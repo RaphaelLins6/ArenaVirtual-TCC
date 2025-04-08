@@ -22,7 +22,7 @@ A aplicação foi projetada para funcionar em **Android**, **iOS**, **Windows** 
 ## 📱 Capturas de Tela
 
 ### Tela Inicial
-![Tela Inicial](./imagens/Tela.png)
+<img src="./imagens/Tela.png" alt="Tela Inicial" width="200" height="150">
 
 ### Gerenciamento de Campeonatos
-![Gerenciamento de Campeonatos](./imagens/Criação%20de%20campeonato%202.png)
+<img src="./imagens/Criação de campeonato 2.png" alt="Tela Inicial" width="200" height="150">
