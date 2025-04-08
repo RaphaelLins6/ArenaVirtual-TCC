@@ -19,10 +19,3 @@ A aplicação foi projetada para funcionar em **Android**, **iOS**, **Windows** 
 - **MVVM**: Arquitetura para separação de responsabilidades.
 - **XAML**: Para criação de interfaces gráficas.
 
-## 📱 Capturas de Tela
-
-### Tela Inicial
-<img src="./imagens/Tela.png" alt="Tela Inicial" width="400" height="300">
-
-### Gerenciamento de Campeonatos
-<img src="./imagens/Criação de campeonato 2.png" alt="Tela Inicial" width="400" height="300">
