@@ -21,10 +21,10 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>ArenaVirtuall</ApplicationTitle>
+		<ApplicationTitle>Arena Virtual</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>br.com.raphaellins.arenavirtuall</ApplicationId>
+		<ApplicationId>br.com.raphaellins.arenavirtual</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -43,11 +43,11 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" Include="Resources\AppIcon\appiconfg_android.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="FF5900" />
+		<MauiIcon Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" Include="Resources\AppIcon\appicon_android.svg" ForegroundFile="Resources\AppIcon\appiconfg_android.svg" BaseSize="512,512" Color="FF5900" />
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="FF5900" />
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="FF5900" BaseSize="528,528" />
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="FF5900" BaseSize="400,400" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
@@ -66,10 +66,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="AppShell.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="FlyoutMenu.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\CriarCampeonato.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\Menu.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\PaginaAtleta.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\TelaInicial.xaml">
@@ -81,6 +90,12 @@
 	  <Folder Include="Models\" />
 	  <Folder Include="Reps\" />
 	  <Folder Include="Views\Layouts\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Views\PaginaAtleta.xaml.cs">
+	    <DependentUpon>PaginaAtleta.xaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 </Project>

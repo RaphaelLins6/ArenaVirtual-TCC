@@ -5,11 +5,9 @@
         public App()
         {
             InitializeComponent();
-        }
 
-        protected override Window CreateWindow(IActivationState? activationState)
-        {
-            return new Window(new FlyoutMenu());
+            // Agora o app usa Shell
+            MainPage = new AppShell();
         }
     }
 }
