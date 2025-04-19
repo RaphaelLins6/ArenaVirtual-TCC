@@ -7,15 +7,24 @@
 
     <!--  Menu lateral  -->
     <FlyoutItem Title="Início" Icon="home.png">
-        <ShellContent Title="Início" ContentTemplate="{DataTemplate views:TelaInicial}" />
+        <ShellContent
+            Title="Início"
+            ContentTemplate="{DataTemplate views:TelaInicial}"
+            Style="{StaticResource BotaoPrincipal}" />
     </FlyoutItem>
 
     <FlyoutItem Title="Criar Campeonato" Icon="add.png">
-        <ShellContent Title="Criar Campeonato" ContentTemplate="{DataTemplate views:CriarCampeonato}" />
+        <ShellContent
+            Title="Criar Campeonato"
+            ContentTemplate="{DataTemplate views:CriarCampeonato}"
+            Style="{StaticResource BotaoPrincipal}" />
     </FlyoutItem>
 
     <FlyoutItem Title="Atleta" Icon="user.png">
-        <ShellContent Title="Atleta" ContentTemplate="{DataTemplate views:PaginaAtleta}" />
+        <ShellContent
+            Title="Atleta"
+            ContentTemplate="{DataTemplate views:PaginaAtleta}"
+            Style="{StaticResource BotaoPrincipal}" />
     </FlyoutItem>
 
 </Shell>

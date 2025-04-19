@@ -4,11 +4,36 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Title="TelaInicial">
-    <VerticalStackLayout>
-        <Label
-            FontSize="32"
-            HorizontalOptions="Center"
-            Text="Tela inicial"
-            VerticalOptions="Center" />
-    </VerticalStackLayout>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="10" Spacing="20">
+
+            <!--  Grid para Campeonatos Favoritos  -->
+            <Grid>
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="24"
+                    HorizontalOptions="Start"
+                    Text="Campeonatos Favoritos" />
+                <!--  Adicione aqui os elementos para exibir os campeonatos favoritos  -->
+            </Grid>
+
+            <!--  Grid para Barra de Pesquisa  -->
+            <Grid FlexLayout.AlignSelf="Center">
+                <Entry Placeholder="Buscar campeonatos..." />
+                <Button HorizontalOptions="End" Text="Pesquisar" />
+            </Grid>
+
+            <!--  Grid para Campeonatos por Popularidade  -->
+            <Grid>
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="24"
+                    HorizontalOptions="Start"
+                    Text="Campeonatos Populares" />
+                <!--  Adicione aqui os elementos para exibir os campeonatos populares  -->
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

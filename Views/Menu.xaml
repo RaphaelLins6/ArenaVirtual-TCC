@@ -11,19 +11,5 @@
             Text="Menu"
             VerticalOptions="Center" />
 
-        <!--  Botões do menu  -->
-        <Button
-            Clicked="OnInicioClicked"
-            Style="{StaticResource BotaoPrincipal}"
-            Text="Início" />
-        <Button
-            Clicked="OnCriarCampeonatoClicked"
-            Style="{StaticResource BotaoPrincipal}"
-            Text="Criar Campeonato" />
-        <Button
-            Clicked="OnAtletaClicked"
-            Style="{StaticResource BotaoPrincipal}"
-            Text="Atleta" />
-
     </VerticalStackLayout>
 </ContentPage>
