@@ -25,6 +25,8 @@
                     <toolkit:Expander x:Name="expanderFav" IsExpanded="False">
                         <toolkit:Expander.Header>
                             <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                <!--  Correct ViewModel reference  -->
+
                                 <Label
                                     FontAttributes="Bold"
                                     FontSize="24"

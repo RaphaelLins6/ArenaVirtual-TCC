@@ -12,7 +12,7 @@ namespace ArenaVirtuall
         }
 
         protected override Window CreateWindow(IActivationState? activationState) {
-            return new Window(new FlyoutMenu()); // Replace TelaInicial with your root page
+            return new Window(new FlyoutMenu());
         }
     }
 }
