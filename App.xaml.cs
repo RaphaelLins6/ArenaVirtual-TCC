@@ -1,13 +1,18 @@
-﻿namespace ArenaVirtuall
+﻿using System;
+using Microsoft.Maui.Controls;
+using ArenaVirtuall.Views;
+
+namespace ArenaVirtuall
 {
     public partial class App : Application
     {
         public App()
         {
             InitializeComponent();
+        }
 
-            // Agora o app usa Shell
-            MainPage = new AppShell();
+        protected override Window CreateWindow(IActivationState? activationState) {
+            return new Window(new FlyoutMenu()); // Replace TelaInicial with your root page
         }
     }
 }

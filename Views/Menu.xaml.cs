@@ -1,3 +1,4 @@
+
 namespace ArenaVirtuall.Views;
 
 public partial class Menu : ContentPage
@@ -7,7 +8,7 @@ public partial class Menu : ContentPage
     }
 
     private async void OnInicioClicked(object sender, EventArgs e) {
-        await Navigation.PushAsync(new TelaInicial()); // ou Navigation.PushModalAsync
+        await Navigation.PushAsync(new TelaInicial());
     }
 
     private async void OnCriarCampeonatoClicked(object sender, EventArgs e) {

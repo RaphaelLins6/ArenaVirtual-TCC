@@ -3,19 +3,75 @@
     x:Class="ArenaVirtuall.Views.TelaInicial"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="TelaInicial">
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
+
+    <NavigationPage.TitleView>
+        <Label
+            FontAttributes="Bold"
+            FontSize="24"
+            HorizontalOptions="Center"
+            Text="Arena Virtual"
+            VerticalOptions="Center" />
+    </NavigationPage.TitleView>
 
     <ScrollView>
         <VerticalStackLayout Padding="10" Spacing="20">
 
             <!--  Grid para Campeonatos Favoritos  -->
-            <Grid>
-                <Label
-                    FontAttributes="Bold"
-                    FontSize="24"
-                    HorizontalOptions="Start"
-                    Text="Campeonatos Favoritos" />
-                <!--  Adicione aqui os elementos para exibir os campeonatos favoritos  -->
+            <Grid Padding="10">
+                <VerticalStackLayout>
+
+                    <!--  Add x:DataType to specify the type for compiled bindings  -->
+                    <toolkit:Expander x:Name="expanderFav" IsExpanded="False">
+                        <toolkit:Expander.Header>
+                            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                <Label
+                                    FontAttributes="Bold"
+                                    FontSize="24"
+                                    HorizontalOptions="Start"
+                                    Text="Campeonatos Favoritos"
+                                    VerticalOptions="Center" />
+
+                                <!--  Seta animada automática  -->
+                                <Image
+                                    Margin="10,0,0,0"
+                                    HeightRequest="24"
+                                    HorizontalOptions="End"
+                                    Rotation="{Binding IsRotated, Converter={StaticResource BoolToRotationConverter}}"
+                                    Source="seta.png"
+                                    VerticalOptions="Center"
+                                    WidthRequest="24" />
+                            </Grid>
+                        </toolkit:Expander.Header>
+
+
+                        <ScrollView HeightRequest="200">
+                            <VerticalStackLayout Padding="10" Spacing="10">
+
+                                <!--  Exemplo de campeonatos  -->
+                                <Border
+                                    BackgroundColor="#FFF3E0"
+                                    Stroke="Black"
+                                    StrokeShape="RoundRectangle 10"
+                                    StrokeThickness="1">
+                                    <Label Text="Campeonato 1" TextColor="Black" />
+                                </Border>
+
+                                <Border
+                                    BackgroundColor="#FFF3E0"
+                                    Stroke="Black"
+                                    StrokeShape="RoundRectangle 10"
+                                    StrokeThickness="1">
+                                    <Label Text="Campeonato 2" TextColor="Black" />
+                                </Border>
+
+                                <!--  Adicione quantos quiser aqui  -->
+
+                            </VerticalStackLayout>
+                        </ScrollView>
+                    </toolkit:Expander>
+
+                </VerticalStackLayout>
             </Grid>
 
             <!--  Grid para Barra de Pesquisa  -->
@@ -25,13 +81,60 @@
             </Grid>
 
             <!--  Grid para Campeonatos por Popularidade  -->
-            <Grid>
-                <Label
-                    FontAttributes="Bold"
-                    FontSize="24"
-                    HorizontalOptions="Start"
-                    Text="Campeonatos Populares" />
-                <!--  Adicione aqui os elementos para exibir os campeonatos populares  -->
+            <Grid Padding="10">
+                <VerticalStackLayout>
+
+                    <!--  Add x:DataType to specify the type for compiled bindings  -->
+                    <toolkit:Expander x:Name="expanderNorm" IsExpanded="False">
+                        <toolkit:Expander.Header>
+                            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                <Label
+                                    FontAttributes="Bold"
+                                    FontSize="24"
+                                    HorizontalOptions="Start"
+                                    Text="Campeonatos"
+                                    VerticalOptions="Center" />
+
+                                <!--  Seta animada automática  -->
+                                <Image
+                                    Margin="10,0,0,0"
+                                    HeightRequest="24"
+                                    HorizontalOptions="End"
+                                    Rotation="{Binding IsRotated, Converter={StaticResource BoolToRotationConverter}}"
+                                    Source="seta.png"
+                                    VerticalOptions="Center"
+                                    WidthRequest="24" />
+                            </Grid>
+                        </toolkit:Expander.Header>
+
+
+                        <ScrollView HeightRequest="200">
+                            <VerticalStackLayout Padding="10" Spacing="10">
+
+                                <!--  Exemplo de campeonatos  -->
+                                <Border
+                                    BackgroundColor="#FFF3E0"
+                                    Stroke="Black"
+                                    StrokeShape="RoundRectangle 10"
+                                    StrokeThickness="1">
+                                    <Label Text="Campeonato 1" TextColor="Black" />
+                                </Border>
+
+                                <Border
+                                    BackgroundColor="#FFF3E0"
+                                    Stroke="Black"
+                                    StrokeShape="RoundRectangle 10"
+                                    StrokeThickness="1">
+                                    <Label Text="Campeonato 2" TextColor="Black" />
+                                </Border>
+
+                                <!--  Adicione quantos quiser aqui  -->
+
+                            </VerticalStackLayout>
+                        </ScrollView>
+                    </toolkit:Expander>
+
+                </VerticalStackLayout>
             </Grid>
 
         </VerticalStackLayout>

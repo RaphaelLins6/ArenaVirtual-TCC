@@ -2,8 +2,13 @@ namespace ArenaVirtuall.Views;
 
 public partial class TelaInicial : ContentPage
 {
-	public TelaInicial()
+    public bool IsRotated { get; set; } // Add this property
+
+    public TelaInicial()
 	{
-		InitializeComponent();
-	}
+        InitializeComponent();
+
+        BindingContext = new TelaInicialViewModel();
+        IsRotated = false; // Initialize the property
+    }
 }
