@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Windows Machine": {
+    "ArenaVirtual": {
       "commandName": "Project",
       "nativeDebugging": false
     }
