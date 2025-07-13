@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-
-namespace ArenaVirtual.Views.Atleta {
+﻿namespace ArenaVirtual.Views.Atleta {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class DashboardAtletaPage : ContentView {
+    public partial class DashboardAtletaPage : ContentPage {
         public DashboardAtletaPage() {
             InitializeComponent();
+            Title = "Dashboard";
+        }
+
+        private void InitializeComponent() {
+            throw new NotImplementedException();
         }
     }
 }

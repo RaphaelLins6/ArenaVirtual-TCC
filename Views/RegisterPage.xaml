@@ -1,10 +1,29 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ArenaVirtual.Views.RegisterPag">
-  <ContentView.Content>
-      <StackLayout>
-          <Label Text="Hello Xamarin.Forms!" />
-      </StackLayout>
-  </ContentView.Content>
-</ContentView>
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="ArenaVirtual.Views.RegisterPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Registro">
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="15">
+            <Label
+                FontSize="28"
+                HorizontalOptions="Center"
+                Text="Criar Conta" />
+            <Entry x:Name="UsernameEntry" Placeholder="Nome de usuário" />
+            <Entry
+                x:Name="EmailEntry"
+                Keyboard="Email"
+                Placeholder="E-mail" />
+            <Entry
+                x:Name="PasswordEntry"
+                IsPassword="True"
+                Placeholder="Senha" />
+            <Entry
+                x:Name="ConfirmPasswordEntry"
+                IsPassword="True"
+                Placeholder="Confirmar senha" />
+            <Button x:Name="RegisterButton" Text="Registrar" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

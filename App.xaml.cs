@@ -1,16 +1,16 @@
 ﻿using System;
 using Microsoft.Maui.Controls;
-using ArenaVirtuall.Views;
+using ArenaVirtual.Views;
 using ArenaVirtual;
 
-namespace ArenaVirtuall {
+namespace ArenaVirtual {
     public partial class App : Application {
         public App() {
             InitializeComponent();
         }
 
         protected override Window CreateWindow(IActivationState? activationState) {
-            return new Window(new AppShell());
+            return new Window(new NavigationPage(new LoginPage()));
         }
     }
 }

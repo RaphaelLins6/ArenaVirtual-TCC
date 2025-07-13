@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-
-namespace ArenaVirtual.Views.Árbitro {
+﻿
+namespace ArenaVirtual.Views.Arbitro {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class AvaliacaoArbitralPage : ContentView {
+    public partial class AvaliacaoArbitralPage : ContentPage {
         public AvaliacaoArbitralPage() {
             InitializeComponent();
+            Title = "Avaliação Arbitral";
+        }
+
+        private void InitializeComponent() {
+            throw new NotImplementedException();
         }
     }
 }

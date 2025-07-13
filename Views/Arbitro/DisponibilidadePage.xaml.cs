@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-
-namespace ArenaVirtual.Views.Árbitro {
+﻿namespace ArenaVirtual.Views.Arbitro {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class DisponibilidadePage : ContentView {
+    public partial class DisponibilidadePage : ContentPage {
         public DisponibilidadePage() {
             InitializeComponent();
+            Title = "Disponibilidade"; // Ensure the Title property is set in the code-behind
+        }
+
+        private void InitializeComponent() {
+            throw new NotImplementedException();
         }
     }
 }

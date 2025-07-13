@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
+﻿using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.Views.Atleta {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class MeusTimesPage : ContentView {
+    public partial class MeusTimesPage : ContentPage {
         public MeusTimesPage() {
             InitializeComponent();
+            Title = "MeusTimes";
+        }
+
+        private void InitializeComponent() {
+            throw new NotImplementedException();
         }
     }
 }

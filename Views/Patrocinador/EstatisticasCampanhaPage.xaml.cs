@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-
+﻿
 namespace ArenaVirtual.Views.Patrocinador {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class EstatisticasCampanhaPage : ContentView {
+    public partial class EstatisticasCampanhaPage : ContentPage {
         public EstatisticasCampanhaPage() {
             InitializeComponent();
+            Title = "Estatisticas das campanhas"; // Ensure the Title property is set in the code-behind
+        }
+
+        private void InitializeComponent() {
+            throw new NotImplementedException();
         }
     }
 }

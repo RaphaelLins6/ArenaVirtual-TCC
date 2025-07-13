@@ -63,38 +63,111 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Remove="Views\Atleta\DashboardAtletaPage.xaml" />
+	  <MauiXaml Remove="Views\Atleta\EstatisticasPessoaisPage.xaml" />
+	  <MauiXaml Remove="Views\Atleta\MeusTimesPage.xaml" />
+	  <MauiXaml Remove="Views\Atleta\PartidasPage.xaml" />
+	  <MauiXaml Remove="Views\Atleta\ProcurarTimesPage.xaml" />
+	  <MauiXaml Remove="Views\LoginPage.xaml" />
+	  <MauiXaml Remove="Views\Organizador\CriarCampeonatoPage.xaml" />
+	  <MauiXaml Remove="Views\Organizador\DashboardOrganizadorPage.xaml" />
+	  <MauiXaml Remove="Views\Organizador\PartidasPage.xaml" />
+	  <MauiXaml Remove="Views\Organizador\RelatoriosPage.xaml" />
+	  <MauiXaml Remove="Views\Organizador\TimesPage.xaml" />
+	  <MauiXaml Remove="Views\Patrocinador\CampanhasPage.xaml" />
+	  <MauiXaml Remove="Views\Patrocinador\DashboardPatrocinadorPage.xaml" />
+	  <MauiXaml Remove="Views\Arbitro\AvaliacaoArbitralPage.xaml" />
+	  <MauiXaml Remove="Views\Arbitro\DashboardArbitroPage.xaml" />
+	  <MauiXaml Remove="Views\Arbitro\DisponibilidadePage.xaml" />
+	  <MauiXaml Remove="Views\Arbitro\MinhasPartidasPage.xaml" />
+	  <MauiXaml Remove="Views\Patrocinador\EstatisticasCampanhaPage.xaml" />
+	  <MauiXaml Remove="Views\Patrocinador\PropostasPatrocinioPage.xaml" />
+	  <MauiXaml Remove="Views\RegisterPage.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Views\Atleta\DashboardAtletaPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Atleta\EstatisticasPessoaisPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Atleta\MeusTimesPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Atleta\PartidasPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Atleta\ProcurarTimesPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\LoginPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Organizador\CriarCampeonatoPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Organizador\DashboardOrganizadorPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Organizador\PartidasPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Organizador\RelatoriosPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Organizador\TimesPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Patrocinador\CampanhasPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Patrocinador\DashboardPatrocinadorPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Arbitro\AvaliacaoArbitralPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Arbitro\DashboardArbitroPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Arbitro\DisponibilidadePage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Arbitro\MinhasPartidasPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Patrocinador\EstatisticasCampanhaPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\Patrocinador\PropostasPatrocinioPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Views\RegisterPage.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="11.2.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.50" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+		<PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Views\Atleta\PartidasPage.xaml.cs">
+	    <DependentUpon>PartidasPage.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\RegisterPage.xaml.cs">
+	    <DependentUpon>RegisterPage.xaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
 	  <MauiXaml Update="AppShell.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="MainPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\CriarCampeonato.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\Menu.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\PaginaAtleta.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Reps\" />
-	  <Folder Include="Views\Layouts\" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Compile Update="Views\PaginaAtleta.xaml.cs">
-	    <DependentUpon>PaginaAtleta.xaml</DependentUpon>
-	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>

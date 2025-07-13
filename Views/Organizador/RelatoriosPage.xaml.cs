@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
+﻿
 
 namespace ArenaVirtual.Views.Organizador {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class RelatoriosPage : ContentView {
+    public partial class RelatoriosPage : ContentPage {
         public RelatoriosPage() {
             InitializeComponent();
+            Title = "Relatorios"; // Ensure the Title property is set in the code-behind
+        }
+
+        private void InitializeComponent() {
+            throw new NotImplementedException();
         }
     }
 }

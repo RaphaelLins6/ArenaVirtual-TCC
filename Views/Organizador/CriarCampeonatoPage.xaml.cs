@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
+﻿
 
 namespace ArenaVirtual.Views.Organizador {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class CriarCampeonatoPage : ContentView {
+    public partial class CriarCampeonatoPage : ContentPage {
         public CriarCampeonatoPage() {
             InitializeComponent();
+            Title = "Criar Campeonato"; // Set the Title property in the code-behind
+        }
+
+        private void InitializeComponent() {
+            throw new NotImplementedException();
         }
     }
 }

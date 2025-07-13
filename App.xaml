@@ -1,13 +1,12 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <Application
-    x:Class="ArenaVirtuall.App"
+    x:Class="ArenaVirtual.App"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:ArenaVirtuall.Converters">
+    xmlns:local="clr-namespace:ArenaVirtual">
 
     <Application.Resources>
         <ResourceDictionary>
-            <local:BoolToRotationConverter x:Key="BoolToRotationConverter" />
             <Style x:Key="BotaoPrincipal" TargetType="Button">
                 <Setter Property="BackgroundColor" Value="#FF4500" />
                 <Setter Property="TextColor" Value="Black" />

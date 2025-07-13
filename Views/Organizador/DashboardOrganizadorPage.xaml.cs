@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-
-namespace ArenaVirtual.Views.Organizador {
+﻿namespace ArenaVirtual.Views.Organizador {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class DashboardOrganizadorPage : ContentView {
+    public partial class DashboardOrganizadorPage : ContentPage {
         public DashboardOrganizadorPage() {
             InitializeComponent();
+            Title = "Dashboard";
+        }
+
+        private void InitializeComponent() {
+            throw new NotImplementedException();
         }
     }
 }
