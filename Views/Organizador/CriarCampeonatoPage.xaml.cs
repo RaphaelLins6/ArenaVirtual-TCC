@@ -7,9 +7,5 @@ namespace ArenaVirtual.Views.Organizador {
             InitializeComponent();
             Title = "Criar Campeonato"; // Set the Title property in the code-behind
         }
-
-        private void InitializeComponent() {
-            throw new NotImplementedException();
-        }
     }
 }

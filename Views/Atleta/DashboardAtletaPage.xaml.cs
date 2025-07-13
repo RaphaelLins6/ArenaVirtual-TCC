@@ -5,9 +5,5 @@
             InitializeComponent();
             Title = "Dashboard";
         }
-
-        private void InitializeComponent() {
-            throw new NotImplementedException();
-        }
     }
 }

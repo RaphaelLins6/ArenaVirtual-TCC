@@ -7,9 +7,5 @@ namespace ArenaVirtual.Views.Patrocinador {
             InitializeComponent();
             Title = "Campanhas"; // Ensure the Title property is set in the code-behind
         }
-
-        private void InitializeComponent() {
-            throw new NotImplementedException();
-        }
     }
 }

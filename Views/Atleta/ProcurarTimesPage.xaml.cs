@@ -7,9 +7,5 @@ namespace ArenaVirtual.Views.Atleta {
             InitializeComponent();
             Title = "Procurar Times"; // Set the Title property in the code-behind
         }
-
-        private void InitializeComponent() {
-            throw new NotImplementedException();
-        }
     }
 }

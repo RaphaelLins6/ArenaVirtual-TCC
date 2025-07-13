@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "ArenaVirtual": {
-      "commandName": "Project",
-      "nativeDebugging": false
-    }
-  }
-}

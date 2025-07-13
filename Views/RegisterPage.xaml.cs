@@ -5,9 +5,5 @@ namespace ArenaVirtual.Views {
         public RegisterPage() {
             InitializeComponent();
         }
-
-        private void InitializeComponent() {
-            throw new NotImplementedException();
-        }
     }
 }

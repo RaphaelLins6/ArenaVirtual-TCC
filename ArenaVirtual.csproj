@@ -63,7 +63,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Remove="Views\Atleta\DashboardAtletaPage.xaml" />
+		<!-- <MauiXaml Remove="Views\Atleta\DashboardAtletaPage.xaml" />
 	  <MauiXaml Remove="Views\Atleta\EstatisticasPessoaisPage.xaml" />
 	  <MauiXaml Remove="Views\Atleta\MeusTimesPage.xaml" />
 	  <MauiXaml Remove="Views\Atleta\PartidasPage.xaml" />
@@ -82,11 +82,11 @@
 	  <MauiXaml Remove="Views\Arbitro\MinhasPartidasPage.xaml" />
 	  <MauiXaml Remove="Views\Patrocinador\EstatisticasCampanhaPage.xaml" />
 	  <MauiXaml Remove="Views\Patrocinador\PropostasPatrocinioPage.xaml" />
-	  <MauiXaml Remove="Views\RegisterPage.xaml" />
+	  <MauiXaml Remove="Views\RegisterPage.xaml" /> -->
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="Views\Atleta\DashboardAtletaPage.xaml">
+		<!-- <EmbeddedResource Include="Views\Atleta\DashboardAtletaPage.xaml">
 	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
 	  </EmbeddedResource>
 	  <EmbeddedResource Include="Views\Atleta\EstatisticasPessoaisPage.xaml">
@@ -145,7 +145,7 @@
 	  </EmbeddedResource>
 	  <EmbeddedResource Include="Views\RegisterPage.xaml">
 	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-	  </EmbeddedResource>
+	  </EmbeddedResource> -->
 	</ItemGroup>
 
 	<ItemGroup>
@@ -177,6 +177,10 @@
 	  <None Update="MainPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Properties\" />
 	</ItemGroup>
 
 </Project>

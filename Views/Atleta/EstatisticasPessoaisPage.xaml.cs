@@ -7,9 +7,5 @@ namespace ArenaVirtual.Views.Atleta {
             InitializeComponent();
             Title = "Estatisticas Pessoais"; // Ensure the Title property is set in the code-behind
         }
-
-        private void InitializeComponent() {
-            throw new NotImplementedException();
-        }
     }
 }

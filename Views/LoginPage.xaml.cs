@@ -5,9 +5,5 @@ namespace ArenaVirtual.Views {
             InitializeComponent();
             Title = "Login";
         }
-
-        private void InitializeComponent() {
-            throw new NotImplementedException();
-        }
     }
 }

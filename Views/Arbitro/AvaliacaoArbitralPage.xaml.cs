@@ -6,9 +6,5 @@ namespace ArenaVirtual.Views.Arbitro {
             InitializeComponent();
             Title = "Avaliação Arbitral";
         }
-
-        private void InitializeComponent() {
-            throw new NotImplementedException();
-        }
     }
 }

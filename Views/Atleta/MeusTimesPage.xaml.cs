@@ -6,9 +6,5 @@ namespace ArenaVirtual.Views.Atleta {
             InitializeComponent();
             Title = "MeusTimes";
         }
-
-        private void InitializeComponent() {
-            throw new NotImplementedException();
-        }
     }
 }
