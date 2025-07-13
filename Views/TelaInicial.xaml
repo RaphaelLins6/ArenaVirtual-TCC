@@ -21,56 +21,44 @@
             <Grid Padding="10">
                 <VerticalStackLayout>
 
-                    <!--  Add x:DataType to specify the type for compiled bindings  -->
                     <toolkit:Expander x:Name="expanderFav" IsExpanded="False">
                         <toolkit:Expander.Header>
-                            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
-                                <!--  Correct ViewModel reference  -->
-
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="24"
-                                    HorizontalOptions="Start"
-                                    Text="Campeonatos Favoritos"
-                                    VerticalOptions="Center" />
-
-                                <!--  Seta animada automática  -->
-                                <Image
-                                    Margin="10,0,0,0"
-                                    HeightRequest="24"
-                                    HorizontalOptions="End"
-                                    Rotation="{Binding IsRotated, Converter={StaticResource BoolToRotationConverter}}"
-                                    Source="seta.png"
-                                    VerticalOptions="Center"
-                                    WidthRequest="24" />
-                            </Grid>
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="24"
+                                Text="Favoritos"
+                                TextColor="White" />
                         </toolkit:Expander.Header>
 
-
-                        <ScrollView HeightRequest="200">
-                            <VerticalStackLayout Padding="10" Spacing="10">
-
-                                <!--  Exemplo de campeonatos  -->
-                                <Border
-                                    BackgroundColor="#FFF3E0"
-                                    Stroke="Black"
-                                    StrokeShape="RoundRectangle 10"
-                                    StrokeThickness="1">
-                                    <Label Text="Campeonato 1" TextColor="Black" />
-                                </Border>
-
-                                <Border
-                                    BackgroundColor="#FFF3E0"
-                                    Stroke="Black"
-                                    StrokeShape="RoundRectangle 10"
-                                    StrokeThickness="1">
-                                    <Label Text="Campeonato 2" TextColor="Black" />
-                                </Border>
-
-                                <!--  Adicione quantos quiser aqui  -->
-
-                            </VerticalStackLayout>
-                        </ScrollView>
+                        <CollectionView ItemsSource="{Binding Favoritos}">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Padding="10" ColumnDefinitions="Auto, *, Auto">
+                                        <Image
+                                            HeightRequest="50"
+                                            Source="{Binding Imagem}"
+                                            VerticalOptions="Center"
+                                            WidthRequest="50" />
+                                        <Label
+                                            Grid.Column="1"
+                                            Margin="10,0,0,0"
+                                            FontAttributes="Bold"
+                                            FontSize="18"
+                                            Text="{Binding Nome}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+                                        <ImageButton
+                                            Grid.Column="2"
+                                            BackgroundColor="Transparent"
+                                            Clicked="OnFavoriteButtonClicked"
+                                            HeightRequest="30"
+                                            Source="estrela_cheia.png"
+                                            VerticalOptions="Center"
+                                            WidthRequest="30" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
                     </toolkit:Expander>
 
                 </VerticalStackLayout>
@@ -82,59 +70,50 @@
                 <Button HorizontalOptions="End" Text="Pesquisar" />
             </Grid>
 
-            <!--  Grid para Campeonatos por Popularidade  -->
+            <!--  Grid para Campeonatos  -->
             <Grid Padding="10">
                 <VerticalStackLayout>
 
-                    <!--  Add x:DataType to specify the type for compiled bindings  -->
                     <toolkit:Expander x:Name="expanderNorm" IsExpanded="False">
                         <toolkit:Expander.Header>
-                            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="24"
-                                    HorizontalOptions="Start"
-                                    Text="Campeonatos"
-                                    VerticalOptions="Center" />
-
-                                <!--  Seta animada automática  -->
-                                <Image
-                                    Margin="10,0,0,0"
-                                    HeightRequest="24"
-                                    HorizontalOptions="End"
-                                    Rotation="{Binding IsRotated, Converter={StaticResource BoolToRotationConverter}}"
-                                    Source="seta.png"
-                                    VerticalOptions="Center"
-                                    WidthRequest="24" />
-                            </Grid>
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="24"
+                                Text="Campeonatos"
+                                TextColor="White" />
                         </toolkit:Expander.Header>
 
-
-                        <ScrollView HeightRequest="200">
-                            <VerticalStackLayout Padding="10" Spacing="10">
-
-                                <!--  Exemplo de campeonatos  -->
-                                <Border
-                                    BackgroundColor="#FFF3E0"
-                                    Stroke="Black"
-                                    StrokeShape="RoundRectangle 10"
-                                    StrokeThickness="1">
-                                    <Label Text="Campeonato 1" TextColor="Black" />
-                                </Border>
-
-                                <Border
-                                    BackgroundColor="#FFF3E0"
-                                    Stroke="Black"
-                                    StrokeShape="RoundRectangle 10"
-                                    StrokeThickness="1">
-                                    <Label Text="Campeonato 2" TextColor="Black" />
-                                </Border>
-
-                                <!--  Adicione quantos quiser aqui  -->
-
-                            </VerticalStackLayout>
-                        </ScrollView>
+                        <CollectionView ItemsSource="{Binding Campeonatos}">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Padding="10" ColumnDefinitions="Auto, *, Auto">
+                                        <Image
+                                            HeightRequest="50"
+                                            Source="{Binding Imagem}"
+                                            VerticalOptions="Center"
+                                            WidthRequest="50" />
+                                        <Label
+                                            Grid.Column="1"
+                                            Margin="10,0,0,0"
+                                            FontAttributes="Bold"
+                                            FontSize="18"
+                                            Text="{Binding Nome}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+                                        <ImageButton
+                                            Grid.Column="2"
+                                            BackgroundColor="Transparent"
+                                            Clicked="OnFavoriteButtonClicked"
+                                            HeightRequest="30"
+                                            Source="estrela.png"
+                                            VerticalOptions="Center"
+                                            WidthRequest="30" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
                     </toolkit:Expander>
+
 
                 </VerticalStackLayout>
             </Grid>
