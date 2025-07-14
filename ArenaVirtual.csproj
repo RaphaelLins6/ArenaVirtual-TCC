@@ -62,8 +62,7 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<!-- <EmbeddedResource Include="Views\Atleta\DashboardAtletaPage.xaml">
+	<ItemGroup><!-- <EmbeddedResource Include="Views\Atleta\DashboardAtletaPage.xaml">
 	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
 	  </EmbeddedResource>
 	  <EmbeddedResource Include="Views\Atleta\EstatisticasPessoaisPage.xaml">
@@ -123,6 +122,13 @@
 	  <EmbeddedResource Include="Views\RegisterPage.xaml">
 	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
 	  </EmbeddedResource> -->
+	
+	  <AndroidResource Remove="NovaPasta\**" />
+	  <Compile Remove="NovaPasta\**" />
+	  <EmbeddedResource Remove="NovaPasta\**" />
+	  <MauiCss Remove="NovaPasta\**" />
+	  <MauiXaml Remove="NovaPasta\**" />
+	  <None Remove="NovaPasta\**" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -131,6 +137,7 @@
 		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.82" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7" />
 		<PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 	</ItemGroup>
 
 	<ItemGroup>

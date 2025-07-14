@@ -11,6 +11,10 @@
                 HorizontalOptions="Center"
                 Text="Criar Conta" />
             <Entry x:Name="UsernameEntry" Placeholder="Nome de usuário" />
+            <Picker
+                x:Name="ProfileTypePicker"
+                Title="Tipo de perfil"
+                ItemsSource="{x:StaticResource PerfilTipos}" />
             <Entry
                 x:Name="EmailEntry"
                 Keyboard="Email"

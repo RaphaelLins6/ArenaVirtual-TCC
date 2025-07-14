@@ -5,7 +5,8 @@ namespace ArenaVirtual {
     public partial class AppShell : Shell {
         public AppShell() {
             InitializeComponent();
-            //Routing.RegisterRoute(nameof(RegisterPage), typeof(RegisterPage));
+            Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));
+            Routing.RegisterRoute(nameof(RegisterPage), typeof(RegisterPage));
         }
 
         public AppShell(Usuario usuario) {
@@ -17,7 +18,7 @@ namespace ArenaVirtual {
             Items.Clear();
 
             switch (usuario.Perfil) {
-                case "Organizador":
+                case TipoPerfil.Organizador:
                     Items.Add(new FlyoutItem { Title = "Dashboard", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Organizador.DashboardOrganizadorPage)) } } });
                     Items.Add(new FlyoutItem { Title = "Campeonatos", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Organizador.CriarCampeonatoPage)) } } });
                     Items.Add(new FlyoutItem { Title = "Times", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Organizador.TimesPage)) } } });
@@ -25,7 +26,7 @@ namespace ArenaVirtual {
                     Items.Add(new FlyoutItem { Title = "Relatórios", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Organizador.RelatoriosPage)) } } });
                     break;
 
-                case "Atleta":
+                case TipoPerfil.Atleta:
                     Items.Add(new FlyoutItem { Title = "Dashboard", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Atleta.DashboardAtletaPage)) } } });
                     Items.Add(new FlyoutItem { Title = "Meus Times", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Atleta.MeusTimesPage)) } } });
                     Items.Add(new FlyoutItem { Title = "Estatísticas", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Atleta.EstatisticasPessoaisPage)) } } });
@@ -33,14 +34,14 @@ namespace ArenaVirtual {
                     Items.Add(new FlyoutItem { Title = "Partidas", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Atleta.PartidasPage)) } } });
                     break;
 
-                case "Arbitro":
+                case TipoPerfil.Arbitro:
                     Items.Add(new FlyoutItem { Title = "Dashboard", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Arbitro.DashboardArbitroPage)) } } });
                     Items.Add(new FlyoutItem { Title = "Minhas Partidas", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Arbitro.MinhasPartidasPage)) } } });
                     Items.Add(new FlyoutItem { Title = "Avaliações", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Arbitro.AvaliacaoArbitralPage)) } } });
                     Items.Add(new FlyoutItem { Title = "Disponibilidade", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Arbitro.DisponibilidadePage)) } } });
                     break;
 
-                case "Patrocinador":
+                case TipoPerfil.Patrocinador:
                     Items.Add(new FlyoutItem { Title = "Dashboard", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Patrocinador.DashboardPatrocinadorPage)) } } });
                     Items.Add(new FlyoutItem { Title = "Campanhas", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Patrocinador.CampanhasPage)) } } });
                     Items.Add(new FlyoutItem { Title = "Estatísticas", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Patrocinador.EstatisticasCampanhaPage)) } } });
@@ -51,8 +52,7 @@ namespace ArenaVirtual {
             Items.Add(new MenuItem {
                 Text = "Sair",
                 IconImageSource = "logout.png", // Opcional, se tiver ícone
-                Command = new Command(async () => {
-                    // Verifica se a propriedade Windows e o índice 0 não são nulos
+                Command = new Command(() => {
                     if (Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] != null) {
                         Application.Current.Windows[0].Page = new LoginPage();
                     }

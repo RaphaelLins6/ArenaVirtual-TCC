@@ -6,5 +6,4 @@
     xmlns:local="clr-namespace:ArenaVirtual.Views">
 
     <ShellContent Title="Início" ContentTemplate="{DataTemplate local:LoginPage}" />
-
 </Shell>

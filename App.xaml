@@ -7,6 +7,12 @@
 
     <Application.Resources>
         <ResourceDictionary>
+            <x:Array x:Key="PerfilTipos" Type="{x:Type x:String}">
+                <x:String>Atleta</x:String>
+                <x:String>Árbitro</x:String>
+                <x:String>Patrocinador</x:String>
+                <x:String>Organizador</x:String>
+            </x:Array>
             <Style x:Key="BotaoPrincipal" TargetType="Button">
                 <Setter Property="BackgroundColor" Value="#FF4500" />
                 <Setter Property="TextColor" Value="Black" />
