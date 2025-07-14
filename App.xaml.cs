@@ -10,7 +10,13 @@ namespace ArenaVirtual {
         }
 
         protected override Window CreateWindow(IActivationState? activationState) {
-            return new Window(new NavigationPage(new LoginPage()));
+            Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));
+            Routing.RegisterRoute(nameof(RegisterPage), typeof(RegisterPage));
+            return new Window(new AppShell());
+        }
+
+        public async Task NavigateToRegisterPageAsync() {
+            await Shell.Current.GoToAsync(nameof(RegisterPage));
         }
     }
 }

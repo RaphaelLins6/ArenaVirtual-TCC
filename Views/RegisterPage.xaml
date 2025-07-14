@@ -23,7 +23,11 @@
                 x:Name="ConfirmPasswordEntry"
                 IsPassword="True"
                 Placeholder="Confirmar senha" />
-            <Button x:Name="RegisterButton" Text="Registrar" />
+            <Button
+                x:Name="RegisterButton"
+                Clicked="OnRegistrarClicked"
+                Style="{StaticResource BotaoPrincipal}"
+                Text="Registrar" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

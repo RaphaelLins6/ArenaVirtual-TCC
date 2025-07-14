@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Shell
     x:Class="ArenaVirtual.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:ArenaVirtual"
-    Title="ArenaVirtual"
-    Shell.FlyoutBehavior="Flyout" />
+    xmlns:local="clr-namespace:ArenaVirtual.Views">
+
+    <ShellContent Title="Início" ContentTemplate="{DataTemplate local:LoginPage}" />
+
+</Shell>

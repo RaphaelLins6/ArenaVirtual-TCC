@@ -1,9 +1,11 @@
 ﻿using ArenaVirtual.Models;
+using ArenaVirtual.Views;
 
 namespace ArenaVirtual {
     public partial class AppShell : Shell {
         public AppShell() {
             InitializeComponent();
+            //Routing.RegisterRoute(nameof(RegisterPage), typeof(RegisterPage));
         }
 
         public AppShell(Usuario usuario) {
@@ -45,6 +47,17 @@ namespace ArenaVirtual {
                     Items.Add(new FlyoutItem { Title = "Propostas", Items = { new ShellContent { ContentTemplate = new DataTemplate(typeof(Views.Patrocinador.PropostasPatrocinioPage)) } } });
                     break;
             }
+
+            Items.Add(new MenuItem {
+                Text = "Sair",
+                IconImageSource = "logout.png", // Opcional, se tiver ícone
+                Command = new Command(async () => {
+                    // Verifica se a propriedade Windows e o índice 0 não são nulos
+                    if (Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] != null) {
+                        Application.Current.Windows[0].Page = new LoginPage();
+                    }
+                })
+            });
         }
     }
 }

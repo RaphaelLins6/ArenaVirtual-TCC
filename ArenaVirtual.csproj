@@ -63,29 +63,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- <MauiXaml Remove="Views\Atleta\DashboardAtletaPage.xaml" />
-	  <MauiXaml Remove="Views\Atleta\EstatisticasPessoaisPage.xaml" />
-	  <MauiXaml Remove="Views\Atleta\MeusTimesPage.xaml" />
-	  <MauiXaml Remove="Views\Atleta\PartidasPage.xaml" />
-	  <MauiXaml Remove="Views\Atleta\ProcurarTimesPage.xaml" />
-	  <MauiXaml Remove="Views\LoginPage.xaml" />
-	  <MauiXaml Remove="Views\Organizador\CriarCampeonatoPage.xaml" />
-	  <MauiXaml Remove="Views\Organizador\DashboardOrganizadorPage.xaml" />
-	  <MauiXaml Remove="Views\Organizador\PartidasPage.xaml" />
-	  <MauiXaml Remove="Views\Organizador\RelatoriosPage.xaml" />
-	  <MauiXaml Remove="Views\Organizador\TimesPage.xaml" />
-	  <MauiXaml Remove="Views\Patrocinador\CampanhasPage.xaml" />
-	  <MauiXaml Remove="Views\Patrocinador\DashboardPatrocinadorPage.xaml" />
-	  <MauiXaml Remove="Views\Arbitro\AvaliacaoArbitralPage.xaml" />
-	  <MauiXaml Remove="Views\Arbitro\DashboardArbitroPage.xaml" />
-	  <MauiXaml Remove="Views\Arbitro\DisponibilidadePage.xaml" />
-	  <MauiXaml Remove="Views\Arbitro\MinhasPartidasPage.xaml" />
-	  <MauiXaml Remove="Views\Patrocinador\EstatisticasCampanhaPage.xaml" />
-	  <MauiXaml Remove="Views\Patrocinador\PropostasPatrocinioPage.xaml" />
-	  <MauiXaml Remove="Views\RegisterPage.xaml" /> -->
-	</ItemGroup>
-
-	<ItemGroup>
 		<!-- <EmbeddedResource Include="Views\Atleta\DashboardAtletaPage.xaml">
 	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
 	  </EmbeddedResource>
@@ -149,9 +126,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Maui" Version="11.2.0" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.50" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="12.1.0" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.82" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7" />
 		<PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
 	</ItemGroup>
 
