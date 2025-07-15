@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SQLite;
 
 namespace ArenaVirtual.Models {
     public class Time {
+        [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
-        public string Nome { get; set; } = string.Empty; // Fixed: Initialized with a default value
-        public int CampeonatoId { get; set; }
-        public List<int> AtletasIds { get; set; } = new();
+        public string? Nome { get; set; }
+        public int CampeonatoId { get; set; } // FK para Campeonato
     }
 }

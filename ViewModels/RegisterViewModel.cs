@@ -1,35 +1,66 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 
 namespace ArenaVirtual.ViewModels {
-    internal class RegisterViewModel {
-        public string Nome { get; set; }
-        public string Email { get; set; }
-        public string Senha { get; set; }
-        public string PerfilSelecionado { get; set; }
+    public partial class RegisterViewModel : ObservableObject {
+        private string nome = string.Empty;
+        public string Nome {
+            get => nome;
+            set => SetProperty(ref nome, value);
+        }
 
-        public async Task<bool> RegistrarUsuarioAsync() {
-            // Converte a string PerfilSelecionado para o enum TipoPerfil  
-            if (!Enum.TryParse(PerfilSelecionado, out TipoPerfil perfilEnum)) {
-                throw new ArgumentException($"O perfil '{PerfilSelecionado}' não é válido.");
+        private string email = string.Empty;
+        public string Email {
+            get => email;
+            set => SetProperty(ref email, value);
+        }
+
+        private string senha = string.Empty;
+        public string Senha {
+            get => senha;
+            set => SetProperty(ref senha, value);
+        }
+
+        private TipoPerfil perfilSelecionado;
+        public TipoPerfil PerfilSelecionado {
+            get => perfilSelecionado;
+            set => SetProperty(ref perfilSelecionado, value);
+        }
+
+        public ObservableCollection<TipoPerfil> PerfisDisponiveis { get; }
+
+        public RegisterViewModel() {
+            PerfisDisponiveis = new ObservableCollection<TipoPerfil>(Enum.GetValues(typeof(TipoPerfil)).Cast<TipoPerfil>());
+            this.PerfilSelecionado = TipoPerfil.Atleta;
+        }
+
+        [RelayCommand]
+        public async Task Registrar() {
+            if (string.IsNullOrWhiteSpace(Nome) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha)) {
+                await Shell.Current.DisplayAlert("Erro de Registro", "Por favor, preencha todos os campos e selecione um tipo de perfil.", "OK");
+                return;
             }
 
-            var novoUsuario = new Usuario {
-                Nome = Nome,
-                Email = Email,
-                Senha = Senha,
-                Perfil = perfilEnum
+            var usuario = new Usuario {
+                Nome = this.nome,
+                Email = this.email,
+                Senha = this.senha,
+                Perfil = this.perfilSelecionado
             };
 
-            // Corrige o tipo de App.Database para DatabaseService  
-            if (App.Database is DatabaseService databaseService) {
-                await databaseService.InserirUsuarioAsync(novoUsuario);
-            } else {
-                throw new InvalidOperationException("App.Database não é do tipo DatabaseService.");
-            }
+            Usuario? usuarioCadastrado = await UsuarioService.Cadastrar(usuario);
 
-            // Retorne true se necessário para indicar sucesso  
-            return true;
+            if (usuarioCadastrado != null) {
+                await Shell.Current.DisplayAlert("Sucesso", "Usuário registrado com sucesso!", "OK");
+                if (Application.Current?.Windows.Count > 0) {
+                    Application.Current.Windows[0].Page = new AppShell(usuarioCadastrado);
+                }
+            } else {
+                await Shell.Current.DisplayAlert("Erro", "Email já cadastrado ou erro ao registrar.", "OK");
+            }
         }
     }
 }

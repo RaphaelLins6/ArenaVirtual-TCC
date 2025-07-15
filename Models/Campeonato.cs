@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SQLite;
 
 namespace ArenaVirtual.Models {
     public class Campeonato {
-            public int Id { get; set; }
-            public required string Nome { get; set; }
-            public DateTime DataInicio { get; set; }
-            public DateTime DataFim { get; set; }
-            public int OrganizadorId { get; set; }
-        }
-
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+        public string? Nome { get; set; }
+        public string? Local { get; set; }
+        public DateTime DataInicio { get; set; }
+        public DateTime DataFim { get; set; }
+        public int OrganizadorId { get; set; } // FK para Usuario
     }
+}

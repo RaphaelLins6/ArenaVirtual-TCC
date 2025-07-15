@@ -1,0 +1,24 @@
+﻿<ContentPage
+    x:Class="ArenaVirtual.Views.PerfilPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Meu Perfil">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Label
+            x:Name="WelcomeMessageLabel"
+            Grid.Row="0"
+            FontSize="Large"
+            HorizontalOptions="Center"
+            VerticalOptions="Center" />
+        <Button
+            x:Name="AdminOnlyButton"
+            Grid.Row="1"
+            HorizontalOptions="Center"
+            IsVisible="False"
+            Text="Botão de Ação do Perfil" />
+    </Grid>
+</ContentPage>

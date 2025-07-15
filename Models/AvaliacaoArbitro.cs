@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SQLite;
 
 namespace ArenaVirtual.Models {
     public class AvaliacaoArbitro {
+        [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
         public int ArbitroId { get; set; }
         public int JogoId { get; set; }

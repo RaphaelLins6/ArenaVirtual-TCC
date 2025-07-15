@@ -2,27 +2,29 @@
 
 namespace ArenaVirtual.Services {
     public static class UsuarioService {
-        private static List<Usuario> usuarios = new();
+        private static DatabaseService _databaseService => App.Database;
 
-        public static bool RegistrarUsuario(Usuario usuario) {
-            if (usuarios.Any(u => u.Email == usuario.Email)) {
-                return false; // Já existe
+        public static async Task<Usuario?> Cadastrar(Usuario usuario) {
+            bool emailExiste = await _databaseService.EmailExisteAsync(usuario.Email);
+            if (emailExiste) {
+                return null;
             }
 
-            usuarios.Add(usuario);
-            return true;
+            usuario.Senha = DatabaseService.GerarHash(usuario.Senha);
+
+            int result = await _databaseService.InserirUsuarioAsync(usuario);
+
+            if (result > 0) {
+                return await _databaseService.ObterUsuarioPorEmailSenhaAsync(usuario.Email, usuario.Senha);
+            }
+            return null;
         }
 
-        public static Usuario? Autenticar(string email, string senha, out string mensagem) {
-            var usuario = usuarios.FirstOrDefault(u => u.Email == email && u.Senha == senha);
+        public static async Task<Usuario?> Autenticar(string email, string senha) {
+            string senhaHash = DatabaseService.GerarHash(senha);
 
-            if (usuario != null) {
-                mensagem = "Autenticação bem-sucedida.";
-                return usuario;
-            }
-
-            mensagem = "Usuário ou senha inválidos.";
-            return null;
+            Usuario? usuario = await _databaseService.ObterUsuarioPorEmailSenhaAsync(email, senhaHash);
+            return usuario;
         }
     }
 }
