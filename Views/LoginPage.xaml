@@ -1,27 +1,34 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
+﻿<ContentPage
     x:Class="ArenaVirtual.Views.LoginPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
+    Title="Login"
     x:DataType="vm:LoginViewModel">
-    <ContentPage.BindingContext>
-        <vm:LoginViewModel />
-    </ContentPage.BindingContext>
 
-    <StackLayout Padding="30" Spacing="15">
-        <Entry Placeholder="Email" Text="{Binding Email}" />
+    <VerticalStackLayout Padding="30" Spacing="25">
         <Entry
+            Keyboard="Email"
+            Placeholder="Email"
+            Text="{Binding Email}" />
+        <Entry
+            Completed="Senha_Completed"
             IsPassword="True"
             Placeholder="Senha"
+            ReturnType="Go"
             Text="{Binding Senha}" />
         <Button
-            Command="{Binding EntrarCommand}"
-            MaximumWidthRequest="150"
+            Command="{Binding LoginCommand}"
+            Style="{StaticResource BotaoPrincipal}"
             Text="Entrar" />
-        <Button
-            Command="{Binding RegistrarCommand}"
-            MaximumWidthRequest="150"
-            Text="Registrar-se" />
-    </StackLayout>
+        <Label HorizontalOptions="Center" Text="Não tem uma conta?" />
+        <Label
+            HorizontalOptions="Center"
+            Text="Registre-se"
+            TextColor="OrangeRed">
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding IrParaRegistroCommand}" />
+            </Label.GestureRecognizers>
+        </Label>
+    </VerticalStackLayout>
 </ContentPage>

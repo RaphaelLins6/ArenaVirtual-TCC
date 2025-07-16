@@ -7,15 +7,27 @@
     x:DataType="vm:RegisterViewModel">
 
     <VerticalStackLayout Padding="30" Spacing="15">
+        <Button
+            BackgroundColor="Transparent"
+            Clicked="OnVoltarClicked"
+            FontAttributes="Bold"
+            HorizontalOptions="Start"
+            Text="← Voltar"
+            TextColor="OrangeRed" />
         <Entry Placeholder="Nome" Text="{Binding Nome}" />
         <Entry
             Keyboard="Email"
             Placeholder="Email"
             Text="{Binding Email}" />
         <Entry
+            Completed="OnRegisterEnterPressed"
             IsPassword="True"
             Placeholder="Senha"
             Text="{Binding Senha}" />
+        <Entry
+            IsPassword="True"
+            Placeholder="Confirmar Senha"
+            Text="{Binding ConfirmarSenha}" />
         <Picker
             Title="Selecione o perfil"
             ItemsSource="{Binding PerfisDisponiveis}"

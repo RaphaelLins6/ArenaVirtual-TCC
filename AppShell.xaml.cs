@@ -23,11 +23,6 @@ namespace ArenaVirtual {
             this.Items.Clear(); 
 
             this.Items.Add(new ShellContent {
-                Title = "Início",
-                ContentTemplate = new DataTemplate(() => new LoginPage())
-            });
-
-            this.Items.Add(new ShellContent {
                 Title = "Meu Perfil",
                 ContentTemplate = new DataTemplate(() => new PerfilPage(_usuarioLogado)) 
             });
@@ -65,10 +60,13 @@ namespace ArenaVirtual {
                 });
             }
 
-            this.Items.Add(new ShellContent {
-                Title = "Sair",
-                ContentTemplate = new DataTemplate(() => new LoginPage()), // Redireciona para a tela de login
-                FlyoutItemIsVisible = true, 
+            this.Items.Add(new MenuItem {
+                Text = "Sair",
+                Command = new Command(() => {
+                    MainThread.BeginInvokeOnMainThread(() => {
+                        Application.Current.MainPage = new LoginPage(); // Sai da área logada
+                    });
+                })
             });
         }
     }

@@ -1,4 +1,6 @@
-﻿using ArenaVirtual.Services;
+﻿using ArenaVirtual.Models;
+using ArenaVirtual.Services;
+using ArenaVirtual.Views;
 
 namespace ArenaVirtual;
 
@@ -9,11 +11,15 @@ public partial class App : Application {
         InitializeComponent();
 
         string dbPath = Path.Combine(FileSystem.AppDataDirectory, "ArenaVirtual.db3");
-
         Database = new DatabaseService(dbPath);
     }
 
     protected override Window CreateWindow(IActivationState? activationState) {
-        return new Window(new AppShell());
+        Routing.RegisterRoute(nameof(Views.RegisterPage), typeof(Views.RegisterPage));
+        Routing.RegisterRoute(nameof(Views.LoginPage), typeof(Views.LoginPage));
+        Routing.RegisterRoute(nameof(Views.PerfilPage), typeof(Views.PerfilPage)); 
+
+        return new Window(new LoginPage()); 
     }
+
 }

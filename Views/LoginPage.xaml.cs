@@ -9,5 +9,11 @@ namespace ArenaVirtual.Views {
             BindingContext = new ArenaVirtual.ViewModels.LoginViewModel();
             System.Diagnostics.Debug.WriteLine(BindingContext?.GetType().Name); // Deve mostrar "LoginViewModel"
         }
+
+    private void Senha_Completed(object sender, EventArgs e) {
+            if (BindingContext is LoginViewModel vm && vm.LoginCommand.CanExecute(null)) {
+                vm.LoginCommand.Execute(null);
+            }
+        }
     }
 }
