@@ -26,12 +26,14 @@ namespace ArenaVirtual.ViewModels {
                 return;
             }
 
-            Application.Current.MainPage = new AppShell(usuario); // <- aqui é o correto
+            Application.Current.MainPage = new AppShell(usuario);
         }
 
         [RelayCommand]
         public async Task IrParaRegistro() {
-            Application.Current.MainPage = new RegisterPage();
+            var alertService = new AlertService(); // Assuming AlertService is a class that implements IAlertService  
+            var registerViewModel = new RegisterViewModel(alertService);
+            Application.Current.MainPage = new RegisterPage(registerViewModel);
         }
     }
 }

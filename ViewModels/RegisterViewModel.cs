@@ -3,8 +3,8 @@ using ArenaVirtual.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
-using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
+using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.ViewModels {
     public partial class RegisterViewModel : ObservableObject {
@@ -16,7 +16,10 @@ namespace ArenaVirtual.ViewModels {
 
         public ObservableCollection<TipoPerfil> PerfisDisponiveis { get; }
 
-        public RegisterViewModel() {
+        private readonly IAlertService _alertService;
+
+        public RegisterViewModel(IAlertService alertService) {
+            _alertService = alertService;
             PerfisDisponiveis = new ObservableCollection<TipoPerfil>(Enum.GetValues(typeof(TipoPerfil)).Cast<TipoPerfil>());
             this.perfilSelecionado = TipoPerfil.Atleta;
         }
@@ -24,17 +27,17 @@ namespace ArenaVirtual.ViewModels {
         [RelayCommand]
         public async Task Registrar() {
             if (string.IsNullOrWhiteSpace(Nome) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha) || string.IsNullOrWhiteSpace(ConfirmarSenha)) {
-                await Toast.Make("Por favor, preencha todos os campos.", ToastDuration.Short).Show();
+                await _alertService.DisplayAlert("Campos Vazios", "Por favor, preencha todos os campos.", "OK");
                 return;
             }
 
             if (Senha != ConfirmarSenha) {
-                await Toast.Make("A senha e a confirmação de senha não coincidem.", ToastDuration.Short).Show();
+                await _alertService.DisplayAlert("Senhas Diferentes", "As senhas não coincidem.", "OK");
                 return;
             }
 
             if (!Email.Contains("@") || !Email.Contains(".")) {
-                await Toast.Make("Por favor, insira um e-mail válido.", ToastDuration.Short).Show();
+                await _alertService.DisplayAlert("E-mail Inválido", "Por favor, insira um e-mail válido.", "OK");
                 return;
             }
 
@@ -48,22 +51,21 @@ namespace ArenaVirtual.ViewModels {
             Usuario? usuarioCadastrado = await UsuarioService.Cadastrar(usuario);
 
             if (usuarioCadastrado != null) {
-                
-                
-                await Toast.Make("Usuário registrado com sucesso!", ToastDuration.Short).Show();
+                await _alertService.DisplayAlert("Sucesso", "Usuário registrado com sucesso!", "OK");
 
-                // Limpa os campos
                 Nome = string.Empty;
                 Email = string.Empty;
                 Senha = string.Empty;
                 ConfirmarSenha = string.Empty;
                 PerfilSelecionado = TipoPerfil.Atleta;
 
-                if (Application.Current?.Windows.Count > 0) {
-                    Application.Current.MainPage = new AppShell(usuarioCadastrado);
-                }
+                MainThread.BeginInvokeOnMainThread(() => {
+                    if (Application.Current?.Windows.Count > 0) {
+                        Application.Current.MainPage = new AppShell(usuarioCadastrado);
+                    }
+                });
             } else {
-                await Toast.Make("Email já cadastrado ou erro ao registrar.", ToastDuration.Short).Show();
+                await _alertService.DisplayAlert("Erro", "Email já cadastrado ou falha ao registrar.", "OK");
             }
         }
     }

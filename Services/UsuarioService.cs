@@ -7,16 +7,24 @@ namespace ArenaVirtual.Services {
         public static async Task<Usuario?> Cadastrar(Usuario usuario) {
             bool emailExiste = await _databaseService.EmailExisteAsync(usuario.Email);
             if (emailExiste) {
+                System.Diagnostics.Debug.WriteLine("Email já existe.");
                 return null;
             }
 
             usuario.Senha = DatabaseService.GerarHash(usuario.Senha);
 
             int result = await _databaseService.InserirUsuarioAsync(usuario);
+            System.Diagnostics.Debug.WriteLine($"Resultado da inserção: {result}");
 
             if (result > 0) {
-                return await _databaseService.ObterUsuarioPorEmailSenhaAsync(usuario.Email, usuario.Senha);
+                var usuarioRetornado = await _databaseService.ObterUsuarioPorEmailSenhaAsync(usuario.Email, usuario.Senha);
+                if (usuarioRetornado != null)
+                    System.Diagnostics.Debug.WriteLine($"Usuário cadastrado: {usuarioRetornado.Nome}");
+                else
+                    System.Diagnostics.Debug.WriteLine("Usuário não encontrado após cadastro.");
+                return usuarioRetornado;
             }
+            System.Diagnostics.Debug.WriteLine("Falha ao inserir usuário.");
             return null;
         }
 

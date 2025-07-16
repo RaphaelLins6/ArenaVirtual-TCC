@@ -1,10 +1,18 @@
-﻿using ArenaVirtual.ViewModels;
+﻿using ArenaVirtual.Services;
+using ArenaVirtual.ViewModels;
 
 namespace ArenaVirtual.Views {
     public partial class RegisterPage : ContentPage {
         public RegisterPage() {
             InitializeComponent();
-            BindingContext = new RegisterViewModel();
+            // Obtém o serviço via ServiceProvider do MAUI
+            var alertService = App.Current?.Handler?.MauiContext?.Services.GetService<IAlertService>();
+            BindingContext = new RegisterViewModel(alertService);
+        }
+
+        public RegisterPage(RegisterViewModel viewModel) {
+            InitializeComponent();
+            BindingContext = viewModel;
         }
 
         private void OnRegisterEnterPressed(object sender, EventArgs e) {
