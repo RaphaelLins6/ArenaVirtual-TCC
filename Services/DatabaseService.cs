@@ -9,15 +9,19 @@ namespace ArenaVirtual.Services {
 
         public DatabaseService(string dbPath) {
             _database = new SQLiteAsyncConnection(dbPath);
-            _database.CreateTableAsync<Usuario>().Wait();
-            _database.CreateTableAsync<Campeonato>().Wait();
-            _database.CreateTableAsync<Time>().Wait();
-            _database.CreateTableAsync<Partida>().Wait();
-            _database.CreateTableAsync<AvaliacaoArbitro>().Wait();
-            _database.CreateTableAsync<CampanhaPatrocinio>().Wait();
-            _database.CreateTableAsync<Estatistica>().Wait();
-            _database.CreateTableAsync<Jogo>().Wait();
-            _database.CreateTableAsync<PropostaPatrocinio>().Wait();
+            // Não chame CreateTableAsync ou InitializeAsync aqui!
+        }
+
+        public async Task InitializeAsync() {
+            await _database.CreateTableAsync<Usuario>();
+            await _database.CreateTableAsync<Campeonato>();
+            await _database.CreateTableAsync<Time>();
+            await _database.CreateTableAsync<Partida>();
+            await _database.CreateTableAsync<AvaliacaoArbitro>();
+            await _database.CreateTableAsync<CampanhaPatrocinio>();
+            await _database.CreateTableAsync<Estatistica>();
+            await _database.CreateTableAsync<Jogo>();
+            await _database.CreateTableAsync<PropostaPatrocinio>();
         }
 
         public Task<int> InserirUsuarioAsync(Usuario usuario) {
@@ -55,8 +59,6 @@ namespace ArenaVirtual.Services {
         public Task<int> DeletarUsuarioAsync(Usuario usuario) {
             return _database.DeleteAsync(usuario);
         }
-
-        // ... (código existente)
 
         public Task<int> InserirCampeonatoAsync(Campeonato item) {
             return _database.InsertAsync(item);
@@ -161,7 +163,5 @@ namespace ArenaVirtual.Services {
         public Task<int> DeletarPropostaPatrocinioAsync(PropostaPatrocinio item) {
             return _database.DeleteAsync(item);
         }
-
-        // ... (restante do código)
     }
 }

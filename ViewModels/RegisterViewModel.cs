@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using Microsoft.Extensions.DependencyInjection;
-using ArenaVirtual.Views; // Para GetService
+using ArenaVirtual.Views;
 
 namespace ArenaVirtual.ViewModels {
     public partial class RegisterViewModel : ObservableObject {
@@ -19,9 +19,12 @@ namespace ArenaVirtual.ViewModels {
         public ObservableCollection<TipoPerfil> PerfisDisponiveis { get; }
 
         private readonly IAlertService _alertService;
+        private readonly UsuarioService _usuarioService;
 
-        public RegisterViewModel(IAlertService alertService) {
+        // Construtor que recebe IAlertService E UsuarioService
+        public RegisterViewModel(IAlertService alertService, UsuarioService usuarioService) {
             _alertService = alertService;
+            _usuarioService = usuarioService;
             PerfisDisponiveis = new ObservableCollection<TipoPerfil>(Enum.GetValues(typeof(TipoPerfil)).Cast<TipoPerfil>());
             this.perfilSelecionado = TipoPerfil.Atleta;
         }
@@ -50,7 +53,8 @@ namespace ArenaVirtual.ViewModels {
                 Perfil = this.PerfilSelecionado
             };
 
-            Usuario? usuarioCadastrado = await UsuarioService.Cadastrar(usuario);
+            // Use o _usuarioService injetado
+            Usuario? usuarioCadastrado = await _usuarioService.Cadastrar(usuario);
 
             if (usuarioCadastrado != null) {
                 await _alertService.DisplayAlert("Sucesso", "Usuário registrado com sucesso!", "OK");
@@ -72,8 +76,7 @@ namespace ArenaVirtual.ViewModels {
         }
 
         [RelayCommand]
-        public async Task VoltarParaLogin() // Novo comando para o botão "Voltar"
-        {
+        public async Task VoltarParaLogin() {
             var serviceProvider = Application.Current.Handler.MauiContext.Services;
             Application.Current.MainPage = serviceProvider.GetService<LoginPage>();
             await Task.CompletedTask;

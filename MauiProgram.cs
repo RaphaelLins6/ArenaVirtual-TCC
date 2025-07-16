@@ -4,6 +4,7 @@ using CommunityToolkit.Maui;
 using ArenaVirtual.Services;
 using ArenaVirtual.Views;
 using ArenaVirtual.ViewModels;
+using Microsoft.Maui.ApplicationModel; // Necessário para FileSystem
 
 namespace ArenaVirtual;
 
@@ -21,24 +22,32 @@ public static class MauiProgram {
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
-        // Registrar seus serviços
+        // Serviços
         builder.Services.AddTransient<IAlertService, AlertService>();
-        builder.Services.AddTransient<DatabaseService>();
-        // ... (outros serviços)
 
-        // Registrar seus ViewModels
+        // Registre DatabaseService como Singleton
+        // NÃO chame InitializeAsync() aqui!
+        builder.Services.AddSingleton<DatabaseService>(s => {
+            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "ArenaVirtual.db3");
+            var databaseService = new DatabaseService(dbPath);
+            // NÃO chame databaseService.InitializeAsync() aqui!
+            return databaseService;
+        });
+
+        builder.Services.AddTransient<UsuarioService>();
+
+        // ViewModels
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<RegisterViewModel>();
-        // ... (outros ViewModels)
+        builder.Services.AddTransient<PerfilViewModel>();
 
-        // Registrar suas Views (Páginas)
+        // Views (Páginas)
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<RegisterPage>();
         builder.Services.AddTransient<PerfilPage>();
-        // ... (outras Views)
 
-        // Registrar o AppShell
-        builder.Services.AddTransient<AppShell>(); // Use AddTransient para permitir passar Usuario no construtor
+        // AppShell
+        builder.Services.AddTransient<AppShell>();
 
         return builder.Build();
     }

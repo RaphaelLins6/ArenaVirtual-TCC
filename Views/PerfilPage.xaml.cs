@@ -1,37 +1,19 @@
 ﻿using ArenaVirtual.Models;
+using ArenaVirtual.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArenaVirtual.Views {
     public partial class PerfilPage : ContentPage {
+        public PerfilPage(Usuario usuarioLogado) {
+            InitializeComponent();
 
-        private Usuario _usuarioAtual;
-
-        public PerfilPage(Usuario usuario) {
-            InitializeComponent(); 
-            _usuarioAtual = usuario; 
-            ConfigurarUIComBaseNoPerfil();
-        }
-
-        private void ConfigurarUIComBaseNoPerfil() {
-            if (WelcomeMessageLabel != null) { 
-                WelcomeMessageLabel.Text = $"Bem-vindo, {_usuarioAtual?.Nome ?? "Usuário"}! ({_usuarioAtual?.Email ?? "N/A"})";
+            // Correção: use o ServiceProvider do MauiContext para resolver o PerfilViewModel, passando o usuário logado
+            if (this.Handler?.MauiContext?.Services != null) {
+                var serviceProvider = this.Handler.MauiContext.Services;
+                BindingContext = ActivatorUtilities.CreateInstance<PerfilViewModel>(serviceProvider, usuarioLogado);
+            } else {
+                System.Diagnostics.Debug.WriteLine("Erro: Handler ou MauiContext é nulo na PerfilPage.");
             }
-
-            if (AdminOnlyButton != null) {
-                if (_usuarioAtual?.Perfil == TipoPerfil.Organizador) { // Supondo que "Organizador" seja um valor do seu enum TipoPerfil
-                    AdminOnlyButton.Text = "Gerenciar Campeonatos";
-                    AdminOnlyButton.IsVisible = true;
-                } else {
-                    AdminOnlyButton.IsVisible = false;
-                }
-            }
-
-            // Exemplo para outros perfis, se existirem no seu TipoPerfil
-            // else if (_usuarioAtual?.Perfil == TipoPerfil.Arbitro) {
-            //     AdminOnlyButton.Text = "Ver Escala de Jogos";
-            //     AdminOnlyButton.IsVisible = true;
-            // }
-
-            Title = $"Perfil de {_usuarioAtual?.Nome ?? "Usuário"} - {_usuarioAtual?.Perfil.ToString() ?? "N/A"}";
         }
     }
 }

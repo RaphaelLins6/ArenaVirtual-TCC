@@ -1,30 +1,22 @@
 ﻿using ArenaVirtual.Services;
 using ArenaVirtual.ViewModels;
-using Microsoft.Extensions.DependencyInjection; // Adicione este using
-using System; // Para EventArgs
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace ArenaVirtual.Views {
     public partial class RegisterPage : ContentPage {
-        private readonly IServiceProvider _serviceProvider; // Adicione esta linha
-
-        public RegisterPage() {
-            InitializeComponent();
-            // Obtém o serviço via ServiceProvider do MAUI  
-            var alertService = App.Current?.Handler?.MauiContext?.Services.GetService<IAlertService>();
-            BindingContext = new RegisterViewModel(alertService);
-        }
+        private readonly IServiceProvider _serviceProvider;
 
         // Construtor principal para injeção de dependência.
-        // Recebe o RegisterViewModel e o IServiceProvider
-        public RegisterPage(RegisterViewModel viewModel, IServiceProvider serviceProvider) { // <--- Modifique AQUI
+        public RegisterPage(RegisterViewModel viewModel, IServiceProvider serviceProvider) {
             InitializeComponent();
             BindingContext = viewModel;
-            _serviceProvider = serviceProvider; // Armazene o ServiceProvider
+            _serviceProvider = serviceProvider;
         }
 
         private void OnRegisterEnterPressed(object sender, EventArgs e) {
-            if (BindingContext is LoginViewModel vm && vm.LoginCommand.CanExecute(null)) {
-                vm.LoginCommand.Execute(null);
+            if (BindingContext is RegisterViewModel vm && vm.RegistrarCommand.CanExecute(null)) {
+                vm.RegistrarCommand.Execute(null);
             }
         }
     }
