@@ -7,13 +7,6 @@
     x:DataType="vm:RegisterViewModel">
 
     <VerticalStackLayout Padding="30" Spacing="15">
-        <Button
-            BackgroundColor="Transparent"
-            Clicked="OnVoltarClicked"
-            FontAttributes="Bold"
-            HorizontalOptions="Start"
-            Text="← Voltar"
-            TextColor="OrangeRed" />
         <Entry Placeholder="Nome" Text="{Binding Nome}" />
         <Entry
             Keyboard="Email"
@@ -32,6 +25,13 @@
             Title="Selecione o perfil"
             ItemsSource="{Binding PerfisDisponiveis}"
             SelectedItem="{Binding PerfilSelecionado}" />
-        <Button Command="{Binding RegistrarCommand}" Text="Registrar" />
+        <Button
+            Command="{Binding RegistrarCommand}"
+            Style="{StaticResource BotaoPrincipal}"
+            Text="Registrar" />
+        <Button
+            Command="{Binding VoltarParaLoginCommand}"
+            Style="{StaticResource BotaoPrincipal}"
+            Text="Voltar" />
     </VerticalStackLayout>
 </ContentPage>

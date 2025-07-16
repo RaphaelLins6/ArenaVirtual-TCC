@@ -4,6 +4,7 @@ using ArenaVirtual.Views.Arbitro;
 using ArenaVirtual.Views.Atleta;
 using ArenaVirtual.Views.Organizador;
 using ArenaVirtual.Views.Patrocinador;
+using Microsoft.Extensions.DependencyInjection; // Adicione este using
 
 namespace ArenaVirtual {
     public partial class AppShell : Shell {
@@ -64,7 +65,8 @@ namespace ArenaVirtual {
                 Text = "Sair",
                 Command = new Command(() => {
                     MainThread.BeginInvokeOnMainThread(() => {
-                        Application.Current.MainPage = new LoginPage(); // Sai da área logada
+                        var serviceProvider = Application.Current.Handler.MauiContext.Services;
+                        Application.Current.MainPage = serviceProvider.GetService<LoginPage>(); // <--- Usar GetService aqui
                     });
                 })
             });

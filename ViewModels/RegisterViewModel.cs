@@ -5,6 +5,8 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
+using Microsoft.Extensions.DependencyInjection;
+using ArenaVirtual.Views; // Para GetService
 
 namespace ArenaVirtual.ViewModels {
     public partial class RegisterViewModel : ObservableObject {
@@ -67,6 +69,14 @@ namespace ArenaVirtual.ViewModels {
             } else {
                 await _alertService.DisplayAlert("Erro", "Email já cadastrado ou falha ao registrar.", "OK");
             }
+        }
+
+        [RelayCommand]
+        public async Task VoltarParaLogin() // Novo comando para o botão "Voltar"
+        {
+            var serviceProvider = Application.Current.Handler.MauiContext.Services;
+            Application.Current.MainPage = serviceProvider.GetService<LoginPage>();
+            await Task.CompletedTask;
         }
     }
 }

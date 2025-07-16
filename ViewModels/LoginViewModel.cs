@@ -2,19 +2,26 @@
 using ArenaVirtual.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.ViewModels {
     public partial class LoginViewModel : ObservableObject {
+        private readonly IAlertService _alertService;
+
         [ObservableProperty]
         private string email = string.Empty;
 
         [ObservableProperty]
         private string senha = string.Empty;
 
+        public LoginViewModel(IAlertService alertService) {
+            _alertService = alertService;
+        }
+
         [RelayCommand]
         public async Task Login() {
             if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha)) {
-                await Shell.Current.DisplayAlert("Erro", "Preencha o e-mail e a senha.", "OK");
+                await _alertService.DisplayAlert("Erro", "Preencha o e-mail e a senha.", "OK");
                 return;
             }
 
@@ -22,7 +29,7 @@ namespace ArenaVirtual.ViewModels {
             var usuario = await App.Database.ObterUsuarioPorEmailSenhaAsync(Email, senhaHash);
 
             if (usuario == null) {
-                await Shell.Current.DisplayAlert("Erro", "E-mail ou senha inválidos.", "OK");
+                await _alertService.DisplayAlert("Erro", "E-mail ou senha inválidos.", "OK");
                 return;
             }
 
@@ -31,9 +38,8 @@ namespace ArenaVirtual.ViewModels {
 
         [RelayCommand]
         public async Task IrParaRegistro() {
-            var alertService = new AlertService(); // Assuming AlertService is a class that implements IAlertService  
-            var registerViewModel = new RegisterViewModel(alertService);
-            Application.Current.MainPage = new RegisterPage(registerViewModel);
+            var serviceProvider = Application.Current.Handler.MauiContext.Services;
+            Application.Current.MainPage = serviceProvider.GetService<RegisterPage>();
         }
     }
 }
