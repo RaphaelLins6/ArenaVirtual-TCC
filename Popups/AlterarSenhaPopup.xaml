@@ -1,0 +1,45 @@
+﻿<ContentPage
+    x:Class="ArenaVirtual.Popups.AlterarSenhaPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Alterar Senha"
+    Padding="30"
+    BackgroundColor="#80000000">
+
+    <VerticalStackLayout
+        Padding="20"
+        BackgroundColor="White"
+        HorizontalOptions="Center"
+        Spacing="15"
+        VerticalOptions="Center"
+        WidthRequest="300">
+
+        <Border BackgroundColor="White" StrokeShape="RoundRectangle 10">
+            <VerticalStackLayout>
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="22"
+                    HorizontalOptions="Center"
+                    Text="Alterar Senha" />
+
+                <Entry
+                    x:Name="SenhaAtualEntry"
+                    IsPassword="True"
+                    Placeholder="Senha atual" />
+                <Entry
+                    x:Name="NovaSenhaEntry"
+                    IsPassword="True"
+                    Placeholder="Nova senha" />
+                <Entry
+                    x:Name="ConfirmarNovaSenhaEntry"
+                    IsPassword="True"
+                    Placeholder="Confirmar nova senha" />
+
+                <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
+                    <Button Clicked="Cancelar_Clicked" Text="Cancelar" />
+                    <Button Clicked="Salvar_Clicked" Text="Salvar" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+    </VerticalStackLayout>
+</ContentPage>

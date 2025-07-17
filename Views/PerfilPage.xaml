@@ -131,13 +131,17 @@
             Margin="0,20,0,0"
             Spacing="10">
             <Button
-                Command="{Binding EditarPerfilCommand}"
-                Style="{StaticResource PrimaryButton}"
+                Clicked="AlterarImagem_Clicked"
+                Style="{StaticResource BotaoPrincipal}"
+                Text="Alterar Imagem" />
+            <Button
+                Clicked="EditarPerfil_Clicked"
+                Style="{StaticResource BotaoPrincipal}"
                 Text="Editar Perfil" />
             <Button
-                Command="{Binding AlterarSenhaCommand}"
-                Style="{StaticResource SecondaryButton}"
-                Text="Alterar Senha" />
+                Clicked="TrocarSenha_Clicked"
+                Style="{StaticResource BotaoPrincipal}"
+                Text="Trocar Senha" />
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

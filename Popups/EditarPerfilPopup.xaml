@@ -1,0 +1,36 @@
+﻿<ContentPage
+    x:Class="ArenaVirtual.Popups.EditarPerfilPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Editar Perfil"
+    Padding="30"
+    BackgroundColor="#80000000">
+
+    <Frame
+        Padding="20"
+        BackgroundColor="White"
+        CornerRadius="10"
+        HorizontalOptions="Center"
+        VerticalOptions="Center"
+        WidthRequest="300">
+
+        <VerticalStackLayout Spacing="15">
+            <Label
+                FontAttributes="Bold"
+                FontSize="22"
+                HorizontalOptions="Center"
+                Text="Editar Perfil" />
+
+            <Entry x:Name="NomeEntry" Placeholder="Nome" />
+            <Entry
+                x:Name="EmailEntry"
+                Keyboard="Email"
+                Placeholder="E-mail" />
+
+            <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
+                <Button Clicked="Cancelar_Clicked" Text="Cancelar" />
+                <Button Clicked="Salvar_Clicked" Text="Salvar" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </Frame>
+</ContentPage>

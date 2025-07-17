@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ArenaVirtual.Popups.AlterarImagemPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Padding="30"
+    BackgroundColor="#80000000">
+
+    <Border
+        Padding="20"
+        BackgroundColor="White"
+        HorizontalOptions="Center"
+        VerticalOptions="Center"
+        WidthRequest="300">
+
+        <VerticalStackLayout Spacing="20">
+            <Label
+                FontAttributes="Bold"
+                FontSize="20"
+                HorizontalOptions="Center"
+                Text="Alterar Imagem" />
+
+            <Border
+                BackgroundColor="#eee"
+                HeightRequest="150"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                WidthRequest="150">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="75" />
+                </Border.StrokeShape>
+                <Image
+                    x:Name="ImagemPerfil"
+                    Aspect="AspectFill"
+                    HeightRequest="150"
+                    WidthRequest="150" />
+            </Border>
+
+            <Button Clicked="EscolherImagem_Clicked" Text="Escolher imagem" />
+            <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
+                <Button Clicked="Cancelar_Clicked" Text="Cancelar" />
+                <Button Clicked="Salvar_Clicked" Text="Salvar" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </Border>
+</ContentPage>

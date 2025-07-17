@@ -1,5 +1,6 @@
 ﻿using System;
 using ArenaVirtual.Models;
+using ArenaVirtual.Popups;
 using ArenaVirtual.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -39,13 +40,19 @@ namespace ArenaVirtual.ViewModels {
                 NomeUsuario = _usuarioLogado.Nome;
                 EmailUsuario = _usuarioLogado.Email;
                 TipoPerfilUsuario = _usuarioLogado.Perfil.ToString();
-                // LocalizacaoUsuario = _usuarioLogado.Localizacao; // Descomente se existir  
+                // LocalizacaoUsuario = _usuarioLogado.Localizacao;   
             }
         }
 
         [RelayCommand]
         private async Task EditarPerfil() {
-            await _alertService.DisplayAlert("Editar Perfil", "Funcionalidade de edição de perfil em desenvolvimento.", "OK");
+            var popup = new EditarPerfilPopup(_usuarioLogado, _alertService);
+            popup.PerfilAtualizado += (s, usuarioAtualizado) => {
+                _usuarioLogado = usuarioAtualizado;
+                CarregarDadosDoUsuario(); 
+            };
+
+            await Shell.Current.Navigation.PushModalAsync(popup);
         }
 
         [RelayCommand]
