@@ -1,9 +1,10 @@
-﻿using System;
-using ArenaVirtual.Models;
+﻿using ArenaVirtual.Models;
 using ArenaVirtual.Popups;
 using ArenaVirtual.Services;
+using CommunityToolkit.Maui.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System;
 
 namespace ArenaVirtual.ViewModels {
     public partial class PerfilViewModel : ObservableObject {
@@ -56,7 +57,8 @@ namespace ArenaVirtual.ViewModels {
 
         [RelayCommand]
         private async Task AlterarSenha() {
-            await _alertService.DisplayAlert("Alterar Senha", "Funcionalidade de alteração de senha em desenvolvimento.", "OK");
+            var popup = new AlterarSenhaPopup(_usuarioLogado, _alertService);
+            await Shell.Current.Navigation.PushModalAsync(popup);
         }
     }
 }
