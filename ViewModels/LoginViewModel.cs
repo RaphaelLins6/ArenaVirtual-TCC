@@ -2,8 +2,6 @@
 using ArenaVirtual.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Maui.Controls;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ArenaVirtual.ViewModels {
     public partial class LoginViewModel : ObservableObject {
@@ -28,8 +26,10 @@ namespace ArenaVirtual.ViewModels {
                 return;
             }
 
-            string senhaHash = UsuarioService.GerarHash(Senha);
-            var usuario = await _usuarioService.Autenticar(Email, senhaHash);
+            // Removido: string senhaHash = UsuarioService.GerarHash(Senha);
+
+            // Passe a senha "pura" para o Autenticar, que faz o hash internamente
+            var usuario = await _usuarioService.Autenticar(Email, Senha);
 
             if (usuario == null) {
                 await _alertService.DisplayAlert("Erro", "E-mail ou senha inválidos.", "OK");

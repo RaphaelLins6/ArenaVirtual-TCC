@@ -8,18 +8,11 @@ namespace ArenaVirtual.Views {
         private Usuario _usuario;
         private IAlertService _alertService;
 
-        public PerfilPage(Usuario usuarioLogado, IAlertService alertService) {
+        public PerfilPage(Usuario usuarioLogado, IAlertService alertService, IServiceProvider serviceProvider) {
             InitializeComponent();
-
             _usuario = usuarioLogado;
             _alertService = alertService;
-
-            if (this.Handler?.MauiContext?.Services != null) {
-                var serviceProvider = this.Handler.MauiContext.Services;
-                BindingContext = ActivatorUtilities.CreateInstance<PerfilViewModel>(serviceProvider, usuarioLogado);
-            } else {
-                System.Diagnostics.Debug.WriteLine("Erro: Handler ou MauiContext é nulo na PerfilPage.");
-            }
+            BindingContext = ActivatorUtilities.CreateInstance<PerfilViewModel>(serviceProvider, usuarioLogado, alertService);
         }
 
         private async void AlterarImagem_Clicked(object sender, EventArgs e) {

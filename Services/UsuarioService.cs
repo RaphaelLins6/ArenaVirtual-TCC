@@ -3,11 +3,9 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace ArenaVirtual.Services {
-    // Agora UsuarioService é uma classe normal, não estática
     public class UsuarioService {
         private readonly DatabaseService _databaseService;
 
-        // Injete DatabaseService no construtor
         public UsuarioService(DatabaseService databaseService) {
             _databaseService = databaseService;
         }
@@ -19,7 +17,7 @@ namespace ArenaVirtual.Services {
                 return null;
             }
 
-            usuario.Senha = DatabaseService.GerarHash(usuario.Senha);
+            usuario.Senha = GerarHash(usuario.Senha); // Corrigido para usar o método estático GerarHash
 
             int result = await _databaseService.InserirUsuarioAsync(usuario);
             System.Diagnostics.Debug.WriteLine($"Resultado da inserção: {result}");
@@ -37,12 +35,11 @@ namespace ArenaVirtual.Services {
         }
 
         public async Task<Usuario?> Autenticar(string email, string senha) {
-            string senhaHash = DatabaseService.GerarHash(senha);
+            string senhaHash = GerarHash(senha); // Corrigido para usar o método estático GerarHash
             Usuario? usuario = await _databaseService.ObterUsuarioPorEmailSenhaAsync(email, senhaHash);
             return usuario;
         }
 
-        // Método utilitário pode continuar estático
         public static string GerarHash(string senha) {
             using var sha256 = SHA256.Create();
             var bytes = Encoding.UTF8.GetBytes(senha);

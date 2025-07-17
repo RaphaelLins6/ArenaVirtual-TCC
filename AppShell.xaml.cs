@@ -23,12 +23,13 @@ namespace ArenaVirtual {
         private void CriarMenuPorPerfil(Usuario usuario) {
             this.Items.Clear();
 
+            var serviceProvider = Application.Current.Handler.MauiContext.Services;
+            var alertService = serviceProvider.GetService<IAlertService>();
+
             this.Items.Add(new ShellContent {
                 Title = "Meu Perfil",
                     ContentTemplate = new DataTemplate(() => {
-                    var serviceProvider = Application.Current.Handler.MauiContext.Services;
-                    var alertService = serviceProvider.GetService<IAlertService>();
-                    return new PerfilPage(_usuarioLogado, alertService);
+                    return new PerfilPage(_usuarioLogado, alertService, serviceProvider);
                 })
             });
 

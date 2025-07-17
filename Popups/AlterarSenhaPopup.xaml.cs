@@ -1,5 +1,5 @@
 ﻿using ArenaVirtual.Models;
-using ArenaVirtual.Services; // SecurityService não existe, use métodos de DatabaseService
+using ArenaVirtual.Services;
 
 namespace ArenaVirtual.Popups;
 
@@ -32,7 +32,7 @@ public partial class AlterarSenhaPopup : ContentPage {
         }
 
         // Verifica se a senha atual confere
-        if (_usuario.Senha != DatabaseService.GerarHash(senhaAtual)) {
+        if (_usuario.Senha != UsuarioService.GerarHash(senhaAtual)) { // Corrigido aqui
             await _alertService.DisplayAlert("Erro", "Senha atual incorreta.", "OK");
             return;
         }
@@ -43,7 +43,7 @@ public partial class AlterarSenhaPopup : ContentPage {
         }
 
         // Atualiza a senha com hash
-        _usuario.Senha = DatabaseService.GerarHash(novaSenha);
+        _usuario.Senha = UsuarioService.GerarHash(novaSenha); // Corrigido aqui
         await _databaseService.AtualizarUsuarioAsync(_usuario);
 
         await _alertService.DisplayAlert("Sucesso", "Senha atualizada com sucesso!", "OK");
