@@ -3,12 +3,8 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace ArenaVirtual.Services {
-    public class UsuarioService {
-        private readonly DatabaseService _databaseService;
-
-        public UsuarioService(DatabaseService databaseService) {
-            _databaseService = databaseService;
-        }
+    public class UsuarioService(DatabaseService databaseService) {
+        private readonly DatabaseService _databaseService = databaseService;
 
         public async Task<Usuario?> Cadastrar(Usuario usuario) {
             bool emailExiste = await _databaseService.EmailExisteAsync(usuario.Email);
@@ -17,7 +13,7 @@ namespace ArenaVirtual.Services {
                 return null;
             }
 
-            usuario.Senha = GerarHash(usuario.Senha); // Corrigido para usar o método estático GerarHash
+            usuario.Senha = GerarHash(usuario.Senha);
 
             int result = await _databaseService.InserirUsuarioAsync(usuario);
             System.Diagnostics.Debug.WriteLine($"Resultado da inserção: {result}");
@@ -35,15 +31,14 @@ namespace ArenaVirtual.Services {
         }
 
         public async Task<Usuario?> Autenticar(string email, string senha) {
-            string senhaHash = GerarHash(senha); // Corrigido para usar o método estático GerarHash
+            string senhaHash = GerarHash(senha);
             Usuario? usuario = await _databaseService.ObterUsuarioPorEmailSenhaAsync(email, senhaHash);
             return usuario;
         }
 
         public static string GerarHash(string senha) {
-            using var sha256 = SHA256.Create();
             var bytes = Encoding.UTF8.GetBytes(senha);
-            var hash = sha256.ComputeHash(bytes);
+            var hash = SHA256.HashData(bytes);
             return Convert.ToBase64String(hash);
         }
     }

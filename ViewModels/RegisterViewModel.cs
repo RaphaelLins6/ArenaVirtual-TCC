@@ -3,31 +3,20 @@ using ArenaVirtual.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
-using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.Controls;
-using Microsoft.Extensions.DependencyInjection;
 using ArenaVirtual.Views;
 
 namespace ArenaVirtual.ViewModels {
-    public partial class RegisterViewModel : ObservableObject {
+    public partial class RegisterViewModel(IAlertService alertService, UsuarioService usuarioService) : ObservableObject {
         [ObservableProperty] private string nome = string.Empty;
         [ObservableProperty] private string email = string.Empty;
         [ObservableProperty] private string senha = string.Empty;
         [ObservableProperty] private string confirmarSenha = string.Empty;
-        [ObservableProperty] private TipoPerfil perfilSelecionado;
+        [ObservableProperty] private TipoPerfil perfilSelecionado = TipoPerfil.Atleta;
 
-        public ObservableCollection<TipoPerfil> PerfisDisponiveis { get; }
+        public ObservableCollection<TipoPerfil> PerfisDisponiveis { get; } = new ObservableCollection<TipoPerfil>(Enum.GetValues<TipoPerfil>());
 
-        private readonly IAlertService _alertService;
-        private readonly UsuarioService _usuarioService;
-
-        // Construtor que recebe IAlertService E UsuarioService
-        public RegisterViewModel(IAlertService alertService, UsuarioService usuarioService) {
-            _alertService = alertService;
-            _usuarioService = usuarioService;
-            PerfisDisponiveis = new ObservableCollection<TipoPerfil>(Enum.GetValues(typeof(TipoPerfil)).Cast<TipoPerfil>());
-            this.perfilSelecionado = TipoPerfil.Atleta;
-        }
+        private readonly IAlertService _alertService = alertService;
+        private readonly UsuarioService _usuarioService = usuarioService;
 
         [RelayCommand]
         public async Task Registrar() {
@@ -41,7 +30,7 @@ namespace ArenaVirtual.ViewModels {
                 return;
             }
 
-            if (!Email.Contains("@") || !Email.Contains(".")) {
+            if (!Email.Contains('@') || !Email.Contains('.')) {
                 await _alertService.DisplayAlert("E-mail Inválido", "Por favor, insira um e-mail válido.", "OK");
                 return;
             }
@@ -53,7 +42,6 @@ namespace ArenaVirtual.ViewModels {
                 Perfil = this.PerfilSelecionado
             };
 
-            // Use o _usuarioService injetado
             Usuario? usuarioCadastrado = await _usuarioService.Cadastrar(usuario);
 
             if (usuarioCadastrado != null) {
@@ -67,7 +55,7 @@ namespace ArenaVirtual.ViewModels {
 
                 MainThread.BeginInvokeOnMainThread(() => {
                     if (Application.Current?.Windows.Count > 0) {
-                        Application.Current.MainPage = new AppShell(usuarioCadastrado);
+                        Application.Current.Windows[0].Page = new AppShell(usuarioCadastrado);
                     }
                 });
             } else {
@@ -76,9 +64,14 @@ namespace ArenaVirtual.ViewModels {
         }
 
         [RelayCommand]
-        public async Task VoltarParaLogin() {
-            var serviceProvider = Application.Current.Handler.MauiContext.Services;
-            Application.Current.MainPage = serviceProvider.GetService<LoginPage>();
+        public static async Task VoltarParaLogin() {
+            var serviceProvider = Application.Current?.Handler?.MauiContext?.Services;
+            if (serviceProvider != null) {
+                var loginPage = serviceProvider.GetService<LoginPage>();
+                if (loginPage != null && Application.Current?.Windows.Count > 0) {
+                    Application.Current.Windows[0].Page = loginPage;
+                }
+            }
             await Task.CompletedTask;
         }
     }

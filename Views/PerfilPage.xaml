@@ -3,7 +3,8 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodels="clr-namespace:ArenaVirtual.ViewModels;assembly=ArenaVirtual"
-    Title="Meu Perfil">
+    Title="Meu Perfil"
+    x:DataType="viewmodels:PerfilViewModel">
 
     <Grid
         Padding="20"
@@ -25,13 +26,11 @@
             Grid.Row="1"
             HorizontalOptions="Center"
             Spacing="10">
-            <Frame
-                Padding="0"
-                BorderColor="{StaticResource Primary}"
-                CornerRadius="75"
-                HasShadow="False"
+            <Border
                 HeightRequest="150"
-                IsClippedToBounds="True"
+                Stroke="{StaticResource Primary}"
+                StrokeShape="RoundRectangle 75"
+                StrokeThickness="1"
                 WidthRequest="150">
                 <Image
                     x:Name="UserImage"
@@ -39,7 +38,7 @@
                     HorizontalOptions="Center"
                     Source="user_avatar_placeholder.png"
                     VerticalOptions="Center" />
-            </Frame>
+            </Border>
             <Label
                 FontAttributes="Bold"
                 FontSize="22"
@@ -57,7 +56,7 @@
         <ScrollView Grid.Row="2">
             <VerticalStackLayout Margin="0,20,0,0" Spacing="15">
 
-                <Frame Style="{StaticResource CardFrameStyle}">
+                <Border Style="{StaticResource CardFrameStyle}">
                     <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                         <Image
                             HeightRequest="24"
@@ -77,9 +76,9 @@
                                                             Dark=White}" />
                         </VerticalStackLayout>
                     </Grid>
-                </Frame>
+                </Border>
 
-                <Frame Style="{StaticResource CardFrameStyle}">
+                <Border Style="{StaticResource CardFrameStyle}">
                     <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                         <Image
                             HeightRequest="24"
@@ -99,9 +98,9 @@
                                                             Dark=White}" />
                         </VerticalStackLayout>
                     </Grid>
-                </Frame>
+                </Border>
 
-                <Frame Style="{StaticResource CardFrameStyle}">
+                <Border Style="{StaticResource CardFrameStyle}">
                     <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                         <Image
                             HeightRequest="24"
@@ -121,7 +120,7 @@
                                                             Dark=White}" />
                         </VerticalStackLayout>
                     </Grid>
-                </Frame>
+                </Border>
 
             </VerticalStackLayout>
         </ScrollView>

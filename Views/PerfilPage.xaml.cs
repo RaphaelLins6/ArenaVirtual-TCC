@@ -6,7 +6,7 @@ using ArenaVirtual.ViewModels;
 namespace ArenaVirtual.Views {
     public partial class PerfilPage : ContentPage {
         private Usuario _usuario;
-        private IAlertService _alertService;
+        private readonly IAlertService _alertService;
 
         public PerfilPage(Usuario usuarioLogado, IAlertService alertService, IServiceProvider serviceProvider) {
             InitializeComponent();
@@ -42,9 +42,10 @@ namespace ArenaVirtual.Views {
             await Navigation.PushModalAsync(popup);
         }
     }
-    public class TrocarSenhaPopup : ContentPage {
-        private Usuario _usuario;
-        private IAlertService _alertService;
+
+    public partial class TrocarSenhaPopup : ContentPage {
+        private readonly Usuario _usuario;
+        private readonly IAlertService _alertService;
 
         public TrocarSenhaPopup(Usuario usuario, IAlertService alertService) {
             _usuario = usuario;

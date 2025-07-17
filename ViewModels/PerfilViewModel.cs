@@ -11,19 +11,19 @@ namespace ArenaVirtual.ViewModels {
         private Usuario _usuarioLogado;
 
         [ObservableProperty]
-        private string saudacao;
+        private string saudacao = string.Empty;
 
         [ObservableProperty]
-        private string nomeUsuario;
+        private string nomeUsuario = string.Empty;
 
         [ObservableProperty]
-        private string emailUsuario;
+        private string emailUsuario = string.Empty;
 
         [ObservableProperty]
-        private string tipoPerfilUsuario;
+        private string tipoPerfilUsuario = string.Empty;
 
         [ObservableProperty]
-        private string localizacaoUsuario; // Exemplo de propriedade adicional  
+        private string localizacaoUsuario = string.Empty;
 
         public PerfilViewModel(Usuario usuario, IAlertService alertService) {
             _usuarioLogado = usuario;
@@ -33,14 +33,13 @@ namespace ArenaVirtual.ViewModels {
 
         private void CarregarDadosDoUsuario() {
             if (_usuarioLogado != null) {
-                if (DateTime.Now.Hour < 12) saudacao = "Bom dia,";
-                else if (DateTime.Now.Hour < 18) saudacao = "Boa tarde,";
-                else saudacao = "Boa noite,";
+                if (DateTime.Now.Hour < 12) Saudacao = "Bom dia,";
+                else if (DateTime.Now.Hour < 18) Saudacao = "Boa tarde,";
+                else Saudacao = "Boa noite,";
 
                 NomeUsuario = _usuarioLogado.Nome;
                 EmailUsuario = _usuarioLogado.Email;
                 TipoPerfilUsuario = _usuarioLogado.Perfil.ToString();
-                // LocalizacaoUsuario = _usuarioLogado.Localizacao;   
             }
         }
 
@@ -49,7 +48,7 @@ namespace ArenaVirtual.ViewModels {
             var popup = new EditarPerfilPopup(_usuarioLogado, _alertService);
             popup.PerfilAtualizado += (s, usuarioAtualizado) => {
                 _usuarioLogado = usuarioAtualizado;
-                CarregarDadosDoUsuario(); 
+                CarregarDadosDoUsuario();
             };
 
             await Shell.Current.Navigation.PushModalAsync(popup);

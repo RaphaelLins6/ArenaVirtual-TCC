@@ -1,8 +1,5 @@
 ﻿using ArenaVirtual.Services;
 using ArenaVirtual.Views;
-using Microsoft.Maui.ApplicationModel;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual;
 
@@ -16,23 +13,31 @@ public partial class App : Application {
         Routing.RegisterRoute(nameof(Views.LoginPage), typeof(Views.LoginPage));
         Routing.RegisterRoute(nameof(Views.PerfilPage), typeof(Views.PerfilPage));
 
-        var initialPage = this.Handler.MauiContext.Services.GetService<LoginPage>();
+        var serviceProvider = this.Handler?.MauiContext?.Services;
+        LoginPage initialPage;
+
+        if (serviceProvider != null) {
+            initialPage = serviceProvider.GetRequiredService<LoginPage>();
+        } else {
+            throw new InvalidOperationException("Service provider is not available during app initialization.");
+        }
+
         var window = new Window(initialPage);
 
-        // Assina o evento Created da Window para garantir que o Handler está pronto
         window.Created += async (sender, args) => {
             if (sender is Window createdWindow) {
                 try {
-                    var databaseService = createdWindow.Handler.MauiContext.Services.GetService<DatabaseService>();
-                    if (databaseService != null) {
+                    var windowServiceProvider = createdWindow.Handler?.MauiContext?.Services;
+
+                    if (windowServiceProvider != null) {
+                        var databaseService = windowServiceProvider.GetRequiredService<DatabaseService>();
                         System.Diagnostics.Debug.WriteLine("Iniciando inicialização do DatabaseService...");
                         await databaseService.InitializeAsync();
                         System.Diagnostics.Debug.WriteLine("DatabaseService inicializado com sucesso.");
                     } else {
-                        System.Diagnostics.Debug.WriteLine("Erro: DatabaseService não pôde ser obtido para inicialização.");
+                        System.Diagnostics.Debug.WriteLine("Erro: ServiceProvider da janela não pôde ser obtido para inicialização do DatabaseService.");
                     }
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     System.Diagnostics.Debug.WriteLine($"Erro na inicialização do DatabaseService: {ex.Message}");
                 }
             }

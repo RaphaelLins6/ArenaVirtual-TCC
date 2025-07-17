@@ -26,9 +26,6 @@ namespace ArenaVirtual.ViewModels {
                 return;
             }
 
-            // Removido: string senhaHash = UsuarioService.GerarHash(Senha);
-
-            // Passe a senha "pura" para o Autenticar, que faz o hash internamente
             var usuario = await _usuarioService.Autenticar(Email, Senha);
 
             if (usuario == null) {
@@ -36,13 +33,36 @@ namespace ArenaVirtual.ViewModels {
                 return;
             }
 
-            Application.Current.MainPage = new AppShell(usuario);
+            if (Application.Current?.Windows.Count > 0) {
+                if (usuario != null) {
+                    Application.Current.Windows[0].Page = new AppShell(usuario);
+                } else {
+                    await _alertService.DisplayAlert("Erro", "Falha ao carregar o perfil do usuário.", "OK");
+                }
+            } else {
+                await _alertService.DisplayAlert("Erro", "Nenhuma janela do aplicativo disponível.", "OK");
+            }
         }
 
         [RelayCommand]
         public async Task IrParaRegistro() {
-            var serviceProvider = Application.Current.Handler.MauiContext.Services;
-            Application.Current.MainPage = serviceProvider.GetService<RegisterPage>();
+            var localServiceProvider = Application.Current?.Handler?.MauiContext?.Services;
+
+            if (localServiceProvider != null) {
+                var registerPage = localServiceProvider.GetService<RegisterPage>();
+
+                if (registerPage != null) {
+                    if (Application.Current?.Windows.Count > 0) {
+                        Application.Current.Windows[0].Page = registerPage;
+                    } else {
+                        await _alertService.DisplayAlert("Erro", "Nenhuma janela do aplicativo disponível.", "OK");
+                    }
+                } else {
+                    await _alertService.DisplayAlert("Erro", "Página de registro não pôde ser carregada. Contate o suporte.", "OK");
+                }
+            } else {
+                await _alertService.DisplayAlert("Erro", "Serviços do aplicativo não disponíveis. Contate o suporte.", "OK");
+            }
             await Task.CompletedTask;
         }
     }

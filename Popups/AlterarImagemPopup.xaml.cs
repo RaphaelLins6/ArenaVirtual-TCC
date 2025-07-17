@@ -1,23 +1,27 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
-using Microsoft.Maui.Storage;
-using System;
 
 namespace ArenaVirtual.Popups;
 
 public partial class AlterarImagemPopup : ContentPage {
     private Usuario _usuario;
-    private DatabaseService _databaseService;
+    private DatabaseService _databaseService; 
     private IAlertService _alertService;
-    private string _novaImagemPath;
+    private string? _novaImagemPath; 
 
-    public event EventHandler<string> ImagemAtualizada; // Evento adicionado
+    public event EventHandler<string>? ImagemAtualizada; // Declarado como anulável
 
     public AlterarImagemPopup(Usuario usuario, IAlertService alertService) {
         InitializeComponent();
         _usuario = usuario;
         _alertService = alertService;
-        _databaseService = App.Current.Handler.MauiContext.Services.GetService<DatabaseService>();
+
+        var serviceProvider = App.Current?.Handler?.MauiContext?.Services;
+        if (serviceProvider != null) {
+            _databaseService = serviceProvider.GetRequiredService<DatabaseService>();
+        } else {
+            throw new InvalidOperationException("DatabaseService not registered or app context is null.");
+        }
 
         if (!string.IsNullOrEmpty(_usuario.ImagemPath))
             ImagemPerfil.Source = _usuario.ImagemPath;
@@ -35,7 +39,7 @@ public partial class AlterarImagemPopup : ContentPage {
                 ImagemPerfil.Source = _novaImagemPath;
             }
         } catch (Exception ex) {
-            await _alertService.DisplayAlert("Erro", "Não foi possível selecionar a imagem.", "OK");
+            await _alertService.DisplayAlert("Erro", $"Não foi possível selecionar a imagem: {ex.Message}", "OK");
         }
     }
 
