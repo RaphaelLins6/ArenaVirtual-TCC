@@ -1,4 +1,5 @@
-﻿using ArenaVirtual.Services;
+﻿using ArenaVirtual.Models;
+using ArenaVirtual.Services;
 using ArenaVirtual.Views;
 
 namespace ArenaVirtual;
@@ -45,4 +46,6 @@ public partial class App : Application {
 
         return window;
     }
+
+    public static Usuario? CurrentUser { get; set; }
 }

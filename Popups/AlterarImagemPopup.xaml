@@ -36,10 +36,19 @@
                     WidthRequest="150" />
             </Border>
 
-            <Button Clicked="EscolherImagem_Clicked" Text="Escolher imagem" />
+            <Button
+                Clicked="EscolherImagem_Clicked"
+                Style="{StaticResource BotaoPrincipal}"
+                Text="Escolher imagem" />
             <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
-                <Button Clicked="Cancelar_Clicked" Text="Cancelar" />
-                <Button Clicked="Salvar_Clicked" Text="Salvar" />
+                <Button
+                    Clicked="Cancelar_Clicked"
+                    Style="{StaticResource BotaoPrincipal}"
+                    Text="Cancelar" />
+                <Button
+                    Clicked="Salvar_Clicked"
+                    Style="{StaticResource BotaoPrincipal}"
+                    Text="Salvar" />
             </HorizontalStackLayout>
         </VerticalStackLayout>
     </Border>

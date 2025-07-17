@@ -28,8 +28,14 @@
                 Placeholder="E-mail" />
 
             <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
-                <Button Clicked="Cancelar_Clicked" Text="Cancelar" />
-                <Button Clicked="Salvar_Clicked" Text="Salvar" />
+                <Button
+                    Clicked="Cancelar_Clicked"
+                    Style="{StaticResource BotaoPrincipal}"
+                    Text="Cancelar" />
+                <Button
+                    Clicked="Salvar_Clicked"
+                    Style="{StaticResource BotaoPrincipal}"
+                    Text="Salvar" />
             </HorizontalStackLayout>
         </VerticalStackLayout>
     </Frame>

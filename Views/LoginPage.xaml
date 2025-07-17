@@ -21,11 +21,11 @@
             Command="{Binding LoginCommand}"
             Style="{StaticResource BotaoPrincipal}"
             Text="Entrar" />
-        <Label HorizontalOptions="Center" Text="Não tem uma conta?" />
         <Label
             HorizontalOptions="Center"
-            Text="Registre-se"
-            TextColor="OrangeRed">
+            Text="Não tem uma conta?"
+            TextColor="White" />
+        <Label HorizontalOptions="Center" Text="Registre-se">
             <Label.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding IrParaRegistroCommand}" />
             </Label.GestureRecognizers>

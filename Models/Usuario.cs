@@ -18,7 +18,7 @@ namespace ArenaVirtual.Models {
         public bool Ativo { get; set; }
         public TipoPerfil Perfil { get; set; }
         public string ImagemPath { get; set; } = string.Empty; // Propriedade adicionada
-        public static TipoPerfil[] PerfilTipos => (TipoPerfil[])Enum.GetValues(typeof(TipoPerfil));
+        public static TipoPerfil[] PerfilTipos => Enum.GetValues<TipoPerfil>();
         public Usuario() {
             DataCadastro = DateTime.Now;
             Ativo = true;

@@ -4,9 +4,9 @@ using ArenaVirtual.Services;
 namespace ArenaVirtual.Popups;
 
 public partial class AlterarImagemPopup : ContentPage {
-    private Usuario _usuario;
-    private DatabaseService _databaseService; 
-    private IAlertService _alertService;
+    private readonly Usuario _usuario;
+    private readonly DatabaseService _databaseService; 
+    private readonly IAlertService _alertService;
     private string? _novaImagemPath; 
 
     public event EventHandler<string>? ImagemAtualizada; // Declarado como anulável

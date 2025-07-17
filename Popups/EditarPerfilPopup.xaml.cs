@@ -4,9 +4,9 @@ using ArenaVirtual.Services;
 namespace ArenaVirtual.Popups;
 
 public partial class EditarPerfilPopup : ContentPage {
-    private Usuario _usuario;
-    private IAlertService _alertService;
-    private DatabaseService _databaseService; // Agora será inicializado para não-nulo
+    private readonly Usuario _usuario;
+    private readonly IAlertService _alertService;
+    private readonly DatabaseService _databaseService; // Agora será inicializado para não-nulo
 
     public event EventHandler<Usuario>? PerfilAtualizado;
 
