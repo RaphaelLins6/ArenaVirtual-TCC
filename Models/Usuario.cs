@@ -17,15 +17,18 @@ namespace ArenaVirtual.Models {
         public DateTime DataCadastro { get; set; }
         public bool Ativo { get; set; }
         public TipoPerfil Perfil { get; set; }
-        public string ImagemPath { get; set; } = string.Empty; // Propriedade adicionada
+        public string ImagemPath { get; set; } = string.Empty; // <-- O NOME CORRETO É IMAGEMPATH!
         public static TipoPerfil[] PerfilTipos => Enum.GetValues<TipoPerfil>();
+
         public Usuario() {
             DataCadastro = DateTime.Now;
             Ativo = true;
         }
+
         public void Ativar() {
             Ativo = true;
         }
+
         public void Desativar() {
             Ativo = false;
         }

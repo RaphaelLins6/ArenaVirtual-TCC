@@ -1,7 +1,6 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Popups;
 using ArenaVirtual.Services;
-using CommunityToolkit.Maui.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
@@ -26,13 +25,17 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty]
         private string localizacaoUsuario = string.Empty;
 
+        // Se quiser tornar a imagem observável, descomente abaixo:
+        // [ObservableProperty]
+        // private ImageSource imagemPerfilSource;
+
         public PerfilViewModel(Usuario usuario, IAlertService alertService) {
             _usuarioLogado = usuario;
             _alertService = alertService;
             CarregarDadosDoUsuario();
         }
 
-        private void CarregarDadosDoUsuario() {
+        public void CarregarDadosDoUsuario() {
             if (_usuarioLogado != null) {
                 if (DateTime.Now.Hour < 12) Saudacao = "Bom dia,";
                 else if (DateTime.Now.Hour < 18) Saudacao = "Boa tarde,";
@@ -41,6 +44,11 @@ namespace ArenaVirtual.ViewModels {
                 NomeUsuario = _usuarioLogado.Nome;
                 EmailUsuario = _usuarioLogado.Email;
                 TipoPerfilUsuario = _usuarioLogado.Perfil.ToString();
+
+                // Se quiser atualizar a imagem via ViewModel:
+                // ImagemPerfilSource = string.IsNullOrEmpty(_usuarioLogado.ImagemPath)
+                //     ? "default_profile.png"
+                //     : ImageSource.FromFile(_usuarioLogado.ImagemPath);
             }
         }
 

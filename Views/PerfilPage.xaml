@@ -33,7 +33,7 @@
                 StrokeThickness="1"
                 WidthRequest="150">
                 <Image
-                    x:Name="UserImage"
+                    x:Name="ImagemPerfil"
                     Aspect="AspectFill"
                     HorizontalOptions="Center"
                     Source="user_avatar_placeholder.png"

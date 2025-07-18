@@ -4,13 +4,8 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace ArenaVirtual.Services {
-    public class DatabaseService {
-        private readonly SQLiteAsyncConnection _database;
-
-        public DatabaseService(string dbPath) {
-            _database = new SQLiteAsyncConnection(dbPath);
-            // Não chame CreateTableAsync ou InitializeAsync aqui!
-        }
+    public class DatabaseService(string dbPath) {
+        private readonly SQLiteAsyncConnection _database = new(dbPath);
 
         public async Task InitializeAsync() {
             await _database.CreateTableAsync<Usuario>();
@@ -45,8 +40,24 @@ namespace ArenaVirtual.Services {
             return usuario != null;
         }
 
-        public Task<int> AtualizarUsuarioAsync(Usuario usuario) {
-            return _database.UpdateAsync(usuario);
+        public async Task<int> AtualizarUsuarioAsync(Usuario usuario) {
+            // Depuração: Mostra o ID e o caminho da imagem antes do update
+            System.Diagnostics.Debug.WriteLine($"[DatabaseService] Atualizando usuário ID: {usuario.Id}, ImagemPath: {usuario.ImagemPath}");
+
+            // Verifique se o usuário existe no banco antes de atualizar
+            var existingUser = await _database.FindAsync<Usuario>(usuario.Id);
+            if (existingUser != null) {
+                System.Diagnostics.Debug.WriteLine($"[DatabaseService] Usuário existente no DB (ID={existingUser.Id}): ImagemPath={existingUser.ImagemPath}");
+            } else {
+                System.Diagnostics.Debug.WriteLine($"[DatabaseService] Usuário com ID {usuario.Id} NÃO encontrado no DB para atualização.");
+                return 0;
+            }
+
+            int rowsAffected = await _database.UpdateAsync(usuario);
+
+            System.Diagnostics.Debug.WriteLine($"[DatabaseService] UpdateAsync retornou: {rowsAffected} linhas afetadas.");
+
+            return rowsAffected;
         }
 
         public Task<int> DeletarUsuarioAsync(Usuario usuario) {

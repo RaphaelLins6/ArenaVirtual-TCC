@@ -4,20 +4,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace ArenaVirtual.ViewModels {
-    public partial class LoginViewModel : ObservableObject {
-        private readonly IAlertService _alertService;
-        private readonly UsuarioService _usuarioService;
+    public partial class LoginViewModel(IAlertService alertService, UsuarioService usuarioService) : ObservableObject {
+        private readonly IAlertService _alertService = alertService;
+        private readonly UsuarioService _usuarioService = usuarioService;
 
         [ObservableProperty]
         private string email = string.Empty;
 
         [ObservableProperty]
         private string senha = string.Empty;
-
-        public LoginViewModel(IAlertService alertService, UsuarioService usuarioService) {
-            _alertService = alertService;
-            _usuarioService = usuarioService;
-        }
 
         [RelayCommand]
         public async Task Login() {
@@ -33,12 +28,11 @@ namespace ArenaVirtual.ViewModels {
                 return;
             }
 
+            App.CurrentUser = usuario;
+            System.Diagnostics.Debug.WriteLine($"[LoginViewModel] App.CurrentUser definido para ID: {App.CurrentUser.Id}, Email: {App.CurrentUser.Email}");
+
             if (Application.Current?.Windows.Count > 0) {
-                if (usuario != null) {
-                    Application.Current.Windows[0].Page = new AppShell(usuario);
-                } else {
-                    await _alertService.DisplayAlert("Erro", "Falha ao carregar o perfil do usuário.", "OK");
-                }
+                Application.Current.Windows[0].Page = new AppShell(usuario);
             } else {
                 await _alertService.DisplayAlert("Erro", "Nenhuma janela do aplicativo disponível.", "OK");
             }
