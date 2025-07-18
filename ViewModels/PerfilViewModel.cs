@@ -3,6 +3,7 @@ using ArenaVirtual.Popups;
 using ArenaVirtual.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Controls;
 using System;
 
 namespace ArenaVirtual.ViewModels {
@@ -33,80 +34,82 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty] private bool isArbitro;
         [ObservableProperty] private bool isPatrocinador;
 
-        private Usuario _usuarioLogado;
+        [ObservableProperty]
+        private Usuario usuarioLogado;
 
         public PerfilViewModel(Usuario usuario, IAlertService alertService) {
-            _usuarioLogado = usuario;
+            UsuarioLogado = usuario; // Use sempre a propriedade gerada!
             _alertService = alertService;
             CarregarDadosDoUsuario();
+
+            MessagingCenter.Subscribe<object, Usuario>(this, "PerfilAtualizado", (sender, usuarioAtualizado) => {
+                MainThread.BeginInvokeOnMainThread(() => {
+                    UsuarioLogado = usuarioAtualizado; // Correto: usa a propriedade!
+                    CarregarDadosDoUsuario();
+                });
+            });
         }
 
         public void CarregarDadosDoUsuario() {
-            if (_usuarioLogado != null) {
-                // Campos comuns
+            if (UsuarioLogado != null) {
                 if (DateTime.Now.Hour < 12) Saudacao = "Bom dia,";
                 else if (DateTime.Now.Hour < 18) Saudacao = "Boa tarde,";
                 else Saudacao = "Boa noite,";
 
-                NomeUsuario = _usuarioLogado.Nome;
-                EmailUsuario = _usuarioLogado.Email;
-                TipoPerfilUsuario = _usuarioLogado.Perfil.ToString();
-                LocalizacaoUsuario = _usuarioLogado.Localizacao;
-                telefoneUsuario = _usuarioLogado.Telefone;
-                linkRedeSocialUsuario = _usuarioLogado.LinkRedeSocial;
+                NomeUsuario = UsuarioLogado.Nome;
+                EmailUsuario = UsuarioLogado.Email;
+                TipoPerfilUsuario = UsuarioLogado.Perfil.ToString();
+                LocalizacaoUsuario = UsuarioLogado.Localizacao;
+                TelefoneUsuario = UsuarioLogado.Telefone;
+                LinkRedeSocialUsuario = UsuarioLogado.LinkRedeSocial;
 
                 // Limpa campos específicos
-                dataNascimentoUsuario = null;
-                generoUsuario = null;
-                nomeEmpresaUsuario = string.Empty;
-                cnpjUsuario = string.Empty;
-                pesoUsuario = null;
-                alturaUsuario = null;
-                faixaOrcamentoPatrocinioUsuario = string.Empty;
+                DataNascimentoUsuario = null;
+                GeneroUsuario = null;
+                NomeEmpresaUsuario = string.Empty;
+                CnpjUsuario = string.Empty;
+                PesoUsuario = null;
+                AlturaUsuario = null;
+                FaixaOrcamentoPatrocinioUsuario = string.Empty;
 
                 // Preenche campos específicos conforme o perfil
-                switch (_usuarioLogado.Perfil) {
+                switch (UsuarioLogado.Perfil) {
                     case TipoPerfil.Atleta:
-                        dataNascimentoUsuario = _usuarioLogado.DataNascimento;
-                        generoUsuario = _usuarioLogado.Genero;
-                        pesoUsuario = _usuarioLogado.Peso;
-                        alturaUsuario = _usuarioLogado.Altura;
+                        DataNascimentoUsuario = UsuarioLogado.DataNascimento;
+                        GeneroUsuario = UsuarioLogado.Genero;
+                        PesoUsuario = UsuarioLogado.Peso;
+                        AlturaUsuario = UsuarioLogado.Altura;
                         break;
                     case TipoPerfil.Organizador:
-                        nomeEmpresaUsuario = _usuarioLogado.NomeEmpresa;
-                        cnpjUsuario = _usuarioLogado.CNPJ;
+                        NomeEmpresaUsuario = UsuarioLogado.NomeEmpresa;
+                        CnpjUsuario = UsuarioLogado.CNPJ;
                         break;
                     case TipoPerfil.Arbitro:
-                        dataNascimentoUsuario = _usuarioLogado.DataNascimento;
+                        DataNascimentoUsuario = UsuarioLogado.DataNascimento;
                         break;
                     case TipoPerfil.Patrocinador:
-                        nomeEmpresaUsuario = _usuarioLogado.NomeEmpresa;
-                        cnpjUsuario = _usuarioLogado.CNPJ;
-                        faixaOrcamentoPatrocinioUsuario = _usuarioLogado.FaixaOrcamentoPatrocinio;
+                        NomeEmpresaUsuario = UsuarioLogado.NomeEmpresa;
+                        CnpjUsuario = UsuarioLogado.CNPJ;
+                        FaixaOrcamentoPatrocinioUsuario = UsuarioLogado.FaixaOrcamentoPatrocinio;
                         break;
                 }
 
-                IsAtleta = _usuarioLogado.Perfil == TipoPerfil.Atleta;
-                IsOrganizador = _usuarioLogado.Perfil == TipoPerfil.Organizador;
-                IsArbitro = _usuarioLogado.Perfil == TipoPerfil.Arbitro;
-                IsPatrocinador = _usuarioLogado.Perfil == TipoPerfil.Patrocinador;
+                IsAtleta = UsuarioLogado.Perfil == TipoPerfil.Atleta;
+                IsOrganizador = UsuarioLogado.Perfil == TipoPerfil.Organizador;
+                IsArbitro = UsuarioLogado.Perfil == TipoPerfil.Arbitro;
+                IsPatrocinador = UsuarioLogado.Perfil == TipoPerfil.Patrocinador;
             }
         }
 
         [RelayCommand]
         private async Task EditarPerfil() {
-            var popup = new EditarPerfilPopup(_usuarioLogado, _alertService);
-            popup.PerfilAtualizado += (s, usuarioAtualizado) => {
-                _usuarioLogado = usuarioAtualizado;
-                CarregarDadosDoUsuario();
-            };
-
+            var popup = new EditarPerfilPopup(UsuarioLogado, _alertService);
             await Shell.Current.Navigation.PushModalAsync(popup);
         }
 
         [RelayCommand]
         private async Task AlterarSenha() {
-            var popup = new AlterarSenhaPopup(_usuarioLogado, _alertService);
+            var popup = new AlterarSenhaPopup(UsuarioLogado, _alertService);
             await Shell.Current.Navigation.PushModalAsync(popup);
         }
 

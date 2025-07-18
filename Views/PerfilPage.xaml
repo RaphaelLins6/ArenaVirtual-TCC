@@ -125,16 +125,7 @@
                 </Border>
 
                 <!--  Seção Atleta  -->
-                <VerticalStackLayout IsVisible="False">
-                    <VerticalStackLayout.Triggers>
-                        <DataTrigger
-                            Binding="{Binding TipoPerfilUsuario}"
-                            TargetType="VerticalStackLayout"
-                            Value="Atleta">
-                            <Setter Property="IsVisible" Value="True" />
-                        </DataTrigger>
-                    </VerticalStackLayout.Triggers>
-
+                <VerticalStackLayout IsVisible="{Binding IsAtleta}">
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                             <Image
@@ -151,7 +142,8 @@
                                     FontAttributes="Bold"
                                     FontSize="16"
                                     Text="{Binding DataNascimentoUsuarioFormatado}"
-                                    TextColor="White" />
+                                    TextColor="{AppThemeBinding Light=Black,
+                                                                Dark=White}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>
@@ -171,7 +163,8 @@
                                     FontAttributes="Bold"
                                     FontSize="16"
                                     Text="{Binding GeneroUsuario}"
-                                    TextColor="White" />
+                                    TextColor="{AppThemeBinding Light=Black,
+                                                                Dark=White}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>
@@ -192,7 +185,8 @@
                                     FontAttributes="Bold"
                                     FontSize="16"
                                     Text="{Binding PesoUsuario}"
-                                    TextColor="White" />
+                                    TextColor="{AppThemeBinding Light=Black,
+                                                                Dark=White}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>
@@ -212,22 +206,15 @@
                                     FontAttributes="Bold"
                                     FontSize="16"
                                     Text="{Binding AlturaUsuario}"
-                                    TextColor="White" />
+                                    TextColor="{AppThemeBinding Light=Black,
+                                                                Dark=White}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>
                 </VerticalStackLayout>
 
                 <!--  Seção Organizador  -->
-                <VerticalStackLayout IsVisible="False">
-                    <VerticalStackLayout.Triggers>
-                        <DataTrigger
-                            Binding="{Binding TipoPerfilUsuario}"
-                            TargetType="VerticalStackLayout"
-                            Value="Organizador">
-                            <Setter Property="IsVisible" Value="True" />
-                        </DataTrigger>
-                    </VerticalStackLayout.Triggers>
+                <VerticalStackLayout IsVisible="{Binding IsOrganizador}">
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                             <Image
@@ -269,15 +256,7 @@
                 </VerticalStackLayout>
 
                 <!--  Seção Árbitro  -->
-                <VerticalStackLayout IsVisible="False">
-                    <VerticalStackLayout.Triggers>
-                        <DataTrigger
-                            Binding="{Binding TipoPerfilUsuario}"
-                            TargetType="VerticalStackLayout"
-                            Value="Arbitro">
-                            <Setter Property="IsVisible" Value="True" />
-                        </DataTrigger>
-                    </VerticalStackLayout.Triggers>
+                <VerticalStackLayout IsVisible="{Binding IsArbitro}">
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                             <Image
@@ -357,15 +336,7 @@
                 </VerticalStackLayout>
 
                 <!--  Seção Patrocinador  -->
-                <VerticalStackLayout IsVisible="False">
-                    <VerticalStackLayout.Triggers>
-                        <DataTrigger
-                            Binding="{Binding TipoPerfilUsuario}"
-                            TargetType="VerticalStackLayout"
-                            Value="Patrocinador">
-                            <Setter Property="IsVisible" Value="True" />
-                        </DataTrigger>
-                    </VerticalStackLayout.Triggers>
+                <VerticalStackLayout IsVisible="{Binding IsPatrocinador}">
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                             <Image
@@ -476,11 +447,11 @@
                 Style="{StaticResource BotaoPrincipal}"
                 Text="Alterar Imagem" />
             <Button
-                Clicked="EditarPerfil_Clicked"
+                Command="{Binding EditarPerfilCommand}"
                 Style="{StaticResource BotaoPrincipal}"
                 Text="Editar Perfil" />
             <Button
-                Clicked="TrocarSenha_Clicked"
+                Command="{Binding AlterarSenhaCommand}"
                 Style="{StaticResource BotaoPrincipal}"
                 Text="Trocar Senha" />
         </VerticalStackLayout>

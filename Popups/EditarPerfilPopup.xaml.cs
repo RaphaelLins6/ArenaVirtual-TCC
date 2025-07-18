@@ -4,15 +4,14 @@ using ArenaVirtual.Services;
 namespace ArenaVirtual.Popups;
 
 public partial class EditarPerfilPopup : ContentPage {
-    private readonly Usuario _usuario;
+    private readonly Usuario _usuario; // Esta instância é a mesma do ViewModel
+
     private readonly IAlertService _alertService;
     private readonly DatabaseService _databaseService;
 
-    public event EventHandler<Usuario>? PerfilAtualizado;
-
     public EditarPerfilPopup(Usuario usuario, IAlertService alertService) {
         InitializeComponent();
-        _usuario = usuario;
+        _usuario = usuario; // Recebe a referência do ViewModel.UsuarioLogado
         _alertService = alertService;
 
         var serviceProvider = App.Current?.Handler?.MauiContext?.Services;
@@ -49,7 +48,6 @@ public partial class EditarPerfilPopup : ContentPage {
             FaixaOrcamentoPatrocinioEntry.Text = _usuario.FaixaOrcamentoPatrocinio;
         }
 
-        // No construtor, adicione as opções ao Picker de gênero:
         if (GeneroPicker != null) {
             GeneroPicker.ItemsSource = Enum.GetNames<GeneroEnum>().ToList();
             if (_usuario.Genero != null)
@@ -84,7 +82,8 @@ public partial class EditarPerfilPopup : ContentPage {
 
         await _databaseService.AtualizarUsuarioAsync(_usuario);
 
-        PerfilAtualizado?.Invoke(this, _usuario);
+        // Envia a mensagem com a instância atualizada do usuário
+        Microsoft.Maui.Controls.MessagingCenter.Send(this, "PerfilAtualizado", _usuario);
 
         await _alertService.DisplayAlert("Sucesso", "Perfil atualizado com sucesso!", "OK");
         await Navigation.PopModalAsync();
