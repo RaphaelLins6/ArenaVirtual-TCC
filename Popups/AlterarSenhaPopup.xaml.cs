@@ -35,8 +35,8 @@ public partial class AlterarSenhaPopup : ContentPage {
             return;
         }
 
-
-        if (_usuario.Senha != UsuarioService.GerarHash(senhaAtual)) {
+// Troque a verificação da senha atual para usar BCrypt.Verify
+        if (!BCrypt.Net.BCrypt.Verify(senhaAtual, _usuario.SenhaHash)) {
             await _alertService.DisplayAlert("Erro", "Senha atual incorreta.", "OK");
             return;
         }
@@ -46,14 +46,14 @@ public partial class AlterarSenhaPopup : ContentPage {
             return;
         }
 
-        _usuario.Senha = UsuarioService.GerarHash(novaSenha);
+        _usuario.SenhaHash = UsuarioService.GerarHash(novaSenha);
 
         try {
             int rowsAffected = await _databaseService.AtualizarUsuarioAsync(_usuario);
 
             if (rowsAffected > 0) {
                 if (App.CurrentUser != null && App.CurrentUser.Id == _usuario.Id) {
-                    App.CurrentUser.Senha = _usuario.Senha;
+                    App.CurrentUser.SenhaHash = _usuario.SenhaHash;
                 }
 
                 await _alertService.DisplayAlert("Sucesso", "Senha atualizada com sucesso!", "OK");

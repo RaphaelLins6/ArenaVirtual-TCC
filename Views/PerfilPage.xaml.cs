@@ -22,7 +22,7 @@ namespace ArenaVirtual.Views {
         protected override void OnAppearing() {
             base.OnAppearing();
             _viewModel.CarregarDadosDoUsuario();
-            AtualizarImagemPerfilUI();
+            AtualizarImagemPerfilUI();   
         }
 
         private void AtualizarImagemPerfilUI() {

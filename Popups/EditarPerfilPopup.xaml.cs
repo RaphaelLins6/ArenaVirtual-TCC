@@ -6,7 +6,7 @@ namespace ArenaVirtual.Popups;
 public partial class EditarPerfilPopup : ContentPage {
     private readonly Usuario _usuario;
     private readonly IAlertService _alertService;
-    private readonly DatabaseService _databaseService; // Agora será inicializado para não-nulo
+    private readonly DatabaseService _databaseService;
 
     public event EventHandler<Usuario>? PerfilAtualizado;
 
@@ -22,8 +22,39 @@ public partial class EditarPerfilPopup : ContentPage {
             throw new InvalidOperationException("DatabaseService not registered or app context is null.");
         }
 
+        // Preenche campos comuns
         NomeEntry.Text = _usuario.Nome;
         EmailEntry.Text = _usuario.Email;
+        TelefoneEntry.Text = _usuario.Telefone;
+        LocalizacaoEntry.Text = _usuario.Localizacao;
+        LinkRedeSocialEntry.Text = _usuario.LinkRedeSocial;
+
+        // Visibilidade por perfil
+        AtletaSection.IsVisible = _usuario.Perfil == TipoPerfil.Atleta;
+        OrganizadorSection.IsVisible = _usuario.Perfil == TipoPerfil.Organizador;
+        PatrocinadorSection.IsVisible = _usuario.Perfil == TipoPerfil.Patrocinador;
+
+        // Campos específicos
+        if (_usuario.Perfil == TipoPerfil.Atleta) {
+            DataNascimentoPicker.Date = _usuario.DataNascimento ?? DateTime.Now;
+            GeneroPicker.SelectedItem = _usuario.Genero?.ToString();
+            PesoEntry.Text = _usuario.Peso?.ToString();
+            AlturaEntry.Text = _usuario.Altura?.ToString();
+        }
+        if (_usuario.Perfil == TipoPerfil.Organizador) {
+            NomeEmpresaEntry.Text = _usuario.NomeEmpresa;
+            CnpjEntry.Text = _usuario.CNPJ;
+        }
+        if (_usuario.Perfil == TipoPerfil.Patrocinador) {
+            FaixaOrcamentoPatrocinioEntry.Text = _usuario.FaixaOrcamentoPatrocinio;
+        }
+
+        // No construtor, adicione as opções ao Picker de gênero:
+        if (GeneroPicker != null) {
+            GeneroPicker.ItemsSource = Enum.GetNames<GeneroEnum>().ToList();
+            if (_usuario.Genero != null)
+                GeneroPicker.SelectedItem = _usuario.Genero.ToString();
+        }
     }
 
     private async void Cancelar_Clicked(object sender, EventArgs e) {
@@ -31,28 +62,29 @@ public partial class EditarPerfilPopup : ContentPage {
     }
 
     private async void Salvar_Clicked(object sender, EventArgs e) {
-        string novoNome = NomeEntry.Text?.Trim() ?? string.Empty;
-        string novoEmail = EmailEntry.Text?.Trim() ?? string.Empty;
+        _usuario.Nome = NomeEntry.Text?.Trim() ?? string.Empty;
+        _usuario.Email = EmailEntry.Text?.Trim() ?? string.Empty;
+        _usuario.Telefone = TelefoneEntry.Text?.Trim() ?? string.Empty;
+        _usuario.Localizacao = LocalizacaoEntry.Text?.Trim() ?? string.Empty;
+        _usuario.LinkRedeSocial = LinkRedeSocialEntry.Text?.Trim() ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(novoNome) || string.IsNullOrWhiteSpace(novoEmail)) {
-            await _alertService.DisplayAlert("Erro", "Nome e e-mail são obrigatórios.", "OK");
-            return;
+        if (_usuario.Perfil == TipoPerfil.Atleta) {
+            _usuario.DataNascimento = DataNascimentoPicker.Date;
+            _usuario.Genero = Enum.TryParse<GeneroEnum>(GeneroPicker.SelectedItem?.ToString(), out var genero) ? genero : null;
+            _usuario.Peso = double.TryParse(PesoEntry.Text, out var peso) ? peso : null;
+            _usuario.Altura = double.TryParse(AlturaEntry.Text, out var altura) ? altura : null;
         }
-
-        if (!novoEmail.Equals(_usuario.Email, StringComparison.OrdinalIgnoreCase)) {
-            var emailExistente = await _databaseService.ListarUsuariosAsync();
-            if (emailExistente.Any(u => u.Email != null && u.Email.Equals(novoEmail, StringComparison.OrdinalIgnoreCase))) {
-                await _alertService.DisplayAlert("Erro", "Este e-mail já está em uso.", "OK");
-                return;
-            }
+        if (_usuario.Perfil == TipoPerfil.Organizador) {
+            _usuario.NomeEmpresa = NomeEmpresaEntry.Text?.Trim() ?? string.Empty;
+            _usuario.CNPJ = CnpjEntry.Text?.Trim() ?? string.Empty;
         }
-
-        _usuario.Nome = novoNome;
-        _usuario.Email = novoEmail;
+        if (_usuario.Perfil == TipoPerfil.Patrocinador) {
+            _usuario.FaixaOrcamentoPatrocinio = FaixaOrcamentoPatrocinioEntry.Text?.Trim() ?? string.Empty;
+        }
 
         await _databaseService.AtualizarUsuarioAsync(_usuario);
 
-        PerfilAtualizado?.Invoke(this, _usuario); // Dispara o evento de forma segura (?.Invoke)
+        PerfilAtualizado?.Invoke(this, _usuario);
 
         await _alertService.DisplayAlert("Sucesso", "Perfil atualizado com sucesso!", "OK");
         await Navigation.PopModalAsync();

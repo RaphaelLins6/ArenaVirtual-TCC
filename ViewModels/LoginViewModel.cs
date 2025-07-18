@@ -21,7 +21,7 @@ namespace ArenaVirtual.ViewModels {
                 return;
             }
 
-            var usuario = await _usuarioService.Autenticar(Email, Senha);
+            var usuario = await _usuarioService.Autenticar(Email, Senha); // <--- Correto, pois Autenticar usa BCrypt.Verify
 
             if (usuario == null) {
                 await _alertService.DisplayAlert("Erro", "E-mail ou senha inválidos.", "OK");

@@ -2,17 +2,15 @@
     x:Class="ArenaVirtual.Popups.EditarPerfilPopup"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Editar Perfil"
     Padding="30"
     BackgroundColor="#80000000">
 
-    <Frame
+    <Border
         Padding="20"
         BackgroundColor="White"
-        CornerRadius="10"
         HorizontalOptions="Center"
         VerticalOptions="Center"
-        WidthRequest="300">
+        WidthRequest="340">
 
         <VerticalStackLayout Spacing="15">
             <Label
@@ -21,11 +19,91 @@
                 HorizontalOptions="Center"
                 Text="Editar Perfil" />
 
-            <Entry x:Name="NomeEntry" Placeholder="Nome" />
+            <!--  Campos comuns  -->
+            <Entry
+                x:Name="NomeEntry"
+                Placeholder="Nome"
+                PlaceholderColor="Black"
+                TextColor="Black" />
             <Entry
                 x:Name="EmailEntry"
                 Keyboard="Email"
-                Placeholder="E-mail" />
+                Placeholder="E-mail"
+                PlaceholderColor="Black"
+                TextColor="Black" />
+            <Entry
+                x:Name="TelefoneEntry"
+                Placeholder="Telefone"
+                PlaceholderColor="Black"
+                TextColor="Black" />
+            <Entry
+                x:Name="LocalizacaoEntry"
+                Placeholder="Localização"
+                PlaceholderColor="Black"
+                TextColor="Black" />
+            <Entry
+                x:Name="LinkRedeSocialEntry"
+                Placeholder="Link Rede Social"
+                PlaceholderColor="Black"
+                TextColor="Black" />
+
+            <!--  Atleta  -->
+            <VerticalStackLayout
+                x:Name="AtletaSection"
+                IsVisible="False"
+                Spacing="10">
+                <DatePicker
+                    x:Name="DataNascimentoPicker"
+                    BackgroundColor="White"
+                    TextColor="Black" />
+                <Picker
+                    x:Name="GeneroPicker"
+                    Title="Gênero"
+                    BackgroundColor="LightGray"
+                    TextColor="Black"
+                    TitleColor="Black" />
+                <Entry
+                    x:Name="PesoEntry"
+                    Keyboard="Numeric"
+                    Placeholder="Peso (kg)"
+                    PlaceholderColor="Black"
+                    TextColor="Black" />
+                <Entry
+                    x:Name="AlturaEntry"
+                    Keyboard="Numeric"
+                    Placeholder="Altura (m)"
+                    PlaceholderColor="Black"
+                    TextColor="Black" />
+            </VerticalStackLayout>
+
+            <!--  Organizador  -->
+            <VerticalStackLayout
+                x:Name="OrganizadorSection"
+                IsVisible="False"
+                Spacing="10">
+                <Entry
+                    x:Name="NomeEmpresaEntry"
+                    Placeholder="Nome da Empresa"
+                    PlaceholderColor="Black"
+                    TextColor="Black" />
+                <Entry
+                    x:Name="CnpjEntry"
+                    Placeholder="CNPJ"
+                    PlaceholderColor="Black"
+                    TextColor="Black" />
+            </VerticalStackLayout>
+
+            <!--  Patrocinador  -->
+            <VerticalStackLayout
+                x:Name="PatrocinadorSection"
+                IsVisible="False"
+                Spacing="10">
+                <Entry
+                    x:Name="FaixaOrcamentoPatrocinioEntry"
+                    Placeholder="Faixa de Orçamento"
+                    PlaceholderColor="Black"
+                    TextColor="Black" />
+            </VerticalStackLayout>
 
             <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
                 <Button
@@ -38,5 +116,5 @@
                     Text="Salvar" />
             </HorizontalStackLayout>
         </VerticalStackLayout>
-    </Frame>
+    </Border>
 </ContentPage>

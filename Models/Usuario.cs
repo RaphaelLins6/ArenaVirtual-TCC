@@ -1,11 +1,18 @@
 ﻿using SQLite;
+using System;
 
 namespace ArenaVirtual.Models {
     public enum TipoPerfil {
         Atleta,
+        Organizador,
         Arbitro,
-        Patrocinador,
-        Organizador
+        Patrocinador
+    }
+
+    public enum GeneroEnum {
+        Masculino,
+        Feminino,
+        Outro
     }
 
     public class Usuario {
@@ -13,24 +20,26 @@ namespace ArenaVirtual.Models {
         public int Id { get; set; }
         public string Nome { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public string Senha { get; set; } = string.Empty;
-        public DateTime DataCadastro { get; set; }
-        public bool Ativo { get; set; }
+        public string SenhaHash { get; set; } = string.Empty; // Armazene o hash da senha
         public TipoPerfil Perfil { get; set; }
-        public string ImagemPath { get; set; } = string.Empty; // <-- O NOME CORRETO É IMAGEMPATH!
-        public static TipoPerfil[] PerfilTipos => Enum.GetValues<TipoPerfil>();
 
-        public Usuario() {
-            DataCadastro = DateTime.Now;
-            Ativo = true;
-        }
+        // Campos comuns
+        public string ImagemPath { get; set; } = string.Empty;
+        public string Localizacao { get; set; } = string.Empty;
+        public string Telefone { get; set; } = string.Empty;
+        public string LinkRedeSocial { get; set; } = string.Empty;
 
-        public void Ativar() {
-            Ativo = true;
-        }
+        // Específicos
+        public DateTime? DataNascimento { get; set; }
+        public GeneroEnum? Genero { get; set; }
+        public string NomeEmpresa { get; set; } = string.Empty;
+        public string CNPJ { get; set; } = string.Empty;
+        public string Modalidades { get; set; } = string.Empty;
+        public double? Peso { get; set; }
+        public double? Altura { get; set; }
+        public string AreasInteressePatrocinio { get; set; } = string.Empty;
+        public string FaixaOrcamentoPatrocinio { get; set; } = string.Empty;
 
-        public void Desativar() {
-            Ativo = false;
-        }
+        public Usuario() { }
     }
 }

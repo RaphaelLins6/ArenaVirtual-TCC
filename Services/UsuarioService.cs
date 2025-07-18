@@ -1,6 +1,5 @@
 ﻿using ArenaVirtual.Models;
-using System.Security.Cryptography;
-using System.Text;
+using BCrypt.Net; 
 
 namespace ArenaVirtual.Services {
     public class UsuarioService(DatabaseService databaseService) {
@@ -13,17 +12,15 @@ namespace ArenaVirtual.Services {
                 return null;
             }
 
-            usuario.Senha = GerarHash(usuario.Senha);
-
             int result = await _databaseService.InserirUsuarioAsync(usuario);
             System.Diagnostics.Debug.WriteLine($"Resultado da inserção: {result}");
 
             if (result > 0) {
-                var usuarioRetornado = await _databaseService.ObterUsuarioPorEmailSenhaAsync(usuario.Email, usuario.Senha);
+                var usuarioRetornado = await _databaseService.ObterUsuarioPorEmailAsync(usuario.Email);
                 if (usuarioRetornado != null)
-                    System.Diagnostics.Debug.WriteLine($"Usuário cadastrado: {usuarioRetornado.Nome}");
+                    System.Diagnostics.Debug.WriteLine($"Usuário cadastrado e retornado: {usuarioRetornado.Nome}");
                 else
-                    System.Diagnostics.Debug.WriteLine("Usuário não encontrado após cadastro.");
+                    System.Diagnostics.Debug.WriteLine("Usuário não encontrado após cadastro (possível problema de ID).");
                 return usuarioRetornado;
             }
             System.Diagnostics.Debug.WriteLine("Falha ao inserir usuário.");
@@ -31,15 +28,20 @@ namespace ArenaVirtual.Services {
         }
 
         public async Task<Usuario?> Autenticar(string email, string senha) {
-            string senhaHash = GerarHash(senha);
-            Usuario? usuario = await _databaseService.ObterUsuarioPorEmailSenhaAsync(email, senhaHash);
-            return usuario;
-        }
+            Usuario? usuario = await _databaseService.ObterUsuarioPorEmailAsync(email);
 
+            if (usuario == null) {
+                return null;
+            }
+
+            if (BCrypt.Net.BCrypt.Verify(senha, usuario.SenhaHash)) {
+                return usuario;
+            } else {
+                return null;
+            }
+        }
         public static string GerarHash(string senha) {
-            var bytes = Encoding.UTF8.GetBytes(senha);
-            var hash = SHA256.HashData(bytes);
-            return Convert.ToBase64String(hash);
+            return BCrypt.Net.BCrypt.HashPassword(senha, workFactor: 12);
         }
     }
 }

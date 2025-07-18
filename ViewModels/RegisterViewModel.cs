@@ -13,15 +13,33 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty] private string confirmarSenha = string.Empty;
         [ObservableProperty] private TipoPerfil perfilSelecionado = TipoPerfil.Atleta;
 
+        // Novos campos  
+        [ObservableProperty] private string telefone = string.Empty;
+        [ObservableProperty] private string localizacao = string.Empty;
+        [ObservableProperty] private string linkRedeSocial = string.Empty;
+        [ObservableProperty] private string nomeEmpresa = string.Empty;
+        [ObservableProperty] private string cnpj = string.Empty;
+        [ObservableProperty] private string modalidades = string.Empty;
+        [ObservableProperty] private string areasInteressePatrocinio = string.Empty;
+        [ObservableProperty] private string faixaOrcamentoPatrocinio = string.Empty;
+        [ObservableProperty] private double? peso = null;
+        [ObservableProperty] private double? altura = null;
+        [ObservableProperty] private DateTime? dataNascimento = null;
+        [ObservableProperty] private GeneroEnum? generoSelecionado = null;
+
         public ObservableCollection<TipoPerfil> PerfisDisponiveis { get; } = new ObservableCollection<TipoPerfil>(Enum.GetValues<TipoPerfil>());
+        public ObservableCollection<GeneroEnum> GenerosDisponiveis { get; } = new ObservableCollection<GeneroEnum>(Enum.GetValues<GeneroEnum>());
 
         private readonly IAlertService _alertService = alertService;
         private readonly UsuarioService _usuarioService = usuarioService;
 
+        // Propriedade de conveniência para visibilidade de campos de patrocinador
+        public bool IsPatrocinador => PerfilSelecionado == TipoPerfil.Patrocinador;
+
         [RelayCommand]
         public async Task Registrar() {
             if (string.IsNullOrWhiteSpace(Nome) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha) || string.IsNullOrWhiteSpace(ConfirmarSenha)) {
-                await _alertService.DisplayAlert("Campos Vazios", "Por favor, preencha todos os campos.", "OK");
+                await _alertService.DisplayAlert("Campos Vazios", "Por favor, preencha todos os campos obrigatórios.", "OK");
                 return;
             }
 
@@ -38,8 +56,20 @@ namespace ArenaVirtual.ViewModels {
             var usuario = new Usuario {
                 Nome = this.Nome,
                 Email = this.Email,
-                Senha = this.Senha,
-                Perfil = this.PerfilSelecionado
+                SenhaHash = UsuarioService.GerarHash(this.Senha), // Gera e atribui o hash da senha corretamente
+                Perfil = this.PerfilSelecionado,
+                Telefone = this.Telefone,
+                Localizacao = this.Localizacao,
+                LinkRedeSocial = this.LinkRedeSocial,
+                NomeEmpresa = this.NomeEmpresa,
+                CNPJ = this.Cnpj,
+                Modalidades = this.Modalidades,
+                AreasInteressePatrocinio = this.AreasInteressePatrocinio,
+                FaixaOrcamentoPatrocinio = this.FaixaOrcamentoPatrocinio,
+                Peso = this.Peso,
+                Altura = this.Altura,
+                DataNascimento = this.DataNascimento,
+                Genero = this.GeneroSelecionado
             };
 
             Usuario? usuarioCadastrado = await _usuarioService.Cadastrar(usuario);
@@ -52,6 +82,18 @@ namespace ArenaVirtual.ViewModels {
                 Senha = string.Empty;
                 ConfirmarSenha = string.Empty;
                 PerfilSelecionado = TipoPerfil.Atleta;
+                Telefone = string.Empty;
+                Localizacao = string.Empty;
+                LinkRedeSocial = string.Empty;
+                NomeEmpresa = string.Empty;
+                Cnpj = string.Empty;
+                Modalidades = string.Empty;
+                AreasInteressePatrocinio = string.Empty;
+                FaixaOrcamentoPatrocinio = string.Empty;
+                Peso = null;
+                Altura = null;
+                DataNascimento = null;
+                GeneroSelecionado = null;
 
                 MainThread.BeginInvokeOnMainThread(() => {
                     if (Application.Current?.Windows.Count > 0) {

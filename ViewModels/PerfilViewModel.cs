@@ -8,26 +8,32 @@ using System;
 namespace ArenaVirtual.ViewModels {
     public partial class PerfilViewModel : ObservableObject {
         private readonly IAlertService _alertService;
+
+        // Campos comuns
+        [ObservableProperty] private string saudacao = string.Empty;
+        [ObservableProperty] private string nomeUsuario = string.Empty;
+        [ObservableProperty] private string emailUsuario = string.Empty;
+        [ObservableProperty] private string tipoPerfilUsuario = string.Empty;
+        [ObservableProperty] private string localizacaoUsuario = string.Empty;
+        [ObservableProperty] private string telefoneUsuario = string.Empty;
+        [ObservableProperty] private string linkRedeSocialUsuario = string.Empty;
+
+        // Campos específicos
+        [ObservableProperty] private DateTime? dataNascimentoUsuario;
+        [ObservableProperty] private GeneroEnum? generoUsuario;
+        [ObservableProperty] private string nomeEmpresaUsuario = string.Empty;
+        [ObservableProperty] private string cnpjUsuario = string.Empty;
+        [ObservableProperty] private double? pesoUsuario;
+        [ObservableProperty] private double? alturaUsuario = 0;
+        [ObservableProperty] private string faixaOrcamentoPatrocinioUsuario = string.Empty;
+
+        // Exemplo de propriedades de visibilidade no ViewModel
+        [ObservableProperty] private bool isAtleta;
+        [ObservableProperty] private bool isOrganizador;
+        [ObservableProperty] private bool isArbitro;
+        [ObservableProperty] private bool isPatrocinador;
+
         private Usuario _usuarioLogado;
-
-        [ObservableProperty]
-        private string saudacao = string.Empty;
-
-        [ObservableProperty]
-        private string nomeUsuario = string.Empty;
-
-        [ObservableProperty]
-        private string emailUsuario = string.Empty;
-
-        [ObservableProperty]
-        private string tipoPerfilUsuario = string.Empty;
-
-        [ObservableProperty]
-        private string localizacaoUsuario = string.Empty;
-
-        // Se quiser tornar a imagem observável, descomente abaixo:
-        // [ObservableProperty]
-        // private ImageSource imagemPerfilSource;
 
         public PerfilViewModel(Usuario usuario, IAlertService alertService) {
             _usuarioLogado = usuario;
@@ -37,6 +43,7 @@ namespace ArenaVirtual.ViewModels {
 
         public void CarregarDadosDoUsuario() {
             if (_usuarioLogado != null) {
+                // Campos comuns
                 if (DateTime.Now.Hour < 12) Saudacao = "Bom dia,";
                 else if (DateTime.Now.Hour < 18) Saudacao = "Boa tarde,";
                 else Saudacao = "Boa noite,";
@@ -44,11 +51,45 @@ namespace ArenaVirtual.ViewModels {
                 NomeUsuario = _usuarioLogado.Nome;
                 EmailUsuario = _usuarioLogado.Email;
                 TipoPerfilUsuario = _usuarioLogado.Perfil.ToString();
+                LocalizacaoUsuario = _usuarioLogado.Localizacao;
+                telefoneUsuario = _usuarioLogado.Telefone;
+                linkRedeSocialUsuario = _usuarioLogado.LinkRedeSocial;
 
-                // Se quiser atualizar a imagem via ViewModel:
-                // ImagemPerfilSource = string.IsNullOrEmpty(_usuarioLogado.ImagemPath)
-                //     ? "default_profile.png"
-                //     : ImageSource.FromFile(_usuarioLogado.ImagemPath);
+                // Limpa campos específicos
+                dataNascimentoUsuario = null;
+                generoUsuario = null;
+                nomeEmpresaUsuario = string.Empty;
+                cnpjUsuario = string.Empty;
+                pesoUsuario = null;
+                alturaUsuario = null;
+                faixaOrcamentoPatrocinioUsuario = string.Empty;
+
+                // Preenche campos específicos conforme o perfil
+                switch (_usuarioLogado.Perfil) {
+                    case TipoPerfil.Atleta:
+                        dataNascimentoUsuario = _usuarioLogado.DataNascimento;
+                        generoUsuario = _usuarioLogado.Genero;
+                        pesoUsuario = _usuarioLogado.Peso;
+                        alturaUsuario = _usuarioLogado.Altura;
+                        break;
+                    case TipoPerfil.Organizador:
+                        nomeEmpresaUsuario = _usuarioLogado.NomeEmpresa;
+                        cnpjUsuario = _usuarioLogado.CNPJ;
+                        break;
+                    case TipoPerfil.Arbitro:
+                        dataNascimentoUsuario = _usuarioLogado.DataNascimento;
+                        break;
+                    case TipoPerfil.Patrocinador:
+                        nomeEmpresaUsuario = _usuarioLogado.NomeEmpresa;
+                        cnpjUsuario = _usuarioLogado.CNPJ;
+                        faixaOrcamentoPatrocinioUsuario = _usuarioLogado.FaixaOrcamentoPatrocinio;
+                        break;
+                }
+
+                IsAtleta = _usuarioLogado.Perfil == TipoPerfil.Atleta;
+                IsOrganizador = _usuarioLogado.Perfil == TipoPerfil.Organizador;
+                IsArbitro = _usuarioLogado.Perfil == TipoPerfil.Arbitro;
+                IsPatrocinador = _usuarioLogado.Perfil == TipoPerfil.Patrocinador;
             }
         }
 
@@ -68,5 +109,10 @@ namespace ArenaVirtual.ViewModels {
             var popup = new AlterarSenhaPopup(_usuarioLogado, _alertService);
             await Shell.Current.Navigation.PushModalAsync(popup);
         }
+
+        public string DataNascimentoUsuarioFormatado =>
+            DataNascimentoUsuario.HasValue
+                ? DataNascimentoUsuario.Value.ToString("dd/MM/yyyy")
+                : string.Empty;
     }
 }

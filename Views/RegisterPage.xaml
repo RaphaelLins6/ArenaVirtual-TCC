@@ -2,36 +2,75 @@
     x:Class="ArenaVirtual.Views.RegisterPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:ArenaVirtual.Models"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
     Title="Registrar"
     x:DataType="vm:RegisterViewModel">
 
-    <VerticalStackLayout Padding="30" Spacing="15">
-        <Entry Placeholder="Nome" Text="{Binding Nome}" />
-        <Entry
-            Keyboard="Email"
-            Placeholder="Email"
-            Text="{Binding Email}" />
-        <Entry
-            Completed="OnRegisterEnterPressed"
-            IsPassword="True"
-            Placeholder="Senha"
-            Text="{Binding Senha}" />
-        <Entry
-            IsPassword="True"
-            Placeholder="Confirmar Senha"
-            Text="{Binding ConfirmarSenha}" />
-        <Picker
-            Title="Selecione o perfil"
-            ItemsSource="{Binding PerfisDisponiveis}"
-            SelectedItem="{Binding PerfilSelecionado}" />
-        <Button
-            Command="{Binding RegistrarCommand}"
-            Style="{StaticResource BotaoPrincipal}"
-            Text="Registrar" />
-        <Button
-            Command="{Binding VoltarParaLoginCommand}"
-            Style="{StaticResource BotaoPrincipal}"
-            Text="Voltar" />
-    </VerticalStackLayout>
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="15">
+            <Entry Placeholder="Nome" Text="{Binding Nome}" />
+            <Entry
+                Keyboard="Numeric"
+                Placeholder="Peso (kg)"
+                Text="{Binding Peso}" />
+            <Entry
+                Keyboard="Numeric"
+                Placeholder="Altura (cm)"
+                Text="{Binding Altura}" />
+            <Entry
+                Keyboard="Email"
+                Placeholder="Email"
+                Text="{Binding Email}" />
+            <Entry Placeholder="Telefone/WhatsApp" Text="{Binding Telefone}" />
+            <Entry Placeholder="Localização (Cidade/Estado)" Text="{Binding Localizacao}" />
+            <Entry Placeholder="Link Rede Social" Text="{Binding LinkRedeSocial}" />
+            <Entry
+                Completed="OnRegisterEnterPressed"
+                IsPassword="True"
+                Placeholder="Senha"
+                Text="{Binding Senha}" />
+            <Entry
+                IsPassword="True"
+                Placeholder="Confirmar Senha"
+                Text="{Binding ConfirmarSenha}" />
+            <Label Text="Data de Nascimento: " TextColor="White" />
+            <DatePicker Date="{Binding DataNascimento}" Format="dd/MM/yyyy" />
+            <Picker
+                Title="Gênero"
+                ItemsSource="{Binding GenerosDisponiveis}"
+                SelectedItem="{Binding GeneroSelecionado}" />
+            <Picker
+                Title="Selecione o perfil"
+                ItemsSource="{Binding PerfisDisponiveis}"
+                SelectedItem="{Binding PerfilSelecionado}" />
+
+            <!--  Campos específicos de perfil  -->
+            <VerticalStackLayout
+                x:Name="PatrocinadorFields"
+                IsVisible="False"
+                Spacing="10">
+                <VerticalStackLayout.Triggers>
+                    <DataTrigger
+                        Binding="{Binding PerfilSelecionado}"
+                        TargetType="VerticalStackLayout"
+                        Value="{x:Static models:TipoPerfil.Patrocinador}">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
+                </VerticalStackLayout.Triggers>
+                <Entry Placeholder="Nome da Empresa" Text="{Binding NomeEmpresa}" />
+                <Entry Placeholder="CNPJ" Text="{Binding Cnpj}" />
+                <Entry Placeholder="Faixa de Orçamento para Patrocínio" Text="{Binding FaixaOrcamentoPatrocinio}" />
+            </VerticalStackLayout>
+
+            <Button
+                Command="{Binding RegistrarCommand}"
+                Style="{StaticResource BotaoPrincipal}"
+                Text="Registrar" />
+            <Button
+                Command="{Binding VoltarParaLoginCommand}"
+                Style="{StaticResource BotaoPrincipal}"
+                Text="Voltar" />
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

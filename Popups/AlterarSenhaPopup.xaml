@@ -23,15 +23,21 @@
             <Entry
                 x:Name="SenhaAtualEntry"
                 IsPassword="True"
-                Placeholder="Senha atual" />
+                Placeholder="Senha atual"
+                PlaceholderColor="Black"
+                TextColor="Black" />
             <Entry
                 x:Name="NovaSenhaEntry"
                 IsPassword="True"
-                Placeholder="Nova senha" />
+                Placeholder="Nova senha"
+                PlaceholderColor="Black"
+                TextColor="Black" />
             <Entry
                 x:Name="ConfirmarNovaSenhaEntry"
                 IsPassword="True"
-                Placeholder="Confirmar nova senha" />
+                Placeholder="Confirmar nova senha"
+                PlaceholderColor="Black"
+                TextColor="Black" />
 
             <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
                 <Button

@@ -1,7 +1,5 @@
 ﻿using SQLite;
 using ArenaVirtual.Models;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace ArenaVirtual.Services {
     public class DatabaseService(string dbPath) {
@@ -23,9 +21,9 @@ namespace ArenaVirtual.Services {
             return _database.InsertAsync(usuario);
         }
 
-        public Task<Usuario> ObterUsuarioPorEmailSenhaAsync(string email, string senha) {
-            return _database.Table<Usuario>()
-                .Where(u => u.Email == email && u.Senha == senha)
+        public async Task<Usuario?> ObterUsuarioPorEmailAsync(string email) {
+            return await _database.Table<Usuario>()
+                .Where(u => u.Email == email)
                 .FirstOrDefaultAsync();
         }
 
@@ -41,10 +39,8 @@ namespace ArenaVirtual.Services {
         }
 
         public async Task<int> AtualizarUsuarioAsync(Usuario usuario) {
-            // Depuração: Mostra o ID e o caminho da imagem antes do update
             System.Diagnostics.Debug.WriteLine($"[DatabaseService] Atualizando usuário ID: {usuario.Id}, ImagemPath: {usuario.ImagemPath}");
 
-            // Verifique se o usuário existe no banco antes de atualizar
             var existingUser = await _database.FindAsync<Usuario>(usuario.Id);
             if (existingUser != null) {
                 System.Diagnostics.Debug.WriteLine($"[DatabaseService] Usuário existente no DB (ID={existingUser.Id}): ImagemPath={existingUser.ImagemPath}");

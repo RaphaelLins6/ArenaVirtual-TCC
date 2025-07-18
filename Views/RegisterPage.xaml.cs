@@ -1,7 +1,4 @@
-﻿using ArenaVirtual.Services;
-using ArenaVirtual.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using ArenaVirtual.ViewModels;
 
 namespace ArenaVirtual.Views {
     public partial class RegisterPage : ContentPage {
