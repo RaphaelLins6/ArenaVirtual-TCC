@@ -86,6 +86,7 @@ namespace ArenaVirtual.ViewModels {
                         break;
                     case TipoPerfil.Arbitro:
                         DataNascimentoUsuario = UsuarioLogado.DataNascimento;
+                        GeneroUsuario = UsuarioLogado.Genero;
                         break;
                     case TipoPerfil.Patrocinador:
                         NomeEmpresaUsuario = UsuarioLogado.NomeEmpresa;

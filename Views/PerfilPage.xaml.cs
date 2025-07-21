@@ -2,9 +2,6 @@
 using ArenaVirtual.Popups;
 using ArenaVirtual.Services;
 using ArenaVirtual.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
-using System.IO;
-using Microsoft.Maui.Controls; // Certifique-se deste using
 
 namespace ArenaVirtual.Views {
     public partial class PerfilPage : ContentPage {

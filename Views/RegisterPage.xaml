@@ -11,17 +11,15 @@
         <VerticalStackLayout Padding="30" Spacing="15">
             <Entry Placeholder="Nome" Text="{Binding Nome}" />
             <Entry
-                Keyboard="Numeric"
-                Placeholder="Peso (kg)"
-                Text="{Binding Peso}" />
-            <Entry
-                Keyboard="Numeric"
-                Placeholder="Altura (cm)"
-                Text="{Binding Altura}" />
-            <Entry
                 Keyboard="Email"
                 Placeholder="Email"
                 Text="{Binding Email}" />
+
+            <Picker
+                Title="Selecione o perfil"
+                ItemsSource="{Binding PerfisDisponiveis}"
+                SelectedItem="{Binding PerfilSelecionado}" />
+
             <Entry Placeholder="Telefone/WhatsApp" Text="{Binding Telefone}" />
             <Entry Placeholder="Localização (Cidade/Estado)" Text="{Binding Localizacao}" />
             <Entry Placeholder="Link Rede Social" Text="{Binding LinkRedeSocial}" />
@@ -34,18 +32,10 @@
                 IsPassword="True"
                 Placeholder="Confirmar Senha"
                 Text="{Binding ConfirmarSenha}" />
-            <Label Text="Data de Nascimento: " TextColor="White" />
-            <DatePicker Date="{Binding DataNascimento}" Format="dd/MM/yyyy" />
-            <Picker
-                Title="Gênero"
-                ItemsSource="{Binding GenerosDisponiveis}"
-                SelectedItem="{Binding GeneroSelecionado}" />
-            <Picker
-                Title="Selecione o perfil"
-                ItemsSource="{Binding PerfisDisponiveis}"
-                SelectedItem="{Binding PerfilSelecionado}" />
 
-            <!--  Campos específicos de perfil  -->
+            <!--  Campos específicos de perfil organizados  -->
+
+            <!--  Campos do Patrocinador  -->
             <VerticalStackLayout
                 x:Name="PatrocinadorFields"
                 IsVisible="False"
@@ -59,8 +49,75 @@
                     </DataTrigger>
                 </VerticalStackLayout.Triggers>
                 <Entry Placeholder="Nome da Empresa" Text="{Binding NomeEmpresa}" />
-                <Entry Placeholder="CNPJ" Text="{Binding Cnpj}" />
+                <Entry Placeholder="CNPJ/CPF" Text="{Binding Cnpj}" />
                 <Entry Placeholder="Faixa de Orçamento para Patrocínio" Text="{Binding FaixaOrcamentoPatrocinio}" />
+            </VerticalStackLayout>
+
+            <!--  Campos do Organizador  -->
+            <VerticalStackLayout
+                x:Name="OrganizadorFields"
+                IsVisible="False"
+                Spacing="10">
+                <VerticalStackLayout.Triggers>
+                    <DataTrigger
+                        Binding="{Binding PerfilSelecionado}"
+                        TargetType="VerticalStackLayout"
+                        Value="{x:Static models:TipoPerfil.Organizador}">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
+                </VerticalStackLayout.Triggers>
+                <Entry Placeholder="Nome da Empresa" Text="{Binding NomeEmpresa}" />
+                <Entry Placeholder="CNPJ/CPF" Text="{Binding Cnpj}" />
+            </VerticalStackLayout>
+
+            <!--  Campos do Atleta  -->
+            <VerticalStackLayout
+                x:Name="AtletaFields"
+                IsVisible="False"
+                Spacing="10">
+                <VerticalStackLayout.Triggers>
+                    <DataTrigger
+                        Binding="{Binding PerfilSelecionado}"
+                        TargetType="VerticalStackLayout"
+                        Value="{x:Static models:TipoPerfil.Atleta}">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
+                </VerticalStackLayout.Triggers>
+                <Entry
+                    Keyboard="Numeric"
+                    Placeholder="Altura (cm)"
+                    Text="{Binding Altura}" />
+                <Entry
+                    Keyboard="Numeric"
+                    Placeholder="Peso (kg)"
+                    Text="{Binding Peso}" />
+            </VerticalStackLayout>
+
+            <!--  Campos compartilhados entre Atleta e Árbitro  -->
+            <VerticalStackLayout
+                x:Name="DataNascimentoGeneroFields"
+                IsVisible="False"
+                Spacing="10">
+                <VerticalStackLayout.Triggers>
+                    <DataTrigger
+                        Binding="{Binding PerfilSelecionado}"
+                        TargetType="VerticalStackLayout"
+                        Value="{x:Static models:TipoPerfil.Atleta}">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
+                    <DataTrigger
+                        Binding="{Binding PerfilSelecionado}"
+                        TargetType="VerticalStackLayout"
+                        Value="{x:Static models:TipoPerfil.Arbitro}">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
+                </VerticalStackLayout.Triggers>
+                <Picker
+                    Title="Gênero"
+                    ItemsSource="{Binding GenerosDisponiveis}"
+                    SelectedItem="{Binding GeneroSelecionado}" />
+                <Label Text="Data de Nascimento:" TextColor="White" />
+                <DatePicker Date="{Binding DataNascimento}" Format="dd/MM/yyyy" />
             </VerticalStackLayout>
 
             <Button

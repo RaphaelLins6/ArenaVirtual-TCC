@@ -63,8 +63,6 @@ namespace ArenaVirtual.ViewModels {
                 LinkRedeSocial = this.LinkRedeSocial,
                 NomeEmpresa = this.NomeEmpresa,
                 CNPJ = this.Cnpj,
-                Modalidades = this.Modalidades,
-                AreasInteressePatrocinio = this.AreasInteressePatrocinio,
                 FaixaOrcamentoPatrocinio = this.FaixaOrcamentoPatrocinio,
                 Peso = this.Peso,
                 Altura = this.Altura,

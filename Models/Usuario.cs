@@ -93,12 +93,6 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref cnpj, value);
         }
 
-        private string modalidades = string.Empty;
-        public string Modalidades {
-            get => modalidades;
-            set => SetProperty(ref modalidades, value);
-        }
-
         private double? peso;
         public double? Peso {
             get => peso;
@@ -109,12 +103,6 @@ namespace ArenaVirtual.Models {
         public double? Altura {
             get => altura;
             set => SetProperty(ref altura, value);
-        }
-
-        private string areasInteressePatrocinio = string.Empty;
-        public string AreasInteressePatrocinio {
-            get => areasInteressePatrocinio;
-            set => SetProperty(ref areasInteressePatrocinio, value);
         }
 
         private string faixaOrcamentoPatrocinio = string.Empty;

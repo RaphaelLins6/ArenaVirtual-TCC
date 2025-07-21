@@ -99,10 +99,37 @@
                 IsVisible="False"
                 Spacing="10">
                 <Entry
+                    x:Name="NomeEmpresaPatrocinadorEntry"
+                    Placeholder="Nome da Empresa"
+                    PlaceholderColor="Black"
+                    TextColor="Black" />
+                <Entry
+                    x:Name="CnpjCpfPatrocinadorEntry"
+                    Placeholder="CNPJ/CPF"
+                    PlaceholderColor="Black"
+                    TextColor="Black" />
+                <Entry
                     x:Name="FaixaOrcamentoPatrocinioEntry"
                     Placeholder="Faixa de Orçamento"
                     PlaceholderColor="Black"
                     TextColor="Black" />
+            </VerticalStackLayout>
+
+            <!--  Árbitro  -->
+            <VerticalStackLayout
+                x:Name="ArbitroSection"
+                IsVisible="False"
+                Spacing="10">
+                <DatePicker
+                    x:Name="DataNascimentoPickerArbitro"
+                    BackgroundColor="White"
+                    TextColor="Black" />
+                <Picker
+                    x:Name="GeneroArbitroPicker"
+                    Title="Gênero"
+                    BackgroundColor="LightGray"
+                    TextColor="Black"
+                    TitleColor="Black" />
             </VerticalStackLayout>
 
             <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
