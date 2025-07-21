@@ -2,15 +2,10 @@
     x:Class="ArenaVirtual.Views.HomePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
     Title="Campeonatos"
     x:DataType="vm:HomeViewModel">
-
-    <ContentPage.Resources>
-        <ResourceDictionary>
-            <converters:ZeroToTrueConverter x:Key="ZeroToTrueConverter" />
-        </ResourceDictionary>
-    </ContentPage.Resources>
 
     <StackLayout>
         <CollectionView ItemsSource="{Binding Campeonatos}" SelectionMode="None">
@@ -41,8 +36,10 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Label Text="Nenhum campeonato encontrado."
-               IsVisible="{Binding Campeonatos.Count, Converter={StaticResource ZeroToTrueConverter}}"
-               HorizontalOptions="Center" VerticalOptions="Center" />
+        <Label
+            HorizontalOptions="Center"
+            IsVisible="{Binding Campeonatos.Count, Converter={StaticResource ZeroToTrueConverter}}"
+            Text="Nenhum campeonato encontrado."
+            VerticalOptions="Center" />
     </StackLayout>
 </ContentPage>

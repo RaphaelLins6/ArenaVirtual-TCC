@@ -3,10 +3,11 @@
     x:Class="ArenaVirtual.App"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:ArenaVirtual">
+    xmlns:converters="clr-namespace:ArenaVirtual.Converters">
 
     <Application.Resources>
         <ResourceDictionary>
+            <converters:ZeroToTrueConverter x:Key="ZeroToTrueConverter" />
             <x:Array x:Key="PerfilTipos" Type="{x:Type x:String}">
                 <x:String>Atleta</x:String>
                 <x:String>Árbitro</x:String>

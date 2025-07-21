@@ -15,6 +15,28 @@ namespace ArenaVirtual.Services {
             await _database.CreateTableAsync<Estatistica>();
             await _database.CreateTableAsync<Jogo>();
             await _database.CreateTableAsync<PropostaPatrocinio>();
+
+            // Inserção de campeonatos fake para testes
+            if ((await ListarCampeonatosAsync()).Count == 0)
+            {
+                await InserirCampeonatoAsync(new Campeonato
+                {
+                    Nome = "Campeonato de Teste",
+                    Local = "Quadra Central",
+                    DataInicio = DateTime.Today,
+                    DataFim = DateTime.Today.AddDays(7),
+                    OrganizadorId = 1
+                });
+
+                await InserirCampeonatoAsync(new Campeonato
+                {
+                    Nome = "Torneio Experimental",
+                    Local = "Ginásio Municipal",
+                    DataInicio = DateTime.Today.AddDays(10),
+                    DataFim = DateTime.Today.AddDays(17),
+                    OrganizadorId = 1
+                });
+            }
         }
 
         public Task<int> InserirUsuarioAsync(Usuario usuario) {
