@@ -36,10 +36,11 @@ public partial class EditarPerfilPopup : ContentPage {
 
         // Campos específicos
         if (_usuario.Perfil == TipoPerfil.Atleta) {
+            GeneroPicker.ItemsSource = Enum.GetValues<GeneroEnum>().Cast<GeneroEnum>().ToList();
+            GeneroPicker.SelectedItem = _usuario.Genero;
             DataNascimentoPicker.Date = _usuario.DataNascimento ?? DateTime.Now;
             PesoEntry.Text = _usuario.Peso?.ToString();
             AlturaEntry.Text = _usuario.Altura?.ToString();
-            GeneroPicker.SelectedItem = _usuario.Genero?.ToString();
         }
         if (_usuario.Perfil == TipoPerfil.Organizador || _usuario.Perfil == TipoPerfil.Patrocinador) {
             NomeEmpresaEntry.Text = _usuario.NomeEmpresa;
