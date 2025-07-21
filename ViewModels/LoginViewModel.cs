@@ -31,11 +31,7 @@ namespace ArenaVirtual.ViewModels {
             App.CurrentUser = usuario;
             System.Diagnostics.Debug.WriteLine($"[LoginViewModel] App.CurrentUser definido para ID: {App.CurrentUser.Id}, Email: {App.CurrentUser.Email}");
 
-            if (Application.Current?.Windows.Count > 0) {
-                Application.Current.Windows[0].Page = new AppShell(usuario);
-            } else {
-                await _alertService.DisplayAlert("Erro", "Nenhuma janela do aplicativo disponível.", "OK");
-            }
+            Application.Current.MainPage = new AppShell(usuario);
         }
 
         [RelayCommand]

@@ -14,10 +14,11 @@ namespace ArenaVirtual {
             InitializeComponent();
             _usuarioLogado = usuarioLogado;
 
-            CriarMenuPorPerfil(usuarioLogado);
-
+            Routing.RegisterRoute(nameof(HomePage), typeof(HomePage));
             Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));
             Routing.RegisterRoute(nameof(RegisterPage), typeof(RegisterPage));
+
+            CriarMenuPorPerfil(usuarioLogado);
         }
 
         private void CriarMenuPorPerfil(Usuario usuario) {
@@ -30,6 +31,18 @@ namespace ArenaVirtual {
             }
             var alertService = serviceProvider.GetService<IAlertService>();
 
+            // ✅ Adiciona HomePage como primeira opção
+            this.Items.Add(new FlyoutItem {
+                Title = "Início",
+                Route = "HomePage",
+                Icon = "home_icon.png", 
+                Items = {
+                    new ShellContent {
+                        ContentTemplate = new DataTemplate(() => new HomePage())
+                    }
+                }
+            });
+
             this.Items.Add(new ShellContent {
                 Title = "Meu Perfil",
                 ContentTemplate = new DataTemplate(() => {
@@ -41,32 +54,32 @@ namespace ArenaVirtual {
                 this.Items.Add(new FlyoutItem {
                     Title = "Meu Time",
                     Items = {
-                                new ShellContent { Title = "Informações do Time", ContentTemplate = new DataTemplate(() => new MeusTimesPage()) },
-                                new ShellContent { Title = "Jogos", ContentTemplate = new DataTemplate(() => new Views.Atleta.PartidasPage()) }
-                            }
+                        new ShellContent { Title = "Informações do Time", ContentTemplate = new DataTemplate(() => new MeusTimesPage()) },
+                        new ShellContent { Title = "Jogos", ContentTemplate = new DataTemplate(() => new Views.Atleta.PartidasPage()) }
+                    }
                 });
             } else if (usuario.Perfil == TipoPerfil.Organizador) {
                 this.Items.Add(new FlyoutItem {
                     Title = "Gerenciar Campeonatos",
                     Items = {
-                                new ShellContent { Title = "Criar Campeonato", ContentTemplate = new DataTemplate(() => new CriarCampeonatoPage()) },
-                                new ShellContent { Title = "Ver Campeonatos", ContentTemplate = new DataTemplate(() => new DashboardOrganizadorPage()) }
-                            }
+                        new ShellContent { Title = "Criar Campeonato", ContentTemplate = new DataTemplate(() => new CriarCampeonatoPage()) },
+                        new ShellContent { Title = "Ver Campeonatos", ContentTemplate = new DataTemplate(() => new DashboardOrganizadorPage()) }
+                    }
                 });
             } else if (usuario.Perfil == TipoPerfil.Arbitro) {
                 this.Items.Add(new FlyoutItem {
                     Title = "Meus Jogos",
                     Items = {
-                                new ShellContent { Title = "Ver Jogos Atribuidos", ContentTemplate = new DataTemplate(() => new MinhasPartidasPage()) }
-                            }
+                        new ShellContent { Title = "Ver Jogos Atribuidos", ContentTemplate = new DataTemplate(() => new MinhasPartidasPage()) }
+                    }
                 });
             } else if (usuario.Perfil == TipoPerfil.Patrocinador) {
                 this.Items.Add(new FlyoutItem {
                     Title = "Minhas Campanhas",
                     Items = {
-                                new ShellContent { Title = "Criar Campanha", ContentTemplate = new DataTemplate(() => new PropostasPatrocinioPage()) },
-                                new ShellContent { Title = "Ver Campanhas", ContentTemplate = new DataTemplate(() => new CampanhasPage()) }
-                            }
+                        new ShellContent { Title = "Criar Campanha", ContentTemplate = new DataTemplate(() => new PropostasPatrocinioPage()) },
+                        new ShellContent { Title = "Ver Campanhas", ContentTemplate = new DataTemplate(() => new CampanhasPage()) }
+                    }
                 });
             }
 
@@ -76,16 +89,15 @@ namespace ArenaVirtual {
                     MainThread.BeginInvokeOnMainThread(() => {
                         var localServiceProvider = Application.Current?.Handler?.MauiContext?.Services;
                         if (localServiceProvider != null) {
-                            // Correção para o aviso de 'Application.MainPage.set' obsoleto
                             if (Application.Current?.Windows.Count > 0) {
                                 var loginPage = localServiceProvider.GetService<LoginPage>();
                                 if (loginPage != null) {
                                     Application.Current.Windows[0].Page = loginPage;
                                 } else {
-                                     Console.WriteLine("Erro: LoginPage não pôde ser resolvido pelo ServiceProvider.");
+                                    Console.WriteLine("Erro: LoginPage não pôde ser resolvido pelo ServiceProvider.");
                                 }
                             } else {
-                                 Console.WriteLine("Erro: Nenhuma janela do aplicativo encontrada.");
+                                Console.WriteLine("Erro: Nenhuma janela do aplicativo encontrada.");
                             }
                         }
                     });
