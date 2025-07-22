@@ -3,7 +3,6 @@
     public partial class DashboardOrganizadorPage : ContentPage {
         public DashboardOrganizadorPage() {
             InitializeComponent();
-            Title = "Dashboard";
         }
     }
 }

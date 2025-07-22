@@ -1,11 +1,13 @@
-﻿
+﻿using ArenaVirtual.ViewModels;
+using ArenaVirtual.Services;
 
 namespace ArenaVirtual.Views.Organizador {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class CriarCampeonatoPage : ContentPage {
         public CriarCampeonatoPage() {
             InitializeComponent();
-            Title = "Criar Campeonato"; // Set the Title property in the code-behind
+            var databaseService = App.Current?.Handler?.MauiContext?.Services?.GetRequiredService<DatabaseService>();
+            BindingContext = new CriarCampeonatoViewModel(databaseService!);
         }
     }
 }
