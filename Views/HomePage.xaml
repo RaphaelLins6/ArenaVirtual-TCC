@@ -2,44 +2,60 @@
     x:Class="ArenaVirtual.Views.HomePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
     Title="Campeonatos"
     x:DataType="vm:HomeViewModel">
 
-    <StackLayout>
-        <CollectionView ItemsSource="{Binding Campeonatos}" SelectionMode="None">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame
-                        Margin="10"
-                        Padding="10"
-                        BackgroundColor="Black"
-                        CornerRadius="12">
-                        <VerticalStackLayout>
-                            <Label
-                                FontAttributes="Bold"
-                                FontSize="20"
-                                Text="{Binding Nome}"
-                                TextColor="White" />
-                            <Label
-                                FontSize="14"
-                                Text="{Binding Descricao}"
-                                TextColor="Gray" />
-                            <Button
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=FavoritarCommand}"
-                                CommandParameter="{Binding .}"
-                                Text="Favoritar" />
-                        </VerticalStackLayout>
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="24">
 
-        <Label
-            HorizontalOptions="Center"
-            IsVisible="{Binding Campeonatos.Count, Converter={StaticResource ZeroToTrueConverter}}"
-            Text="Nenhum campeonato encontrado."
-            VerticalOptions="Center" />
-    </StackLayout>
+            <Label Text="Campeonatos"
+               FontSize="28"
+               FontAttributes="Bold"
+               TextColor="OrangeRed" />
+
+            <StackLayout>
+                <Label Text="Favoritos"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="OrangeRed" />
+
+                <CollectionView ItemsSource="{Binding CampeonatosFavoritos}">
+                    <CollectionView.EmptyView>
+                        <Label Text="Nenhum campeonato favoritado."
+                           HorizontalOptions="Center"
+                           TextColor="White"
+                           VerticalOptions="Center" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <local:CampeonatoCard />
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </StackLayout>
+
+            <StackLayout>
+                <Label Text="Todos os Campeonatos"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="OrangeRed" />
+
+                <CollectionView ItemsSource="{Binding Campeonatos}">
+                    <CollectionView.EmptyView>
+                        <Label Text="Nenhum campeonato encontrado."
+                           HorizontalOptions="Center"
+                           TextColor="White"
+                           VerticalOptions="Center" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <local:CampeonatoCard />
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </StackLayout>
+
+        </StackLayout>
+    </ScrollView>
 </ContentPage>

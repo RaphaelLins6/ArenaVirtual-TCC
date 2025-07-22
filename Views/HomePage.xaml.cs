@@ -6,8 +6,8 @@ namespace ArenaVirtual.Views {
         public HomePage() {
             InitializeComponent();
 
-            var databaseService = new DatabaseService(Path.Combine(FileSystem.AppDataDirectory, "arena.db"));
-            BindingContext = new HomeViewModel(databaseService);
+            var databaseService = App.Current?.Handler?.MauiContext?.Services?.GetRequiredService<DatabaseService>();
+            BindingContext = new HomeViewModel(databaseService!);
         }
     }
 }
