@@ -3,9 +3,70 @@
     x:Class="ArenaVirtual.Views.Organizador.DashboardOrganizadorPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:ArenaVirtual.Views.Organizador"
-    Title="Dashboard">
-    <StackLayout Padding="20">
-        <Label FontSize="20" Text="Página inicial do Organizador" />
+    Shell.NavBarIsVisible="False">
+    <StackLayout Padding="20" Spacing="16">
+        <Label
+            FontSize="20"
+            Text="Meus Campeonatos"
+            TextColor="OrangeRed" />
+        <CollectionView ItemsSource="{Binding Campeonatos}">
+            <CollectionView.EmptyView>
+                <Label
+                    HorizontalOptions="Center"
+                    Text="Nenhum campeonato cadastrado."
+                    TextColor="White"
+                    VerticalOptions="Center" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border
+                        Margin="0,0,0,10"
+                        Padding="10"
+                        Stroke="Gray"
+                        StrokeShape="RoundRectangle 8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image
+                                Grid.Column="0"
+                                Aspect="AspectFill"
+                                HeightRequest="60"
+                                HorizontalOptions="Center"
+                                Source="{Binding LogoUrl}"
+                                VerticalOptions="Center"
+                                WidthRequest="60" />
+                            <StackLayout
+                                Grid.Column="1"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center">
+                                <Label
+                                    FontAttributes="Bold"
+                                    FontSize="18"
+                                    HorizontalTextAlignment="Center"
+                                    Text="{Binding Nome}"
+                                    TextColor="White" />
+                                <Label
+                                    FontSize="14"
+                                    HorizontalTextAlignment="Center"
+                                    Text="{Binding Local}"
+                                    TextColor="White" />
+                                <Label
+                                    FontSize="12"
+                                    HorizontalTextAlignment="Center"
+                                    Text="{Binding DataInicio, StringFormat='Início: {0:dd/MM/yyyy}'}"
+                                    TextColor="White" />
+                                <Label
+                                    FontSize="12"
+                                    HorizontalTextAlignment="Center"
+                                    Text="{Binding DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}"
+                                    TextColor="White" />
+                            </StackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </StackLayout>
 </ContentPage>

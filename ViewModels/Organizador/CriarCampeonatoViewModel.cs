@@ -94,7 +94,7 @@ namespace ArenaVirtual.ViewModels {
                 FormatoCampeonato = FormatoCampeonato,
                 LocaisDosJogos = LocaisDosJogos,
                 HaveraPremiacao = HaveraPremiacao,
-                OrganizadorId = 1 
+                OrganizadorId = App.CurrentUser?.Id ?? 0 // Use o ID do usuário logado
             };
 
             try {
