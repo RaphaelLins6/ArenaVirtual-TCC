@@ -81,5 +81,12 @@ namespace ArenaVirtual.ViewModels {
 
             await CarregarCampeonatos();
         }
+
+        private async Task AdicionarCampeonatoAsync(Campeonato campeonato) {
+            if (App.CurrentUser != null)
+                campeonato.OrganizadorId = App.CurrentUser.Id;
+            await _databaseService.InserirCampeonatoAsync(campeonato);
+            await CarregarCampeonatos();
+        }
     }
 }
