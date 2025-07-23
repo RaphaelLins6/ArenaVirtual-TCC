@@ -2,30 +2,35 @@
     x:Class="ArenaVirtual.Views.HomePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:ArenaVirtual.Views.Components"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
-    Title="Campeonatos"
-    x:DataType="vm:HomeViewModel">
+    x:DataType="vm:HomeViewModel"
+    Shell.NavBarIsVisible="False">
 
     <ScrollView>
         <StackLayout Padding="20" Spacing="24">
 
-            <Label Text="Campeonatos"
-               FontSize="28"
-               FontAttributes="Bold"
-               TextColor="OrangeRed" />
+            <Label
+                FontAttributes="Bold"
+                FontSize="28"
+                HorizontalOptions="Center"
+                Text="Campeonatos"
+                TextColor="OrangeRed" />
 
             <StackLayout>
-                <Label Text="Favoritos"
-                   FontSize="20"
-                   FontAttributes="Bold"
-                   TextColor="OrangeRed" />
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="20"
+                    Text="Favoritos"
+                    TextColor="OrangeRed" />
 
                 <CollectionView ItemsSource="{Binding CampeonatosFavoritos}">
                     <CollectionView.EmptyView>
-                        <Label Text="Nenhum campeonato favoritado."
-                           HorizontalOptions="Center"
-                           TextColor="White"
-                           VerticalOptions="Center" />
+                        <Label
+                            HorizontalOptions="Center"
+                            Text="Nenhum campeonato favoritado."
+                            TextColor="White"
+                            VerticalOptions="Center" />
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
@@ -36,17 +41,19 @@
             </StackLayout>
 
             <StackLayout>
-                <Label Text="Todos os Campeonatos"
-                   FontSize="20"
-                   FontAttributes="Bold"
-                   TextColor="OrangeRed" />
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="20"
+                    Text="Todos os Campeonatos"
+                    TextColor="OrangeRed" />
 
                 <CollectionView ItemsSource="{Binding Campeonatos}">
                     <CollectionView.EmptyView>
-                        <Label Text="Nenhum campeonato encontrado."
-                           HorizontalOptions="Center"
-                           TextColor="White"
-                           VerticalOptions="Center" />
+                        <Label
+                            HorizontalOptions="Center"
+                            Text="Nenhum campeonato encontrado."
+                            TextColor="White"
+                            VerticalOptions="Center" />
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
                         <DataTemplate>

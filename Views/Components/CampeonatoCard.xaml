@@ -1,0 +1,87 @@
+﻿<ContentView
+    x:Class="ArenaVirtual.Views.Components.CampeonatoCard"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:model="clr-namespace:ArenaVirtual.Models"
+    xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
+    x:DataType="model:Campeonato"
+    BackgroundColor="Transparent">
+
+    <Border
+        Margin="0,0,0,10"
+        Padding="10"
+        Stroke="Gray"
+        StrokeShape="RoundRectangle 8">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Image
+                Grid.Column="0"
+                Aspect="AspectFill"
+                HeightRequest="60"
+                HorizontalOptions="Center"
+                Source="{Binding LogoUrl}"
+                WidthRequest="60" />
+
+            <StackLayout
+                Grid.Column="1"
+                HorizontalOptions="Center"
+                Spacing="6"
+                VerticalOptions="Center">
+                <!--  Ícone de Favorito no canto superior direito  -->
+                <Grid>
+                    <Label
+                        FontSize="20"
+                        HorizontalOptions="End"
+                        Text="{Binding EhFavorito, Converter={StaticResource FavoritoConverter}}"
+                        TextColor="Orange"
+                        VerticalOptions="Start">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=FavoritarCommand}" CommandParameter="{Binding .}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="18"
+                    Text="{Binding Nome}"
+                    TextColor="White" />
+                <Label
+                    FontSize="14"
+                    Text="{Binding Local}"
+                    TextColor="White" />
+                <Label
+                    FontSize="12"
+                    Text="{Binding DataInicio, StringFormat='Início: {0:dd/MM/yyyy}'}"
+                    TextColor="White" />
+                <Label
+                    FontSize="12"
+                    Text="{Binding DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}"
+                    TextColor="White" />
+
+                <!--  Botões de ação  -->
+                <HorizontalStackLayout Margin="0,8,0,0" Spacing="10">
+                    <Button
+                        BackgroundColor="OrangeRed"
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=ParticiparCommand}"
+                        CommandParameter="{Binding .}"
+                        Text="Participar"
+                        TextColor="White" />
+
+                    <Button
+                        BackgroundColor="Transparent"
+                        BorderColor="OrangeRed"
+                        BorderWidth="1"
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=VerCampeonatoCommand}"
+                        CommandParameter="{Binding .}"
+                        Text="Ver Campeonato"
+                        TextColor="OrangeRed" />
+                </HorizontalStackLayout>
+            </StackLayout>
+        </Grid>
+    </Border>
+</ContentView>
