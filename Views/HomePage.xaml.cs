@@ -9,5 +9,13 @@ namespace ArenaVirtual.Views {
             var databaseService = App.Current?.Handler?.MauiContext?.Services?.GetRequiredService<DatabaseService>();
             BindingContext = new HomeViewModel(databaseService!);
         }
+
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+
+            if (BindingContext is ArenaVirtual.ViewModels.HomeViewModel vm)
+                await vm.CarregarCampeonatos();
+        }
     }
 }

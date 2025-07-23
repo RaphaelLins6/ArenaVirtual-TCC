@@ -60,8 +60,15 @@ namespace ArenaVirtual.Services {
             return _database.DeleteAsync(usuario);
         }
 
-        public Task<int> InserirCampeonatoAsync(Campeonato item) {
-            return _database.InsertAsync(item);
+        public async Task<int> InserirCampeonatoAsync(Campeonato campeonato) {
+            var existente = await _database.Table<Campeonato>()
+                .Where(c => c.Nome == campeonato.Nome && c.DataInicio == campeonato.DataInicio)
+                .FirstOrDefaultAsync();
+
+            if (existente != null)
+                return 0;
+
+            return await _database.InsertAsync(campeonato);
         }
         public Task<List<Campeonato>> ListarCampeonatosAsync() {
             return _database.Table<Campeonato>().ToListAsync();
@@ -163,5 +170,5 @@ namespace ArenaVirtual.Services {
         public Task<int> DeletarPropostaPatrocinioAsync(PropostaPatrocinio item) {
             return _database.DeleteAsync(item);
         }
-    }
+    }   
 }

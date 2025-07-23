@@ -34,6 +34,8 @@ namespace ArenaVirtual.ViewModels.Organizador {
         }
 
         private async Task AdicionarCampeonatoAsync(Campeonato campeonato) {
+            if (App.CurrentUser != null)
+                campeonato.OrganizadorId = App.CurrentUser.Id;
             await _databaseService.InserirCampeonatoAsync(campeonato);
             await CarregarCampeonatos();
         }

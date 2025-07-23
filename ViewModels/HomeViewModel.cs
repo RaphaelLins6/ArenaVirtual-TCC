@@ -44,22 +44,22 @@ namespace ArenaVirtual.ViewModels {
         }
 
         public async Task CarregarCampeonatos() {
-            if (IsBusy) return; 
+            if (IsBusy) return;
 
             IsBusy = true;
             try {
                 var todos = await _databaseService.ListarCampeonatosAsync() ?? [];
 
-                todos = [.. todos.GroupBy(c => c.Id).Select(g => g.First())];
+                // Agrupa por ID para evitar duplicação real
+                var unicos = todos
+                    .GroupBy(c => c.Id)
+                    .Select(g => g.First())
+                    .ToList();
 
-                Debug.WriteLine("Campeonatos no banco:");
-                foreach (var c in todos)
-                    Debug.WriteLine($"- {c.Id} | {c.Nome}");
-
-                Favoritos = new ObservableCollection<Campeonato>(todos.Where(c => c.EhFavorito));
+                Favoritos = new ObservableCollection<Campeonato>(unicos.Where(c => c.EhFavorito));
 
                 _campeonatos.Clear();
-                foreach (var c in todos.Where(c => !c.EhFavorito)) {
+                foreach (var c in unicos.Where(c => !c.EhFavorito)) {
                     _campeonatos.Add(c);
                 }
 
@@ -79,7 +79,6 @@ namespace ArenaVirtual.ViewModels {
 
             await _databaseService.AtualizarCampeonatoAsync(campeonato);
 
-            // Atualiza a lista após alteração
             await CarregarCampeonatos();
         }
     }

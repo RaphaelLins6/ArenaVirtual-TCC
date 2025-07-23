@@ -36,11 +36,11 @@
                     <Label
                         FontSize="20"
                         HorizontalOptions="End"
-                        Text="{Binding EhFavorito, Converter={StaticResource FavoritoConverter}}"
+                        Text="{Binding EhFavorito, Converter={StaticResource FavoritoIconConverter}}"
                         TextColor="Orange"
                         VerticalOptions="Start">
                         <Label.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=FavoritarCommand}" CommandParameter="{Binding .}" />
+                            <TapGestureRecognizer Command="{Binding BindingContext.FavoritarCommand, Source={x:Reference HomePageRef}}" CommandParameter="{Binding .}" />
                         </Label.GestureRecognizers>
                     </Label>
                 </Grid>

@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:ArenaVirtual.Views.Components"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
+    x:Name="HomePageRef"
     x:DataType="vm:HomeViewModel"
     Shell.NavBarIsVisible="False">
 
