@@ -4,6 +4,7 @@ using MvvmHelpers;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows.Input;
 
 namespace ArenaVirtual.ViewModels {
@@ -52,7 +53,6 @@ namespace ArenaVirtual.ViewModels {
 
         public async Task CarregarCampeonatos() {
             if (IsBusy) return;
-
             IsBusy = true;
             try {
                 var todos = await _databaseService.ListarCampeonatosAsync() ?? [];
@@ -63,10 +63,12 @@ namespace ArenaVirtual.ViewModels {
                     .Select(g => g.First())
                     .ToList();
 
+                // Popula a lista de Favoritos APENAS com os campeonatos marcados como favoritos
                 Favoritos = new ObservableCollection<Campeonato>(unicos.Where(c => c.EhFavorito));
 
-                _campeonatos.Clear();
-                foreach (var c in unicos.Where(c => !c.EhFavorito)) {
+                _campeonatos.Clear(); // Limpa a lista atual de "Todos os Campeonatos"
+                // Adiciona TODOS os campeonatos (únicos) à lista _campeonatos
+                foreach (var c in unicos) {
                     _campeonatos.Add(c);
                 }
 

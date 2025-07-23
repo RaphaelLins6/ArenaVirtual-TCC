@@ -5,7 +5,8 @@
     xmlns:model="clr-namespace:ArenaVirtual.Models"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.CampeonatoPage"
     x:DataType="vm:CampeonatoDetailViewModel"
-    BackgroundColor="Black">
+    BackgroundColor="Black"
+    Shell.NavBarIsVisible="False">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
