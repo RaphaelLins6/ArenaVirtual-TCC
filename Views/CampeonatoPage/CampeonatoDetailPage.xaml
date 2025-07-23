@@ -1,0 +1,36 @@
+﻿<ContentPage
+    x:Class="ArenaVirtual.Views.CampeonatoPage.CampeonatoDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:model="clr-namespace:ArenaVirtual.Models"
+    xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.CampeonatoPage"
+    x:DataType="vm:CampeonatoDetailViewModel"
+    BackgroundColor="Black">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+            <Label
+                FontAttributes="Bold"
+                FontSize="28"
+                Text="{Binding Campeonato.Nome}"
+                TextColor="Orange" />
+            <Image
+                HeightRequest="120"
+                HorizontalOptions="Center"
+                Source="{Binding Campeonato.LogoUrl}" />
+            <Label
+                FontSize="18"
+                Text="{Binding Campeonato.Local}"
+                TextColor="White" />
+            <Label
+                FontSize="16"
+                Text="{Binding Campeonato.DataInicio, StringFormat='Início: {0:dd/MM/yyyy}'}"
+                TextColor="White" />
+            <Label
+                FontSize="16"
+                Text="{Binding Campeonato.DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}"
+                TextColor="White" />
+            <!--  Adicione mais detalhes conforme necessário  -->
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

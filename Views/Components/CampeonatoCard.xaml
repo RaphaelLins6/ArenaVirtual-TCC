@@ -2,9 +2,10 @@
     x:Class="ArenaVirtual.Views.Components.CampeonatoCard"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:ArenaVirtual.Views.Components"
     xmlns:model="clr-namespace:ArenaVirtual.Models"
+    xmlns:views="clr-namespace:ArenaVirtual.Views"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
-    x:DataType="model:Campeonato"
     BackgroundColor="Transparent">
 
     <Border
@@ -17,8 +18,28 @@
                 <ColumnDefinition Width="80" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!--  Ícone de Favorito no canto superior direito  -->
+            <Label
+                Grid.Row="0"
+                Grid.Column="1"
+                Margin="0,0,4,0"
+                FontSize="20"
+                HorizontalOptions="End"
+                Text="{Binding EhFavorito, Converter={StaticResource FavoritoIconConverter}}"
+                TextColor="Orange"
+                VerticalOptions="Start">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding BindingContext.FavoritarCommand, Source={RelativeSource AncestorType={x:Type views:HomePage}}}" CommandParameter="{Binding .}" />
+                </Label.GestureRecognizers>
+            </Label>
 
             <Image
+                Grid.RowSpan="2"
                 Grid.Column="0"
                 Aspect="AspectFill"
                 HeightRequest="60"
@@ -27,24 +48,11 @@
                 WidthRequest="60" />
 
             <StackLayout
+                Grid.Row="1"
                 Grid.Column="1"
                 HorizontalOptions="Center"
                 Spacing="6"
                 VerticalOptions="Center">
-                <!--  Ícone de Favorito no canto superior direito  -->
-                <Grid>
-                    <Label
-                        FontSize="20"
-                        HorizontalOptions="End"
-                        Text="{Binding EhFavorito, Converter={StaticResource FavoritoIconConverter}}"
-                        TextColor="Orange"
-                        VerticalOptions="Start">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding BindingContext.FavoritarCommand, Source={x:Reference HomePageRef}}" CommandParameter="{Binding .}" />
-                        </Label.GestureRecognizers>
-                    </Label>
-                </Grid>
-
                 <Label
                     FontAttributes="Bold"
                     FontSize="18"
@@ -63,12 +71,12 @@
                     Text="{Binding DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}"
                     TextColor="White" />
 
-                <!--  Botões de ação  -->
                 <HorizontalStackLayout Margin="0,8,0,0" Spacing="10">
                     <Button
                         BackgroundColor="OrangeRed"
-                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=ParticiparCommand}"
+                        Command="{Binding BindingContext.ParticiparCommand, Source={RelativeSource AncestorType={x:Type views:HomePage}}}"
                         CommandParameter="{Binding .}"
+                        Style="{StaticResource BotaoPrincipal}"
                         Text="Participar"
                         TextColor="White" />
 
@@ -76,8 +84,9 @@
                         BackgroundColor="Transparent"
                         BorderColor="OrangeRed"
                         BorderWidth="1"
-                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=VerCampeonatoCommand}"
+                        Command="{Binding BindingContext.VerCampeonatoCommand, Source={RelativeSource AncestorType={x:Type views:HomePage}}}"
                         CommandParameter="{Binding .}"
+                        Style="{StaticResource BotaoPrincipal}"
                         Text="Ver Campeonato"
                         TextColor="OrangeRed" />
                 </HorizontalStackLayout>

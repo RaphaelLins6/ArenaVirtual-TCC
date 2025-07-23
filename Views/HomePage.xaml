@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:ArenaVirtual.Views.Components"
+    xmlns:model="clr-namespace:ArenaVirtual.Models"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
     x:Name="HomePageRef"
     x:DataType="vm:HomeViewModel"
@@ -25,7 +26,7 @@
                     Text="Favoritos"
                     TextColor="OrangeRed" />
 
-                <CollectionView ItemsSource="{Binding CampeonatosFavoritos}">
+                <CollectionView ItemsSource="{Binding Favoritos}">
                     <CollectionView.EmptyView>
                         <Label
                             HorizontalOptions="Center"
@@ -34,8 +35,12 @@
                             VerticalOptions="Center" />
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <local:CampeonatoCard />
+                        <DataTemplate x:DataType="model:Campeonato">
+                            <local:CampeonatoCard
+                                CampeonatoItem="{Binding .}"
+                                FavoritarCommand="{Binding BindingContext.FavoritarCommand, Source={x:Reference HomePageRef}}"
+                                ParticiparCommand="{Binding BindingContext.ParticiparCommand, Source={x:Reference HomePageRef}}"
+                                VerCampeonatoCommand="{Binding BindingContext.VerCampeonatoCommand, Source={x:Reference HomePageRef}}" />
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
@@ -57,8 +62,12 @@
                             VerticalOptions="Center" />
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <local:CampeonatoCard />
+                        <DataTemplate x:DataType="model:Campeonato">
+                            <local:CampeonatoCard
+                                CampeonatoItem="{Binding .}"
+                                FavoritarCommand="{Binding BindingContext.FavoritarCommand, Source={x:Reference HomePageRef}}"
+                                ParticiparCommand="{Binding BindingContext.ParticiparCommand, Source={x:Reference HomePageRef}}"
+                                VerCampeonatoCommand="{Binding BindingContext.VerCampeonatoCommand, Source={x:Reference HomePageRef}}" />
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>

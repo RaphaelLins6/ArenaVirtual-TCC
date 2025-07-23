@@ -21,7 +21,8 @@ namespace ArenaVirtual.ViewModels {
         }
 
         public ICommand FavoritarCommand { get; }
-        private readonly CampeonatoService _campeonatoService;
+        public ICommand ParticiparCommand { get; }
+        public ICommand VerCampeonatoCommand { get; }
         private readonly DatabaseService _databaseService;
 
         public HomeViewModel(DatabaseService databaseService) {
@@ -34,8 +35,14 @@ namespace ArenaVirtual.ViewModels {
                     if (obj is Campeonato campeonato)
                         await FavoritarAsync(campeonato);
                 });
+            
+            ParticiparCommand = new Command<Campeonato>(async (campeonato) => {
+                await ParticiparAsync(campeonato);
+            });
 
-            _campeonatoService = new CampeonatoService(databaseService);
+            VerCampeonatoCommand = new Command<Campeonato>(async (campeonato) => {
+                await VerCampeonatoAsync(campeonato);
+            });
 
             Task.Run(async () => {
                 await _databaseService.InitializeAsync();
@@ -73,8 +80,9 @@ namespace ArenaVirtual.ViewModels {
         }
 
         private async Task FavoritarAsync(Campeonato campeonato) {
+            Debug.WriteLine($"[HomeViewModel] FavoritarAsync chamado. Campeonato: {campeonato?.Nome ?? "NULO"}, ID: {campeonato?.Id ?? 0}");
             if (campeonato == null) return;
-
+            Debug.WriteLine($"[DEBUG] FavoritarAsync acionado para: {campeonato.Nome ?? "N/A"}, ID: {campeonato.Id}");
             campeonato.EhFavorito = !campeonato.EhFavorito;
 
             await _databaseService.AtualizarCampeonatoAsync(campeonato);
@@ -82,11 +90,24 @@ namespace ArenaVirtual.ViewModels {
             await CarregarCampeonatos();
         }
 
-        private async Task AdicionarCampeonatoAsync(Campeonato campeonato) {
-            if (App.CurrentUser != null)
-                campeonato.OrganizadorId = App.CurrentUser.Id;
-            await _databaseService.InserirCampeonatoAsync(campeonato);
-            await CarregarCampeonatos();
+        private static async Task ParticiparAsync(Campeonato campeonato) {
+            Debug.WriteLine($"[HomeViewModel] ParticiparAsync chamado. Campeonato: {campeonato?.Nome ?? "NULO"}, ID: {campeonato?.Id ?? 0}");
+            if (campeonato == null) {
+                Debug.WriteLine("[DEBUG] ParticiparCommand acionado, mas campeonato é nulo.");
+                return;
+            }
+            Debug.WriteLine($"[DEBUG] ParticiparCommand acionado para: {campeonato.Nome ?? "N/A"}, ID: {campeonato.Id}");
+            await Shell.Current.DisplayAlert("Participar", $"Você clicou em Participar do campeonato: {campeonato.Nome}", "OK");
+        }
+
+        private static async Task VerCampeonatoAsync(Campeonato campeonato) {
+            Debug.WriteLine($"[HomeViewModel] VerCampeonatoAsync chamado. Campeonato: {campeonato?.Nome ?? "NULO"}, ID: {campeonato?.Id ?? 0}");
+            if (campeonato == null) {
+                Debug.WriteLine("[DEBUG] VerCampeonatoCommand acionado, mas campeonato é nulo.");
+                return;
+            }
+            Debug.WriteLine($"[DEBUG] VerCampeonatoCommand acionado para: {campeonato.Nome ?? "N/A"}, ID: {campeonato.Id}");
+            await Shell.Current.Navigation.PushAsync(new Views.CampeonatoPage.CampeonatoDetailPage(campeonato));
         }
     }
 }
