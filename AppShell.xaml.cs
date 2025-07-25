@@ -31,7 +31,6 @@ namespace ArenaVirtual {
             }
             var alertService = serviceProvider.GetService<IAlertService>();
 
-            // ✅ Adiciona HomePage como primeira opção
             this.Items.Add(new FlyoutItem {
                 Title = "Início",
                 Route = "HomePage",
@@ -63,7 +62,7 @@ namespace ArenaVirtual {
                     Title = "Gerenciar Campeonatos",
                     Items = {
                         new ShellContent { Title = "Criar Campeonato", ContentTemplate = new DataTemplate(() => new CriarCampeonatoPage()) },
-                        new ShellContent { Title = "Ver Campeonatos", ContentTemplate = new DataTemplate(() => new DashboardOrganizadorPage()) }
+                        new ShellContent { Title = "Meus Campeonatos", ContentTemplate = new DataTemplate(() => new DashboardOrganizadorPage()) }
                     }
                 });
             } else if (usuario.Perfil == TipoPerfil.Arbitro) {
