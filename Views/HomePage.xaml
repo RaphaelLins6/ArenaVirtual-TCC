@@ -39,7 +39,6 @@
                             <local:CampeonatoCard
                                 CampeonatoItem="{Binding .}"
                                 FavoritarCommand="{Binding BindingContext.FavoritarCommand, Source={x:Reference HomePageRef}}"
-                                ParticiparCommand="{Binding BindingContext.ParticiparCommand, Source={x:Reference HomePageRef}}"
                                 VerCampeonatoCommand="{Binding BindingContext.VerCampeonatoCommand, Source={x:Reference HomePageRef}}" />
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
@@ -66,7 +65,6 @@
                             <local:CampeonatoCard
                                 CampeonatoItem="{Binding .}"
                                 FavoritarCommand="{Binding BindingContext.FavoritarCommand, Source={x:Reference HomePageRef}}"
-                                ParticiparCommand="{Binding BindingContext.ParticiparCommand, Source={x:Reference HomePageRef}}"
                                 VerCampeonatoCommand="{Binding BindingContext.VerCampeonatoCommand, Source={x:Reference HomePageRef}}" />
                         </DataTemplate>
                     </CollectionView.ItemTemplate>

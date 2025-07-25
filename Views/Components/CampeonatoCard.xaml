@@ -73,14 +73,6 @@
 
                 <HorizontalStackLayout Margin="0,8,0,0" Spacing="10">
                     <Button
-                        BackgroundColor="OrangeRed"
-                        Command="{Binding BindingContext.ParticiparCommand, Source={RelativeSource AncestorType={x:Type views:HomePage}}}"
-                        CommandParameter="{Binding .}"
-                        Style="{StaticResource BotaoPrincipal}"
-                        Text="Participar"
-                        TextColor="White" />
-
-                    <Button
                         BackgroundColor="Transparent"
                         BorderColor="OrangeRed"
                         BorderWidth="1"

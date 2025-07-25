@@ -4,7 +4,6 @@ using MvvmHelpers;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows.Input;
 
 namespace ArenaVirtual.ViewModels {
@@ -22,7 +21,6 @@ namespace ArenaVirtual.ViewModels {
         }
 
         public ICommand FavoritarCommand { get; }
-        public ICommand ParticiparCommand { get; }
         public ICommand VerCampeonatoCommand { get; }
         private readonly DatabaseService _databaseService;
 
@@ -37,10 +35,6 @@ namespace ArenaVirtual.ViewModels {
                         await FavoritarAsync(campeonato);
                 });
             
-            ParticiparCommand = new Command<Campeonato>(async (campeonato) => {
-                await ParticiparAsync(campeonato);
-            });
-
             VerCampeonatoCommand = new Command<Campeonato>(async (campeonato) => {
                 await VerCampeonatoAsync(campeonato);
             });
@@ -57,17 +51,14 @@ namespace ArenaVirtual.ViewModels {
             try {
                 var todos = await _databaseService.ListarCampeonatosAsync() ?? [];
 
-                // Agrupa por ID para evitar duplicação real
                 var unicos = todos
                     .GroupBy(c => c.Id)
                     .Select(g => g.First())
                     .ToList();
 
-                // Popula a lista de Favoritos APENAS com os campeonatos marcados como favoritos
                 Favoritos = new ObservableCollection<Campeonato>(unicos.Where(c => c.EhFavorito));
 
-                _campeonatos.Clear(); // Limpa a lista atual de "Todos os Campeonatos"
-                // Adiciona TODOS os campeonatos (únicos) à lista _campeonatos
+                _campeonatos.Clear(); 
                 foreach (var c in unicos) {
                     _campeonatos.Add(c);
                 }
@@ -90,16 +81,6 @@ namespace ArenaVirtual.ViewModels {
             await _databaseService.AtualizarCampeonatoAsync(campeonato);
 
             await CarregarCampeonatos();
-        }
-
-        private static async Task ParticiparAsync(Campeonato campeonato) {
-            Debug.WriteLine($"[HomeViewModel] ParticiparAsync chamado. Campeonato: {campeonato?.Nome ?? "NULO"}, ID: {campeonato?.Id ?? 0}");
-            if (campeonato == null) {
-                Debug.WriteLine("[DEBUG] ParticiparCommand acionado, mas campeonato é nulo.");
-                return;
-            }
-            Debug.WriteLine($"[DEBUG] ParticiparCommand acionado para: {campeonato.Nome ?? "N/A"}, ID: {campeonato.Id}");
-            await Shell.Current.DisplayAlert("Participar", $"Você clicou em Participar do campeonato: {campeonato.Nome}", "OK");
         }
 
         private static async Task VerCampeonatoAsync(Campeonato campeonato) {

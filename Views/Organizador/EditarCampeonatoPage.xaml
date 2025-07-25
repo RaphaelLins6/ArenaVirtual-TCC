@@ -10,44 +10,53 @@
             <Label
                 FontSize="24"
                 HorizontalOptions="Center"
-                Text="Editar Campeonato" 
-                TextColor="White"/>
+                Text="Editar Campeonato"
+                TextColor="White" />
 
-            <Entry Placeholder="Nome do campeonato" Text="{Binding Nome}" />
-            <Entry Placeholder="Local" Text="{Binding Local}" />
-            <Entry Placeholder="URL do logo" Text="{Binding LogoUrl}" />
-            <Entry Placeholder="Nome do organizador" Text="{Binding NomeOrganizador}" />
+            <Entry Placeholder="Nome do campeonato" Text="{Binding Campeonato.Nome}" />
+            <Entry Placeholder="Local" Text="{Binding Campeonato.Local}" />
+            <Button
+                Command="{Binding SelecionarLogoCommand}"
+                Style="{StaticResource BotaoPrincipal}"
+                Text="Selecionar Logo" />
+            <Image
+                Margin="0,10,0,0"
+                Aspect="AspectFit"
+                HeightRequest="100"
+                Source="{Binding LogoImageSource}"
+                WidthRequest="100" />
+            <Entry Placeholder="Nome do organizador" Text="{Binding Campeonato.NomeOrganizador}" />
             <Entry
                 Keyboard="Email"
                 Placeholder="Email do organizador"
-                Text="{Binding EmailOrganizador}" />
+                Text="{Binding Campeonato.EmailOrganizador}" />
             <Entry
                 Keyboard="Telephone"
                 Placeholder="Telefone do organizador"
-                Text="{Binding TelefoneOrganizador}" />
-            <Entry Placeholder="Formato do campeonato" Text="{Binding FormatoCampeonato}" />
-            <Entry Placeholder="Locais dos jogos" Text="{Binding LocaisDosJogos}" />
+                Text="{Binding Campeonato.TelefoneOrganizador}" />
+            <Entry Placeholder="Formato do campeonato" Text="{Binding Campeonato.FormatoCampeonato}" />
+            <Entry Placeholder="Locais dos jogos" Text="{Binding Campeonato.LocaisDosJogos}" />
 
             <Label Text="Data de Início" />
-            <DatePicker Date="{Binding DataInicio}" Format="dd/MM/yyyy" />
+            <DatePicker Date="{Binding Campeonato.DataInicio}" Format="dd/MM/yyyy" />
 
             <Label Text="Data de Fim" />
-            <DatePicker Date="{Binding DataFim}" Format="dd/MM/yyyy" />
+            <DatePicker Date="{Binding Campeonato.DataFim}" Format="dd/MM/yyyy" />
 
             <Label Text="Número máximo de equipes" />
-            <Entry Keyboard="Numeric" Text="{Binding NumeroMaximoEquipes}" />
+            <Entry Keyboard="Numeric" Text="{Binding Campeonato.NumeroMaximoEquipes}" />
 
             <Label Text="Valor da taxa de inscrição" />
-            <Entry Keyboard="Numeric" Text="{Binding ValorTaxaInscricao}" />
+            <Entry Keyboard="Numeric" Text="{Binding Campeonato.ValorTaxaInscricao}" />
 
             <StackLayout Orientation="Horizontal" VerticalOptions="Center">
                 <Label Text="Favorito" VerticalOptions="Center" />
-                <Switch IsToggled="{Binding EhFavorito}" />
+                <Switch IsToggled="{Binding Campeonato.EhFavorito}" />
             </StackLayout>
 
             <StackLayout Orientation="Horizontal" VerticalOptions="Center">
                 <Label Text="Haverá premiação?" VerticalOptions="Center" />
-                <Switch IsToggled="{Binding HaveraPremiacao}" />
+                <Switch IsToggled="{Binding Campeonato.HaveraPremiacao}" />
             </StackLayout>
 
             <Button

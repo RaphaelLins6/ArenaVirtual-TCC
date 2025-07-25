@@ -12,7 +12,7 @@ public partial class EditarCampeonatoPage : ContentPage, IQueryAttributable
         InitializeComponent();
     }
 
-    public Campeonato? Campeonato { get; set; } // Adicione o tipo nullable para evitar warnings
+    public Campeonato? Campeonato { get; set; }
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
@@ -20,7 +20,9 @@ public partial class EditarCampeonatoPage : ContentPage, IQueryAttributable
         {
             var json = Uri.UnescapeDataString(campeonatoJson as string);
             Campeonato = JsonSerializer.Deserialize<Campeonato>(json);
-            BindingContext = Campeonato;
+
+            var databaseService = App.Current?.Handler?.MauiContext?.Services?.GetRequiredService<DatabaseService>();
+            BindingContext = new EditarCampeonatoViewModel(databaseService, Campeonato);
         }
     }
 }
