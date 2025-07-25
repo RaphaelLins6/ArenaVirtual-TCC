@@ -1,11 +1,60 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage
-    x:Class="ArenaVirtual.Views.Organizador.TimesPage"
+    x:Class="ArenaVirtual.Views.Organizador.EditarCampeonatoPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:ArenaVirtual.Views.Organizador"
-    Title="Times">
-    <StackLayout Padding="20">
-        <Label FontSize="20" Text="Página de times" />
-    </StackLayout>
+    Title="Editar Campeonato">
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="16">
+            <Label
+                FontSize="24"
+                HorizontalOptions="Center"
+                Text="Editar Campeonato" />
+
+            <Entry Placeholder="Nome do campeonato" Text="{Binding Nome}" />
+            <Entry Placeholder="Local" Text="{Binding Local}" />
+            <Entry Placeholder="URL do logo" Text="{Binding LogoUrl}" />
+            <Entry Placeholder="Nome do organizador" Text="{Binding NomeOrganizador}" />
+            <Entry
+                Keyboard="Email"
+                Placeholder="Email do organizador"
+                Text="{Binding EmailOrganizador}" />
+            <Entry
+                Keyboard="Telephone"
+                Placeholder="Telefone do organizador"
+                Text="{Binding TelefoneOrganizador}" />
+            <Entry Placeholder="Formato do campeonato" Text="{Binding FormatoCampeonato}" />
+            <Entry Placeholder="Locais dos jogos" Text="{Binding LocaisDosJogos}" />
+
+            <Label Text="Data de Início" />
+            <DatePicker Date="{Binding DataInicio}" Format="dd/MM/yyyy" />
+
+            <Label Text="Data de Fim" />
+            <DatePicker Date="{Binding DataFim}" Format="dd/MM/yyyy" />
+
+            <Label Text="Número máximo de equipes" />
+            <Entry Keyboard="Numeric" Text="{Binding NumeroMaximoEquipes}" />
+
+            <Label Text="Valor da taxa de inscrição" />
+            <Entry Keyboard="Numeric" Text="{Binding ValorTaxaInscricao}" />
+
+            <StackLayout Orientation="Horizontal" VerticalOptions="Center">
+                <Label Text="Favorito" VerticalOptions="Center" />
+                <Switch IsToggled="{Binding EhFavorito}" />
+            </StackLayout>
+
+            <StackLayout Orientation="Horizontal" VerticalOptions="Center">
+                <Label Text="Haverá premiação?" VerticalOptions="Center" />
+                <Switch IsToggled="{Binding HaveraPremiacao}" />
+            </StackLayout>
+
+            <Button
+                Padding="12,6"
+                BackgroundColor="#2196F3"
+                Command="{Binding SalvarCommand}"
+                CornerRadius="8"
+                Text="Salvar"
+                TextColor="White" />
+        </StackLayout>
+    </ScrollView>
 </ContentPage>

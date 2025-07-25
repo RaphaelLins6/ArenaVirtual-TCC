@@ -82,6 +82,9 @@
 	  <Compile Update="Views\Atleta\PartidasPage.xaml.cs">
 	    <DependentUpon>PartidasPage.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Views\Organizador\EditarCampeonatoPage.xaml.cs">
+	    <DependentUpon>EditarCampeonatoPage.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Views\RegisterPage.xaml.cs">
 	    <DependentUpon>RegisterPage.xaml</DependentUpon>
 	  </Compile>
