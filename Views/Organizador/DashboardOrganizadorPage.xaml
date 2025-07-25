@@ -68,16 +68,17 @@
                                     <Button
                                         Padding="10,4"
                                         BackgroundColor="#2196F3"
-                                        Command="{Binding BindingContext.EditarCampeonatoCommand, Source={x:Reference DashboardOrganizadorPage}}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditarCampeonatoCommand}"
                                         CommandParameter="{Binding .}"
                                         CornerRadius="6"
                                         Style="{StaticResource BotaoPrincipal}"
                                         Text="Editar"
                                         TextColor="White" />
+
                                     <Button
                                         Padding="10,4"
                                         BackgroundColor="#F44336"
-                                        Command="{Binding BindingContext.RemoverCampeonatoCommand, Source={x:Reference DashboardOrganizadorPage}}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoverCampeonatoCommand}"
                                         CommandParameter="{Binding .}"
                                         CornerRadius="6"
                                         Style="{StaticResource BotaoPrincipal}"

@@ -1,18 +1,25 @@
 ﻿using ArenaVirtual.Models;
+using ArenaVirtual.Services;
+using ArenaVirtual.ViewModels.Organizador;
+using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 
 namespace ArenaVirtual.Views.Organizador;
-public partial class EditarCampeonatoPage : ContentPage, IQueryAttributable {
-    public Campeonato Campeonato { get; set; }
-
-    public EditarCampeonatoPage() {
+public partial class EditarCampeonatoPage : ContentPage, IQueryAttributable
+{
+    public EditarCampeonatoPage()
+    {
         InitializeComponent();
     }
 
-    public void ApplyQueryAttributes(IDictionary<string, object> query) {
-        if (query.TryGetValue("campeonato", out var campeonatoJson)) {
-            Campeonato = JsonSerializer.Deserialize<Campeonato>(campeonatoJson as string);
-            // Atualize o BindingContext ou os campos conforme necessário
+    public Campeonato? Campeonato { get; set; } // Adicione o tipo nullable para evitar warnings
+
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (query.TryGetValue("campeonato", out var campeonatoJson))
+        {
+            var json = Uri.UnescapeDataString(campeonatoJson as string);
+            Campeonato = JsonSerializer.Deserialize<Campeonato>(json);
             BindingContext = Campeonato;
         }
     }

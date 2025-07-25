@@ -42,12 +42,20 @@ namespace ArenaVirtual.ViewModels.Organizador {
         }
 
         private async Task NavegarParaEditarCampeonatoAsync(Campeonato campeonato) {
-            // Serializa o objeto para passar como parâmetro
             var campeonatoJson = JsonSerializer.Serialize(campeonato);
             await Shell.Current.GoToAsync($"{nameof(EditarCampeonatoPage)}?campeonato={Uri.EscapeDataString(campeonatoJson)}");
         }
 
         private async Task RemoverCampeonatoAsync(Campeonato campeonato) {
+            // Exibe alerta de confirmação
+            bool confirmar = await Shell.Current.DisplayAlert(
+                "Excluir Campeonato",
+                $"Deseja realmente excluir o campeonato \"{campeonato.Nome}\"?",
+                "Sim", "Não");
+
+            if (!confirmar)
+                return;
+
             await _databaseService.DeletarCampeonatoAsync(campeonato);
             await CarregarCampeonatos();
         }

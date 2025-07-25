@@ -3,13 +3,15 @@
     x:Class="ArenaVirtual.Views.Organizador.EditarCampeonatoPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Editar Campeonato">
+    Title="Editar Campeonato"
+    Shell.NavBarIsVisible="False">
     <ScrollView>
         <StackLayout Padding="20" Spacing="16">
             <Label
                 FontSize="24"
                 HorizontalOptions="Center"
-                Text="Editar Campeonato" />
+                Text="Editar Campeonato" 
+                TextColor="White"/>
 
             <Entry Placeholder="Nome do campeonato" Text="{Binding Nome}" />
             <Entry Placeholder="Local" Text="{Binding Local}" />
@@ -50,9 +52,9 @@
 
             <Button
                 Padding="12,6"
-                BackgroundColor="#2196F3"
                 Command="{Binding SalvarCommand}"
                 CornerRadius="8"
+                Style="{StaticResource BotaoPrincipal}"
                 Text="Salvar"
                 TextColor="White" />
         </StackLayout>
