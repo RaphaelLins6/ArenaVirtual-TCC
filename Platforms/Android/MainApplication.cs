@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace ArenaVirtuall
+namespace ArenaVirtual
 {
     [Application]
     public class MainApplication : MauiApplication

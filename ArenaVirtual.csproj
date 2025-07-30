@@ -103,6 +103,9 @@
 	  <MauiXaml Update="Popups\EditarPerfilPopup.xaml">
 	    <Generator></Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\Atleta\CriarTimePage.xaml">
+	    <Generator></Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\CampeonatoPage\CampeonatoDetailPage.xaml">
 	    <Generator></Generator>
 	  </MauiXaml>

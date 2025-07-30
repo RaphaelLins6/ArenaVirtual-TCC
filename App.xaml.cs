@@ -5,6 +5,7 @@ using ArenaVirtual.Views;
 namespace ArenaVirtual;
 
 public partial class App : Application {
+    public static TimeService? TimeService { get; private set; }
     public App() {
         InitializeComponent();
     }

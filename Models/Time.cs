@@ -29,7 +29,7 @@ namespace ArenaVirtual.Models {
         public int Derrotas { get; set; } = 0;
         public int Empates { get; set; } = 0;
 
-        [ForeignKey("CapitãoId")]
-        public int? CapitãoId { get; set; }
+        [ForeignKey("CapitaoId")]
+        public int? CapitaoId { get; set; }
     }
 }

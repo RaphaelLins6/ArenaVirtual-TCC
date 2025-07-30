@@ -18,6 +18,9 @@ namespace ArenaVirtual {
             Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));
             Routing.RegisterRoute(nameof(RegisterPage), typeof(RegisterPage));
             Routing.RegisterRoute(nameof(EditarCampeonatoPage), typeof(EditarCampeonatoPage));
+            Routing.RegisterRoute(nameof(CriarTimePage), typeof(CriarTimePage));
+            Routing.RegisterRoute(nameof(ProcurarTimesPage), typeof(ProcurarTimesPage));
+
 
             CriarMenuPorPerfil(usuarioLogado);
         }

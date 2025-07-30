@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="ArenaVirtual.Views.Atleta.CriarTimePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Label
+                FontSize="24"
+                HorizontalOptions="Center"
+                Text="Criar Novo Time" />
+
+            <Entry Placeholder="Nome do time" Text="{Binding Nome, Mode=TwoWay}" />
+
+            <Editor
+                AutoSize="TextChanges"
+                HeightRequest="100"
+                Placeholder="Descrição do time"
+                Text="{Binding Descricao, Mode=TwoWay}" />
+
+            <!--  Upload da logo (imagem)  -->
+            <Button
+                Command="{Binding SelecionarLogoCommand}"
+                Style="{StaticResource BotaoPrincipal}"
+                Text="Selecionar Logo" />
+            <Image HeightRequest="120" Source="{Binding LogoImagem}" />
+
+            <!--  Escolha da cor do uniforme  -->
+            <Label Text="Cor do uniforme:" />
+            <Picker
+                Title="Escolha uma cor"
+                ItemsSource="{Binding CoresDisponiveis}"
+                SelectedItem="{Binding CorUniforme}" />
+
+            <Button
+                Command="{Binding CriarTimeCommand}"
+                FontAttributes="Bold"
+                Style="{StaticResource BotaoPrincipal}"
+                Text="Criar Time" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

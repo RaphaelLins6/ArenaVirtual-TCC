@@ -111,6 +111,12 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref faixaOrcamentoPatrocinio, value);
         }
 
+        private int? timeId;
+        public int? TimeId {
+            get => timeId;
+            set => SetProperty(ref timeId, value);
+        }
+
         public Usuario() { }
 
         public event PropertyChangedEventHandler? PropertyChanged;
