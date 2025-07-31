@@ -21,15 +21,15 @@ namespace ArenaVirtual.ViewModels {
                 return;
             }
 
-            var usuario = await _usuarioService.Autenticar(Email, Senha); // <--- Correto, pois Autenticar usa BCrypt.Verify
+            var usuario = await _usuarioService.Autenticar(Email, Senha);
 
             if (usuario == null) {
                 await _alertService.DisplayAlert("Erro", "E-mail ou senha inválidos.", "OK");
                 return;
             }
 
-            App.CurrentUser = usuario;
-            System.Diagnostics.Debug.WriteLine($"[LoginViewModel] App.CurrentUser definido para ID: {App.CurrentUser.Id}, Email: {App.CurrentUser.Email}");
+            SessaoService.Instancia.Login(usuario);
+            System.Diagnostics.Debug.WriteLine($"[LoginViewModel] SessaoService.Instancia.Login() chamado para ID: {usuario.Id}, Email: {usuario.Email}");
 
             Application.Current.MainPage = new AppShell(usuario);
         }

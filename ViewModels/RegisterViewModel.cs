@@ -93,6 +93,9 @@ namespace ArenaVirtual.ViewModels {
                 DataNascimento = null;
                 GeneroSelecionado = null;
 
+                SessaoService.Instancia.Login(usuarioCadastrado);
+                System.Diagnostics.Debug.WriteLine($"[RegisterViewModel] SessaoService.Instancia.Login() chamado para ID: {usuarioCadastrado.Id}, Email: {usuarioCadastrado.Email}");
+
                 MainThread.BeginInvokeOnMainThread(() => {
                     if (Application.Current?.Windows.Count > 0) {
                         Application.Current.Windows[0].Page = new AppShell(usuarioCadastrado);
