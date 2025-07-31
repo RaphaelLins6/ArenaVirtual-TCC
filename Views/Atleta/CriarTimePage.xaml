@@ -13,7 +13,7 @@
                 HorizontalOptions="Center"
                 Text="Criar Novo Time" />
 
-            <Entry Placeholder="Nome do time" Text="{Binding Nome, Mode=TwoWay}" />
+            <Entry Placeholder="Nome do time" Text="{Binding Nome}" />
 
             <Editor
                 AutoSize="TextChanges"
@@ -26,7 +26,12 @@
                 Command="{Binding SelecionarLogoCommand}"
                 Style="{StaticResource BotaoPrincipal}"
                 Text="Selecionar Logo" />
-            <Image HeightRequest="120" Source="{Binding LogoImagem}" />
+            <Image
+                Aspect="AspectFit"
+                HeightRequest="100"
+                IsVisible="{Binding LogoImagem, Converter={StaticResource StringNotNullOrEmptyConverter}}"
+                Source="{Binding LogoImagem}"
+                WidthRequest="100" />
 
             <!--  Escolha da cor do uniforme  -->
             <Label Text="Cor do uniforme:" />
@@ -34,6 +39,21 @@
                 Title="Escolha uma cor"
                 ItemsSource="{Binding CoresDisponiveis}"
                 SelectedItem="{Binding CorUniforme}" />
+
+            <Label Text="Cor secundária do uniforme:" />
+            <Picker
+                Title="Escolha uma cor secundária"
+                ItemsSource="{Binding CoresDisponiveis}"
+                SelectedItem="{Binding CorSecundaria}" />
+
+            <Label Text="Responsável:" />
+            <Entry IsReadOnly="True" Text="{Binding NomeResponsavel}" />
+
+            <Label Text="Telefone do Responsável:" />
+            <Entry
+                IsReadOnly="True"
+                Keyboard="Telephone"
+                Text="{Binding TelefoneResponsavel}" />
 
             <Button
                 Command="{Binding CriarTimeCommand}"

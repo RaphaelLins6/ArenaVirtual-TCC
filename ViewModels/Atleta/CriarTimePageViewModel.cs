@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using ArenaVirtual.Services;
-using ArenaVirtual.Views.Atleta;
 
 namespace ArenaVirtual.ViewModels.Atleta {
     public partial class CriarTimePageViewModel : INotifyPropertyChanged {
@@ -12,6 +11,9 @@ namespace ArenaVirtual.ViewModels.Atleta {
         private string _descricao;
         private string _logoImagem;
         private string _corUniforme;
+        private string _corSecundaria;
+        private string _nomeResponsavel;
+        private string _telefoneResponsavel;
 
         public string Nome {
             get => _nome;
@@ -45,6 +47,30 @@ namespace ArenaVirtual.ViewModels.Atleta {
             }
         }
 
+        public string CorSecundaria {
+            get => _corSecundaria;
+            set {
+                _corSecundaria = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string NomeResponsavel {
+            get => _nomeResponsavel;
+            set {
+                _nomeResponsavel = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string TelefoneResponsavel {
+            get => _telefoneResponsavel;
+            set {
+                _telefoneResponsavel = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ObservableCollection<string> CoresDisponiveis { get; } =
         [
             "Vermelho", "Azul", "Verde", "Amarelo", "Preto", "Branco", "Laranja"
@@ -57,6 +83,8 @@ namespace ArenaVirtual.ViewModels.Atleta {
             _timeService = timeService;
             CriarTimeCommand = new Command(async () => await CriarTime());
             SelecionarLogoCommand = new Command(ExecutarSelecionarLogo);
+
+            CarregarDadosUsuario();
         }
 
         private async Task CriarTime() {
@@ -76,10 +104,26 @@ namespace ArenaVirtual.ViewModels.Atleta {
         }
 
         private async void ExecutarSelecionarLogo() {
-            _ = await FilePicker.PickAsync(new PickOptions {
-                PickerTitle = "Selecione uma imagem de logo",
-                FileTypes = FilePickerFileType.Images
-            });
+            try {
+                var result = await FilePicker.PickAsync(new PickOptions {
+                    PickerTitle = "Selecione uma imagem de logo",
+                    FileTypes = FilePickerFileType.Images
+                });
+
+                if (result != null) {
+                    LogoImagem = result.FullPath;
+                }
+            } catch (Exception ex) {
+                await Application.Current.MainPage.DisplayAlert("Erro", $"Não foi possível selecionar a imagem: {ex.Message}", "OK");
+            }
+        }
+
+        private void CarregarDadosUsuario() {
+            var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
+            if (usuarioAtual != null) {
+                NomeResponsavel = usuarioAtual.Nome;
+                TelefoneResponsavel = usuarioAtual.Telefone;
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
