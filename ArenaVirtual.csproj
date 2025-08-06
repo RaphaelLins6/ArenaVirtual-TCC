@@ -133,4 +133,8 @@
 	  <Folder Include="Properties\" />
 	</ItemGroup>
 
+	<PropertyGroup>
+		<InvariantGlobalization>true</InvariantGlobalization>
+	</PropertyGroup>
+	
 </Project>
