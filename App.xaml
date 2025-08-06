@@ -9,6 +9,8 @@
         <ResourceDictionary>
             <converters:FavoritoIconConverter x:Key="FavoritoIconConverter" />
             <converters:ZeroToTrueConverter x:Key="ZeroToTrueConverter" />
+            <converters:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmptyConverter" />
+
             <x:Array x:Key="PerfilTipos" Type="{x:Type x:String}">
                 <x:String>Atleta</x:String>
                 <x:String>Árbitro</x:String>

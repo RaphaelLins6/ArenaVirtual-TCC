@@ -6,8 +6,7 @@
     xmlns:model="clr-namespace:ArenaVirtual.Models"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
     x:Name="HomePageRef"
-    x:DataType="vm:HomeViewModel"
-    Shell.NavBarIsVisible="False">
+    x:DataType="vm:HomeViewModel">
 
     <ScrollView>
         <StackLayout Padding="20" Spacing="24">
