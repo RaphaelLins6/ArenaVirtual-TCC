@@ -3,11 +3,11 @@ namespace ArenaVirtual.Services {
     
 
 public class SessaoService {
-        private static SessaoService? _instancia; // Declare as nullable
+        private static SessaoService? _instancia; 
 
         private SessaoService() { }
 
-        private Usuario? _usuarioAtual; // Declare as nullable
+        private Usuario? _usuarioAtual; 
 
         public static SessaoService Instancia => _instancia ??= new SessaoService();
 
@@ -15,7 +15,7 @@ public class SessaoService {
             _usuarioAtual = usuario;
         }
 
-        public Usuario? GetUsuarioAtual() { // Return nullable type
+        public Usuario? GetUsuarioAtual() { 
             return _usuarioAtual;
         }
 

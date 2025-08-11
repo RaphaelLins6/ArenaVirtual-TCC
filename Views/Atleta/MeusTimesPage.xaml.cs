@@ -1,6 +1,4 @@
-﻿// MeusTimesPage.xaml.cs
-using ArenaVirtual.ViewModels.Atleta;
-using Microsoft.Extensions.DependencyInjection; // Adicione este using
+﻿using ArenaVirtual.ViewModels.Atleta;
 
 namespace ArenaVirtual.Views.Atleta {
     public partial class MeusTimesPage : ContentPage {

@@ -27,16 +27,6 @@
         RowDefinitions="Auto, Auto, *, Auto"
         RowSpacing="15">
 
-        <Label
-            Grid.Row="0"
-            Margin="0,0,0,10"
-            FontAttributes="Bold"
-            FontSize="28"
-            HorizontalOptions="Center"
-            Text="Meu Perfil"
-            TextColor="{AppThemeBinding Light=Black,
-                                        Dark=White}" />
-
         <VerticalStackLayout
             Grid.Row="1"
             HorizontalOptions="Center"

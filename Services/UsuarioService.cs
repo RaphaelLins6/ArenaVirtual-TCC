@@ -43,5 +43,10 @@ namespace ArenaVirtual.Services {
         public static string GerarHash(string senha) {
             return BCrypt.Net.BCrypt.HashPassword(senha, workFactor: 12);
         }
+
+        public async Task<List<Usuario>> ListarMembrosDoTimeAsync(int timeId) {
+            var todosUsuarios = await _databaseService.ListarUsuariosAsync();
+            return todosUsuarios.Where(u => u.TimeId == timeId).ToList();
+        }
     }
 }

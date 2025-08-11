@@ -29,6 +29,8 @@ namespace ArenaVirtual.Services {
                 if (timeCriado != null) {
                     usuario.TimeId = timeCriado.Id;
                     await _db.AtualizarUsuarioAsync(usuario);
+
+                    SessaoService.Instancia.Login(usuario);
                 }
             }
 
@@ -38,7 +40,12 @@ namespace ArenaVirtual.Services {
         public async Task<int> AssociarUsuarioAoTimeAsync(Time time) {
             var usuario = SessaoService.Instancia.GetUsuarioAtual() ?? throw new Exception("Usuário não logado");
             usuario.TimeId = time.Id;
-            return await _db.AtualizarUsuarioAsync(usuario);
+
+            int resultado = await _db.AtualizarUsuarioAsync(usuario);
+
+            SessaoService.Instancia.Login(usuario);
+
+            return resultado;
         }
     }
 }
