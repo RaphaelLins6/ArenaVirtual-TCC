@@ -89,7 +89,7 @@
 
                 <Button
                     BackgroundColor="#4CAF50"
-                    Command="{Binding CriarTimeCommand}"
+                    Command="{Binding CriarMeuTimeCommand}"
                     CornerRadius="20"
                     HorizontalOptions="Center"
                     Text="Criar Time"
