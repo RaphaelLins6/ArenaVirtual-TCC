@@ -9,11 +9,9 @@
     <ContentPage.Content>
         <Grid Padding="15">
 
-            <!--  Estado: Vinculado a Time  -->
             <ScrollView IsVisible="{Binding VinculadoATime}">
                 <VerticalStackLayout Spacing="15">
 
-                    <!--  Logo e Nome  -->
                     <Frame
                         Padding="10"
                         BackgroundColor="{AppThemeBinding Light=White,
@@ -24,7 +22,7 @@
                             <Image
                                 Aspect="AspectFill"
                                 HeightRequest="80"
-                                Source="{Binding Time.Logo}"
+                                Source="{Binding LogoImageSource}"
                                 WidthRequest="80" />
                             <VerticalStackLayout>
                                 <Label
@@ -39,12 +37,11 @@
                         </HorizontalStackLayout>
                     </Frame>
 
-                    <!--  Capitão e Membros  -->
                     <Label
                         FontAttributes="Bold"
                         FontSize="18"
                         Text="Membros" />
-                    <CollectionView ItemsSource="{Binding Membros}">
+                    <CollectionView ItemsSource="{Binding MembrosDoTime}">
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Frame
@@ -66,7 +63,6 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <!--  Botões de ação  -->
                     <Button
                         BackgroundColor="#FF9800"
                         Command="{Binding GerenciarTimeCommand}"
@@ -76,7 +72,6 @@
                 </VerticalStackLayout>
             </ScrollView>
 
-            <!--  Estado: Não vinculado a Time  -->
             <VerticalStackLayout
                 IsVisible="{Binding NaoVinculadoATime}"
                 Spacing="20"

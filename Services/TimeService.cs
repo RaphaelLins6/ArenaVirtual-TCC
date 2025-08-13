@@ -8,15 +8,20 @@ namespace ArenaVirtual.Services {
         public async Task<List<Time>> ObterTodosAsync() =>
             await _db.ListarTimesAsync();
 
-        public async Task<Time?> ObterPorIdAsync(int id) =>
-            (await _db.ListarTimesAsync()).FirstOrDefault(t => t.Id == id);
+        public async Task<Time?> ObterPorIdAsync(int id) {
+            var todos = await _db.ListarTimesAsync();
+            var t = todos.FirstOrDefault(x => x.Id == id);
 
-        public async Task<int> CriarTimeEAssociarUsuarioAsync(string nome, string descricao) {
+            return t;
+        }
+
+        public async Task<int> CriarTimeEAssociarUsuarioAsync(Time novoTime) {
             var usuario = SessaoService.Instancia.GetUsuarioAtual() ?? throw new Exception("Usuário não logado");
-            
+
             var time = new Time {
-                Nome = nome,
-                Descricao = descricao,
+                Nome = novoTime.Nome,
+                Descricao = novoTime.Descricao,
+                LogoUrl = novoTime.LogoUrl,
                 CapitaoId = usuario.Id
             };
 
@@ -24,7 +29,7 @@ namespace ArenaVirtual.Services {
 
             if (resultado > 0) {
                 var timeCriado = (await _db.ListarTimesAsync())
-                    .FirstOrDefault(t => t.Nome == nome && t.CapitaoId == usuario.Id);
+                    .FirstOrDefault(t => t.Nome == novoTime.Nome && t.CapitaoId == usuario.Id);
 
                 if (timeCriado != null) {
                     usuario.TimeId = timeCriado.Id;

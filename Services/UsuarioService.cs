@@ -45,8 +45,10 @@ namespace ArenaVirtual.Services {
         }
 
         public async Task<List<Usuario>> ListarMembrosDoTimeAsync(int timeId) {
-            var todosUsuarios = await _databaseService.ListarUsuariosAsync();
-            return todosUsuarios.Where(u => u.TimeId == timeId).ToList();
+            var todos = await _databaseService.ListarUsuariosAsync();
+            var membros = todos.Where(u => u.TimeId == timeId).ToList();
+
+            return membros;
         }
     }
 }

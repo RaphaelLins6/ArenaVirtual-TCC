@@ -7,9 +7,12 @@ namespace ArenaVirtual.Views.Atleta {
             BindingContext = App.Current.Handler.MauiContext.Services.GetRequiredService<MeuTimePageViewModel>();
         }
 
-        protected override void OnAppearing() {
+        public MeuTimePageViewModel Vm => BindingContext as MeuTimePageViewModel;
+
+        protected override async void OnAppearing() {
             base.OnAppearing();
             if (BindingContext is MeuTimePageViewModel vm) {
+                await vm.LoadData();
             }
         }
     }

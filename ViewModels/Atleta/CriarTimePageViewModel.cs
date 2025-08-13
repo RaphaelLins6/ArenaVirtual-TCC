@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using ArenaVirtual.Services;
+using ArenaVirtual.Models; 
 
 namespace ArenaVirtual.ViewModels.Atleta {
     public partial class CriarTimePageViewModel : INotifyPropertyChanged {
@@ -82,7 +83,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
         public CriarTimePageViewModel(TimeService timeService) {
             _timeService = timeService;
             CriarTimeCommand = new Command(async () => await CriarTime());
-            SelecionarLogoCommand = new Command(ExecutarSelecionarLogo);
+            SelecionarLogoCommand = new Command(async () => await ExecutarSelecionarLogo());
 
             CarregarDadosUsuario();
         }
@@ -93,7 +94,13 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 return;
             }
 
-            var resultado = await _timeService.CriarTimeEAssociarUsuarioAsync(Nome, Descricao);
+            var novoTime = new Time {
+                Nome = Nome,
+                Descricao = Descricao,
+                LogoUrl = LogoImagem,
+            };
+
+            var resultado = await _timeService.CriarTimeEAssociarUsuarioAsync(novoTime);
 
             if (resultado > 0) {
                 await Application.Current.MainPage.DisplayAlert("Sucesso", $"Time '{Nome}' criado com sucesso!", "OK");
@@ -103,7 +110,8 @@ namespace ArenaVirtual.ViewModels.Atleta {
             }
         }
 
-        private async void ExecutarSelecionarLogo() {
+
+        private async Task ExecutarSelecionarLogo() {
             try {
                 var result = await FilePicker.PickAsync(new PickOptions {
                     PickerTitle = "Selecione uma imagem de logo",
@@ -111,7 +119,15 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 });
 
                 if (result != null) {
-                    LogoImagem = result.FullPath;
+                    var newFileName = Guid.NewGuid().ToString() + Path.GetExtension(result.FileName);
+                    var newFilePath = Path.Combine(FileSystem.AppDataDirectory, newFileName);
+
+                    using (var stream = await result.OpenReadAsync())
+                    using (var newStream = File.OpenWrite(newFilePath)) {
+                        await stream.CopyToAsync(newStream);
+                    }
+
+                    LogoImagem = newFilePath;
                 }
             } catch (Exception ex) {
                 await Application.Current.MainPage.DisplayAlert("Erro", $"Não foi possível selecionar a imagem: {ex.Message}", "OK");

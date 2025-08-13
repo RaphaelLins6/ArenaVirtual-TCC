@@ -1,28 +1,21 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using ArenaVirtual.Services;
+﻿using ArenaVirtual.Services;
 using ArenaVirtual.Views.Atleta;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices; 
+using System.Windows.Input;
+using ArenaVirtual.Models;
 
 namespace ArenaVirtual.ViewModels.Atleta;
 
 public partial class MeuTimePageViewModel : INotifyPropertyChanged {
-    public class TimeModel {
-        public int Id { get; set; }
-        public string Nome { get; set; }
-        public string Descricao { get; set; }
-        public string Logo { get; set; }
-        public ObservableCollection<MembroModel> Membros { get; set; } = [];
-    }
-
     public class MembroModel {
         public string Nome { get; set; }
-        public string Foto { get; set; }
+        public ImageSource Foto { get; set; }
     }
 
-    private TimeModel _time = new TimeModel();
-    public TimeModel Time {
+    private Time _time = new Time();
+    public Time Time {
         get => _time;
         set {
             if (_time != value) {
@@ -30,6 +23,20 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(VinculadoATime));
                 OnPropertyChanged(nameof(NaoVinculadoATime));
+                OnPropertyChanged(nameof(LogoImageSource));
+            }
+        }
+    }
+
+    public ImageSource LogoImageSource => GetImageSourceFromFile(Time?.LogoUrl);
+
+    private ObservableCollection<MembroModel> _membrosDoTime = new ObservableCollection<MembroModel>();
+    public ObservableCollection<MembroModel> MembrosDoTime {
+        get => _membrosDoTime;
+        set {
+            if (_membrosDoTime != value) {
+                _membrosDoTime = value;
+                OnPropertyChanged();
             }
         }
     }
@@ -42,44 +49,86 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
     public ICommand GerenciarTimeCommand { get; }
 
     private readonly TimeService _timeService;
-    private readonly UsuarioService _usuarioService; 
+    private readonly UsuarioService _usuarioService;
 
     public MeuTimePageViewModel(TimeService timeService, UsuarioService usuarioService) {
         _timeService = timeService;
-        _usuarioService = usuarioService; 
+        _usuarioService = usuarioService;
 
         GerenciarTimeCommand = new Command(async () => await Shell.Current.GoToAsync("GerenciarTimePage"));
         CriarMeuTimeCommand = new Command(async () => await Shell.Current.Navigation.PushAsync(new CriarTimePage(_timeService)));
         EntrarTimeCommand = new Command(async () => await Shell.Current.GoToAsync("ProcurarTimePage"));
 
+        Time = new Time();
         _ = LoadData();
     }
 
     public async Task LoadData() {
-        var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
+        try {
+            var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
 
-        if (usuarioAtual != null && usuarioAtual.TimeId != null) {
+            if (usuarioAtual?.TimeId == null) {
+                Time = new Time(); 
+                MembrosDoTime.Clear(); 
+                return;
+            }
+
             var timeDoUsuario = await _timeService.ObterPorIdAsync(usuarioAtual.TimeId.Value);
 
-            if (timeDoUsuario != null) {
-                this.Time = new MeuTimePageViewModel.TimeModel {
-                    Id = timeDoUsuario.Id,
-                    Nome = timeDoUsuario.Nome,
-                    Descricao = timeDoUsuario.Descricao,
-                    Logo = timeDoUsuario.LogoUrl,
-                    Membros = new ObservableCollection<MembroModel>()
-                };
+            if (timeDoUsuario == null) {
+                Time = new Time(); 
+                MembrosDoTime.Clear(); 
+                return;
+            }
 
-                var membros = await _usuarioService.ListarMembrosDoTimeAsync(timeDoUsuario.Id);
-                foreach (var membro in membros) {
-                    this.Time.Membros.Add(new MembroModel { Nome = membro.Nome, Foto = membro.ImagemPath });
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] Caminho da Logo do Time lido do DB: '{timeDoUsuario.LogoUrl}'");
+
+            Time = timeDoUsuario;
+
+            var membrosCarregados = new ObservableCollection<MembroModel>();
+            var usuariosDoTime = await _usuarioService.ListarMembrosDoTimeAsync(timeDoUsuario.Id);
+
+            if (usuariosDoTime != null) {
+                foreach (var usuario in usuariosDoTime) {
+                    membrosCarregados.Add(new MembroModel {
+                        Nome = usuario.Nome,
+                        Foto = GetImageSourceFromFile(usuario.ImagemPath)
+                    });
                 }
             }
-        } else {
-            this.Time = new MeuTimePageViewModel.TimeModel();
+            MembrosDoTime = membrosCarregados; 
+        } catch (Exception ex) {
+            Time = new Time();
+            MembrosDoTime.Clear(); 
+            await Shell.Current.DisplayAlert("Erro", "Não foi possível carregar os dados do time.", "OK");
+            System.Diagnostics.Debug.WriteLine($"[ERRO GERAL] Falha ao carregar dados do time: {ex.Message}");
         }
     }
 
+    // Seu método GetImageSourceFromFile permanece o mesmo e é ótimo!
+    private ImageSource GetImageSourceFromFile(string filePath) {
+        if (string.IsNullOrEmpty(filePath)) {
+            System.Diagnostics.Debug.WriteLine("[DEBUG] filePath para ImageSource está vazio ou nulo. Usando placeholder.");
+            return ImageSource.FromFile("placeholder.png");
+        }
+
+        try {
+            if (File.Exists(filePath)) {
+                System.Diagnostics.Debug.WriteLine($"[DEBUG] Tentando carregar imagem do caminho: '{filePath}'");
+                return ImageSource.FromStream(() => File.OpenRead(filePath));
+            } else {
+                System.Diagnostics.Debug.WriteLine($"[DEBUG] Arquivo não encontrado no caminho: '{filePath}'. Usando placeholder.");
+                return ImageSource.FromFile("placeholder.png");
+            }
+        } catch (Exception ex) {
+            System.Diagnostics.Debug.WriteLine($"[ERRO DE CARREGAMENTO] Falha ao carregar imagem do caminho: '{filePath}'. Erro: {ex.Message}");
+            return ImageSource.FromFile("placeholder.png");
+        }
+    }
+
+    // **CORREÇÃO**: A sua classe MeuTimePageViewModel é 'partial', mas precisa ter a implementação
+    // de INotifyPropertyChanged na mesma parte do arquivo para evitar o erro CS0103.
+    // Esta é a implementação necessária.
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
