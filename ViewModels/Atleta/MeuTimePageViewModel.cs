@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using ArenaVirtual.Models;
+using System.IO;
 
 namespace ArenaVirtual.ViewModels.Atleta;
 
@@ -57,6 +58,27 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
     private readonly UsuarioService _usuarioService;
     private readonly DatabaseService _databaseService;
 
+    // NOVAS PROPRIEDADES PARA A MENSAGEM
+    private string _statusMessageTitle;
+    public string StatusMessageTitle {
+        get => _statusMessageTitle;
+        set => SetProperty(ref _statusMessageTitle, value);
+    }
+
+    private string _statusMessageDescription;
+    public string StatusMessageDescription {
+        get => _statusMessageDescription;
+        set => SetProperty(ref _statusMessageDescription, value);
+    }
+
+    // Antiga propriedade StatusMessage removida
+
+    private bool _showButtons = true;
+    public bool ShowButtons {
+        get => _showButtons;
+        set => SetProperty(ref _showButtons, value);
+    }
+
     public MeuTimePageViewModel(TimeService timeService, UsuarioService usuarioService, DatabaseService databaseService) {
         _timeService = timeService;
         _usuarioService = usuarioService;
@@ -71,28 +93,6 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
         _ = LoadData();
     }
 
-    private string _statusMessage = "Você ainda não está em um time!";
-    public string StatusMessage {
-        get => _statusMessage;
-        set {
-            if (_statusMessage != value) {
-                _statusMessage = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    private bool _showButtons = true;
-    public bool ShowButtons {
-        get => _showButtons;
-        set {
-            if (_showButtons != value) {
-                _showButtons = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
     public async Task LoadData() {
         try {
             var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
@@ -104,15 +104,16 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
                 var convitePendente = await _databaseService.ObterConvitePendenteDoUsuarioAsync(usuarioAtual.Id);
                 if (convitePendente != null) {
                     var timeConvidado = await _timeService.ObterPorIdAsync(convitePendente.IdTime);
-                    if (timeConvidado != null) {
-                        StatusMessage = $"Solicitação enviada para o time: {timeConvidado.Nome}. Aguarde a resposta do capitão.";
-                    } else {
-                        StatusMessage = "Solicitação enviada para um time. Aguarde a resposta do capitão.";
-                    }
+
+                    StatusMessageTitle = "Solicitação Pendente";
+                    StatusMessageDescription = timeConvidado != null
+                        ? $"Sua solicitação para entrar no time {timeConvidado.Nome} foi enviada. Aguarde a resposta do capitão."
+                        : "Sua solicitação para entrar em um time foi enviada. Aguarde a resposta do capitão.";
 
                     ShowButtons = false;
                 } else {
-                    StatusMessage = "Você ainda não está em um time!";
+                    StatusMessageTitle = "Você ainda não está em um time!";
+                    StatusMessageDescription = "Crie seu próprio time ou solicite entrada em um time existente.";
                     ShowButtons = true;
                 }
 
@@ -124,7 +125,8 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
             if (timeDoUsuario == null) {
                 Time = new Time();
                 MembrosDoTime.Clear();
-                StatusMessage = "Você ainda não está em um time!";
+                StatusMessageTitle = "Você ainda não está em um time!";
+                StatusMessageDescription = "Crie seu próprio time ou solicite entrada em um time existente.";
                 ShowButtons = true;
                 return;
             }
@@ -145,7 +147,8 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
                 }
             }
             MembrosDoTime = membrosCarregados;
-            StatusMessage = ""; 
+            StatusMessageTitle = string.Empty; 
+            StatusMessageDescription = string.Empty;
             ShowButtons = false;
         } catch (Exception ex) {
             Time = new Time();
@@ -179,4 +182,11 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
     protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
+    protected bool SetProperty<T>(ref T backingField, T value, [CallerMemberName] string propertyName = null) {
+        if (EqualityComparer<T>.Default.Equals(backingField, value))
+            return false;
+        backingField = value;
+        OnPropertyChanged(propertyName);
+        return true;
+    }
 }

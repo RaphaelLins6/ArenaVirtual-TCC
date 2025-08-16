@@ -93,7 +93,13 @@
                     FontAttributes="Bold"
                     FontSize="20"
                     HorizontalOptions="Center"
-                    Text="{Binding StatusMessage}" />
+                    Text="{Binding StatusMessageTitle}" />
+
+                <Label
+                    FontSize="16"
+                    HorizontalOptions="Center"
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding StatusMessageDescription}" />
 
                 <Button
                     BackgroundColor="#4CAF50"

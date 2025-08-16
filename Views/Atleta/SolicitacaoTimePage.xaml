@@ -44,7 +44,7 @@
                                     Grid.Column="0"
                                     Aspect="AspectFill"
                                     HeightRequest="40"
-                                    Source="{Binding UsuarioSolicitante.LogoUrl}"
+                                    Source="{Binding UsuarioSolicitante.ImagemPath}"
                                     VerticalOptions="Center"
                                     WidthRequest="40" />
 
