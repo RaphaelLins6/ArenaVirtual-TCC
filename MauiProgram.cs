@@ -46,7 +46,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<MeuTimePageViewModel>();
         builder.Services.AddTransient<EntrarTimePageViewModel>();
         builder.Services.AddTransient<SolicitacaoTimePageViewModel>();
-
+        builder.Services.AddTransient<EditarTimePageViewModel>();
         // Páginas
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<RegisterPage>();
@@ -56,6 +56,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<AppShell>();
         builder.Services.AddTransient<EntrarTimePage>();
         builder.Services.AddTransient<SolicitacaoTimePage>();
+        builder.Services.AddTransient<EditarTimePage>();
 
         return builder.Build();
     }

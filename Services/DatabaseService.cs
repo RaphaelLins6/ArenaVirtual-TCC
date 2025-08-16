@@ -213,5 +213,17 @@ namespace ArenaVirtual.Services {
         public AsyncTableQuery<Convite> GetConviteTable() {
             return _database.Table<Convite>();
         }
+
+        public async Task<Time?> GetTimeByIdAsync(int id) {
+            return await _database.Table<Time>().Where(t => t.Id == id).FirstOrDefaultAsync();
+        }
+
+        public async Task<int> ExcluirTimeAsync(Time time) {
+            return await _database.DeleteAsync(time);
+        }
+
+        public async Task<List<Usuario>> GetMembrosByTimeIdAsync(int timeId) {
+            return await _database.Table<Usuario>().Where(u => u.TimeId == timeId).ToListAsync();
+        }
     }   
 }

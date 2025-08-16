@@ -10,8 +10,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
         private readonly UsuarioService _usuarioService;
         private readonly TimeService _timeService;
 
-        public ObservableCollection<Usuario> MembrosDoTime { get; set; } = [];
-        public ObservableCollection<ConviteViewModel> ConvitesPendentes { get; set; } = [];
+        public ObservableCollection<ConviteViewModel> ConvitesPendentes { get; set; } = new ObservableCollection<ConviteViewModel>();
 
         public ICommand AceitarConviteCommand { get; }
         public ICommand RecusarConviteCommand { get; }
@@ -36,17 +35,8 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     return;
                 }
 
-                // Limpar coleções
-                MembrosDoTime.Clear();
                 ConvitesPendentes.Clear();
 
-                // Carregar membros do time
-                var membros = await _usuarioService.GetMembrosByTimeIdAsync(usuarioAtual.TimeId.Value);
-                foreach (var membro in membros) {
-                    MembrosDoTime.Add(membro);
-                }
-
-                // Carregar convites pendentes
                 var convites = await _databaseService.ListarConvitesPendentesAsync(usuarioAtual.TimeId.Value);
                 foreach (var convite in convites) {
                     var solicitante = await _usuarioService.ObterUsuarioPorIdAsync(convite.IdSolicitante);
@@ -63,19 +53,15 @@ namespace ArenaVirtual.ViewModels.Atleta {
         private async Task AceitarConviteAsync(ConviteViewModel conviteVM) {
             IsBusy = true;
             try {
-                // Obter o convite original e o usuário solicitante
                 var convite = conviteVM.ConviteOriginal;
                 var usuarioSolicitante = conviteVM.UsuarioSolicitante;
 
-                // Mude o status do convite para Aceito
                 convite.Status = StatusConvite.Aceito;
                 await _databaseService.AtualizarConviteAsync(convite);
 
-                // Vincule o usuário ao time
                 usuarioSolicitante.TimeId = convite.IdTime;
                 await _databaseService.AtualizarUsuarioAsync(usuarioSolicitante);
 
-                // Recarregue os dados para atualizar a UI
                 await LoadData();
 
                 await Application.Current.MainPage.DisplayAlert("Sucesso", $"O usuário {usuarioSolicitante.Nome} foi adicionado ao time.", "OK");
@@ -87,14 +73,11 @@ namespace ArenaVirtual.ViewModels.Atleta {
         private async Task RecusarConviteAsync(ConviteViewModel conviteVM) {
             IsBusy = true;
             try {
-                // Obter o convite original
                 var convite = conviteVM.ConviteOriginal;
 
-                // Mude o status do convite para Recusado
                 convite.Status = StatusConvite.Recusado;
                 await _databaseService.AtualizarConviteAsync(convite);
 
-                // Recarregue os dados para atualizar a UI
                 await LoadData();
 
                 await Application.Current.MainPage.DisplayAlert("Aviso", $"O convite do usuário {conviteVM.UsuarioSolicitante.Nome} foi recusado.", "OK");

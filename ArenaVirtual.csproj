@@ -79,6 +79,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Views\Atleta\EditarTimePage.xaml.cs">
+	    <DependentUpon>EditarTimePage.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Views\Atleta\PartidasPage.xaml.cs">
 	    <DependentUpon>PartidasPage.xaml</DependentUpon>
 	  </Compile>
@@ -104,6 +107,9 @@
 	    <Generator></Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\Atleta\CriarTimePage.xaml">
+	    <Generator></Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Atleta\EditarTimePage.xaml">
 	    <Generator></Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\Atleta\EntrarTimePage.xaml">
