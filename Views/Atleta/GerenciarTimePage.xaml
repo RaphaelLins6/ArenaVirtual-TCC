@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ArenaVirtual.Views.Atleta.GerenciarTimePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:ArenaVirtual.Models"
+    xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.Atleta"
+    Title="Gerenciar Time"
+    BackgroundColor="{AppThemeBinding Light=#F5F5F5,
+                                      Dark=#121212}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <Label
+                FontAttributes="Bold"
+                FontSize="20"
+                Text="Membros do Time"
+                TextColor="{AppThemeBinding Light=#333333,
+                                            Dark=White}" />
+            <CollectionView ItemsSource="{Binding MembrosDoTime}">
+                <CollectionView.EmptyView>
+                    <Label
+                        HorizontalOptions="Center"
+                        Text="Nenhum membro no time."
+                        VerticalOptions="CenterAndExpand" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame
+                            Margin="0,5"
+                            Padding="10"
+                            BackgroundColor="{AppThemeBinding Light=White,
+                                                              Dark=#1E1E1E}"
+                            CornerRadius="10">
+                            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                                <Image
+                                    Aspect="AspectFill"
+                                    HeightRequest="40"
+                                    Source="{Binding ImagemPath}"
+                                    WidthRequest="40" />
+                                <Label
+                                    FontSize="16"
+                                    Text="{Binding Nome}"
+                                    VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label
+                Margin="0,20,0,0"
+                FontAttributes="Bold"
+                FontSize="20"
+                Text="Convites Pendentes"
+                TextColor="{AppThemeBinding Light=#333333,
+                                            Dark=White}" />
+            <CollectionView ItemsSource="{Binding ConvitesPendentes}">
+                <CollectionView.EmptyView>
+                    <Label
+                        HorizontalOptions="Center"
+                        Text="Nenhum convite pendente."
+                        VerticalOptions="CenterAndExpand" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame
+                            Margin="0,5"
+                            Padding="10"
+                            BackgroundColor="{AppThemeBinding Light=White,
+                                                              Dark=#1E1E1E}"
+                            CornerRadius="10">
+                            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                                <Label
+                                    FontAttributes="Bold"
+                                    FontSize="16"
+                                    Text="{Binding UsuarioSolicitante.Nome}"
+                                    VerticalOptions="Center" />
+                                <HorizontalStackLayout HorizontalOptions="EndAndExpand" Spacing="10">
+                                    <Button
+                                        BackgroundColor="Green"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GerenciarTimePageViewModel}}, Path=AceitarConviteCommand}"
+                                        CommandParameter="{Binding .}"
+                                        Text="Aceitar" />
+                                    <Button
+                                        BackgroundColor="Red"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GerenciarTimePageViewModel}}, Path=RecusarConviteCommand}"
+                                        CommandParameter="{Binding .}"
+                                        Text="Recusar" />
+                                </HorizontalStackLayout>
+                            </HorizontalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

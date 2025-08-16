@@ -57,7 +57,7 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
 
         GerenciarTimeCommand = new Command(async () => await Shell.Current.GoToAsync("GerenciarTimePage"));
         CriarMeuTimeCommand = new Command(async () => await Shell.Current.Navigation.PushAsync(new CriarTimePage(_timeService)));
-        EntrarTimeCommand = new Command(async () => await Shell.Current.GoToAsync("ProcurarTimePage"));
+        EntrarTimeCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(EntrarTimePage)));
 
         Time = new Time();
         _ = LoadData();

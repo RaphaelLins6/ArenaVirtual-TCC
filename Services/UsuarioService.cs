@@ -50,5 +50,13 @@ namespace ArenaVirtual.Services {
 
             return membros;
         }
+
+        public async Task<List<Usuario>> GetMembrosByTimeIdAsync(int timeId) {
+            return await _databaseService.GetUsuarioTable().Where(u => u.TimeId == timeId).ToListAsync();
+        }
+
+        public async Task<Usuario> ObterUsuarioPorIdAsync(int usuarioId) {
+            return await _databaseService.GetUsuarioTable().FirstOrDefaultAsync(u => u.Id == usuarioId);
+        }
     }
 }

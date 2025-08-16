@@ -16,6 +16,7 @@ namespace ArenaVirtual.Services {
             await _database.CreateTableAsync<Jogo>();
             await _database.CreateTableAsync<PropostaPatrocinio>();
             await _database.CreateTableAsync<UsuarioCampeonatoFavorito>();
+            await _database.CreateTableAsync<Convite>();
         }
 
         public Task<int> InserirUsuarioAsync(Usuario usuario) {
@@ -184,6 +185,33 @@ namespace ArenaVirtual.Services {
             return await _database.Table<UsuarioCampeonatoFavorito>()
                                   .Where(f => f.UsuarioId == usuarioId)
                                   .ToListAsync();
+        }
+
+        public async Task<int> InserirConviteAsync(Convite convite) {
+            return await _database.InsertAsync(convite);
+        }
+
+        public async Task<int> AtualizarConviteAsync(Convite convite) {
+            return await _database.UpdateAsync(convite);
+        }
+
+        public async Task<List<Convite>> ListarConvitesPendentesAsync(int timeId) {
+            return await _database.Table<Convite>()
+                                  .Where(c => c.IdTime == timeId && c.Status == StatusConvite.Pendente)
+                                  .ToListAsync();
+        }
+
+        public async Task<Convite?> ObterConvitePorUsuarioETimeAsync(int idSolicitante, int idTime) {
+            return await _database.Table<Convite>()
+                                  .FirstOrDefaultAsync(c => c.IdSolicitante == idSolicitante && c.IdTime == idTime);
+        }
+
+        public AsyncTableQuery<Usuario> GetUsuarioTable() {
+            return _database.Table<Usuario>();
+        }
+
+        public AsyncTableQuery<Convite> GetConviteTable() {
+            return _database.Table<Convite>();
         }
     }   
 }
