@@ -15,7 +15,8 @@ namespace ArenaVirtual.Services {
             await _database.CreateTableAsync<Estatistica>();
             await _database.CreateTableAsync<Jogo>();
             await _database.CreateTableAsync<PropostaPatrocinio>();
-}
+            await _database.CreateTableAsync<UsuarioCampeonatoFavorito>();
+        }
 
         public Task<int> InserirUsuarioAsync(Usuario usuario) {
             return _database.InsertAsync(usuario);
@@ -169,6 +170,20 @@ namespace ArenaVirtual.Services {
         }
         public Task<int> DeletarPropostaPatrocinioAsync(PropostaPatrocinio item) {
             return _database.DeleteAsync(item);
+        }
+
+        public async Task<int> InserirFavoritoAsync(UsuarioCampeonatoFavorito favorito) {
+            return await _database.InsertAsync(favorito);
+        }
+
+        public async Task<int> DeletarFavoritoAsync(UsuarioCampeonatoFavorito favorito) {
+            return await _database.DeleteAsync(favorito);
+        }
+
+        public async Task<List<UsuarioCampeonatoFavorito>> ListarFavoritosPorUsuarioAsync(int usuarioId) {
+            return await _database.Table<UsuarioCampeonatoFavorito>()
+                                  .Where(f => f.UsuarioId == usuarioId)
+                                  .ToListAsync();
         }
     }   
 }

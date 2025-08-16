@@ -6,10 +6,11 @@ namespace ArenaVirtual.Models {
         public int Id { get; set; }
         public string? Nome { get; set; }
         public string? Local { get; set; }
+        [Ignore]
         public bool EhFavorito { get; set; }
         public DateTime DataInicio { get; set; }
         public DateTime DataFim { get; set; }
-        public int OrganizadorId { get; set; } // FK para Usuario
+        public int OrganizadorId { get; set; } 
         public string? LogoUrl { get; set; }
         public string? NomeOrganizador { get; set; }
         public string? EmailOrganizador { get; set; }

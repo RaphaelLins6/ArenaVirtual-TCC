@@ -48,19 +48,24 @@ namespace ArenaVirtual.ViewModels {
         public async Task CarregarCampeonatos() {
             if (IsBusy) return;
             IsBusy = true;
+
             try {
-                var todos = await _databaseService.ListarCampeonatosAsync() ?? [];
+                var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
+                if (usuarioAtual == null) return;
 
-                var unicos = todos
-                    .GroupBy(c => c.Id)
-                    .Select(g => g.First())
-                    .ToList();
+                var todosCampeonatos = await _databaseService.ListarCampeonatosAsync() ?? [];
+                var favoritosDoUsuario = await _databaseService.ListarFavoritosPorUsuarioAsync(usuarioAtual.Id);
 
-                Favoritos = new ObservableCollection<Campeonato>(unicos.Where(c => c.EhFavorito));
+                var idsFavoritos = new HashSet<int>(favoritosDoUsuario.Select(f => f.CampeonatoId));
 
-                _campeonatos.Clear(); 
-                foreach (var c in unicos) {
+                Favoritos.Clear();
+                _campeonatos.Clear();
+
+                foreach (var c in todosCampeonatos) {
+                    c.EhFavorito = idsFavoritos.Contains(c.Id);
                     _campeonatos.Add(c);
+                    if (c.EhFavorito)
+                        Favoritos.Add(c);
                 }
 
                 OnPropertyChanged(nameof(Campeonatos));
@@ -73,15 +78,30 @@ namespace ArenaVirtual.ViewModels {
         }
 
         private async Task FavoritarAsync(Campeonato campeonato) {
-            Debug.WriteLine($"[HomeViewModel] FavoritarAsync chamado. Campeonato: {campeonato?.Nome ?? "NULO"}, ID: {campeonato?.Id ?? 0}");
             if (campeonato == null) return;
-            Debug.WriteLine($"[DEBUG] FavoritarAsync acionado para: {campeonato.Nome ?? "N/A"}, ID: {campeonato.Id}");
+
+            var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
+            if (usuarioAtual == null) return;
+
             campeonato.EhFavorito = !campeonato.EhFavorito;
 
-            await _databaseService.AtualizarCampeonatoAsync(campeonato);
+            if (campeonato.EhFavorito) {
+                var favorito = new UsuarioCampeonatoFavorito {
+                    UsuarioId = usuarioAtual.Id,
+                    CampeonatoId = campeonato.Id
+                };
+                await _databaseService.InserirFavoritoAsync(favorito);
+            } else {
+                var favoritoExistente = (await _databaseService.ListarFavoritosPorUsuarioAsync(usuarioAtual.Id))
+                    .FirstOrDefault(f => f.CampeonatoId == campeonato.Id);
+                if (favoritoExistente != null) {
+                    await _databaseService.DeletarFavoritoAsync(favoritoExistente);
+                }
+            }
 
             await CarregarCampeonatos();
         }
+
 
         private static async Task VerCampeonatoAsync(Campeonato campeonato) {
             Debug.WriteLine($"[HomeViewModel] VerCampeonatoAsync chamado. Campeonato: {campeonato?.Nome ?? "NULO"}, ID: {campeonato?.Id ?? 0}");
