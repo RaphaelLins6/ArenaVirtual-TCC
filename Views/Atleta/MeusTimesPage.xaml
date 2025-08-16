@@ -18,24 +18,44 @@
                                                           Dark=#1E1E1E}"
                         CornerRadius="20"
                         HasShadow="True">
-                        <HorizontalStackLayout Spacing="15">
-                            <Image
-                                Aspect="AspectFill"
-                                HeightRequest="80"
-                                Source="{Binding LogoImageSource}"
-                                WidthRequest="80" />
-                            <VerticalStackLayout>
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="20"
-                                    Text="{Binding Time.Nome}" />
-                                <Label
-                                    FontSize="14"
-                                    Text="{Binding Time.Descricao}"
-                                    TextColor="Gray" />
-                            </VerticalStackLayout>
-                        </HorizontalStackLayout>
+                        <VerticalStackLayout Spacing="10">
+                            <HorizontalStackLayout Spacing="15">
+                                <Image
+                                    Aspect="AspectFill"
+                                    HeightRequest="80"
+                                    Source="{Binding LogoImageSource}"
+                                    WidthRequest="80" />
+                                <VerticalStackLayout>
+                                    <Label
+                                        FontAttributes="Bold"
+                                        FontSize="20"
+                                        Text="{Binding Time.Nome}" />
+                                    <Label
+                                        FontSize="14"
+                                        Text="{Binding Time.Descricao}"
+                                        TextColor="Gray" />
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+
+                            <!--  Botão Editar dentro do Card  -->
+                            <Button
+                                BackgroundColor="#FF9800"
+                                Command="{Binding GerenciarTimeCommand}"
+                                CornerRadius="20"
+                                HeightRequest="40"
+                                Text="Editar Time"
+                                TextColor="White" />
+                        </VerticalStackLayout>
                     </Frame>
+
+                    <!--  Botão Solicitações (somente capitão)  -->
+                    <Button
+                        BackgroundColor="#2196F3"
+                        Command="{Binding VerSolicitacoesCommand}"
+                        CornerRadius="20"
+                        IsVisible="{Binding UsuarioEhCapitao}"
+                        Text="Solicitações"
+                        TextColor="White" />
 
                     <Label
                         FontAttributes="Bold"
@@ -63,12 +83,6 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <Button
-                        BackgroundColor="#FF9800"
-                        Command="{Binding GerenciarTimeCommand}"
-                        CornerRadius="20"
-                        Text="Gerenciar Time"
-                        TextColor="White" />
                 </VerticalStackLayout>
             </ScrollView>
 

@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 
 namespace ArenaVirtual.ViewModels.Atleta {
-    public class GerenciarTimePageViewModel : BaseViewModel {
+    public class SolicitacaoTimePageViewModel : BaseViewModel {
         private readonly DatabaseService _databaseService;
         private readonly UsuarioService _usuarioService;
         private readonly TimeService _timeService;
@@ -16,7 +16,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
         public ICommand AceitarConviteCommand { get; }
         public ICommand RecusarConviteCommand { get; }
 
-        public GerenciarTimePageViewModel(DatabaseService databaseService, UsuarioService usuarioService, TimeService timeService) {
+        public SolicitacaoTimePageViewModel(DatabaseService databaseService, UsuarioService usuarioService, TimeService timeService) {
             _databaseService = databaseService;
             _usuarioService = usuarioService;
             _timeService = timeService;

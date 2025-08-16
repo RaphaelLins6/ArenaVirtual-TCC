@@ -2,7 +2,7 @@
 using ArenaVirtual.Views.Atleta;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.CompilerServices; 
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using ArenaVirtual.Models;
 
@@ -24,6 +24,7 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
                 OnPropertyChanged(nameof(VinculadoATime));
                 OnPropertyChanged(nameof(NaoVinculadoATime));
                 OnPropertyChanged(nameof(LogoImageSource));
+                OnPropertyChanged(nameof(UsuarioEhCapitao));
             }
         }
     }
@@ -44,9 +45,14 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
     public bool VinculadoATime => SessaoService.Instancia.GetUsuarioAtual()?.TimeId != null;
     public bool NaoVinculadoATime => !VinculadoATime;
 
+    // Novo: Usuário é capitão do time
+    public bool UsuarioEhCapitao =>
+        SessaoService.Instancia.GetUsuarioAtual()?.Id == Time?.CapitaoId;
+
     public ICommand CriarMeuTimeCommand { get; }
     public ICommand EntrarTimeCommand { get; }
     public ICommand GerenciarTimeCommand { get; }
+    public ICommand VerSolicitacoesCommand { get; }
 
     private readonly TimeService _timeService;
     private readonly UsuarioService _usuarioService;
@@ -55,9 +61,10 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
         _timeService = timeService;
         _usuarioService = usuarioService;
 
-        GerenciarTimeCommand = new Command(async () => await Shell.Current.GoToAsync("GerenciarTimePage"));
+        //GerenciarTimeCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(EditarTimePage)));
         CriarMeuTimeCommand = new Command(async () => await Shell.Current.Navigation.PushAsync(new CriarTimePage(_timeService)));
         EntrarTimeCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(EntrarTimePage)));
+        VerSolicitacoesCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(SolicitacaoTimePage)));
 
         Time = new Time();
         _ = LoadData();
@@ -68,16 +75,16 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
             var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
 
             if (usuarioAtual?.TimeId == null) {
-                Time = new Time(); 
-                MembrosDoTime.Clear(); 
+                Time = new Time();
+                MembrosDoTime.Clear();
                 return;
             }
 
             var timeDoUsuario = await _timeService.ObterPorIdAsync(usuarioAtual.TimeId.Value);
 
             if (timeDoUsuario == null) {
-                Time = new Time(); 
-                MembrosDoTime.Clear(); 
+                Time = new Time();
+                MembrosDoTime.Clear();
                 return;
             }
 
@@ -96,16 +103,15 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
                     });
                 }
             }
-            MembrosDoTime = membrosCarregados; 
+            MembrosDoTime = membrosCarregados;
         } catch (Exception ex) {
             Time = new Time();
-            MembrosDoTime.Clear(); 
+            MembrosDoTime.Clear();
             await Shell.Current.DisplayAlert("Erro", "Não foi possível carregar os dados do time.", "OK");
             System.Diagnostics.Debug.WriteLine($"[ERRO GERAL] Falha ao carregar dados do time: {ex.Message}");
         }
     }
 
-    // Seu método GetImageSourceFromFile permanece o mesmo e é ótimo!
     private ImageSource GetImageSourceFromFile(string filePath) {
         if (string.IsNullOrEmpty(filePath)) {
             System.Diagnostics.Debug.WriteLine("[DEBUG] filePath para ImageSource está vazio ou nulo. Usando placeholder.");
@@ -126,9 +132,6 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
         }
     }
 
-    // **CORREÇÃO**: A sua classe MeuTimePageViewModel é 'partial', mas precisa ter a implementação
-    // de INotifyPropertyChanged na mesma parte do arquivo para evitar o erro CS0103.
-    // Esta é a implementação necessária.
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

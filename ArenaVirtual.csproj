@@ -109,7 +109,7 @@
 	  <MauiXaml Update="Views\Atleta\EntrarTimePage.xaml">
 	    <Generator></Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\Atleta\GerenciarTimePage.xaml">
+	  <MauiXaml Update="Views\Atleta\SolicitacaoTimePage.xaml">
 	    <Generator></Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\CampeonatoPage\CampeonatoDetailPage.xaml">

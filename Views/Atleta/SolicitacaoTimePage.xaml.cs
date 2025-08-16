@@ -1,10 +1,10 @@
 ﻿using ArenaVirtual.ViewModels.Atleta;
 
 namespace ArenaVirtual.Views.Atleta {
-    public partial class GerenciarTimePage : ContentPage {
-        private readonly GerenciarTimePageViewModel _viewModel;
+    public partial class SolicitacaoTimePage : ContentPage {
+        private readonly SolicitacaoTimePageViewModel _viewModel;
 
-        public GerenciarTimePage(GerenciarTimePageViewModel viewModel) {
+        public SolicitacaoTimePage(SolicitacaoTimePageViewModel viewModel) {
             InitializeComponent();
             BindingContext = _viewModel = viewModel;
         }
