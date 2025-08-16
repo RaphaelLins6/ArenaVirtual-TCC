@@ -37,7 +37,6 @@
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
 
-                            <!--  Botão Editar dentro do Card  -->
                             <Button
                                 BackgroundColor="#FF9800"
                                 Command="{Binding GerenciarTimeCommand}"
@@ -48,7 +47,6 @@
                         </VerticalStackLayout>
                     </Frame>
 
-                    <!--  Botão Solicitações (somente capitão)  -->
                     <Button
                         BackgroundColor="#2196F3"
                         Command="{Binding VerSolicitacoesCommand}"
@@ -90,17 +88,19 @@
                 IsVisible="{Binding NaoVinculadoATime}"
                 Spacing="20"
                 VerticalOptions="Center">
+
                 <Label
                     FontAttributes="Bold"
                     FontSize="20"
                     HorizontalOptions="Center"
-                    Text="Você ainda não está em um time!" />
+                    Text="{Binding StatusMessage}" />
 
                 <Button
                     BackgroundColor="#4CAF50"
                     Command="{Binding CriarMeuTimeCommand}"
                     CornerRadius="20"
                     HorizontalOptions="Center"
+                    IsVisible="{Binding ShowButtons}"
                     Text="Criar Time"
                     TextColor="White"
                     WidthRequest="200" />
@@ -110,6 +110,7 @@
                     Command="{Binding EntrarTimeCommand}"
                     CornerRadius="20"
                     HorizontalOptions="Center"
+                    IsVisible="{Binding ShowButtons}"
                     Text="Entrar em um Time"
                     TextColor="White"
                     WidthRequest="200" />

@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
+﻿<ContentPage
     x:Class="ArenaVirtual.Views.Atleta.SolicitacaoTimePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -19,6 +18,7 @@
                 Text="Convites Pendentes"
                 TextColor="{AppThemeBinding Light=#333333,
                                             Dark=White}" />
+
             <CollectionView ItemsSource="{Binding ConvitesPendentes}">
                 <CollectionView.EmptyView>
                     <Label
@@ -34,25 +34,42 @@
                             BackgroundColor="{AppThemeBinding Light=White,
                                                               Dark=#1E1E1E}"
                             CornerRadius="10">
-                            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+
+                            <Grid
+                                ColumnDefinitions="Auto,*,Auto,Auto"
+                                ColumnSpacing="15"
+                                VerticalOptions="Center">
+
+                                <Image
+                                    Grid.Column="0"
+                                    Aspect="AspectFill"
+                                    HeightRequest="40"
+                                    Source="{Binding UsuarioSolicitante.LogoUrl}"
+                                    VerticalOptions="Center"
+                                    WidthRequest="40" />
+
                                 <Label
+                                    Grid.Column="1"
                                     FontAttributes="Bold"
                                     FontSize="16"
+                                    HorizontalOptions="StartAndExpand"
                                     Text="{Binding UsuarioSolicitante.Nome}"
                                     VerticalOptions="Center" />
-                                <HorizontalStackLayout HorizontalOptions="EndAndExpand" Spacing="10">
-                                    <Button
-                                        BackgroundColor="Green"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SolicitacaoTimePageViewModel}}, Path=AceitarConviteCommand}"
-                                        CommandParameter="{Binding .}"
-                                        Text="Aceitar" />
-                                    <Button
-                                        BackgroundColor="Red"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SolicitacaoTimePageViewModel}}, Path=RecusarConviteCommand}"
-                                        CommandParameter="{Binding .}"
-                                        Text="Recusar" />
-                                </HorizontalStackLayout>
-                            </HorizontalStackLayout>
+
+                                <Button
+                                    Grid.Column="2"
+                                    BackgroundColor="Green"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SolicitacaoTimePageViewModel}}, Path=AceitarConviteCommand}"
+                                    CommandParameter="{Binding .}"
+                                    Text="Aceitar" />
+
+                                <Button
+                                    Grid.Column="3"
+                                    BackgroundColor="Red"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SolicitacaoTimePageViewModel}}, Path=RecusarConviteCommand}"
+                                    CommandParameter="{Binding .}"
+                                    Text="Recusar" />
+                            </Grid>
                         </Frame>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

@@ -62,7 +62,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 usuarioSolicitante.TimeId = convite.IdTime;
                 await _databaseService.AtualizarUsuarioAsync(usuarioSolicitante);
 
-                await LoadData();
+                ConvitesPendentes.Remove(conviteVM);
 
                 await Application.Current.MainPage.DisplayAlert("Sucesso", $"O usuário {usuarioSolicitante.Nome} foi adicionado ao time.", "OK");
             } finally {
@@ -78,7 +78,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 convite.Status = StatusConvite.Recusado;
                 await _databaseService.AtualizarConviteAsync(convite);
 
-                await LoadData();
+                ConvitesPendentes.Remove(conviteVM);
 
                 await Application.Current.MainPage.DisplayAlert("Aviso", $"O convite do usuário {conviteVM.UsuarioSolicitante.Nome} foi recusado.", "OK");
             } finally {

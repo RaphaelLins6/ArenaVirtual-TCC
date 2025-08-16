@@ -45,7 +45,6 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
     public bool VinculadoATime => SessaoService.Instancia.GetUsuarioAtual()?.TimeId != null;
     public bool NaoVinculadoATime => !VinculadoATime;
 
-    // Novo: Usuário é capitão do time
     public bool UsuarioEhCapitao =>
         SessaoService.Instancia.GetUsuarioAtual()?.Id == Time?.CapitaoId;
 
@@ -56,10 +55,12 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
 
     private readonly TimeService _timeService;
     private readonly UsuarioService _usuarioService;
+    private readonly DatabaseService _databaseService;
 
-    public MeuTimePageViewModel(TimeService timeService, UsuarioService usuarioService) {
+    public MeuTimePageViewModel(TimeService timeService, UsuarioService usuarioService, DatabaseService databaseService) {
         _timeService = timeService;
         _usuarioService = usuarioService;
+        _databaseService = databaseService;
 
         GerenciarTimeCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(EditarTimePage)));
         CriarMeuTimeCommand = new Command(async () => await Shell.Current.Navigation.PushAsync(new CriarTimePage(_timeService)));
@@ -70,6 +71,28 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
         _ = LoadData();
     }
 
+    private string _statusMessage = "Você ainda não está em um time!";
+    public string StatusMessage {
+        get => _statusMessage;
+        set {
+            if (_statusMessage != value) {
+                _statusMessage = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    private bool _showButtons = true;
+    public bool ShowButtons {
+        get => _showButtons;
+        set {
+            if (_showButtons != value) {
+                _showButtons = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public async Task LoadData() {
         try {
             var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
@@ -77,6 +100,22 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
             if (usuarioAtual?.TimeId == null) {
                 Time = new Time();
                 MembrosDoTime.Clear();
+
+                var convitePendente = await _databaseService.ObterConvitePendenteDoUsuarioAsync(usuarioAtual.Id);
+                if (convitePendente != null) {
+                    var timeConvidado = await _timeService.ObterPorIdAsync(convitePendente.IdTime);
+                    if (timeConvidado != null) {
+                        StatusMessage = $"Solicitação enviada para o time: {timeConvidado.Nome}. Aguarde a resposta do capitão.";
+                    } else {
+                        StatusMessage = "Solicitação enviada para um time. Aguarde a resposta do capitão.";
+                    }
+
+                    ShowButtons = false;
+                } else {
+                    StatusMessage = "Você ainda não está em um time!";
+                    ShowButtons = true;
+                }
+
                 return;
             }
 
@@ -85,6 +124,8 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
             if (timeDoUsuario == null) {
                 Time = new Time();
                 MembrosDoTime.Clear();
+                StatusMessage = "Você ainda não está em um time!";
+                ShowButtons = true;
                 return;
             }
 
@@ -104,6 +145,8 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
                 }
             }
             MembrosDoTime = membrosCarregados;
+            StatusMessage = ""; 
+            ShowButtons = false;
         } catch (Exception ex) {
             Time = new Time();
             MembrosDoTime.Clear();
@@ -135,4 +178,5 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
 }

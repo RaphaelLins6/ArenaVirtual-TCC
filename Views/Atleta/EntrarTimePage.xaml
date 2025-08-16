@@ -55,10 +55,12 @@
 
                             <Button
                                 Grid.Column="2"
+                                BackgroundColor="{Binding ButtonColor}"
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:EntrarTimePageViewModel}}, Path=SolicitarEntradaCommand}"
                                 CommandParameter="{Binding .}"
                                 HorizontalOptions="Center"
-                                Text="Solicitar Entrada"
+                                IsEnabled="{Binding IsButtonEnabled}"
+                                Text="{Binding ButtonText}"
                                 VerticalOptions="Center" />
                         </Grid>
                     </Frame>
