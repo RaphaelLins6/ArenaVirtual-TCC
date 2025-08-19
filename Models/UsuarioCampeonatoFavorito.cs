@@ -2,7 +2,7 @@
 
 namespace ArenaVirtual.Models {
     [Table("UsuarioCampeonatoFavoritos")]
-    public class UsuarioCampeonatoFavorito {
+    public class UsuarioCampeonatoFavorito : ISyncable {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
 
@@ -11,5 +11,7 @@ namespace ArenaVirtual.Models {
 
         [Indexed]
         public int CampeonatoId { get; set; }
+        public bool IsSynced { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }

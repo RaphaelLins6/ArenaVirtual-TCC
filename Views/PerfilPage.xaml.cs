@@ -48,7 +48,21 @@ namespace ArenaVirtual.Views {
                 await _alertService.DisplayAlert("Erro", "Nenhum usuário logado para alterar a imagem.", "OK");
                 return;
             }
-            var popup = new AlterarImagemPopup(usuario, _alertService);
+
+            // Obtenha os serviços necessários do contêiner de injeção de dependência.
+            var services = App.Current?.Handler?.MauiContext?.Services;
+            if (services == null) {
+                // Tratar o caso em que os serviços não estão disponíveis.
+                await _alertService.DisplayAlert("Erro", "Serviços do aplicativo não estão disponíveis.", "OK");
+                return;
+            }
+
+            var databaseService = services.GetRequiredService<DatabaseService>();
+            var syncService = services.GetRequiredService<SyncService>();
+
+            // Crie o popup, passando todos os argumentos exigidos pelo construtor.
+            var popup = new AlterarImagemPopup(usuario, _alertService, databaseService, syncService);
+
             popup.ImagemAtualizada += AlterarImagemPopup_ImagemAtualizada;
             await Navigation.PushModalAsync(popup);
         }

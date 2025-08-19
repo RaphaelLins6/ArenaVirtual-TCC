@@ -1,13 +1,15 @@
 ﻿using SQLite;
 
 namespace ArenaVirtual.Models {
-    public class CampanhaPatrocinio {
+    public class CampanhaPatrocinio : ISyncable {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
         public string Nome { get; set; } = string.Empty; // Fixed: Initialized with a default value
         public int PatrocinadorId { get; set; }
         public DateTime Inicio { get; set; }
         public DateTime Fim { get; set; }
-        public string Descricao { get; set; } = string.Empty; // Fixed: Initialized with a default value
+        public string Descricao { get; set; } = string.Empty;
+        public bool IsSynced { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }

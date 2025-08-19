@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace ArenaVirtuall
+namespace ArenaVirtual
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema; 
 
 namespace ArenaVirtual.Models {
-    public class Time {
+    public class Time : ISyncable{
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
 
@@ -31,5 +31,8 @@ namespace ArenaVirtual.Models {
 
         [ForeignKey("CapitaoId")]
         public int? CapitaoId { get; set; }
+
+        public bool IsSynced { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }

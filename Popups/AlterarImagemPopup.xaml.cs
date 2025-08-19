@@ -1,5 +1,10 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using System.Diagnostics;
+using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.Popups;
 
@@ -7,22 +12,19 @@ public partial class AlterarImagemPopup : ContentPage {
     private readonly Usuario _usuario;
     private readonly IAlertService _alertService;
     private readonly DatabaseService _databaseService;
+    private readonly SyncService _syncService; // Adicionando a dependência
 
     public event EventHandler<string>? ImagemAtualizada;
 
     private string? _caminhoNovaImagemSelecionada;
 
-    public AlterarImagemPopup(Usuario usuario, IAlertService alertService) {
+    // Injeção de dependências no construtor
+    public AlterarImagemPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
         InitializeComponent();
         _usuario = usuario;
         _alertService = alertService;
-
-        var serviceProvider = App.Current?.Handler?.MauiContext?.Services;
-        if (serviceProvider != null) {
-            _databaseService = serviceProvider.GetRequiredService<DatabaseService>();
-        } else {
-            throw new InvalidOperationException("DatabaseService not registered or app context is null.");
-        }
+        _databaseService = databaseService;
+        _syncService = syncService; 
 
         AtualizarImagemUI(_usuario.ImagemPath);
     }
@@ -72,7 +74,16 @@ public partial class AlterarImagemPopup : ContentPage {
             }
 
             _usuario.ImagemPath = caminhoFinalImagem;
+
+            // Marcar usuário para sincronização antes de atualizar no banco de dados
+            _usuario.IsSynced = false;
+            _usuario.UpdatedAt = DateTime.UtcNow;
+
             await _databaseService.AtualizarUsuarioAsync(_usuario);
+
+            // Disparo manual da sincronização após a atualização local
+            Debug.WriteLine("[AlterarImagemPopup] Imagem de usuário atualizada localmente. Disparando sincronização...");
+            await _syncService.SyncAsync();
 
             ImagemAtualizada?.Invoke(this, _usuario.ImagemPath);
 

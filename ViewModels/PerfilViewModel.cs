@@ -104,13 +104,35 @@ namespace ArenaVirtual.ViewModels {
 
         [RelayCommand]
         private async Task EditarPerfil() {
-            var popup = new EditarPerfilPopup(UsuarioLogado, _alertService);
+            // Obtenha os serviços necessários do contêiner de injeção de dependência
+            var services = App.Current?.Handler?.MauiContext?.Services;
+            if (services == null) {
+                // Lidar com o caso em que os serviços não estão disponíveis
+                return;
+            }
+
+            var databaseService = services.GetRequiredService<DatabaseService>();
+            var syncService = services.GetRequiredService<SyncService>();
+
+            // Agora, passe todos os argumentos necessários para o construtor do popup
+            var popup = new EditarPerfilPopup(UsuarioLogado, _alertService, databaseService, syncService);
             await Shell.Current.Navigation.PushModalAsync(popup);
         }
 
         [RelayCommand]
         private async Task AlterarSenha() {
-            var popup = new AlterarSenhaPopup(UsuarioLogado, _alertService);
+            // Obtenha os serviços necessários do contêiner de injeção de dependência
+            var services = App.Current?.Handler?.MauiContext?.Services;
+            if (services == null) {
+                // Lidar com o caso em que os serviços não estão disponíveis
+                return;
+            }
+
+            var databaseService = services.GetRequiredService<DatabaseService>();
+            var syncService = services.GetRequiredService<SyncService>();
+
+            // Agora, passe todos os argumentos necessários para o construtor do popup
+            var popup = new AlterarSenhaPopup(UsuarioLogado, _alertService, databaseService, syncService);
             await Shell.Current.Navigation.PushModalAsync(popup);
         }
 

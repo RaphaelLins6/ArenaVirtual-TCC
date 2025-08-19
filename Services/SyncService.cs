@@ -1,0 +1,90 @@
+﻿// Services/SyncService.cs
+using ArenaVirtual.Services;
+using ArenaVirtual.Models;
+using System.Threading.Tasks;
+using System;
+using System.Reflection;
+using Microsoft.Maui.ApplicationModel;
+
+public class SyncService {
+    private readonly DatabaseService _databaseService;
+    private readonly ApiService _apiService;
+
+    // Lista de tipos de dados que precisam de sincronização
+    private readonly Type[] _syncableTypes = new Type[]
+    {
+        typeof(Usuario),
+        typeof(Campeonato),
+        typeof(Time),
+        typeof(Partida),
+        typeof(AvaliacaoArbitro),
+        typeof(CampanhaPatrocinio),
+        typeof(Estatistica),
+        typeof(Jogo),
+        typeof(PropostaPatrocinio),
+        typeof(UsuarioCampeonatoFavorito),
+        typeof(Convite)
+    };
+
+    public SyncService(DatabaseService databaseService, ApiService apiService) {
+        _databaseService = databaseService;
+        _apiService = apiService;
+    }
+
+    public async Task SyncAsync() {
+        Console.WriteLine("Iniciando sincronização...");
+
+        // 1. Sincronização de Envio (Upload)
+        await UploadChangesAsync();
+
+        // 2. Sincronização de Recebimento (Download)
+        await DownloadChangesAsync();
+
+        Console.WriteLine("Sincronização concluída.");
+    }
+
+    private async Task UploadChangesAsync() {
+        foreach (var type in _syncableTypes) {
+            var getMethod = typeof(DatabaseService).GetMethod("GetUnsyncedItemsAsync");
+            if (getMethod == null) continue; // Garante que o método existe
+
+            var genericGetMethod = getMethod.MakeGenericMethod(type);
+
+            // Corrige o erro de casting. Primeiro, invoca o método e obtém a Task.
+            // Em seguida, usa 'await' para esperar a Task ser concluída e converte o resultado para 'dynamic'.
+            dynamic unsyncedItems = await (dynamic)genericGetMethod.Invoke(_databaseService, null);
+
+            if (unsyncedItems.Count > 0) {
+                var postMethod = typeof(ApiService).GetMethod("PostDataAsync");
+                if (postMethod == null) continue;
+                var genericPostMethod = postMethod.MakeGenericMethod(type);
+                await (Task)genericPostMethod.Invoke(_apiService, new object[] { unsyncedItems });
+
+                var markMethod = typeof(DatabaseService).GetMethod("MarkAsSyncedAsync");
+                if (markMethod == null) continue;
+                var genericMarkMethod = markMethod.MakeGenericMethod(type);
+                await (Task)genericMarkMethod.Invoke(_databaseService, new object[] { unsyncedItems });
+            }
+        }
+    }
+
+    private async Task DownloadChangesAsync() {
+        var lastSyncTime = Preferences.Get("LastSyncTime", DateTime.MinValue);
+
+        foreach (var type in _syncableTypes) {
+            var getUpdatesMethod = typeof(ApiService).GetMethod("GetUpdatesAsync");
+            if (getUpdatesMethod == null) continue;
+            var genericGetUpdatesMethod = getUpdatesMethod.MakeGenericMethod(type);
+
+            // A mesma correção se aplica aqui para o método de download
+            dynamic latestItems = await (dynamic)genericGetUpdatesMethod.Invoke(_apiService, new object[] { lastSyncTime });
+
+            var saveMethod = typeof(DatabaseService).GetMethod("SaveDownloadedItemsAsync");
+            if (saveMethod == null) continue;
+            var genericSaveMethod = saveMethod.MakeGenericMethod(type);
+            await (Task)genericSaveMethod.Invoke(_databaseService, new object[] { latestItems });
+        }
+
+        Preferences.Set("LastSyncTime", DateTime.UtcNow);
+    }
+}

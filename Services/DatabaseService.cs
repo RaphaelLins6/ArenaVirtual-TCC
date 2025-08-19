@@ -231,5 +231,27 @@ namespace ArenaVirtual.Services {
         public async Task<List<Usuario>> GetMembrosByTimeIdAsync(int timeId) {
             return await _database.Table<Usuario>().Where(u => u.TimeId == timeId).ToListAsync();
         }
+
+        public Task<List<T>> GetUnsyncedItemsAsync<T>() where T : ISyncable, new() {
+            return _database.Table<T>().Where(i => !i.IsSynced).ToListAsync();
+        }
+
+        // O método MarkAsSyncedAsync precisa da restrição 'where'
+        public async Task MarkAsSyncedAsync<T>(List<T> items) where T : ISyncable {
+            foreach (var item in items) {
+                item.IsSynced = true;
+                await _database.UpdateAsync(item);
+            }
+        }
+
+        // O método SaveDownloadedItemsAsync também precisa da restrição
+        public async Task SaveDownloadedItemsAsync<T>(List<T> items) where T : ISyncable {
+            foreach (var item in items) {
+                var rowsAffected = await _database.UpdateAsync(item);
+                if (rowsAffected == 0) {
+                    await _database.InsertAsync(item);
+                }
+            }
+        }
     }   
 }

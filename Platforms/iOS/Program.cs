@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace ArenaVirtuall
+namespace ArenaVirtual
 {
     public class Program
     {

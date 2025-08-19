@@ -5,6 +5,9 @@ using ArenaVirtual.Views;
 using ArenaVirtual.ViewModels;
 using ArenaVirtual.ViewModels.Atleta;
 using ArenaVirtual.Views.Atleta;
+using ArenaVirtual.Popups; // Adicionado para registrar os popups
+using ArenaVirtual.ViewModels.Organizador; // Adicionado para registrar os ViewModels do organizador
+using ArenaVirtual.Views.Organizador; // Adicionado para registrar as Páginas do organizador
 
 namespace ArenaVirtual;
 
@@ -22,23 +25,25 @@ public static class MauiProgram {
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
+        // Registro de serviços como Singletons ou Transients para injeção de dependência.
+        // Singleton é usado para serviços que persistem durante toda a vida do app (ex: bancos de dados, sincronização).
+        // Transient é usado para serviços ou páginas que podem ser criados e descartados (ex: ViewModels).
+
+        // Adicione o serviço de alerta como Transient.
         builder.Services.AddTransient<IAlertService, AlertService>();
 
-        builder.Services.AddSingleton<DatabaseService>(s => {
-            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "ArenaVirtual.db3");
-            var databaseService = new DatabaseService(dbPath);
-            return databaseService;
-        });
-
-        // Caminho do banco de dados SQLite
+        // Registre os serviços de dados e sincronização como Singletons.
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "arenavirtual.db3");
-        builder.Services.AddSingleton(new DatabaseService(dbPath)); // Registro correto com parâmetro
+        builder.Services.AddSingleton(new DatabaseService(dbPath));
+        builder.Services.AddSingleton<ApiService>();
+        builder.Services.AddSingleton<SyncService>(); // Registra o serviço de sincronização
+        builder.Services.AddSingleton<CampeonatoService>(); // Registra o serviço de campeonatos
 
-        // Serviços
+        // Registre os serviços de domínio como Transients
         builder.Services.AddTransient<UsuarioService>();
-        builder.Services.AddSingleton<TimeService>();
+        builder.Services.AddTransient<TimeService>();
 
-        // ViewModels
+        // Registre todos os ViewModels como Transient
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<RegisterViewModel>();
         builder.Services.AddTransient<PerfilViewModel>();
@@ -47,7 +52,9 @@ public static class MauiProgram {
         builder.Services.AddTransient<EntrarTimePageViewModel>();
         builder.Services.AddTransient<SolicitacaoTimePageViewModel>();
         builder.Services.AddTransient<EditarTimePageViewModel>();
-        // Páginas
+        builder.Services.AddTransient<EditarCampeonatoViewModel>(); // Adicionado para o organizador
+
+        // Registre as Páginas e Popups como Transient
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<RegisterPage>();
         builder.Services.AddTransient<PerfilPage>();
@@ -57,6 +64,14 @@ public static class MauiProgram {
         builder.Services.AddTransient<EntrarTimePage>();
         builder.Services.AddTransient<SolicitacaoTimePage>();
         builder.Services.AddTransient<EditarTimePage>();
+
+        // Registre os popups que agora recebem injeção de dependência
+        builder.Services.AddTransient<AlterarImagemPopup>();
+        builder.Services.AddTransient<AlterarSenhaPopup>();
+        builder.Services.AddTransient<EditarPerfilPopup>();
+
+        // Registre as Páginas do organizador
+        builder.Services.AddTransient<EditarCampeonatoPage>(); // Adicionado
 
         return builder.Build();
     }

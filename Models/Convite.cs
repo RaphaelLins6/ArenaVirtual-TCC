@@ -1,7 +1,7 @@
 ﻿using SQLite;
 
 namespace ArenaVirtual.Models {
-    public class Convite {
+    public class Convite : ISyncable {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
 
@@ -14,6 +14,9 @@ namespace ArenaVirtual.Models {
         public DateTime DataEnvio { get; set; } 
 
         public StatusConvite Status { get; set; }
+
+        public bool IsSynced { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 
     public enum StatusConvite {

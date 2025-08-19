@@ -2,9 +2,10 @@
 using ArenaVirtual.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Diagnostics;
 
 namespace ArenaVirtual.ViewModels {
-    public partial class LoginViewModel(IAlertService alertService, UsuarioService usuarioService) : ObservableObject {
+    public partial class LoginViewModel(IAlertService alertService, UsuarioService usuarioService, SyncService syncService) : ObservableObject {
         private readonly IAlertService _alertService = alertService;
         private readonly UsuarioService _usuarioService = usuarioService;
 
@@ -30,6 +31,18 @@ namespace ArenaVirtual.ViewModels {
 
             SessaoService.Instancia.Login(usuario);
             System.Diagnostics.Debug.WriteLine($"[LoginViewModel] SessaoService.Instancia.Login() chamado para ID: {usuario.Id}, Email: {usuario.Email}");
+
+            // ** DISPARO AUTOMÁTICO - PRINCIPAL - APÓS LOGIN BEM-SUCEDIDO **
+            Debug.WriteLine("[LoginViewModel] Login bem-sucedido. Disparando sincronização inicial completa.");
+            try {
+                await syncService.SyncAsync();
+                await syncService.SyncAsync();
+                await syncService.SyncAsync();
+                // Adicione outras chamadas de sincronização aqui, se você tiver outros modelos
+            } catch (Exception ex) {
+                Debug.WriteLine($"[LoginViewModel] Erro na sincronização pós-login: {ex.Message}");
+                // Considere exibir um alerta discreto para o usuário ou registrar o erro
+            }
 
             Application.Current.MainPage = new AppShell(usuario);
         }

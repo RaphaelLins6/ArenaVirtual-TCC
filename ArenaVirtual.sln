@@ -5,7 +5,7 @@ VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArenaVirtual", "ArenaVirtual.csproj", "{D6808315-5AD8-4703-B719-752DAB09B4A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArenaVirtualAPI", "..\..\..\Downloads\ArenaVirtualAPI\ArenaVirtualAPI.csproj", "{2840C9F5-648C-91FB-BE81-5DCECBFB92EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArenaVirtualAPI", "..\ArenaVirtualAPI\ArenaVirtualAPI.csproj", "{4C9EF1B7-6B2E-81B5-3E1C-1007096F4141}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,10 +18,10 @@ Global
 		{D6808315-5AD8-4703-B719-752DAB09B4A2}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{D6808315-5AD8-4703-B719-752DAB09B4A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6808315-5AD8-4703-B719-752DAB09B4A2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2840C9F5-648C-91FB-BE81-5DCECBFB92EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2840C9F5-648C-91FB-BE81-5DCECBFB92EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2840C9F5-648C-91FB-BE81-5DCECBFB92EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2840C9F5-648C-91FB-BE81-5DCECBFB92EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C9EF1B7-6B2E-81B5-3E1C-1007096F4141}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C9EF1B7-6B2E-81B5-3E1C-1007096F4141}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C9EF1B7-6B2E-81B5-3E1C-1007096F4141}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C9EF1B7-6B2E-81B5-3E1C-1007096F4141}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,7 +1,7 @@
 ﻿using SQLite;
 
 namespace ArenaVirtual.Models {
-    public class Estatistica {
+    public class Estatistica : ISyncable {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
         public int UsuarioId { get; set; }
@@ -9,5 +9,7 @@ namespace ArenaVirtual.Models {
         public int Pontos { get; set; }
         public int Rebotes { get; set; }
         public int Assistencias { get; set; }
+        public bool IsSynced { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }

@@ -1,29 +1,39 @@
 ﻿using ArenaVirtual.Models;
-using BCrypt.Net; 
+using BCrypt.Net;
+using System.Diagnostics;
 
 namespace ArenaVirtual.Services {
-    public class UsuarioService(DatabaseService databaseService) {
+    public class UsuarioService(DatabaseService databaseService, SyncService syncService) {
         private readonly DatabaseService _databaseService = databaseService;
+        private readonly SyncService _syncService = syncService; // Atribua a dependência
 
         public async Task<Usuario?> Cadastrar(Usuario usuario) {
             bool emailExiste = await _databaseService.EmailExisteAsync(usuario.Email);
             if (emailExiste) {
-                System.Diagnostics.Debug.WriteLine("Email já existe.");
+                Debug.WriteLine("Email já existe.");
                 return null;
             }
 
+            // A lógica de preenchimento está correta
+            usuario.IsSynced = false;
+            usuario.UpdatedAt = DateTime.UtcNow;
+
             int result = await _databaseService.InserirUsuarioAsync(usuario);
-            System.Diagnostics.Debug.WriteLine($"Resultado da inserção: {result}");
+            Debug.WriteLine($"Resultado da inserção: {result}");
 
             if (result > 0) {
+                // ** DISPARO MANUAL DA SINCRONIZAÇÃO APÓS INSERÇÃO BEM-SUCEDIDA **
+                Debug.WriteLine("[UsuarioService] Novo usuário salvo localmente. Disparando sincronização...");
+                await _syncService.SyncAsync();
+
                 var usuarioRetornado = await _databaseService.ObterUsuarioPorEmailAsync(usuario.Email);
                 if (usuarioRetornado != null)
-                    System.Diagnostics.Debug.WriteLine($"Usuário cadastrado e retornado: {usuarioRetornado.Nome}");
+                    Debug.WriteLine($"Usuário cadastrado e retornado: {usuarioRetornado.Nome}");
                 else
-                    System.Diagnostics.Debug.WriteLine("Usuário não encontrado após cadastro (possível problema de ID).");
+                    Debug.WriteLine("Usuário não encontrado após cadastro (possível problema de ID).");
                 return usuarioRetornado;
             }
-            System.Diagnostics.Debug.WriteLine("Falha ao inserir usuário.");
+            Debug.WriteLine("Falha ao inserir usuário.");
             return null;
         }
 
@@ -40,6 +50,7 @@ namespace ArenaVirtual.Services {
                 return null;
             }
         }
+
         public static string GerarHash(string senha) {
             return BCrypt.Net.BCrypt.HashPassword(senha, workFactor: 12);
         }

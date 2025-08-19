@@ -1,7 +1,7 @@
 ﻿using SQLite;
 
 namespace ArenaVirtual.Models {
-    public class Campeonato {
+    public class Campeonato : ISyncable {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
         public string? Nome { get; set; }
@@ -20,5 +20,7 @@ namespace ArenaVirtual.Models {
         public string? FormatoCampeonato { get; set; }
         public string? LocaisDosJogos { get; set; }
         public bool HaveraPremiacao { get; set; }
+        public bool IsSynced { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic; // Adicionar para EqualityComparer
 
 namespace ArenaVirtual.Models {
     public enum TipoPerfil {
@@ -17,7 +18,11 @@ namespace ArenaVirtual.Models {
         Outro
     }
 
-    public partial class Usuario : INotifyPropertyChanged {
+    // A classe Usuario precisa implementar ISyncable, se ainda não o fez.
+    // Presumo que você já tenha criado a interface ISyncable e a adicionado aqui.
+    // Exemplo: public partial class Usuario : INotifyPropertyChanged, ISyncable
+    public partial class Usuario : INotifyPropertyChanged, ISyncable // Se não tiver a ISyncable ainda, adicione-a aqui
+    {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
 
@@ -124,9 +129,22 @@ namespace ArenaVirtual.Models {
         protected bool SetProperty<T>(ref T backingField, T value, [CallerMemberName] string? propertyName = null) {
             if (EqualityComparer<T>.Default.Equals(backingField, value))
                 return false;
+
             backingField = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+            // *** LÓGICA DE SINCRONIZAÇÃO ADICIONADA AQUI ***
+            // Se a propriedade foi alterada, marque o objeto para sincronização
+            // e atualize o timestamp da última modificação.
+            this.IsSynced = false;
+            this.UpdatedAt = DateTime.UtcNow;
+            // ************************************************
+
             return true;
         }
+
+        // Propriedades para sincronização
+        public bool IsSynced { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }

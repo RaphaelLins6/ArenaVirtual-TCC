@@ -45,7 +45,7 @@
                 BackgroundColor="Transparent"
                 Command="{Binding IrParaRegistroCommand}"
                 Text="Registre-se"
-                TextColor="{StaticResource Primary}" />
+                TextColor="White" />
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

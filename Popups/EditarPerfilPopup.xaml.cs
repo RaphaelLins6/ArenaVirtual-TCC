@@ -1,25 +1,26 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Diagnostics;
+using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.Popups;
 
 public partial class EditarPerfilPopup : ContentPage {
-    private readonly Usuario _usuario; 
-
+    private readonly Usuario _usuario;
     private readonly IAlertService _alertService;
     private readonly DatabaseService _databaseService;
+    private readonly SyncService _syncService; // Adicionando a dependência
 
-    public EditarPerfilPopup(Usuario usuario, IAlertService alertService) {
+    // Injeção de dependências no construtor
+    public EditarPerfilPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
         InitializeComponent();
-        _usuario = usuario; 
+        _usuario = usuario;
         _alertService = alertService;
-
-        var serviceProvider = App.Current?.Handler?.MauiContext?.Services;
-        if (serviceProvider != null) {
-            _databaseService = serviceProvider.GetRequiredService<DatabaseService>();
-        } else {
-            throw new InvalidOperationException("DatabaseService not registered or app context is null.");
-        }
+        _databaseService = databaseService;
+        _syncService = syncService;
 
         // Preenche campos comuns
         NomeEntry.Text = _usuario.Nome;
@@ -89,7 +90,15 @@ public partial class EditarPerfilPopup : ContentPage {
             _usuario.Genero = Enum.TryParse<GeneroEnum>(GeneroArbitroPicker.SelectedItem?.ToString(), out var genero) ? genero : null;
         }
 
+        // ** Marcar usuário para sincronização antes de atualizar **
+        _usuario.IsSynced = false;
+        _usuario.UpdatedAt = DateTime.UtcNow;
+
         await _databaseService.AtualizarUsuarioAsync(_usuario);
+
+        // ** DISPARO MANUAL APÓS ATUALIZAÇÃO DO PERFIL **
+        Debug.WriteLine("[EditarPerfilPopup] Perfil de usuário atualizado localmente. Disparando sincronização...");
+        await _syncService.SyncAsync();
 
         MessagingCenter.Send(this, "Perfil Atualizado", _usuario);
 
