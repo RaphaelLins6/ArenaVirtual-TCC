@@ -1,34 +1,51 @@
-﻿<ContentPage
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
     x:Class="ArenaVirtual.Views.LoginPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
+    xmlns:local="clr-namespace:ArenaVirtual.Views"
+    xmlns:viewmodels="clr-namespace:ArenaVirtual.ViewModels"
     Title="Login"
-    x:DataType="vm:LoginViewModel">
+    x:DataType="viewmodels:LoginViewModel"
+    Shell.NavBarIsVisible="False">
 
-    <VerticalStackLayout Padding="30" Spacing="25">
-        <Entry
-            Keyboard="Email"
-            Placeholder="Email"
-            Text="{Binding Email}" />
-        <Entry
-            Completed="Senha_Completed"
-            IsPassword="True"
-            Placeholder="Senha"
-            ReturnType="Go"
-            Text="{Binding Senha}" />
-        <Button
-            Command="{Binding LoginCommand}"
-            Style="{StaticResource BotaoPrincipal}"
-            Text="Entrar" />
-        <Label
-            HorizontalOptions="Center"
-            Text="Não tem uma conta?"
-            TextColor="White" />
-        <Label HorizontalOptions="Center" Text="Registre-se">
-            <Label.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding IrParaRegistroCommand}" />
-            </Label.GestureRecognizers>
-        </Label>
-    </VerticalStackLayout>
+    <Grid>
+        <VerticalStackLayout
+            Padding="20"
+            HorizontalOptions="CenterAndExpand"
+            Spacing="20"
+            VerticalOptions="CenterAndExpand">
+
+            <!--  Mensagem de Boas-vindas  -->
+            <Label
+                Margin="0,0,0,10"
+                FontAttributes="Bold"
+                FontSize="22"
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                Text="Seja bem-vindo, faça seu login!" />
+
+            <!--  Campos de Entrada  -->
+            <Entry Placeholder="E-mail" Text="{Binding Email}" />
+            <Entry
+                IsPassword="True"
+                Placeholder="Senha"
+                Text="{Binding Senha}" />
+
+            <Button
+                Command="{Binding LoginCommand}"
+                Style="{StaticResource BotaoPrincipal}"
+                Text="Entrar" />
+
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
+                <Label Text="Não tem uma conta?" />
+            </HorizontalStackLayout>
+
+            <Button
+                BackgroundColor="Transparent"
+                Command="{Binding IrParaRegistroCommand}"
+                Text="Registre-se"
+                TextColor="{StaticResource Primary}" />
+        </VerticalStackLayout>
+    </Grid>
 </ContentPage>
