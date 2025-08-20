@@ -1,0 +1,6 @@
+@ArenaVirtualAPI_HostAddress = http://localhost:5067
+
+GET {{ArenaVirtualAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
