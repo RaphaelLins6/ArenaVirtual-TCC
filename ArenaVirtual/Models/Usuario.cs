@@ -145,6 +145,6 @@ namespace ArenaVirtual.Models {
 
         // Propriedades para sincronização
         public bool IsSynced { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

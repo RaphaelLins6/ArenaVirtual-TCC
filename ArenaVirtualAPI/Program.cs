@@ -1,33 +1,38 @@
 ﻿using ArenaVirtualAPI.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
 using ArenaVirtualAPI.Services;
-using ArenaVirtualAPI.Controllers;
-using System.Text.Json.Serialization;
-using System.Text.Json;
+using ArenaVirtualAPI.Models;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Adiciona serviços ao contêiner
 builder.Services.AddControllers();
 
-// Configura Entity Framework Core com SQLite (ajuste se usar outro banco)
+// Adiciona o DbContext com SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Registre os serviços de autenticação e autorização
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
-
-// Registre os serviços personalizados aqui
-builder.Services.AddScoped<BackendSyncService>();
-builder.Services.AddScoped<UsuarioService>();
-builder.Services.AddScoped<CampeonatoService>();
-// Adicione aqui os outros serviços que a sua API utiliza
-
-// Adiciona Swagger para documentação da API
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// ==========================================================
+// REGISTRO DOS SERVIÇOS DE SINCRONIZAÇÃO
+// ==========================================================
+// Registra os serviços específicos
+builder.Services.AddScoped<IBackendService<Usuario>, UsuarioService>();
+builder.Services.AddScoped<IBackendService<Campeonato>, CampeonatoService>();
+builder.Services.AddScoped<IBackendService<Time>, TimeService>();
+builder.Services.AddScoped<IBackendService<Convite>, ConviteService>();
+
+// Registra a fábrica de serviços de sincronização
+builder.Services.AddScoped<IBackendSyncServiceFactory, BackendSyncServiceFactory>();
+
+// Registra o serviço principal de sincronização
+builder.Services.AddScoped<BackendSyncService>();
 
 var app = builder.Build();
 
@@ -38,11 +43,14 @@ if (app.Environment.IsDevelopment()) {
 }
 
 app.UseHttpsRedirection();
-
-// Adicione UseAuthentication antes de UseAuthorization
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
+
+// Inicializa o banco de dados
+using (var scope = app.Services.CreateScope()) {
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
 
 app.Run();

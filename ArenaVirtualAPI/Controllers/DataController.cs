@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Text.Json; // Adicionado para JsonElement
-using ArenaVirtualAPI.Models; // Seus modelos
-using ArenaVirtualAPI.Services; // Seu novo BackendSyncService
-using System; // Adicionado para DateTime
+using System.Text.Json;
+using ArenaVirtualAPI.Models;
+using ArenaVirtualAPI.Services;
+using System;
+using System.Linq; // Adicionado para os métodos de extensão Sum() e Count()
 
 [ApiController]
 [Route("api/[controller]")] // Isso define a rota base como /api/data
@@ -46,13 +47,21 @@ public class DataController : ControllerBase {
     // Endpoint para sincronização de download (enviar dados da API para o app)
     // A rota completa será /api/data/updates
     [HttpGet("updates")]
-    public async Task<ActionResult<IEnumerable<ISyncable>>> GetUpdates([FromQuery] DateTime lastSyncTime) {
+    public async Task<IActionResult> GetUpdates([FromQuery] DateTime lastSyncTime) {
         _logger.LogInformation($"Requisição de atualizações recebida. Última sincronização: {lastSyncTime}");
 
         try {
             var updatedItems = await _backendSyncService.GetUpdatesAsync(lastSyncTime);
-            _logger.LogInformation($"Retornando {updatedItems.Count} itens atualizados.");
-            return Ok(updatedItems);
+            var allUpdatedItems = new List<object>();
+
+            // Itere sobre o dicionário e adicione todos os itens a uma única lista
+            foreach (var keyValuePair in updatedItems.UpdatedItems) {
+                allUpdatedItems.AddRange(keyValuePair.Value.Cast<object>());
+            }
+
+            // Retorna a lista de itens. Se a lista estiver vazia, a resposta JSON será `[]`.
+            return Ok(allUpdatedItems);
+
         } catch (Exception ex) {
             _logger.LogError($"Erro ao obter atualizações: {ex.Message}");
             return StatusCode(500, $"Erro interno do servidor: {ex.Message}");

@@ -85,6 +85,37 @@ namespace ArenaVirtualAPI.Migrations
                     b.ToTable("Campeonatos");
                 });
 
+            modelBuilder.Entity("ArenaVirtualAPI.Models.Convite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataEnvio")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdSolicitante")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdTime")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsSynced")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Convites");
+                });
+
             modelBuilder.Entity("ArenaVirtualAPI.Models.Time", b =>
                 {
                     b.Property<int>("Id")
@@ -138,6 +169,8 @@ namespace ArenaVirtualAPI.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CampeonatoId");
 
                     b.ToTable("Times");
                 });
@@ -223,11 +256,25 @@ namespace ArenaVirtualAPI.Migrations
                     b.ToTable("Usuarios");
                 });
 
+            modelBuilder.Entity("ArenaVirtualAPI.Models.Time", b =>
+                {
+                    b.HasOne("ArenaVirtualAPI.Models.Campeonato", null)
+                        .WithMany("Times")
+                        .HasForeignKey("CampeonatoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ArenaVirtualAPI.Models.Usuario", b =>
                 {
                     b.HasOne("ArenaVirtualAPI.Models.Time", null)
                         .WithMany("Membros")
                         .HasForeignKey("TimeId");
+                });
+
+            modelBuilder.Entity("ArenaVirtualAPI.Models.Campeonato", b =>
+                {
+                    b.Navigation("Times");
                 });
 
             modelBuilder.Entity("ArenaVirtualAPI.Models.Time", b =>

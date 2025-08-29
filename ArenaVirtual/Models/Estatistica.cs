@@ -10,6 +10,6 @@ namespace ArenaVirtual.Models {
         public int Rebotes { get; set; }
         public int Assistencias { get; set; }
         public bool IsSynced { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

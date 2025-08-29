@@ -1,5 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ArenaVirtualAPI.Models;
 
@@ -14,13 +17,13 @@ public class Campeonato : ISyncable {
     [MaxLength(200)]
     public string? Local { get; set; }
 
-    [NotMapped]                  // propriedade só de UI (não vai ao banco)
+    [NotMapped] 
     public bool EhFavorito { get; set; }
 
     public DateTime DataInicio { get; set; }
     public DateTime DataFim { get; set; }
 
-    public int OrganizadorId { get; set; }  // FK para Usuario (se quiser mapear depois)
+    public int OrganizadorId { get; set; }
 
     public string? LogoUrl { get; set; }
     public string? NomeOrganizador { get; set; }
@@ -32,7 +35,8 @@ public class Campeonato : ISyncable {
     public string? FormatoCampeonato { get; set; }
     public string? LocaisDosJogos { get; set; }
     public bool HaveraPremiacao { get; set; }
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow; // Valor padrão
-    public bool IsSynced { get; set; } = false; // Valor padrão
-
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsSynced { get; set; } = false;
+    [JsonIgnore]
+    public ICollection<Time>? Times { get; set; }
 }

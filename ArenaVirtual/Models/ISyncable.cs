@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 namespace ArenaVirtual.Models {
     public interface ISyncable {
         public bool IsSynced { get; set; }
-        public DateTime? UpdatedAt { get; set; } // Opcional, mas altamente recomendado
+        public DateTime UpdatedAt { get; set; } 
     }
 }

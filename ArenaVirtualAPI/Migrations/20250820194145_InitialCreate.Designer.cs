@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArenaVirtualAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250817162652_AdicionarMembrosEmTime")]
-    partial class AdicionarMembrosEmTime
+    [Migration("20250820194145_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,6 +48,9 @@ namespace ArenaVirtualAPI.Migrations
                     b.Property<bool>("HaveraPremiacao")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsSynced")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LocaisDosJogos")
                         .HasColumnType("nvarchar(max)");
 
@@ -74,12 +77,46 @@ namespace ArenaVirtualAPI.Migrations
                     b.Property<string>("TelefoneOrganizador")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal>("ValorTaxaInscricao")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Campeonatos");
+                });
+
+            modelBuilder.Entity("ArenaVirtualAPI.Models.Convite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataEnvio")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdSolicitante")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdTime")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsSynced")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Convites");
                 });
 
             modelBuilder.Entity("ArenaVirtualAPI.Models.Time", b =>
@@ -109,6 +146,9 @@ namespace ArenaVirtualAPI.Migrations
                     b.Property<int>("Empates")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsSynced")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LogoUrl")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -124,6 +164,9 @@ namespace ArenaVirtualAPI.Migrations
                     b.Property<string>("Regiao")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Vitorias")
                         .HasColumnType("int");
@@ -167,6 +210,9 @@ namespace ArenaVirtualAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsSynced")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LinkRedeSocial")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -200,6 +246,9 @@ namespace ArenaVirtualAPI.Migrations
 
                     b.Property<int?>("TimeId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

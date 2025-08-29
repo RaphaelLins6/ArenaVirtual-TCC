@@ -14,14 +14,14 @@ public partial class AlterarSenhaPopup : ContentPage {
     private readonly DatabaseService _databaseService;
     private readonly SyncService _syncService; // Adicionando a dependência
 
-    // Injeção de dependências no construtor
-    public AlterarSenhaPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
+    // Injeção de dependências no construtor
+    public AlterarSenhaPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
         InitializeComponent();
         _usuario = usuario;
         _alertService = alertService;
         _databaseService = databaseService;
         _syncService = syncService; // Atribuindo a dependência
-    }
+    }
 
     private async void Cancelar_Clicked(object sender, EventArgs e) {
         await Navigation.PopModalAsync();
@@ -33,8 +33,8 @@ public partial class AlterarSenhaPopup : ContentPage {
         string confirmarNovaSenha = ConfirmarNovaSenhaEntry.Text?.Trim() ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(senhaAtual) ||
-            string.IsNullOrWhiteSpace(novaSenha) ||
-            string.IsNullOrWhiteSpace(confirmarNovaSenha)) {
+          string.IsNullOrWhiteSpace(novaSenha) ||
+          string.IsNullOrWhiteSpace(confirmarNovaSenha)) {
             await _alertService.DisplayAlert("Erro", "Preencha todos os campos.", "OK");
             return;
         }
@@ -49,11 +49,11 @@ public partial class AlterarSenhaPopup : ContentPage {
             return;
         }
 
-        // Gera o novo hash da senha antes de atualizar o objeto
-        _usuario.SenhaHash = UsuarioService.GerarHash(novaSenha);
+        // Gera o novo hash da senha antes de atualizar o objeto
+        _usuario.SenhaHash = UsuarioService.GerarHash(novaSenha);
 
-        // ** Marca o usuário para sincronização antes de atualizar **
-        _usuario.IsSynced = false;
+        // ** Marca o usuário para sincronização antes de atualizar **
+        _usuario.IsSynced = false;
         _usuario.UpdatedAt = DateTime.UtcNow;
 
         try {
@@ -64,9 +64,11 @@ public partial class AlterarSenhaPopup : ContentPage {
                     App.CurrentUser.SenhaHash = _usuario.SenhaHash;
                 }
 
-                // ** DISPARO MANUAL APÓS ATUALIZAÇÃO DA SENHA DO USUÁRIO **
-                Debug.WriteLine("[AlterarSenhaPopup] Senha do usuário atualizada localmente. Disparando sincronização...");
-                await _syncService.SyncAsync();
+                // ** DISPARO MANUAL APÓS ATUALIZAÇÃO DA SENHA DO USUÁRIO **
+                Debug.WriteLine("[AlterarSenhaPopup] Senha do usuário atualizada localmente. Disparando sincronização...");
+
+                // Crie e passe um objeto de progresso vazio para o método SyncAsync
+                await _syncService.SyncAsync(new Progress<string>());
 
                 await _alertService.DisplayAlert("Sucesso", "Senha atualizada com sucesso!", "OK");
                 await Navigation.PopModalAsync();

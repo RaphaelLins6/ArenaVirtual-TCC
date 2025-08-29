@@ -12,6 +12,6 @@ namespace ArenaVirtual.Models {
         [Indexed]
         public int CampeonatoId { get; set; }
         public bool IsSynced { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

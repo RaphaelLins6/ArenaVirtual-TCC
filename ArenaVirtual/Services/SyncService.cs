@@ -1,5 +1,4 @@
-﻿// Services/SyncService.cs
-using ArenaVirtual.Services;
+﻿using ArenaVirtual.Services;
 using ArenaVirtual.Models;
 using System.Threading.Tasks;
 using System;
@@ -31,27 +30,27 @@ public class SyncService {
         _apiService = apiService;
     }
 
-    public async Task SyncAsync() {
-        Console.WriteLine("Iniciando sincronização...");
+    public async Task SyncAsync(IProgress<string> progress) {
+        progress.Report("Iniciando sincronização...");
 
         // 1. Sincronização de Envio (Upload)
-        await UploadChangesAsync();
+        progress.Report("Enviando dados para o servidor...");
+        await UploadChangesAsync(progress); // Passe o objeto de progresso aqui
 
         // 2. Sincronização de Recebimento (Download)
-        await DownloadChangesAsync();
+        progress.Report("Recebendo dados do servidor...");
+        await DownloadChangesAsync(progress); // Passe o objeto de progresso aqui
 
-        Console.WriteLine("Sincronização concluída.");
+        progress.Report("Sincronização concluída.");
     }
 
-    private async Task UploadChangesAsync() {
+    private async Task UploadChangesAsync(IProgress<string> progress) { // Adicione o argumento aqui
         foreach (var type in _syncableTypes) {
+            progress.Report($"Enviando dados de {type.Name}..."); // Mensagem mais específica
             var getMethod = typeof(DatabaseService).GetMethod("GetUnsyncedItemsAsync");
-            if (getMethod == null) continue; // Garante que o método existe
+            if (getMethod == null) continue;
 
             var genericGetMethod = getMethod.MakeGenericMethod(type);
-
-            // Corrige o erro de casting. Primeiro, invoca o método e obtém a Task.
-            // Em seguida, usa 'await' para esperar a Task ser concluída e converte o resultado para 'dynamic'.
             dynamic unsyncedItems = await (dynamic)genericGetMethod.Invoke(_databaseService, null);
 
             if (unsyncedItems.Count > 0) {
@@ -68,15 +67,15 @@ public class SyncService {
         }
     }
 
-    private async Task DownloadChangesAsync() {
+    private async Task DownloadChangesAsync(IProgress<string> progress) { // Adicione o argumento aqui
         var lastSyncTime = Preferences.Get("LastSyncTime", DateTime.MinValue);
 
         foreach (var type in _syncableTypes) {
+            progress.Report($"Atualizando {type.Name}...");
             var getUpdatesMethod = typeof(ApiService).GetMethod("GetUpdatesAsync");
             if (getUpdatesMethod == null) continue;
             var genericGetUpdatesMethod = getUpdatesMethod.MakeGenericMethod(type);
 
-            // A mesma correção se aplica aqui para o método de download
             dynamic latestItems = await (dynamic)genericGetUpdatesMethod.Invoke(_apiService, new object[] { lastSyncTime });
 
             var saveMethod = typeof(DatabaseService).GetMethod("SaveDownloadedItemsAsync");

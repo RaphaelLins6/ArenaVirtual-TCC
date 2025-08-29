@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization; 
 
 namespace ArenaVirtualAPI.Models;
 
@@ -12,7 +13,7 @@ public class Time : ISyncable {
     public string Nome { get; set; } = string.Empty;
 
     [MaxLength(255)]
-    public string? LogoUrl { get; set; }   // guarde aqui uma URL acessível (ex.: Azure Blob)
+    public string? LogoUrl { get; set; } // guarde aqui uma URL acessível (ex.: Azure Blob)
 
     public int CampeonatoId { get; set; }
 
@@ -31,8 +32,10 @@ public class Time : ISyncable {
 
     public int? CapitaoId { get; set; }
 
+    [JsonIgnore]
     public ICollection<Usuario>? Membros { get; set; }
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow; // Valor padrão
-    public bool IsSynced { get; set; } = false; // Valor padrão
+
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsSynced { get; set; } = false;
 
 }

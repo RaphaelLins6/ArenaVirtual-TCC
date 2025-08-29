@@ -1,10 +1,6 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.Popups;
 
@@ -12,19 +8,19 @@ public partial class AlterarImagemPopup : ContentPage {
     private readonly Usuario _usuario;
     private readonly IAlertService _alertService;
     private readonly DatabaseService _databaseService;
-    private readonly SyncService _syncService; // Adicionando a dependência
+    private readonly SyncService _syncService;
 
     public event EventHandler<string>? ImagemAtualizada;
 
     private string? _caminhoNovaImagemSelecionada;
 
-    // Injeção de dependências no construtor
-    public AlterarImagemPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
+    // Injeção de dependências no construtor
+    public AlterarImagemPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
         InitializeComponent();
         _usuario = usuario;
         _alertService = alertService;
         _databaseService = databaseService;
-        _syncService = syncService; 
+        _syncService = syncService;
 
         AtualizarImagemUI(_usuario.ImagemPath);
     }
@@ -75,15 +71,17 @@ public partial class AlterarImagemPopup : ContentPage {
 
             _usuario.ImagemPath = caminhoFinalImagem;
 
-            // Marcar usuário para sincronização antes de atualizar no banco de dados
-            _usuario.IsSynced = false;
+            // Marcar usuário para sincronização antes de atualizar no banco de dados
+            _usuario.IsSynced = false;
             _usuario.UpdatedAt = DateTime.UtcNow;
 
             await _databaseService.AtualizarUsuarioAsync(_usuario);
 
-            // Disparo manual da sincronização após a atualização local
-            Debug.WriteLine("[AlterarImagemPopup] Imagem de usuário atualizada localmente. Disparando sincronização...");
-            await _syncService.SyncAsync();
+            // Disparo manual da sincronização após a atualização local
+            Debug.WriteLine("[AlterarImagemPopup] Imagem de usuário atualizada localmente. Disparando sincronização...");
+
+            // Crie e passe um objeto de progresso vazio
+            await _syncService.SyncAsync(new Progress<string>());
 
             ImagemAtualizada?.Invoke(this, _usuario.ImagemPath);
 

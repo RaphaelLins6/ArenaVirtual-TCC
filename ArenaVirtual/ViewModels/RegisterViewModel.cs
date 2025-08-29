@@ -4,11 +4,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using ArenaVirtual.Views;
-using System.Diagnostics; // Adicionado para Debug.WriteLine
-using System; // Adicionado para DateTime.UtcNow (caso não estivesse)
+using System.Diagnostics;
 
 namespace ArenaVirtual.ViewModels {
-    // Adicione SyncService ao construtor
     public partial class RegisterViewModel(IAlertService alertService, UsuarioService usuarioService, SyncService syncService) : ObservableObject {
         [ObservableProperty] private string nome = string.Empty;
         [ObservableProperty] private string email = string.Empty;
@@ -16,8 +14,8 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty] private string confirmarSenha = string.Empty;
         [ObservableProperty] private TipoPerfil perfilSelecionado = TipoPerfil.Atleta;
 
-        // Novos campos
-        [ObservableProperty] private string telefone = string.Empty;
+        // Novos campos
+        [ObservableProperty] private string telefone = string.Empty;
         [ObservableProperty] private string localizacao = string.Empty;
         [ObservableProperty] private string linkRedeSocial = string.Empty;
         [ObservableProperty] private string nomeEmpresa = string.Empty;
@@ -35,10 +33,10 @@ namespace ArenaVirtual.ViewModels {
 
         private readonly IAlertService _alertService = alertService;
         private readonly UsuarioService _usuarioService = usuarioService;
-        private readonly SyncService _syncService = syncService; // Atribua a dependência
+        private readonly SyncService _syncService = syncService;
 
-        // Propriedade de conveniência para visibilidade de campos de patrocinador
-        public bool IsPatrocinador => PerfilSelecionado == TipoPerfil.Patrocinador;
+        // Propriedade de conveniência para visibilidade de campos de patrocinador
+        public bool IsPatrocinador => PerfilSelecionado == TipoPerfil.Patrocinador;
 
         [RelayCommand]
         public async Task Registrar() {
@@ -74,14 +72,11 @@ namespace ArenaVirtual.ViewModels {
                 Genero = this.GeneroSelecionado
             };
 
-            // Certifique-se de que o UsuarioService já está marcando IsSynced = false e UpdatedAt = DateTime.UtcNow
-            // antes de chamar InserirUsuarioAsync. Isso foi feito em nossa conversa anterior.
             Usuario? usuarioCadastrado = await _usuarioService.Cadastrar(usuario);
 
             if (usuarioCadastrado != null) {
                 await _alertService.DisplayAlert("Sucesso", "Usuário registrado com sucesso!", "OK");
 
-                // Limpar campos
                 Nome = string.Empty;
                 Email = string.Empty;
                 Senha = string.Empty;
@@ -103,12 +98,9 @@ namespace ArenaVirtual.ViewModels {
                 SessaoService.Instancia.Login(usuarioCadastrado);
                 System.Diagnostics.Debug.WriteLine($"[RegisterViewModel] SessaoService.Instancia.Login() chamado para ID: {usuarioCadastrado.Id}, Email: {usuarioCadastrado.Email}");
 
-                // ** DISPARO AUTOMÁTICO - PÓS-REGISTRO **
                 Debug.WriteLine("[RegisterViewModel] Usuário registrado e logado. Disparando sincronização inicial completa.");
                 try {
-                    await _syncService.SyncAsync();
-                    // Se o registro de usuário automaticamente criar outros tipos de dados,
-                    // como um perfil inicial, você também os sincronizaria aqui.
+                    await _syncService.SyncAsync(new Progress<string>());
                 } catch (Exception ex) {
                     Debug.WriteLine($"[RegisterViewModel] Erro na sincronização pós-registro: {ex.Message}");
                 }

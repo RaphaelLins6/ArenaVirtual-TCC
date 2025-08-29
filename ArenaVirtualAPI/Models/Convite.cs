@@ -1,20 +1,18 @@
-﻿using SQLite;
+﻿// ArenaVirtualAPI/Models/Convite.cs
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ArenaVirtual.Models {
+namespace ArenaVirtualAPI.Models {
     public class Convite : ISyncable {
-        [PrimaryKey, AutoIncrement]
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Indexed]
         public int IdSolicitante { get; set; } 
-
-        [Indexed]
-        public int IdTime { get; set; } 
-
-        public DateTime DataEnvio { get; set; } 
-
+        public int IdTime { get; set; }
+        public DateTime DataEnvio { get; set; }
         public StatusConvite Status { get; set; }
-
         public bool IsSynced { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

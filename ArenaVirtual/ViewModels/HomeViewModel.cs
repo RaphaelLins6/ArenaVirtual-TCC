@@ -24,47 +24,40 @@ namespace ArenaVirtual.ViewModels {
         public ICommand FavoritarCommand { get; }
         public ICommand VerCampeonatoCommand { get; }
         private readonly DatabaseService _databaseService;
-        private readonly SyncService _syncService; // 1. Adicionado para sincronização
+        private readonly SyncService _syncService;
 
-        public HomeViewModel(DatabaseService databaseService, SyncService syncService) { // 1. Injetado SyncService
+        public HomeViewModel(DatabaseService databaseService, SyncService syncService) {
             _campeonatos = [];
             Campeonatos = _campeonatos;
             _databaseService = databaseService;
-            _syncService = syncService; // Atribuído a dependência
+            _syncService = syncService;
 
             FavoritarCommand = new Command<object>(
-                async obj => {
-                    if (obj is Campeonato campeonato)
-                        await FavoritarAsync(campeonato);
-                });
+              async obj => {
+                  if (obj is Campeonato campeonato)
+                      await FavoritarAsync(campeonato);
+              });
 
             VerCampeonatoCommand = new Command<Campeonato>(async (campeonato) => {
                 await VerCampeonatoAsync(campeonato);
             });
-
-            // 2. Remova o Task.Run do construtor. A chamada agora será feita no OnAppearing.
-            // Task.Run(async () => {
-            //     await _databaseService.InitializeAsync();
-            //     await CarregarCampeonatos();
-            // });
         }
 
-        // Método público para ser chamado do code-behind da HomeView (página)
         public async Task OnAppearingAsync() {
             Debug.WriteLine("[HomeViewModel] OnAppearingAsync chamado. Disparando sincronização recorrente.");
 
-            // 3. Disparar a sincronização para todos os modelos que precisam de atualização
-            try {
-                await _syncService.SyncAsync();
-                await _syncService.SyncAsync();
-                await _syncService.SyncAsync();
-                // Adicione outras chamadas de sincronização aqui, se necessário
-            } catch (Exception ex) {
-                Debug.WriteLine($"[HomeViewModel] Erro na sincronização automática: {ex.Message}");
-            }
+            // A chamada para sincronizar deve ser executada em um thread em segundo plano para não bloquear a UI
+            // E deve fornecer o argumento IProgress<string>
+            _ = Task.Run(async () => {
+                try {
+                    await _syncService.SyncAsync(new Progress<string>());
+                } catch (Exception ex) {
+                    Debug.WriteLine($"[HomeViewModel] Erro na sincronização em segundo plano: {ex.Message}");
+                }
+            });
 
-            // Recarregar os dados após a sincronização para mostrar a informação mais recente
-            await _databaseService.InitializeAsync();
+            // Recarregar os dados após a sincronização para mostrar a informação mais recente
+            await _databaseService.InitializeAsync();
             await CarregarCampeonatos();
         }
 
@@ -113,15 +106,11 @@ namespace ArenaVirtual.ViewModels {
                     UsuarioId = usuarioAtual.Id,
                     CampeonatoId = campeonato.Id
                 };
-                // Nota: Se UsuarioCampeonatoFavorito precisa ser sincronizado,
-                // a lógica de IsSynced e o disparo de sync devem estar aqui
-                // ou no InserirFavoritoAsync do DatabaseService.
                 await _databaseService.InserirFavoritoAsync(favorito);
             } else {
                 var favoritoExistente = (await _databaseService.ListarFavoritosPorUsuarioAsync(usuarioAtual.Id))
-                    .FirstOrDefault(f => f.CampeonatoId == campeonato.Id);
+                  .FirstOrDefault(f => f.CampeonatoId == campeonato.Id);
                 if (favoritoExistente != null) {
-                    // Nota: A mesma observação acima se aplica a DeletarFavoritoAsync.
                     await _databaseService.DeletarFavoritoAsync(favoritoExistente);
                 }
             }

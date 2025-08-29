@@ -14,29 +14,29 @@ public partial class EditarPerfilPopup : ContentPage {
     private readonly DatabaseService _databaseService;
     private readonly SyncService _syncService; // Adicionando a dependência
 
-    // Injeção de dependências no construtor
-    public EditarPerfilPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
+    // Injeção de dependências no construtor
+    public EditarPerfilPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
         InitializeComponent();
         _usuario = usuario;
         _alertService = alertService;
         _databaseService = databaseService;
         _syncService = syncService;
 
-        // Preenche campos comuns
-        NomeEntry.Text = _usuario.Nome;
+        // Preenche campos comuns
+        NomeEntry.Text = _usuario.Nome;
         EmailEntry.Text = _usuario.Email;
         TelefoneEntry.Text = _usuario.Telefone;
         LocalizacaoEntry.Text = _usuario.Localizacao;
         LinkRedeSocialEntry.Text = _usuario.LinkRedeSocial;
 
-        // Visibilidade por perfil
-        AtletaSection.IsVisible = _usuario.Perfil == TipoPerfil.Atleta;
+        // Visibilidade por perfil
+        AtletaSection.IsVisible = _usuario.Perfil == TipoPerfil.Atleta;
         OrganizadorSection.IsVisible = _usuario.Perfil == TipoPerfil.Organizador;
         PatrocinadorSection.IsVisible = _usuario.Perfil == TipoPerfil.Patrocinador;
         ArbitroSection.IsVisible = _usuario.Perfil == TipoPerfil.Arbitro;
 
-        // Campos específicos
-        if (_usuario.Perfil == TipoPerfil.Atleta) {
+        // Campos específicos
+        if (_usuario.Perfil == TipoPerfil.Atleta) {
             GeneroPicker.ItemsSource = Enum.GetValues<GeneroEnum>().Cast<GeneroEnum>().ToList();
             GeneroPicker.SelectedItem = _usuario.Genero;
             DataNascimentoPicker.Date = _usuario.DataNascimento ?? DateTime.Now;
@@ -90,15 +90,17 @@ public partial class EditarPerfilPopup : ContentPage {
             _usuario.Genero = Enum.TryParse<GeneroEnum>(GeneroArbitroPicker.SelectedItem?.ToString(), out var genero) ? genero : null;
         }
 
-        // ** Marcar usuário para sincronização antes de atualizar **
-        _usuario.IsSynced = false;
+        // ** Marcar usuário para sincronização antes de atualizar **
+        _usuario.IsSynced = false;
         _usuario.UpdatedAt = DateTime.UtcNow;
 
         await _databaseService.AtualizarUsuarioAsync(_usuario);
 
-        // ** DISPARO MANUAL APÓS ATUALIZAÇÃO DO PERFIL **
-        Debug.WriteLine("[EditarPerfilPopup] Perfil de usuário atualizado localmente. Disparando sincronização...");
-        await _syncService.SyncAsync();
+        // ** DISPARO MANUAL APÓS ATUALIZAÇÃO DO PERFIL **
+        Debug.WriteLine("[EditarPerfilPopup] Perfil de usuário atualizado localmente. Disparando sincronização...");
+
+        // Adicione o objeto de progresso vazio para a chamada
+        await _syncService.SyncAsync(new Progress<string>());
 
         MessagingCenter.Send(this, "Perfil Atualizado", _usuario);
 

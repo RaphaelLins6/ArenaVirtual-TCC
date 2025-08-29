@@ -1,30 +1,34 @@
 ﻿using ArenaVirtual.Models;
 using BCrypt.Net;
 using System.Diagnostics;
+using System;
+using System.Threading.Tasks;
 
 namespace ArenaVirtual.Services {
     public class UsuarioService(DatabaseService databaseService, SyncService syncService) {
         private readonly DatabaseService _databaseService = databaseService;
         private readonly SyncService _syncService = syncService; // Atribua a dependência
 
-        public async Task<Usuario?> Cadastrar(Usuario usuario) {
+        public async Task<Usuario?> Cadastrar(Usuario usuario) {
             bool emailExiste = await _databaseService.EmailExisteAsync(usuario.Email);
             if (emailExiste) {
                 Debug.WriteLine("Email já existe.");
                 return null;
             }
 
-            // A lógica de preenchimento está correta
-            usuario.IsSynced = false;
+            // A lógica de preenchimento está correta
+            usuario.IsSynced = false;
             usuario.UpdatedAt = DateTime.UtcNow;
 
             int result = await _databaseService.InserirUsuarioAsync(usuario);
             Debug.WriteLine($"Resultado da inserção: {result}");
 
             if (result > 0) {
-                // ** DISPARO MANUAL DA SINCRONIZAÇÃO APÓS INSERÇÃO BEM-SUCEDIDA **
-                Debug.WriteLine("[UsuarioService] Novo usuário salvo localmente. Disparando sincronização...");
-                await _syncService.SyncAsync();
+                // ** DISPARO MANUAL DA SINCRONIZAÇÃO APÓS INSERÇÃO BEM-SUCEDIDA **
+                Debug.WriteLine("[UsuarioService] Novo usuário salvo localmente. Disparando sincronização...");
+
+                // Crie e passe um objeto de progresso vazio para o método SyncAsync
+                await _syncService.SyncAsync(new Progress<string>());
 
                 var usuarioRetornado = await _databaseService.ObterUsuarioPorEmailAsync(usuario.Email);
                 if (usuarioRetornado != null)

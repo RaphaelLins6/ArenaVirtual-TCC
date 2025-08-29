@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "ArenaVirtual": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {},
+      "applicationUrl": "http://localhost:5067",
+      "dotnetRunMessages": true
+    }
+  }
+}

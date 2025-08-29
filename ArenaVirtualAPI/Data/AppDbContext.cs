@@ -9,7 +9,7 @@ namespace ArenaVirtualAPI.Data {
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Campeonato> Campeonatos { get; set; }
         public DbSet<Time> Times { get; set; }
-        //public DbSet<Partida> Partidas { get; set; }
-        // adicione as outras tabelas conforme necessário
+        public DbSet<Convite> Convites { get; set; }
+        
     }
 }

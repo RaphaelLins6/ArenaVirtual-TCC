@@ -11,6 +11,6 @@ namespace ArenaVirtual.Models {
         public int ArbitroId { get; set; }
         public string Local { get; set; } = string.Empty;
         public bool IsSynced { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

@@ -9,6 +9,6 @@ namespace ArenaVirtual.Models {
         public string Comentarios { get; set; } = string.Empty;
         public int Nota { get; set; }
         public bool IsSynced { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

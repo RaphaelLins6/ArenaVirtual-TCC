@@ -10,6 +10,6 @@ namespace ArenaVirtual.Models {
         public DateTime DataHora { get; set; }
         public string? Local { get; set; }
         public bool IsSynced { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

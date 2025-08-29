@@ -30,11 +30,31 @@ namespace ArenaVirtualAPI.Migrations
                     ValorTaxaInscricao = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     FormatoCampeonato = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LocaisDosJogos = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    HaveraPremiacao = table.Column<bool>(type: "bit", nullable: false)
+                    HaveraPremiacao = table.Column<bool>(type: "bit", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsSynced = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Campeonatos", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Convites",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IdSolicitante = table.Column<int>(type: "int", nullable: false),
+                    IdTime = table.Column<int>(type: "int", nullable: false),
+                    DataEnvio = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    IsSynced = table.Column<bool>(type: "bit", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Convites", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -53,7 +73,9 @@ namespace ArenaVirtualAPI.Migrations
                     Vitorias = table.Column<int>(type: "int", nullable: false),
                     Derrotas = table.Column<int>(type: "int", nullable: false),
                     Empates = table.Column<int>(type: "int", nullable: false),
-                    CapitaoId = table.Column<int>(type: "int", nullable: true)
+                    CapitaoId = table.Column<int>(type: "int", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsSynced = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -81,12 +103,24 @@ namespace ArenaVirtualAPI.Migrations
                     Peso = table.Column<double>(type: "float", nullable: true),
                     Altura = table.Column<double>(type: "float", nullable: true),
                     FaixaOrcamentoPatrocinio = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TimeId = table.Column<int>(type: "int", nullable: true)
+                    TimeId = table.Column<int>(type: "int", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsSynced = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Usuarios", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Usuarios_Times_TimeId",
+                        column: x => x.TimeId,
+                        principalTable: "Times",
+                        principalColumn: "Id");
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Usuarios_TimeId",
+                table: "Usuarios",
+                column: "TimeId");
         }
 
         /// <inheritdoc />
@@ -96,10 +130,13 @@ namespace ArenaVirtualAPI.Migrations
                 name: "Campeonatos");
 
             migrationBuilder.DropTable(
-                name: "Times");
+                name: "Convites");
 
             migrationBuilder.DropTable(
                 name: "Usuarios");
+
+            migrationBuilder.DropTable(
+                name: "Times");
         }
     }
 }
