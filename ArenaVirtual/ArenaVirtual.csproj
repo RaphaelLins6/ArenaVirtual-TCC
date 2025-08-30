@@ -20,7 +20,6 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
-		
 
 		<!-- Display name -->
 		<ApplicationTitle>Arena Virtual</ApplicationTitle>
@@ -44,8 +43,13 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
+
+	<!-- Referência corrigida para ASP.NET Core apenas para a plataforma Windows -->
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<!-- App Icon -->
@@ -79,73 +83,73 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Views\Atleta\EditarTimePage.xaml.cs">
-	    <DependentUpon>EditarTimePage.xaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Views\Atleta\PartidasPage.xaml.cs">
-	    <DependentUpon>PartidasPage.xaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Views\Organizador\EditarCampeonatoPage.xaml.cs">
-	    <DependentUpon>EditarCampeonatoPage.xaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Views\RegisterPage.xaml.cs">
-	    <DependentUpon>RegisterPage.xaml</DependentUpon>
-	  </Compile>
+		<Compile Update="Views\Atleta\EditarTimePage.xaml.cs">
+			<DependentUpon>EditarTimePage.xaml</DependentUpon>
+		</Compile>
+		<Compile Update="Views\Atleta\PartidasPage.xaml.cs">
+			<DependentUpon>PartidasPage.xaml</DependentUpon>
+		</Compile>
+		<Compile Update="Views\Organizador\EditarCampeonatoPage.xaml.cs">
+			<DependentUpon>EditarCampeonatoPage.xaml</DependentUpon>
+		</Compile>
+		<Compile Update="Views\RegisterPage.xaml.cs">
+			<DependentUpon>RegisterPage.xaml</DependentUpon>
+		</Compile>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Update="AppShell.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Popups\AlterarImagemPopup.xaml">
-	    <Generator></Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Popups\AlterarSenhaPopup.xaml">
-	    <Generator></Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Popups\EditarPerfilPopup.xaml">
-	    <Generator></Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\Atleta\CriarTimePage.xaml">
-	    <Generator></Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\Atleta\EditarTimePage.xaml">
-	    <Generator></Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\Atleta\EntrarTimePage.xaml">
-	    <Generator></Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\Atleta\SolicitacaoTimePage.xaml">
-	    <Generator></Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\CampeonatoPage\CampeonatoDetailPage.xaml">
-	    <Generator></Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\Components\CampeonatoCard.xaml">
-	    <Generator></Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\HomePage.xaml">
-	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\LoadingPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\PerfilPage.xaml">
-	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-	  </MauiXaml>
+		<MauiXaml Update="AppShell.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Popups\AlterarImagemPopup.xaml">
+			<Generator></Generator>
+		</MauiXaml>
+		<MauiXaml Update="Popups\AlterarSenhaPopup.xaml">
+			<Generator></Generator>
+		</MauiXaml>
+		<MauiXaml Update="Popups\EditarPerfilPopup.xaml">
+			<Generator></Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\Atleta\CriarTimePage.xaml">
+			<Generator></Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\Atleta\EditarTimePage.xaml">
+			<Generator></Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\Atleta\EntrarTimePage.xaml">
+			<Generator></Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\Atleta\SolicitacaoTimePage.xaml">
+			<Generator></Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\CampeonatoPage\CampeonatoDetailPage.xaml">
+			<Generator></Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\Components\CampeonatoCard.xaml">
+			<Generator></Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\HomePage.xaml">
+			<Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\LoadingPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\PerfilPage.xaml">
+			<Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+		</MauiXaml>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="AppShell.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </None>
-	  <None Update="MainPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </None>
+		<None Update="AppShell.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</None>
+		<None Update="MainPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</None>
 	</ItemGroup>
 
 	<PropertyGroup>
 		<InvariantGlobalization>true</InvariantGlobalization>
 	</PropertyGroup>
-	
+
 </Project>

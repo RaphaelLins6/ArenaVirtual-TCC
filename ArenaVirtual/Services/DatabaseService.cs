@@ -52,9 +52,7 @@ namespace ArenaVirtual.Services {
             }
 
             int rowsAffected = await _database.UpdateAsync(usuario);
-
             System.Diagnostics.Debug.WriteLine($"[DatabaseService] UpdateAsync retornou: {rowsAffected} linhas afetadas.");
-
             return rowsAffected;
         }
 
@@ -183,8 +181,8 @@ namespace ArenaVirtual.Services {
 
         public async Task<List<UsuarioCampeonatoFavorito>> ListarFavoritosPorUsuarioAsync(int usuarioId) {
             return await _database.Table<UsuarioCampeonatoFavorito>()
-                                  .Where(f => f.UsuarioId == usuarioId)
-                                  .ToListAsync();
+                                     .Where(f => f.UsuarioId == usuarioId)
+                                     .ToListAsync();
         }
 
         public async Task<int> InserirConviteAsync(Convite convite) {
@@ -197,19 +195,19 @@ namespace ArenaVirtual.Services {
 
         public async Task<List<Convite>> ListarConvitesPendentesAsync(int timeId) {
             return await _database.Table<Convite>()
-                                  .Where(c => c.IdTime == timeId && c.Status == StatusConvite.Pendente)
-                                  .ToListAsync();
+                                     .Where(c => c.IdTime == timeId && c.Status == StatusConvite.Pendente)
+                                     .ToListAsync();
         }
 
         public async Task<Convite> ObterConvitePendenteDoUsuarioAsync(int usuarioId) {
             return await _database.Table<Convite>()
-                                  .Where(c => c.IdSolicitante == usuarioId && c.Status == StatusConvite.Pendente)
-                                  .FirstOrDefaultAsync();
+                                     .Where(c => c.IdSolicitante == usuarioId && c.Status == StatusConvite.Pendente)
+                                     .FirstOrDefaultAsync();
         }
 
         public async Task<Convite?> ObterConvitePorUsuarioETimeAsync(int idSolicitante, int idTime) {
             return await _database.Table<Convite>()
-                                  .FirstOrDefaultAsync(c => c.IdSolicitante == idSolicitante && c.IdTime == idTime);
+                                     .FirstOrDefaultAsync(c => c.IdSolicitante == idSolicitante && c.IdTime == idTime);
         }
 
         public AsyncTableQuery<Usuario> GetUsuarioTable() {
@@ -236,7 +234,6 @@ namespace ArenaVirtual.Services {
             return _database.Table<T>().Where(i => !i.IsSynced).ToListAsync();
         }
 
-        // O método MarkAsSyncedAsync precisa da restrição 'where'
         public async Task MarkAsSyncedAsync<T>(List<T> items) where T : ISyncable {
             foreach (var item in items) {
                 item.IsSynced = true;
@@ -244,14 +241,22 @@ namespace ArenaVirtual.Services {
             }
         }
 
-        // O método SaveDownloadedItemsAsync também precisa da restrição
-        public async Task SaveDownloadedItemsAsync<T>(List<T> items) where T : ISyncable {
+        // Versão corrigida para evitar loops de sincronização.
+        public async Task SaveDownloadedItemsAsync<T>(List<T> items) where T : ISyncable, new() {
             foreach (var item in items) {
-                var rowsAffected = await _database.UpdateAsync(item);
-                if (rowsAffected == 0) {
+                // Encontra o item pelo Id usando uma consulta LINQ
+                var existingItem = await _database.Table<T>().Where(i => i.Id == item.Id).FirstOrDefaultAsync();
+
+                if (existingItem != null) {
+                    // Atualiza o item existente
+                    item.IsSynced = true;
+                    await _database.UpdateAsync(item);
+                } else {
+                    // Insere um novo item
+                    item.IsSynced = true;
                     await _database.InsertAsync(item);
                 }
             }
         }
-    }   
+    }
 }
