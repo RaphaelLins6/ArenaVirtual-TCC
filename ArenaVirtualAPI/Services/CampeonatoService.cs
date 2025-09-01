@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace ArenaVirtualAPI.Services {
     public class CampeonatoService : IBackendService<Campeonato> {
@@ -18,25 +19,29 @@ namespace ArenaVirtualAPI.Services {
         }
 
         public async Task AddAsync(Campeonato item) {
+            item.UpdatedAt = DateTime.UtcNow;
             _context.Campeonatos.Add(item);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Campeonato item) {
+            item.UpdatedAt = DateTime.UtcNow;
             _context.Entry(item).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
 
         public async Task ProcessItemsAsync(IEnumerable<Campeonato> items) {
             foreach (var item in items) {
-                var existingItem = await _context.Campeonatos.FindAsync(item.Id);
-                if (existingItem == null) {
-                    await AddAsync(item);
+                // Se o Id é 0, é uma nova entrada. Caso contrário, é uma atualização.
+                if (item.Id == 0) {
+                    item.UpdatedAt = DateTime.UtcNow;
+                    _context.Campeonatos.Add(item);
                 } else {
-                    _context.Entry(existingItem).CurrentValues.SetValues(item);
-                    await UpdateAsync(existingItem);
+                    item.UpdatedAt = DateTime.UtcNow;
+                    _context.Campeonatos.Update(item);
                 }
             }
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<ISyncable>> GetUpdatedSinceAsync(DateTime lastSyncTime) {

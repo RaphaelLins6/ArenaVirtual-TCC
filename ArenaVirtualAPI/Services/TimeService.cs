@@ -54,23 +54,25 @@ namespace ArenaVirtualAPI.Services {
         }
 
         // CORREÇÃO: Altere o tipo de retorno para Task<IEnumerable<ISyncable>>
+        public async Task ProcessItemsAsync(IEnumerable<Time> items) {
+            foreach (var item in items) {
+                // Se o Id for 0, é uma nova entrada. Caso contrário, é uma atualização.
+                if (item.Id == 0) {
+                    item.UpdatedAt = DateTime.UtcNow;
+                    _context.Times.Add(item);
+                } else {
+                    // Anexa o item e marca-o como modificado.
+                    _context.Times.Update(item);
+                    item.UpdatedAt = DateTime.UtcNow; // Garante que o timestamp é definido no backend
+                }
+            }
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<IEnumerable<ISyncable>> GetUpdatedSinceAsync(DateTime lastSyncTime) {
-            // Retorna todos os times que foram atualizados (ou criados) desde a última sincronização
-            // O Entity Framework Core irá converter a lista de Times para IEnumerable<ISyncable>
             return await _context.Times
                                  .Where(t => t.UpdatedAt > lastSyncTime)
                                  .ToListAsync();
-        }
-
-        public async Task ProcessItemsAsync(IEnumerable<Time> items) {
-            foreach (var item in items) {
-                var existingItem = await _context.Times.FindAsync(item.Id);
-                if (existingItem == null) {
-                    await AddAsync(item);
-                } else {
-                    await UpdateAsync(item);
-                }
-            }
         }
     }
 }

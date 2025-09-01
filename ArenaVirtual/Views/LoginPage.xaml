@@ -16,7 +16,6 @@
             Spacing="20"
             VerticalOptions="CenterAndExpand">
 
-            <!--  Mensagem de Boas-vindas  -->
             <Label
                 Margin="0,0,0,10"
                 FontAttributes="Bold"
@@ -25,7 +24,6 @@
                 HorizontalTextAlignment="Center"
                 Text="Seja bem-vindo, faça seu login!" />
 
-            <!--  Campos de Entrada  -->
             <Entry Placeholder="E-mail" Text="{Binding Email}" />
             <Entry
                 IsPassword="True"
@@ -47,5 +45,16 @@
                 Text="Registre-se"
                 TextColor="White" />
         </VerticalStackLayout>
+
+        <Grid
+            BackgroundColor="#000000"
+            IsVisible="{Binding IsBusy}"
+            Opacity="0.5">
+            <ActivityIndicator
+                HorizontalOptions="Center"
+                IsRunning="{Binding IsBusy}"
+                VerticalOptions="Center"
+                Color="White" />
+        </Grid>
     </Grid>
 </ContentPage>

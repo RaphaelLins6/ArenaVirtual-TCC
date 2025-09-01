@@ -16,43 +16,55 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty]
         private string senha = string.Empty;
 
-        [RelayCommand]
+        // Adiciona a nova propriedade para controlar a sobreposição de carregamento
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(LoginCommand))]
+        private bool isBusy;
+
+        [RelayCommand(CanExecute = nameof(CanLogin))]
         public async Task Login() {
-            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha)) {
-                await _alertService.DisplayAlert("Erro", "Preencha o e-mail e a senha.", "OK");
-                return;
-            }
+            // Define IsBusy como true para iniciar o carregamento e desabilitar o botão
+            IsBusy = true;
 
-            var usuario = await _usuarioService.Autenticar(Email, Senha);
-
-            if (usuario == null) {
-                await _alertService.DisplayAlert("Erro", "E-mail ou senha inválidos.", "OK");
-                return;
-            }
-
-            SessaoService.Instancia.Login(usuario);
-            System.Diagnostics.Debug.WriteLine($"[LoginViewModel] SessaoService.Instancia.Login() chamado para ID: {usuario.Id}, Email: {usuario.Email}");
-
-            // Inicia a sincronização em segundo plano imediatamente após o login
-            Debug.WriteLine("[LoginViewModel] Login bem-sucedido. Disparando sincronização em segundo plano.");
-
-            // A tarefa de sincronização não precisa ser "await" aqui, pois não queremos que ela bloqueie a UI.
-            // O uso de `_ =` evita um aviso do compilador sobre o await não utilizado.
-            _ = Task.Run(async () => {
-                // A sincronização em segundo plano não reporta progresso para a tela de carregamento,
-                // pois esta será fechada. O foco agora é não bloquear a UI.
-                try {
-                    await _syncService.SyncAsync(null); // O parâmetro IProgress<string> pode ser null ou um Progress<string> vazio se o método exigir.
-                    Debug.WriteLine("[LoginViewModel] Sincronização em segundo plano concluída.");
-                } catch (Exception ex) {
-                    Debug.WriteLine($"[LoginViewModel] Erro na sincronização em segundo plano: {ex.Message}");
-                    // Registre o erro, mas não bloqueie a UI com um pop-up.
+            try {
+                // 1. Validações iniciais
+                if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha)) {
+                    await _alertService.DisplayAlert("Erro", "Preencha o e-mail e a senha.", "OK");
+                    return;
                 }
-            });
 
-            // Navegue para a página principal imediatamente
-            Application.Current.MainPage = new AppShell(usuario);
+                // 2. Autentica o usuário
+                var usuario = await _usuarioService.Autenticar(Email, Senha);
+
+                if (usuario == null) {
+                    await _alertService.DisplayAlert("Erro", "E-mail ou senha inválidos.", "OK");
+                    return;
+                }
+
+                // 3. Define a sessão do usuário
+                SessaoService.Instancia.Login(usuario);
+                System.Diagnostics.Debug.WriteLine($"[LoginViewModel] SessaoService.Instancia.Login() chamado para ID: {usuario.Id}, Email: {usuario.Email}");
+
+                // 4. Inicia a sincronização de dados e aguarda a conclusão
+                // A UI fica "congelada" com o overlay de loading visível.
+                Debug.WriteLine("[LoginViewModel] Login bem-sucedido. Disparando sincronização.");
+                await _syncService.SyncAsync(null);
+
+                Debug.WriteLine("[LoginViewModel] Sincronização concluída. Navegando para a página principal.");
+
+                // 5. Navega para a página principal (AppShell)
+                Application.Current.MainPage = new AppShell(usuario);
+            } catch (Exception ex) {
+                Debug.WriteLine($"[LoginViewModel] Erro no processo de login/sincronização: {ex.Message}");
+                await _alertService.DisplayAlert("Erro", "Ocorreu um erro. Tente novamente ou verifique sua conexão.", "OK");
+            } finally {
+                // Garante que o estado de ocupado seja resetado, independentemente do resultado
+                IsBusy = false;
+            }
         }
+
+        // Método para desabilitar o botão de login enquanto a tarefa estiver rodando
+        private bool CanLogin() => !IsBusy;
 
         [RelayCommand]
         public async Task IrParaRegistro() {

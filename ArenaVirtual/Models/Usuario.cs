@@ -2,7 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Collections.Generic; // Adicionar para EqualityComparer
+using System.Collections.Generic;
 
 namespace ArenaVirtual.Models {
     public enum TipoPerfil {
@@ -18,108 +18,123 @@ namespace ArenaVirtual.Models {
         Outro
     }
 
-    // A classe Usuario precisa implementar ISyncable, se ainda não o fez.
-    // Presumo que você já tenha criado a interface ISyncable e a adicionado aqui.
-    // Exemplo: public partial class Usuario : INotifyPropertyChanged, ISyncable
-    public partial class Usuario : INotifyPropertyChanged, ISyncable // Se não tiver a ISyncable ainda, adicione-a aqui
-    {
+    public partial class Usuario : INotifyPropertyChanged, ISyncable {
+
+        // Campos de suporte (backing fields)
+        private string nome = string.Empty;
+        private string email = string.Empty;
+        private string senhaHash = string.Empty;
+        private TipoPerfil perfil;
+        private string imagemPath = string.Empty;
+        private string localizacao = string.Empty;
+        private string telefone = string.Empty;
+        private string linkRedeSocial = string.Empty;
+        private DateTime? dataNascimento;
+        private GeneroEnum? genero;
+        private string nomeEmpresa = string.Empty;
+        private string cnpj = string.Empty;
+        private double? peso;
+        private double? altura;
+        private string faixaOrcamentoPatrocinio = string.Empty;
+        private int? timeId;
+
+        // Novos campos de suporte para IsSynced e UpdatedAt para evitar recursão
+        private bool isSynced;
+        private DateTime updatedAt;
+
+        // Propriedades usando SetProperty
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
 
-        private string nome = string.Empty;
         public string Nome {
             get => nome;
             set => SetProperty(ref nome, value);
         }
 
-        private string email = string.Empty;
         public string Email {
             get => email;
             set => SetProperty(ref email, value);
         }
 
-        private string senhaHash = string.Empty;
         public string SenhaHash {
             get => senhaHash;
             set => SetProperty(ref senhaHash, value);
         }
 
-        private TipoPerfil perfil;
         public TipoPerfil Perfil {
             get => perfil;
             set => SetProperty(ref perfil, value);
         }
 
-        private string imagemPath = string.Empty;
         public string ImagemPath {
             get => imagemPath;
             set => SetProperty(ref imagemPath, value);
         }
 
-        private string localizacao = string.Empty;
         public string Localizacao {
             get => localizacao;
             set => SetProperty(ref localizacao, value);
         }
 
-        private string telefone = string.Empty;
         public string Telefone {
             get => telefone;
             set => SetProperty(ref telefone, value);
         }
 
-        private string linkRedeSocial = string.Empty;
         public string LinkRedeSocial {
             get => linkRedeSocial;
             set => SetProperty(ref linkRedeSocial, value);
         }
 
-        private DateTime? dataNascimento;
         public DateTime? DataNascimento {
             get => dataNascimento;
             set => SetProperty(ref dataNascimento, value);
         }
 
-        private GeneroEnum? genero;
         public GeneroEnum? Genero {
             get => genero;
             set => SetProperty(ref genero, value);
         }
 
-        private string nomeEmpresa = string.Empty;
         public string NomeEmpresa {
             get => nomeEmpresa;
             set => SetProperty(ref nomeEmpresa, value);
         }
 
-        private string cnpj = string.Empty;
         public string CNPJ {
             get => cnpj;
             set => SetProperty(ref cnpj, value);
         }
 
-        private double? peso;
         public double? Peso {
             get => peso;
             set => SetProperty(ref peso, value);
         }
 
-        private double? altura;
         public double? Altura {
             get => altura;
             set => SetProperty(ref altura, value);
         }
 
-        private string faixaOrcamentoPatrocinio = string.Empty;
         public string FaixaOrcamentoPatrocinio {
             get => faixaOrcamentoPatrocinio;
             set => SetProperty(ref faixaOrcamentoPatrocinio, value);
         }
 
-        private int? timeId;
         public int? TimeId {
             get => timeId;
             set => SetProperty(ref timeId, value);
+        }
+
+        // Propriedades para sincronização. Elas não chamam SetProperty.
+        public bool IsSynced {
+            get => isSynced;
+            set => isSynced = value;
+        }
+
+        public DateTime UpdatedAt {
+            get => updatedAt;
+            set => updatedAt = value;
         }
 
         public Usuario() { }
@@ -133,18 +148,11 @@ namespace ArenaVirtual.Models {
             backingField = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-            // *** LÓGICA DE SINCRONIZAÇÃO ADICIONADA AQUI ***
-            // Se a propriedade foi alterada, marque o objeto para sincronização
-            // e atualize o timestamp da última modificação.
-            this.IsSynced = false;
-            this.UpdatedAt = DateTime.UtcNow;
-            // ************************************************
+            // Atualize os campos de suporte diretamente para evitar recursão
+            this.isSynced = false;
+            this.updatedAt = DateTime.UtcNow;
 
             return true;
         }
-
-        // Propriedades para sincronização
-        public bool IsSynced { get; set; }
-        public DateTime UpdatedAt { get; set; }
     }
 }

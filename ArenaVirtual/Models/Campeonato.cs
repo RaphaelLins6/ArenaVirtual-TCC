@@ -1,13 +1,15 @@
 ﻿// ArenaVirtual.Models/Campeonato.cs
 using SQLite;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Collections.Generic; // Necessário para EqualityComparer
+using System.Text.Json.Serialization;
 
 namespace ArenaVirtual.Models {
     public partial class Campeonato : INotifyPropertyChanged, ISyncable {
         [PrimaryKey, AutoIncrement]
+        [JsonIgnore]
         public int Id { get; set; }
 
         // Variáveis de apoio (backing fields)
@@ -26,9 +28,11 @@ namespace ArenaVirtual.Models {
         private string? _formatoCampeonato;
         private string? _locaisDosJogos;
         private bool _haveraPremiacao;
-        private bool _isSynced;
-        private DateTime _updatedAt;
 
+        // As backing fields de sincronização não precisam de SetProperty,
+        // então não precisam de _underscore.
+        public bool IsSynced { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         // Propriedades mutáveis que usam SetProperty
         public string? Nome {
@@ -94,7 +98,7 @@ namespace ArenaVirtual.Models {
 
         public string? FormatoCampeonato {
             get => _formatoCampeonato;
-            set => SetProperty(ref _formatoCampeonato, value); 
+            set => SetProperty(ref _formatoCampeonato, value);
         }
 
         public string? LocaisDosJogos {
@@ -108,20 +112,11 @@ namespace ArenaVirtual.Models {
         }
 
 
-        // Propriedades para Sincronização
-        public bool IsSynced {
-            get => _isSynced;
-            set => SetProperty(ref _isSynced, value);
-        }
-        public DateTime UpdatedAt {
-            get => _updatedAt;
-            set => SetProperty(ref _updatedAt, value);
-        }
-
+        // Construtor
         public Campeonato() {
-            // Inicialize as backing fields ou as propriedades diretamente
-            _isSynced = false;
-            _updatedAt = DateTime.UtcNow;
+            // Inicialize as propriedades diretamente
+            IsSynced = false;
+            UpdatedAt = DateTime.UtcNow;
             _nome = string.Empty;
             _local = string.Empty;
             _logoUrl = string.Empty;
@@ -130,8 +125,6 @@ namespace ArenaVirtual.Models {
             _telefoneOrganizador = string.Empty;
             _formatoCampeonato = string.Empty;
             _locaisDosJogos = string.Empty;
-
-            // Inicialize DateTime para evitar valores padrão DateTime.MinValue
             _dataInicio = DateTime.Now;
             _dataFim = DateTime.Now;
         }
@@ -143,8 +136,11 @@ namespace ArenaVirtual.Models {
 
             backingField = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            this.IsSynced = false; // Marque para sincronização quando a propriedade é alterada
-            this.UpdatedAt = DateTime.UtcNow; // Atualize o timestamp
+
+            // Agora a atribuição a IsSynced e UpdatedAt não causa recursão
+            this.IsSynced = false;
+            this.UpdatedAt = DateTime.UtcNow;
+
             return true;
         }
     }

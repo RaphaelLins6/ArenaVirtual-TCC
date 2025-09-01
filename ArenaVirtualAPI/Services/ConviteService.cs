@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System;
 
 namespace ArenaVirtualAPI.Services {
     public class ConviteService : IBackendService<Convite> {
@@ -26,37 +25,31 @@ namespace ArenaVirtualAPI.Services {
         }
 
         public async Task UpdateAsync(Convite convite) {
-            var existingConvite = await _context.Convites.FindAsync(convite.Id);
-            if (existingConvite != null) {
-                // Atualize apenas as propriedades que devem ser sincronizadas
-                existingConvite.IdSolicitante = convite.IdSolicitante;
-                existingConvite.IdTime = convite.IdTime;
-                existingConvite.DataEnvio = convite.DataEnvio;
-                existingConvite.Status = convite.Status;
-
-                existingConvite.IsSynced = true;
-                existingConvite.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        // CORREÇÃO: O tipo de retorno é IEnumerable<ISyncable>
-        public async Task<IEnumerable<ISyncable>> GetUpdatedSinceAsync(DateTime lastSyncTime) {
-            // A consulta retorna Convite, mas o tipo de retorno do método é o que a interface exige (ISyncable)
-            return await _context.Convites
-                                 .Where(c => c.UpdatedAt > lastSyncTime)
-                                 .ToListAsync();
+            _context.Entry(convite).State = EntityState.Modified;
+            convite.IsSynced = true;
+            convite.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
         }
 
         public async Task ProcessItemsAsync(IEnumerable<Convite> items) {
             foreach (var convite in items) {
-                var existingConvite = await _context.Convites.FindAsync(convite.Id);
-                if (existingConvite == null) {
-                    await AddAsync(convite);
+                // Se o Id for 0, é um novo convite. Caso contrário, é uma atualização.
+                if (convite.Id == 0) {
+                    convite.UpdatedAt = DateTime.UtcNow;
+                    _context.Convites.Add(convite);
                 } else {
-                    await UpdateAsync(convite);
+                    // Anexa o item e marca-o como modificado.
+                    _context.Convites.Update(convite);
+                    convite.UpdatedAt = DateTime.UtcNow; // Garante que o timestamp é definido no backend
                 }
             }
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<ISyncable>> GetUpdatedSinceAsync(DateTime lastSyncTime) {
+            return await _context.Convites
+                                 .Where(c => c.UpdatedAt > lastSyncTime)
+                                 .ToListAsync();
         }
     }
 }

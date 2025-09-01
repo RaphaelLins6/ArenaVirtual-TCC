@@ -9,6 +9,7 @@ using System;
 namespace ArenaVirtual.ViewModels {
     public partial class PerfilViewModel : ObservableObject {
         private readonly IAlertService _alertService;
+        private bool _isUpdating = false; // Variável de controle para evitar recursão
 
         // Campos comuns
         [ObservableProperty] private string saudacao = string.Empty;
@@ -38,14 +39,21 @@ namespace ArenaVirtual.ViewModels {
         private Usuario usuarioLogado;
 
         public PerfilViewModel(Usuario usuario, IAlertService alertService) {
-            UsuarioLogado = usuario; // Use sempre a propriedade gerada!
+            UsuarioLogado = usuario;
             _alertService = alertService;
             CarregarDadosDoUsuario();
 
             MessagingCenter.Subscribe<object, Usuario>(this, "PerfilAtualizado", (sender, usuarioAtualizado) => {
+                // Checa a variável de controle para evitar a recursão
+                if (_isUpdating) return;
+
                 MainThread.BeginInvokeOnMainThread(() => {
-                    UsuarioLogado = usuarioAtualizado; // Correto: usa a propriedade!
+                    _isUpdating = true; // Inicia o bloqueio
+
+                    UsuarioLogado = usuarioAtualizado;
                     CarregarDadosDoUsuario();
+
+                    _isUpdating = false; // Libera o bloqueio
                 });
             });
         }

@@ -1,69 +1,127 @@
-﻿// Services/ApiService.cs
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json; // Importe este namespace
-using System.Text;
+﻿using System.Diagnostics;
+using System.Net.Http.Json;
 using System.Text.Json;
 using ArenaVirtual.Models;
-using System.Diagnostics;
 
 public class ApiService {
     private readonly HttpClient _httpClient;
     private readonly string _baseUrl;
-    private readonly JsonSerializerOptions _jsonSerializerOptions; // Adicione a propriedade
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
 
-    public ApiService() {
+    public ApiService() {
         _httpClient = new HttpClient();
         _jsonSerializerOptions = new JsonSerializerOptions {
-            // O padrão já é o ISO 8601, mas podemos ser explícitos se necessário
-            WriteIndented = true // Apenas para debug
-        };
+            PropertyNameCaseInsensitive = true,
+            WriteIndented = true // Apenas para facilitar debug
+        };
 
 #if DEBUG
-        string debugIp = "192.168.15.13";
+        string debugIp = "192.168.15.13";
         string debugPort = "5067";
         _baseUrl = $"http://{debugIp}:{debugPort}";
 #else
-        _baseUrl = "https://sua-url-de-producao-da-api.com";
+        _baseUrl = "https://sua-url-de-producao-da-api.com";
 #endif
-        _httpClient.BaseAddress = new Uri(_baseUrl);
-        Debug.WriteLine($"[ApiService] Base URL configurada para: {_baseUrl}");
+        _httpClient.BaseAddress = new Uri(_baseUrl);
+        Debug.WriteLine($"[ApiService] Base URL configurada: {_baseUrl}");
     }
 
-    // Método para enviar dados para a API (Upload)
-    public async Task PostDataAsync<T>(List<T> items) where T : ISyncable {
-        try {
-            var typeName = typeof(T).Name;
-            var url = $"api/data/sync/{typeName}";
-            Debug.WriteLine($"[ApiService] Enviando dados para: {url}");
+    // -----------------------------
+    // Enviar dados (UPLOAD)
+    // -----------------------------
+    public async Task PostDataAsync<T>(List<T> items) where T : ISyncable {
+        if (items == null || items.Count == 0) {
+            Debug.WriteLine($"[ApiService] Nenhum item de {typeof(T).Name} para enviar.");
+            return;
+        }
 
-            // Use PostAsJsonAsync que já serializa e define o Content-Type
-            var response = await _httpClient.PostAsJsonAsync(url, items);
+        var typeName = typeof(T).Name;
+        var url = $"api/data/sync/{typeName}";
+        Debug.WriteLine($"[ApiService] Enviando {items.Count} itens de {typeName} → {url}");
+
+        try {
+            var response = await _httpClient.PostAsJsonAsync(url, items, _jsonSerializerOptions);
             response.EnsureSuccessStatusCode();
-            Debug.WriteLine($"[ApiService] Dados de {typeName} enviados com sucesso. Status: {response.StatusCode}");
+            Debug.WriteLine($"[ApiService] Upload de {typeName} concluído. Status: {response.StatusCode}");
         } catch (HttpRequestException ex) {
-            Debug.WriteLine($"[ApiService] Erro ao enviar dados: {ex.Message}");
-            throw;
+            Debug.WriteLine($"[ApiService] Falha na requisição (UPLOAD {typeName}): {ex.Message}");
+            throw; // Propaga para SyncService lidar se precisar
         }
     }
 
-    // Método para buscar dados atualizados da API (Download)
-    public async Task<List<T>> GetUpdatesAsync<T>(DateTime lastSyncTime) where T : ISyncable {
+    // -----------------------------
+    // Buscar dados (DOWNLOAD)
+    // -----------------------------
+    public async Task<List<T>> GetUpdatesAsync<T>(DateTime lastSyncTime) where T : ISyncable {
+        var typeName = typeof(T).Name;
+        var url = $"api/data/updates?lastSyncTime={lastSyncTime:o}";
+        Debug.WriteLine($"[ApiService] Buscando atualizações para {typeName} → {url}");
+
         try {
-            var url = $"api/data/updates?lastSyncTime={lastSyncTime.ToString("o")}";
-            Debug.WriteLine($"[ApiService] Buscando atualizações da URL: {url}");
+            var response = await _httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
 
-            // Use GetFromJsonAsync para desserializar corretamente
-            var items = await _httpClient.GetFromJsonAsync<List<T>>(url, _jsonSerializerOptions);
+            var json = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(json)) {
+                Debug.WriteLine($"[ApiService] Resposta vazia ao buscar {typeName}.");
+                return new List<T>();
+            }
+
+            var root = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json, _jsonSerializerOptions);
+            if (root == null) {
+                Debug.WriteLine($"[ApiService] JSON inválido ou vazio ao buscar {typeName}.");
+                return new List<T>();
+            }
+
+            // Tenta localizar a chave com fallback: plural ou singular
+            string keyPlural = typeName + "s";
+            string keySingular = typeName;
+            string selectedKey = root.ContainsKey(keyPlural) ? keyPlural :
+                                 root.ContainsKey(keySingular) ? keySingular : null;
+
+            if (selectedKey == null) {
+                Debug.WriteLine($"[ApiService] Nenhum dado encontrado para {typeName} no JSON.");
+                return new List<T>();
+            }
+
+            var rawArray = root[selectedKey].GetRawText();
+            var items = JsonSerializer.Deserialize<List<T>>(rawArray, _jsonSerializerOptions) ?? new List<T>();
+
+            Debug.WriteLine($"[ApiService] Recebidos {items.Count} itens de {typeName}.");
             return items;
-
         } catch (HttpRequestException ex) {
-            Debug.WriteLine($"[ApiService] Erro ao buscar dados: {ex.Message}");
+            Debug.WriteLine($"[ApiService] Falha na requisição (DOWNLOAD {typeName}): {ex.Message}");
             return new List<T>();
         } catch (JsonException ex) {
-            Debug.WriteLine($"[ApiService] Erro de desserialização JSON: {ex.Message}");
+            Debug.WriteLine($"[ApiService] Erro ao desserializar JSON para {typeName}: {ex.Message}");
             return new List<T>();
+        }
+    }
+
+    // NOVO MÉTODO: Obter todos os dados de uma só vez para o SyncService
+    public async Task<UpdatesDTO> GetAllUpdatesAsync(DateTime lastSyncTime) {
+        var url = $"api/data/updates?lastSyncTime={lastSyncTime:o}";
+        Debug.WriteLine($"[ApiService] Buscando todas as atualizações → {url}");
+
+        try {
+            var response = await _httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(json)) {
+                Debug.WriteLine("[ApiService] Resposta vazia.");
+                return new UpdatesDTO();
+            }
+
+            // AQUI ESTÁ O AJUSTE PRINCIPAL: desserializa diretamente para UpdatesDTO
+            var updates = JsonSerializer.Deserialize<UpdatesDTO>(json, _jsonSerializerOptions);
+            return updates ?? new UpdatesDTO();
+        } catch (HttpRequestException ex) {
+            Debug.WriteLine($"[ApiService] Falha na requisição: {ex.Message}");
+            return new UpdatesDTO();
+        } catch (JsonException ex) {
+            Debug.WriteLine($"[ApiService] Erro ao desserializar UpdatesDTO: {ex.Message}");
+            return new UpdatesDTO();
         }
     }
 }

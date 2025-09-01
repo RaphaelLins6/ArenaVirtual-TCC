@@ -1,9 +1,5 @@
-﻿using ArenaVirtualAPI.Models;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
+﻿using ArenaVirtualAPI.Dtos;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace ArenaVirtualAPI.Services {
     // O serviço principal de sincronização, agora mais limpo.
@@ -29,11 +25,20 @@ namespace ArenaVirtualAPI.Services {
 
             foreach (var entityType in _entityTypes) {
                 try {
+                    // O método da fábrica retorna uma lista de objetos (IEnumerable<ISyncable>).
                     var updatedItems = await _syncServiceFactory.GetUpdatesAsync(entityType, lastSyncTime);
-                    updates.UpdatedItems.Add(entityType, updatedItems);
+
+                    // Verifique se a lista de itens não está vazia antes de serializar
+                    if (updatedItems != null && updatedItems.Any()) {
+                        // Serializa a lista de objetos para um JsonElement
+                        var jsonElement = JsonSerializer.SerializeToElement(updatedItems);
+
+                        // Adiciona o JsonElement ao dicionário
+                        updates.UpdatedItems.Add(entityType, jsonElement);
+                    }
                 } catch (Exception ex) {
                     _logger.LogError($"Erro ao obter atualizações para o tipo {entityType}: {ex.Message}");
-                    throw; // Rethrow para que o controller capture o erro 500
+                    throw;
                 }
             }
             return updates;
