@@ -1,5 +1,4 @@
-﻿using System;
-using ArenaVirtual.Models;
+﻿using ArenaVirtual.Models;
 
 namespace ArenaVirtual.DTOs {
     public interface ISyncableDto {
@@ -39,8 +38,8 @@ namespace ArenaVirtual.DTOs {
         public int IdSolicitante { get; set; }
         public int TimeId { get; set; }
         public DateTime DataEnvio { get; set; }
-        public StatusConvite StatusConvite { get; set; }
-        public string? ConvidadoEmail { get; set; }
+        public StatusConvite Status { get; set; } // O nome do campo foi alterado para 'Status' para corresponder ao modelo
+        public string? ConvidadoEmail { get; set; } // Adicione esta linha
         public DateTime UpdatedAt { get; set; }
         public bool IsSynced { get; set; }
     }

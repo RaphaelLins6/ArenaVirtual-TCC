@@ -31,6 +31,7 @@ builder.Services.AddScoped<IBackendService<Usuario, UsuarioSyncDto>, UsuarioServ
 builder.Services.AddScoped<IBackendService<Campeonato, CampeonatoSyncDto>, CampeonatoService>();
 builder.Services.AddScoped<IBackendService<Time, TimeSyncDto>, TimeService>();
 builder.Services.AddScoped<IBackendService<Convite, ConviteSyncDto>, ConviteService>();
+builder.Services.AddScoped<IBackendService<UsuarioCampeonatoFavorito, UsuarioCampeonatoFavoritoSyncDto>, UsuarioCampeonatoFavoritoService>();
 
 // Registra a fábrica de serviços de sincronização
 builder.Services.AddScoped<IBackendSyncServiceFactory, BackendSyncServiceFactory>();

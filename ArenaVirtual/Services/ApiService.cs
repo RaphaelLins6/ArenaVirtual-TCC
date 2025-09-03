@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace ArenaVirtual.Services {
     public class ApiService {
@@ -29,7 +25,7 @@ namespace ArenaVirtual.Services {
 
         public async Task<UpdateResponse> GetAllUpdatesAsync(DateTime lastSyncTime) {
             try {
-                var response = await _httpClient.GetAsync($"api/data/sync/updates?lastSyncTime={lastSyncTime:o}");
+                var response = await _httpClient.GetAsync($"api/data/updates?lastSyncTime={lastSyncTime:o}");
                 response.EnsureSuccessStatusCode();
                 var jsonResponse = await response.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<UpdateResponse>(jsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });

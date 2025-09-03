@@ -1,13 +1,7 @@
 ﻿using ArenaVirtualAPI.Models;
 using ArenaVirtualAPI.DTOs;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Collections;
-using System.Reflection;
 
 namespace ArenaVirtualAPI.Services {
     public class BackendSyncServiceFactory : IBackendSyncServiceFactory {
@@ -30,8 +24,9 @@ namespace ArenaVirtualAPI.Services {
                 throw new ArgumentException($"Tipo de entidade '{entityType}' não suportado.");
             }
 
+            // Desserializa a JsonElement diretamente para o tipo de lista correto.
             var listType = typeof(List<>).MakeGenericType(types.DtoType);
-            var items = (IList)JsonSerializer.Deserialize(data.GetRawText(), listType, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var items = JsonSerializer.Deserialize(data.GetRawText(), listType, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) as IList;
 
             if (items == null || items.Count == 0) {
                 return;
@@ -44,10 +39,11 @@ namespace ArenaVirtualAPI.Services {
             if (processMethod == null) {
                 throw new InvalidOperationException($"Método 'ProcessItemsAsync' não encontrado no serviço '{serviceType}'.");
             }
+
             await (Task)processMethod.Invoke(service, new object[] { items });
         }
 
-        public async Task<IEnumerable<ISyncable>> GetUpdatesAsync(string entityType, DateTime lastSyncTime) {
+        public async Task<IEnumerable<T>> GetUpdatesAsync<T>(string entityType, DateTime lastSyncTime) where T : ISyncableDto {
             if (!_typeMappings.TryGetValue(entityType, out var types)) {
                 throw new ArgumentException($"Tipo de entidade '{entityType}' não suportado.");
             }

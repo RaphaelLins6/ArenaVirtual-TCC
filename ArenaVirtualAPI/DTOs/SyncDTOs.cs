@@ -42,10 +42,10 @@ namespace ArenaVirtualAPI.DTOs {
         public int IdSolicitante { get; set; }
         public int TimeId { get; set; }
         public DateTime DataEnvio { get; set; }
-        public StatusConvite StatusConvite { get; set; }
+        public StatusConvite Status { get; set; }
         public DateTime UpdatedAt { get; set; }
         public bool IsSynced { get; set; }
-        public string? ConvidadoEmail { get; set; }
+        public string ConvidadoEmail { get; set; }
     }
 
     // DTO para sincronização de dados de equipes.

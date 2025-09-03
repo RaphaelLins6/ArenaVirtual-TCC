@@ -135,8 +135,8 @@ public class SyncService {
                         IdSolicitante = item.IdSolicitante,
                         TimeId = item.TimeId,
                         DataEnvio = item.DataEnvio,
-                        StatusConvite = item.Status,
-                        ConvidadoEmail = item.ConvidadoEmail,
+                        Status = item.Status, // Correção: Mapeado de item.Status para Status
+                        ConvidadoEmail = item.ConvidadoEmail, // Mapeamento correto do e-mail
                         UpdatedAt = item.UpdatedAt,
                         IsSynced = true
                     }).ToList();
@@ -174,7 +174,7 @@ public class SyncService {
                 var listType = typeof(List<>).MakeGenericType(type);
                 var items = JsonSerializer.Deserialize(rawJson, listType, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                if (items != null && ((System.Collections.ICollection)items).Count > 0) {
+                if (items is IList collection && collection.Count > 0) { // Correção da sintaxe de verificação e conversão
                     progress?.Report($"Atualizando {typeName}...");
                     var saveMethod = typeof(DatabaseService).GetMethod("SaveDownloadedItemsAsync");
                     if (saveMethod == null) continue;
