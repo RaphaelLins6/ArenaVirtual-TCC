@@ -29,6 +29,13 @@ namespace ArenaVirtual.Models {
         private string? _locaisDosJogos;
         private bool _haveraPremiacao;
 
+        // Novas variáveis de apoio para as propriedades adicionadas
+        private string? _descricao;
+        private string? _modalidade;
+        private string? _regras;
+        private DateTime? _dataTermino;
+        private int? _numeroEquipes;
+
         // As backing fields de sincronização não precisam de SetProperty,
         // então não precisam de _underscore.
         public bool IsSynced { get; set; }
@@ -111,6 +118,32 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref _haveraPremiacao, value);
         }
 
+        // Novas propriedades com SetProperty
+        public string? Descricao {
+            get => _descricao;
+            set => SetProperty(ref _descricao, value);
+        }
+
+        public string? Modalidade {
+            get => _modalidade;
+            set => SetProperty(ref _modalidade, value);
+        }
+
+        public string? Regras {
+            get => _regras;
+            set => SetProperty(ref _regras, value);
+        }
+
+        public DateTime? DataTermino {
+            get => _dataTermino;
+            set => SetProperty(ref _dataTermino, value);
+        }
+
+        public int? NumeroEquipes {
+            get => _numeroEquipes;
+            set => SetProperty(ref _numeroEquipes, value);
+        }
+
 
         // Construtor
         public Campeonato() {
@@ -127,6 +160,13 @@ namespace ArenaVirtual.Models {
             _locaisDosJogos = string.Empty;
             _dataInicio = DateTime.Now;
             _dataFim = DateTime.Now;
+
+            // Inicialize as novas propriedades
+            _descricao = string.Empty;
+            _modalidade = string.Empty;
+            _regras = string.Empty;
+            _dataTermino = null;
+            _numeroEquipes = null;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

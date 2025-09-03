@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ArenaVirtualAPI.Dtos;
+using ArenaVirtualAPI.DTOs;
 using ArenaVirtualAPI.Data;
 
 namespace ArenaVirtualAPI.Controllers {

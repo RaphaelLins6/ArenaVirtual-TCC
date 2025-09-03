@@ -129,7 +129,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
 
                 var novoConvite = new Convite {
                     IdSolicitante = usuarioAtual.Id,
-                    IdTime = timeItemVM.Time.Id,
+                    TimeId = timeItemVM.Time.Id,
                     DataEnvio = DateTime.UtcNow,
                     Status = StatusConvite.Pendente
                 };

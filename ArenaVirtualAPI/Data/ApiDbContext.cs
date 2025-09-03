@@ -10,6 +10,7 @@ namespace ArenaVirtualAPI.Data {
         public DbSet<Campeonato> Campeonatos { get; set; }
         public DbSet<Time> Times { get; set; }
         public DbSet<Convite> Convites { get; set; }
-        
+        public DbSet<UsuarioCampeonatoFavorito> UsuarioCampeonatoFavoritos { get; set; }
+
     }
 }

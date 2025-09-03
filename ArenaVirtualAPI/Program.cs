@@ -2,8 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using ArenaVirtualAPI.Services;
 using ArenaVirtualAPI.Models;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using ArenaVirtualAPI.DTOs;
+using Microsoft.OpenApi.Models; // Adiciona a diretiva using para OpenApi
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,16 +17,20 @@ builder.Services.AddDbContext<ApiDbContext>(options =>
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Este é o código para registrar o gerador de Swagger com a documentação da API.
+builder.Services.AddSwaggerGen(c => {
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "ArenaVirtualAPI", Version = "v1" });
+});
 
 // ==========================================================
 // REGISTRO DOS SERVIÇOS DE SINCRONIZAÇÃO
 // ==========================================================
 // Registra os serviços específicos
-builder.Services.AddScoped<IBackendService<Usuario>, UsuarioService>();
-builder.Services.AddScoped<IBackendService<Campeonato>, CampeonatoService>();
-builder.Services.AddScoped<IBackendService<Time>, TimeService>();
-builder.Services.AddScoped<IBackendService<Convite>, ConviteService>();
+builder.Services.AddScoped<IBackendService<Usuario, UsuarioSyncDto>, UsuarioService>();
+builder.Services.AddScoped<IBackendService<Campeonato, CampeonatoSyncDto>, CampeonatoService>();
+builder.Services.AddScoped<IBackendService<Time, TimeSyncDto>, TimeService>();
+builder.Services.AddScoped<IBackendService<Convite, ConviteSyncDto>, ConviteService>();
 
 // Registra a fábrica de serviços de sincronização
 builder.Services.AddScoped<IBackendSyncServiceFactory, BackendSyncServiceFactory>();
@@ -38,19 +42,20 @@ var app = builder.Build();
 
 // Configura o pipeline HTTP
 if (app.Environment.IsDevelopment()) {
+    // Habilita o middleware para servir o Swagger gerado como um endpoint JSON.
     app.UseSwagger();
-    app.UseSwaggerUI();
+
+    // Habilita o middleware para servir a página da UI do Swagger.
+    app.UseSwaggerUI(c => {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ArenaVirtualAPI v1");
+    });
+} else {
+    // Para ambientes de produção, redirecione para HTTPS para garantir segurança.
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
-// Inicializa o banco de dados
-using (var scope = app.Services.CreateScope()) {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
-    dbContext.Database.Migrate();
-}
 
 app.Run();

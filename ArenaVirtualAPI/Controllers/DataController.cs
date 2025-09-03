@@ -1,12 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Text.Json;
-using ArenaVirtualAPI.Models;
 using ArenaVirtualAPI.Services;
-using System;
-using System.Linq;
-using ArenaVirtualAPI.Dtos;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -29,9 +23,7 @@ public class DataController : ControllerBase {
         _logger.LogInformation($"Recebida requisição de sincronização para o tipo: {modelTypeName}");
 
         try {
-            // A chamada para o método de processamento foi simplificada e delegada ao serviço.
             await _backendSyncService.ProcessUploadAsync(data, modelTypeName);
-
             return Ok($"Sincronização de upload de {modelTypeName} bem-sucedida.");
         } catch (JsonException ex) {
             _logger.LogError($"Erro de desserialização na sincronização de upload para {modelTypeName}: {ex.Message}");

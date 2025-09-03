@@ -1,8 +1,6 @@
 ﻿using SQLite;
-using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Collections.Generic;
 
 namespace ArenaVirtual.Models {
     public enum TipoPerfil {

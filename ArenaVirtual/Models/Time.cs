@@ -12,7 +12,7 @@ namespace ArenaVirtual.Models {
         // Campos de suporte privados para todas as propriedades
         private string nome = string.Empty;
         private string? logoUrl;
-        private int campeonatoId;
+        private int? campeonatoId;
         private string? descricao;
         private string? regiao;
         private int pontuacaoTotal;
@@ -20,6 +20,7 @@ namespace ArenaVirtual.Models {
         private int derrotas;
         private int empates;
         private int? capitaoId;
+        private DateTime dataCriacao;
 
         // Campos de suporte para as propriedades de sincronização
         private bool isSynced;
@@ -41,7 +42,7 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref logoUrl, value);
         }
 
-        public int CampeonatoId {
+        public int? CampeonatoId {
             get => campeonatoId;
             set => SetProperty(ref campeonatoId, value);
         }
@@ -52,7 +53,10 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref descricao, value);
         }
 
-        public DateTime DataCriacao { get; set; }
+        public DateTime DataCriacao {
+            get => dataCriacao;
+            set => SetProperty(ref dataCriacao, value);
+        }
 
         [MaxLength(50)]
         public string? Regiao {

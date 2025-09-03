@@ -195,7 +195,7 @@ namespace ArenaVirtual.Services {
 
         public async Task<List<Convite>> ListarConvitesPendentesAsync(int timeId) {
             return await _database.Table<Convite>()
-                                     .Where(c => c.IdTime == timeId && c.Status == StatusConvite.Pendente)
+                                     .Where(c => c.TimeId == timeId && c.Status == StatusConvite.Pendente)
                                      .ToListAsync();
         }
 
@@ -207,7 +207,7 @@ namespace ArenaVirtual.Services {
 
         public async Task<Convite?> ObterConvitePorUsuarioETimeAsync(int idSolicitante, int idTime) {
             return await _database.Table<Convite>()
-                                     .FirstOrDefaultAsync(c => c.IdSolicitante == idSolicitante && c.IdTime == idTime);
+                                     .FirstOrDefaultAsync(c => c.IdSolicitante == idSolicitante && c.TimeId == idTime);
         }
 
         public AsyncTableQuery<Usuario> GetUsuarioTable() {

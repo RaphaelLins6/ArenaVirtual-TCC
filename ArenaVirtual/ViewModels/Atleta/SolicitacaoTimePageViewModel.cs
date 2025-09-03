@@ -59,7 +59,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 convite.Status = StatusConvite.Aceito;
                 await _databaseService.AtualizarConviteAsync(convite);
 
-                usuarioSolicitante.TimeId = convite.IdTime;
+                usuarioSolicitante.TimeId = convite.TimeId;
                 await _databaseService.AtualizarUsuarioAsync(usuarioSolicitante);
 
                 ConvitesPendentes.Remove(conviteVM);

@@ -103,7 +103,7 @@ public partial class MeuTimePageViewModel : INotifyPropertyChanged {
 
                 var convitePendente = await _databaseService.ObterConvitePendenteDoUsuarioAsync(usuarioAtual.Id);
                 if (convitePendente != null) {
-                    var timeConvidado = await _timeService.ObterPorIdAsync(convitePendente.IdTime);
+                    var timeConvidado = await _timeService.ObterPorIdAsync(convitePendente.TimeId);
 
                     StatusMessageTitle = "Solicitação Pendente";
                     StatusMessageDescription = timeConvidado != null

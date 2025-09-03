@@ -1,21 +1,24 @@
 ﻿using ArenaVirtualAPI.Models;
+using ArenaVirtualAPI.DTOs;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Collections;
+using System.Reflection;
 
 namespace ArenaVirtualAPI.Services {
-    // A fábrica agora implementa a nova interface.
     public class BackendSyncServiceFactory : IBackendSyncServiceFactory {
         private readonly IServiceProvider _serviceProvider;
-        private readonly Dictionary<string, Type> _entityTypes = new()
+        private readonly Dictionary<string, (Type DtoType, Type EntityType)> _typeMappings = new()
         {
-            { "Usuario", typeof(Usuario) },
-            { "Campeonato", typeof(Campeonato) },
-            { "Time", typeof(Time) },
-            { "Convite", typeof(Convite) }
+            { "Usuario", (typeof(UsuarioSyncDto), typeof(Usuario)) },
+            { "Campeonato", (typeof(CampeonatoSyncDto), typeof(Campeonato)) },
+            { "Time", (typeof(TimeSyncDto), typeof(Time)) },
+            { "Convite", (typeof(ConviteSyncDto), typeof(Convite)) },
+            { "UsuarioCampeonatoFavorito", (typeof(UsuarioCampeonatoFavoritoSyncDto), typeof(UsuarioCampeonatoFavorito)) }
         };
 
         public BackendSyncServiceFactory(IServiceProvider serviceProvider) {
@@ -23,46 +26,36 @@ namespace ArenaVirtualAPI.Services {
         }
 
         public async Task ProcessUploadAsync(JsonElement data, string entityType) {
-            if (!_entityTypes.TryGetValue(entityType, out var entityTypeObject)) {
+            if (!_typeMappings.TryGetValue(entityType, out var types)) {
                 throw new ArgumentException($"Tipo de entidade '{entityType}' não suportado.");
             }
 
-            // Usa o 'switch' para lidar com a desserialização e o processamento de forma segura.
-            switch (entityType) {
-                case "Usuario":
-                    var usuarios = JsonSerializer.Deserialize<List<Usuario>>(data.GetRawText());
-                    await _serviceProvider.GetRequiredService<IBackendService<Usuario>>().ProcessItemsAsync(usuarios);
-                    break;
-                case "Campeonato":
-                    var campeonatos = JsonSerializer.Deserialize<List<Campeonato>>(data.GetRawText());
-                    await _serviceProvider.GetRequiredService<IBackendService<Campeonato>>().ProcessItemsAsync(campeonatos);
-                    break;
-                case "Time":
-                    var times = JsonSerializer.Deserialize<List<Time>>(data.GetRawText());
-                    await _serviceProvider.GetRequiredService<IBackendService<Time>>().ProcessItemsAsync(times);
-                    break;
-                case "Convite":
-                    var convites = JsonSerializer.Deserialize<List<Convite>>(data.GetRawText());
-                    await _serviceProvider.GetRequiredService<IBackendService<Convite>>().ProcessItemsAsync(convites);
-                    break;
-                default:
-                    throw new ArgumentException($"Tipo de entidade '{entityType}' não suportado para upload.");
+            var listType = typeof(List<>).MakeGenericType(types.DtoType);
+            var items = (IList)JsonSerializer.Deserialize(data.GetRawText(), listType, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (items == null || items.Count == 0) {
+                return;
             }
+
+            var serviceType = typeof(IBackendService<,>).MakeGenericType(types.EntityType, types.DtoType);
+            var service = _serviceProvider.GetRequiredService(serviceType);
+
+            var processMethod = serviceType.GetMethod("ProcessItemsAsync");
+            if (processMethod == null) {
+                throw new InvalidOperationException($"Método 'ProcessItemsAsync' não encontrado no serviço '{serviceType}'.");
+            }
+            await (Task)processMethod.Invoke(service, new object[] { items });
         }
 
         public async Task<IEnumerable<ISyncable>> GetUpdatesAsync(string entityType, DateTime lastSyncTime) {
-            switch (entityType) {
-                case "Usuario":
-                    return await _serviceProvider.GetRequiredService<IBackendService<Usuario>>().GetUpdatedSinceAsync(lastSyncTime);
-                case "Campeonato":
-                    return await _serviceProvider.GetRequiredService<IBackendService<Campeonato>>().GetUpdatedSinceAsync(lastSyncTime);
-                case "Time":
-                    return await _serviceProvider.GetRequiredService<IBackendService<Time>>().GetUpdatedSinceAsync(lastSyncTime);
-                case "Convite":
-                    return await _serviceProvider.GetRequiredService<IBackendService<Convite>>().GetUpdatedSinceAsync(lastSyncTime);
-                default:
-                    throw new ArgumentException($"Tipo de entidade '{entityType}' não suportado.");
+            if (!_typeMappings.TryGetValue(entityType, out var types)) {
+                throw new ArgumentException($"Tipo de entidade '{entityType}' não suportado.");
             }
+
+            var serviceType = typeof(IBackendService<,>).MakeGenericType(types.EntityType, types.DtoType);
+            dynamic service = _serviceProvider.GetRequiredService(serviceType);
+
+            return await service.GetUpdatedSinceAsync(lastSyncTime);
         }
     }
 }
