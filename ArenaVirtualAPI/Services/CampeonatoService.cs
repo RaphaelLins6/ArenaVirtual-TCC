@@ -1,16 +1,12 @@
 ﻿using ArenaVirtualAPI.Data;
 using ArenaVirtualAPI.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System;
 
 namespace ArenaVirtualAPI.Services {
     public class CampeonatoService : IBackendService<Campeonato> {
-        private readonly AppDbContext _context;
+        private readonly ApiDbContext _context;
 
-        public CampeonatoService(AppDbContext context) {
+        public CampeonatoService(ApiDbContext context) {
             _context = context;
         }
 
@@ -32,15 +28,17 @@ namespace ArenaVirtualAPI.Services {
 
         public async Task ProcessItemsAsync(IEnumerable<Campeonato> items) {
             foreach (var item in items) {
-                // Se o Id é 0, é uma nova entrada. Caso contrário, é uma atualização.
                 if (item.Id == 0) {
+                    // Nova entrada, adiciona ao contexto
                     item.UpdatedAt = DateTime.UtcNow;
                     _context.Campeonatos.Add(item);
                 } else {
+                    // Atualiza uma entrada existente
+                    _context.Entry(item).State = EntityState.Modified;
                     item.UpdatedAt = DateTime.UtcNow;
-                    _context.Campeonatos.Update(item);
                 }
             }
+            // Salva todas as alterações de uma vez
             await _context.SaveChangesAsync();
         }
 

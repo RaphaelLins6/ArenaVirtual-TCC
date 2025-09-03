@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ArenaVirtualAPI.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(ApiDbContext))]
     [Migration("20250901072908_Migração2")]
     partial class Migração2
     {

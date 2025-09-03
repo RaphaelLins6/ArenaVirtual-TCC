@@ -8,9 +8,9 @@ using System;
 
 namespace ArenaVirtualAPI.Services {
     public class TimeService : IBackendService<Time> {
-        private readonly AppDbContext _context;
+        private readonly ApiDbContext _context;
 
-        public TimeService(AppDbContext context) {
+        public TimeService(ApiDbContext context) {
             _context = context;
         }
 
@@ -53,17 +53,14 @@ namespace ArenaVirtualAPI.Services {
             }
         }
 
-        // CORREÇÃO: Altere o tipo de retorno para Task<IEnumerable<ISyncable>>
         public async Task ProcessItemsAsync(IEnumerable<Time> items) {
             foreach (var item in items) {
-                // Se o Id for 0, é uma nova entrada. Caso contrário, é uma atualização.
                 if (item.Id == 0) {
                     item.UpdatedAt = DateTime.UtcNow;
                     _context.Times.Add(item);
                 } else {
-                    // Anexa o item e marca-o como modificado.
                     _context.Times.Update(item);
-                    item.UpdatedAt = DateTime.UtcNow; // Garante que o timestamp é definido no backend
+                    item.UpdatedAt = DateTime.UtcNow;
                 }
             }
             await _context.SaveChangesAsync();

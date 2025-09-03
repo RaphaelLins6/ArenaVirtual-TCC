@@ -8,9 +8,9 @@ using System;
 
 namespace ArenaVirtualAPI.Services {
     public class UsuarioService : IBackendService<Usuario> {
-        private readonly AppDbContext _context;
+        private readonly ApiDbContext _context;
 
-        public UsuarioService(AppDbContext context) {
+        public UsuarioService(ApiDbContext context) {
             _context = context;
         }
 
@@ -32,23 +32,21 @@ namespace ArenaVirtualAPI.Services {
             await _context.SaveChangesAsync();
         }
 
+        // **MÉTODO CORRIGIDO**: Mais robusto e eficiente para a sincronização
         public async Task ProcessItemsAsync(IEnumerable<Usuario> items) {
             foreach (var usuario in items) {
-                // Usa o 'AsNoTracking()' para evitar o rastreamento desnecessário de entidades.
-                var existingUsuario = await _context.Usuarios
-          .AsNoTracking()
-          .FirstOrDefaultAsync(u => u.Id == usuario.Id);
-
-                if (existingUsuario == null) {
-                    // Se não existe, é um novo usuário.
-                    usuario.UpdatedAt = DateTime.UtcNow;
+                if (usuario.Id == 0) {
+                    // Novo usuário. O EF Core irá atribuir o novo Id automaticamente.
+                    usuario.UpdatedAt = DateTime.UtcNow;
                     _context.Usuarios.Add(usuario);
                 } else {
-                    // Se já existe, é uma atualização.
-                    usuario.UpdatedAt = DateTime.UtcNow;
-                    _context.Usuarios.Update(usuario);
+                    // Atualização de usuário. O EF Core irá encontrar o usuário pelo Id
+                    // e atualizar apenas as propriedades que foram alteradas.
+                    _context.Entry(usuario).State = EntityState.Modified;
+                    usuario.UpdatedAt = DateTime.UtcNow;
                 }
             }
+            // Salvando todas as alterações de uma vez
             await _context.SaveChangesAsync();
         }
 

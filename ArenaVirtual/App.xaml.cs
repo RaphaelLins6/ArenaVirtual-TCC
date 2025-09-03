@@ -6,6 +6,7 @@ namespace ArenaVirtual;
 
 public partial class App : Application {
     public static TimeService? TimeService { get; private set; }
+
     public App() {
         InitializeComponent();
     }
@@ -36,11 +37,16 @@ public partial class App : Application {
                         System.Diagnostics.Debug.WriteLine("Iniciando inicialização do DatabaseService...");
                         await databaseService.InitializeAsync();
                         System.Diagnostics.Debug.WriteLine("DatabaseService inicializado com sucesso.");
+
+                        // ⚡️ ADICIONANDO ESTAS LINHAS PARA FORÇAR A SINCRONIZAÇÃO INICIAL!
+                        var syncService = windowServiceProvider.GetRequiredService<SyncService>();
+                        await syncService.SyncAsync(new Progress<string>(status => System.Diagnostics.Debug.WriteLine($"[SyncStatus] {status}")));
+
                     } else {
                         System.Diagnostics.Debug.WriteLine("Erro: ServiceProvider da janela não pôde ser obtido para inicialização do DatabaseService.");
                     }
                 } catch (Exception ex) {
-                    System.Diagnostics.Debug.WriteLine($"Erro na inicialização do DatabaseService: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"Erro na inicialização/sincronização inicial: {ex.Message}");
                 }
             }
         };

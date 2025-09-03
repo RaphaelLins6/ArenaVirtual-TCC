@@ -10,8 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Adiciona serviços ao contêiner
 builder.Services.AddControllers();
 
-// Adiciona o DbContext com SQL Server
-builder.Services.AddDbContext<AppDbContext>(options =>
+// Adiciona o DbContext com SQL Server, usando a string de conexão correta
+builder.Services.AddDbContext<ApiDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAuthentication();
@@ -49,7 +49,7 @@ app.MapControllers();
 
 // Inicializa o banco de dados
 using (var scope = app.Services.CreateScope()) {
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
     dbContext.Database.Migrate();
 }
 

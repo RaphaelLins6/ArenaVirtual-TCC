@@ -6,6 +6,7 @@ using ArenaVirtualAPI.Models;
 using ArenaVirtualAPI.Services;
 using System;
 using System.Linq;
+using ArenaVirtualAPI.Dtos;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -28,7 +29,9 @@ public class DataController : ControllerBase {
         _logger.LogInformation($"Recebida requisição de sincronização para o tipo: {modelTypeName}");
 
         try {
+            // A chamada para o método de processamento foi simplificada e delegada ao serviço.
             await _backendSyncService.ProcessUploadAsync(data, modelTypeName);
+
             return Ok($"Sincronização de upload de {modelTypeName} bem-sucedida.");
         } catch (JsonException ex) {
             _logger.LogError($"Erro de desserialização na sincronização de upload para {modelTypeName}: {ex.Message}");
@@ -44,11 +47,7 @@ public class DataController : ControllerBase {
         _logger.LogInformation($"Requisição de atualizações recebida. Última sincronização: {lastSyncTime}");
 
         try {
-            // Obtenha os dados atualizados de forma estruturada.
             var updatedItems = await _backendSyncService.GetUpdatesAsync(lastSyncTime);
-
-            // Retorna o dicionário diretamente.
-            // O ASP.NET Core serializará isso para um JSON com chaves por tipo.
             return Ok(updatedItems.UpdatedItems);
         } catch (Exception ex) {
             _logger.LogError($"Erro ao obter atualizações: {ex.Message}");

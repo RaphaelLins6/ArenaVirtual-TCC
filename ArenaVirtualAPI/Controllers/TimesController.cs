@@ -7,8 +7,8 @@ namespace ArenaVirtualAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class TimesController(AppDbContext db) : ControllerBase {
-    private readonly AppDbContext _db = db;
+public class TimesController(ApiDbContext db) : ControllerBase {
+    private readonly ApiDbContext _db = db;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Time>>> Get() =>

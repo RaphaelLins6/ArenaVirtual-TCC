@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ArenaVirtualAPI.Models;
 
@@ -38,7 +39,8 @@ public class Usuario : ISyncable {
 
     // relacionamento opcional com Time
     public int? TimeId { get; set; }
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow; // Valor padrão
-    public bool IsSynced { get; set; } = false; // Valor padrão
 
+    // Propriedades de sincronização
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsSynced { get; set; } = false;
 }

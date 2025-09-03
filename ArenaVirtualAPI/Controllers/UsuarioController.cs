@@ -7,8 +7,8 @@ using ArenaVirtualAPI.Data;
 namespace ArenaVirtualAPI.Controllers {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsuariosController(AppDbContext context) : ControllerBase {
-        private readonly AppDbContext _context = context;
+    public class UsuariosController(ApiDbContext context) : ControllerBase {
+        private readonly ApiDbContext _context = context;
 
         // GET: api/usuarios
         [HttpGet]

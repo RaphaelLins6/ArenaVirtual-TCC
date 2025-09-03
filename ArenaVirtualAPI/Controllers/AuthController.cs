@@ -7,9 +7,9 @@ namespace ArenaVirtualAPI.Controllers {
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase {
-        private readonly AppDbContext _context;
+        private readonly ApiDbContext _context;
 
-        public AuthController(AppDbContext context) => _context = context;
+        public AuthController(ApiDbContext context) => _context = context;
 
         [HttpPost("login")]
         public async Task<ActionResult<UsuarioReadDto>> Login([FromBody] LoginDto dto) {

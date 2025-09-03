@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ArenaVirtualAPI.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(ApiDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -124,7 +124,7 @@ namespace ArenaVirtualAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CampeonatoId")
+                    b.Property<int?>("CampeonatoId")
                         .HasColumnType("int");
 
                     b.Property<int?>("CapitaoId")
@@ -260,9 +260,7 @@ namespace ArenaVirtualAPI.Migrations
                 {
                     b.HasOne("ArenaVirtualAPI.Models.Campeonato", null)
                         .WithMany("Times")
-                        .HasForeignKey("CampeonatoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CampeonatoId");
                 });
 
             modelBuilder.Entity("ArenaVirtualAPI.Models.Usuario", b =>

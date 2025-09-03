@@ -15,7 +15,7 @@ public class Time : ISyncable {
     [MaxLength(255)]
     public string? LogoUrl { get; set; } // guarde aqui uma URL acessível (ex.: Azure Blob)
 
-    public int CampeonatoId { get; set; }
+    public int? CampeonatoId { get; set; }
 
     [MaxLength(500)]
     public string? Descricao { get; set; }

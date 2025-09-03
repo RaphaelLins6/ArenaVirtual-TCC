@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ArenaVirtualAPI.Models; // ajuste para onde estão suas entidades
+using ArenaVirtualAPI.Models; 
 
 namespace ArenaVirtualAPI.Data {
-    public class AppDbContext : DbContext {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {
+    public class ApiDbContext : DbContext {
+        public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options) {
         }
 
         public DbSet<Usuario> Usuarios { get; set; }

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace ArenaVirtualAPI.Services {
     public class ConviteService : IBackendService<Convite> {
-        private readonly AppDbContext _context;
+        private readonly ApiDbContext _context;
 
-        public ConviteService(AppDbContext context) {
+        public ConviteService(ApiDbContext context) {
             _context = context;
         }
 
@@ -33,14 +33,12 @@ namespace ArenaVirtualAPI.Services {
 
         public async Task ProcessItemsAsync(IEnumerable<Convite> items) {
             foreach (var convite in items) {
-                // Se o Id for 0, é um novo convite. Caso contrário, é uma atualização.
                 if (convite.Id == 0) {
                     convite.UpdatedAt = DateTime.UtcNow;
                     _context.Convites.Add(convite);
                 } else {
-                    // Anexa o item e marca-o como modificado.
                     _context.Convites.Update(convite);
-                    convite.UpdatedAt = DateTime.UtcNow; // Garante que o timestamp é definido no backend
+                    convite.UpdatedAt = DateTime.UtcNow;
                 }
             }
             await _context.SaveChangesAsync();

@@ -8,8 +8,8 @@ namespace ArenaVirtualAPI.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class CampeonatosController : ControllerBase {
-    private readonly AppDbContext _db;
-    public CampeonatosController(AppDbContext db) => _db = db;
+    private readonly ApiDbContext _db;
+    public CampeonatosController(ApiDbContext db) => _db = db;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Campeonato>>> Get() =>
