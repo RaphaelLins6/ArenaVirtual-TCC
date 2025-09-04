@@ -24,6 +24,20 @@ builder.Services.AddSwaggerGen(c => {
 });
 
 // ==========================================================
+// CONFIGURAÇÃO DO KESTREL PARA HABILITAR HTTP E HTTPS
+// ==========================================================
+builder.WebHost.ConfigureKestrel(options => {
+    // HTTP normal (sem SSL) na porta 5067.
+    // O endereço AnyIP permite escutar em todos os endereços IP disponíveis, incluindo o 10.0.2.2.
+    options.ListenAnyIP(5067);
+
+    // HTTPS com certificado de desenvolvimento na porta 7117.
+    options.ListenAnyIP(7117, listenOptions => {
+        listenOptions.UseHttps();
+    });
+});
+
+// ==========================================================
 // REGISTRO DOS SERVIÇOS DE SINCRONIZAÇÃO
 // ==========================================================
 // Registra os serviços específicos
