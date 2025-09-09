@@ -27,6 +27,9 @@ namespace ArenaVirtual.Services {
             novoTime.IsSynced = false;
             novoTime.UpdatedAt = DateTime.UtcNow;
 
+            // CORREÇÃO: Atribuir o ClientAppId do usuário logado ao novo time.
+            novoTime.CapitaoClientAppId = usuario.ClientAppId;
+
             int resultado = await _db.InserirTimeAsync(novoTime);
 
             if (resultado > 0) {
