@@ -20,15 +20,23 @@ namespace ArenaVirtual.Models {
         private int derrotas;
         private int empates;
         private int? capitaoId;
+        public Guid? CapitaoClientAppId { get; set; }
         private DateTime dataCriacao;
-
-        // Campos de suporte para as propriedades de sincronização
+        private Guid clientAppId; // Campo de suporte para o ClientAppId
+        private Guid campeonatoClientAppId;
         private bool isSynced;
         private DateTime updatedAt;
 
         [PrimaryKey, AutoIncrement]
         [JsonIgnore]
         public int Id { get; set; }
+
+        // A chave de sincronização que será usada para mapear com a API
+        [NotNull, Unique]
+        public Guid ClientAppId {
+            get => clientAppId;
+            set => SetProperty(ref clientAppId, value);
+        }
 
         [NotNull, MaxLength(100)]
         public string Nome {
@@ -46,6 +54,14 @@ namespace ArenaVirtual.Models {
             get => campeonatoId;
             set => SetProperty(ref campeonatoId, value);
         }
+
+        [JsonIgnore]
+        public Guid CampeonatoClientAppId {
+            get => campeonatoClientAppId;
+            set => SetProperty(ref campeonatoClientAppId, value);
+        }
+
+        // ... (o restante das propriedades e métodos)
 
         [MaxLength(500)]
         public string? Descricao {
@@ -90,7 +106,6 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref capitaoId, value);
         }
 
-        // Propriedades de sincronização que manipulam os campos de suporte diretamente
         public bool IsSynced {
             get => isSynced;
             set => isSynced = value;
@@ -102,7 +117,6 @@ namespace ArenaVirtual.Models {
         }
 
         public Time() {
-            // Inicializa os campos de suporte diretamente
             isSynced = false;
             updatedAt = DateTime.UtcNow;
             DataCriacao = DateTime.Now;
@@ -117,7 +131,6 @@ namespace ArenaVirtual.Models {
             backingField = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-            // Atualiza os campos de suporte diretamente para evitar recursão
             this.isSynced = false;
             this.updatedAt = DateTime.UtcNow;
 

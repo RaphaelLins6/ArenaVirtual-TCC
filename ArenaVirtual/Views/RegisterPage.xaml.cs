@@ -11,9 +11,12 @@ namespace ArenaVirtual.Views {
             _serviceProvider = serviceProvider;
         }
 
-        private void OnRegisterEnterPressed(object sender, EventArgs e) {
-            if (BindingContext is RegisterViewModel vm && vm.RegistrarCommand.CanExecute(null)) {
-                vm.RegistrarCommand.Execute(null);
+        // Método otimizado com o [RelayCommand] no ViewModel
+        private async void OnRegisterEnterPressed(object sender, EventArgs e) {
+            if (BindingContext is RegisterViewModel vm) {
+                if (vm.RegistrarCommand.CanExecute(null)) {
+                    await vm.RegistrarCommand.ExecuteAsync(null);
+                }
             }
         }
     }

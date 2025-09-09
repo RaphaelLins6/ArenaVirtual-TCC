@@ -1,75 +1,62 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
-using MvvmHelpers;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Windows.Input;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ArenaVirtual.ViewModels {
-    public partial class HomeViewModel : BaseViewModel, INotifyPropertyChanged {
-        private readonly ObservableCollection<Campeonato> _campeonatos;
-        public ObservableCollection<Campeonato> Campeonatos { get; set; }
+    // Certifique-se de que a classe seja 'partial' para que o código gerado pelo CommunityToolkit funcione
+    public partial class HomeViewModel(DatabaseService databaseService, SyncService syncService) : ObservableObject {
 
-        private ObservableCollection<Campeonato> _favoritos = new ObservableCollection<Campeonato>();
-        public ObservableCollection<Campeonato> Favoritos {
-            get => _favoritos;
-            set {
-                _favoritos = value;
-                OnPropertyChanged(nameof(Favoritos));
-            }
+        // Propriedade observável que controla a visibilidade do indicador de atividade
+        [ObservableProperty]
+        private bool isBusy = false;
+
+        private readonly ObservableCollection<Campeonato> _campeonatos = new();
+        public ObservableCollection<Campeonato> Campeonatos => _campeonatos;
+
+        private readonly ObservableCollection<Campeonato> _favoritos = new();
+        public ObservableCollection<Campeonato> Favoritos => _favoritos;
+
+        private bool _isFirstLoad = true;
+        private readonly DatabaseService _databaseService = databaseService;
+        private readonly SyncService _syncService = syncService;
+        private readonly SemaphoreSlim _syncSemaphore = new(1, 1);
+
+        // O atributo [RelayCommand] gera automaticamente as propriedades public ICommand FavoritarCommand e VerCampeonatoCommand
+        [RelayCommand]
+        private async Task Favoritar(Campeonato campeonato) {
+            if (campeonato == null || IsBusy) return;
+            await FavoritarAsync(campeonato);
         }
 
-        // Sinalizador para o primeiro carregamento da página
-        private bool _isFirstLoad = true;
-
-        public ICommand FavoritarCommand { get; }
-        public ICommand VerCampeonatoCommand { get; }
-        private readonly DatabaseService _databaseService;
-        private readonly SyncService _syncService;
-
-        // Usamos um SemaphoreSlim para garantir que apenas uma execução
-        // de OnAppearingAsync ocorra por vez.
-        private readonly SemaphoreSlim _syncSemaphore = new SemaphoreSlim(1, 1);
-
-        public HomeViewModel(DatabaseService databaseService, SyncService syncService) {
-            _campeonatos = new ObservableCollection<Campeonato>();
-            Campeonatos = _campeonatos;
-            _databaseService = databaseService;
-            _syncService = syncService;
-
-            FavoritarCommand = new Command<object>(
-                async obj => {
-                    if (obj is Campeonato campeonato)
-                        await FavoritarAsync(campeonato);
-                });
-
-            VerCampeonatoCommand = new Command<Campeonato>(async (campeonato) => {
-                await VerCampeonatoAsync(campeonato);
-            });
+        [RelayCommand]
+        private async Task VerCampeonato(Campeonato campeonato) {
+            if (campeonato == null || IsBusy) return;
+            await VerCampeonatoAsync(campeonato);
         }
 
         public async Task OnAppearingAsync() {
             Debug.WriteLine("[HomeViewModel] OnAppearingAsync chamado.");
 
-            // Tenta adquirir o 'lock' de forma assíncrona.
             await _syncSemaphore.WaitAsync();
             try {
-                // Sincroniza e carrega tudo apenas no primeiro carregamento.
                 if (_isFirstLoad) {
                     _isFirstLoad = false;
-                    IsBusy = true;
+                    IsBusy = true; // Inicia o indicador
                     await _syncService.SyncAsync(new Progress<string>());
                     await CarregarTodosCampeonatos();
                 } else {
-                    // Nas chamadas subsequentes, apenas atualize os favoritos para ser mais eficiente.
                     await CarregarFavoritos();
                 }
             } catch (Exception ex) {
                 Debug.WriteLine($"[HomeViewModel] Erro em OnAppearingAsync: {ex.Message}");
             } finally {
-                IsBusy = false;
-                // Libera o 'lock' para que a próxima chamada possa ser executada.
+                IsBusy = false; // Desliga o indicador
                 _syncSemaphore.Release();
             }
         }
@@ -77,19 +64,18 @@ namespace ArenaVirtual.ViewModels {
         private async Task CarregarTodosCampeonatos() {
             try {
                 var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
-                if (usuarioAtual == null) return;
+                if (usuarioAtual == null || usuarioAtual.ClientAppId == Guid.Empty) return;
 
                 var todosCampeonatos = await _databaseService.ListarCampeonatosAsync() ?? new List<Campeonato>();
-                var favoritosDoUsuario = await _databaseService.ListarFavoritosPorUsuarioAsync(usuarioAtual.Id);
-
-                var idsFavoritos = new HashSet<int>(favoritosDoUsuario.Select(f => f.CampeonatoId));
+                var favoritosDoUsuario = await _databaseService.ListarFavoritosPorUsuarioAsync(usuarioAtual.ClientAppId);
+                var idsFavoritos = new HashSet<Guid>(favoritosDoUsuario.Select(f => f.CampeonatoClientAppId));
 
                 MainThread.BeginInvokeOnMainThread(() => {
                     Favoritos.Clear();
                     _campeonatos.Clear();
 
                     foreach (var c in todosCampeonatos) {
-                        c.EhFavorito = idsFavoritos.Contains(c.Id);
+                        c.EhFavorito = idsFavoritos.Contains(c.ClientAppId);
                         _campeonatos.Add(c);
                         if (c.EhFavorito)
                             Favoritos.Add(c);
@@ -100,19 +86,18 @@ namespace ArenaVirtual.ViewModels {
             }
         }
 
-        // Novo método para carregar apenas os favoritos, otimizando o reaparecimento da tela
         private async Task CarregarFavoritos() {
             try {
                 var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
-                if (usuarioAtual == null) return;
+                if (usuarioAtual == null || usuarioAtual.ClientAppId == Guid.Empty) return;
 
-                var favoritosDoUsuario = await _databaseService.ListarFavoritosPorUsuarioAsync(usuarioAtual.Id);
-                var idsFavoritos = new HashSet<int>(favoritosDoUsuario.Select(f => f.CampeonatoId));
+                var favoritosDoUsuario = await _databaseService.ListarFavoritosPorUsuarioAsync(usuarioAtual.ClientAppId);
+                var idsFavoritos = new HashSet<Guid>(favoritosDoUsuario.Select(f => f.CampeonatoClientAppId));
 
                 MainThread.BeginInvokeOnMainThread(() => {
                     Favoritos.Clear();
                     foreach (var c in _campeonatos) {
-                        c.EhFavorito = idsFavoritos.Contains(c.Id);
+                        c.EhFavorito = idsFavoritos.Contains(c.ClientAppId);
                         if (c.EhFavorito)
                             Favoritos.Add(c);
                     }
@@ -123,33 +108,27 @@ namespace ArenaVirtual.ViewModels {
         }
 
         private async Task FavoritarAsync(Campeonato campeonato) {
-            if (campeonato == null) return;
-
             var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
-            if (usuarioAtual == null) return;
+            if (usuarioAtual == null || usuarioAtual.ClientAppId == Guid.Empty) return;
 
             campeonato.EhFavorito = !campeonato.EhFavorito;
 
-            // Oculta/exibe o favorito da lista de favoritos imediatamente para dar feedback instantâneo
             if (campeonato.EhFavorito) {
-                // Adiciona o favorito na lista
                 var favorito = new UsuarioCampeonatoFavorito {
-                    UsuarioId = usuarioAtual.Id,
-                    CampeonatoId = campeonato.Id
+                    UsuarioClientAppId = usuarioAtual.ClientAppId,
+                    CampeonatoClientAppId = campeonato.ClientAppId
                 };
                 await _databaseService.InserirFavoritoAsync(favorito);
                 Favoritos.Add(campeonato);
             } else {
-                // Remove o favorito da lista
-                var favoritoExistente = (await _databaseService.ListarFavoritosPorUsuarioAsync(usuarioAtual.Id))
-                    .FirstOrDefault(f => f.CampeonatoId == campeonato.Id);
+                var favoritoExistente = (await _databaseService.ListarFavoritosPorUsuarioAsync(usuarioAtual.ClientAppId))
+                    .FirstOrDefault(f => f.CampeonatoClientAppId == campeonato.ClientAppId);
                 if (favoritoExistente != null) {
                     await _databaseService.DeletarFavoritoAsync(favoritoExistente);
                 }
                 Favoritos.Remove(campeonato);
             }
 
-            // Reordena a lista de favoritos
             var tempFavoritos = Favoritos.OrderBy(c => c.Nome).ToList();
             MainThread.BeginInvokeOnMainThread(() => {
                 Favoritos.Clear();

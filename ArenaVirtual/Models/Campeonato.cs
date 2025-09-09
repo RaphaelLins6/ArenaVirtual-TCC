@@ -11,6 +11,7 @@ namespace ArenaVirtual.Models {
         [PrimaryKey, AutoIncrement]
         [JsonIgnore]
         public int Id { get; set; }
+        public Guid ClientAppId { get; set; }
 
         // Variáveis de apoio (backing fields)
         private string? _nome;
@@ -160,8 +161,7 @@ namespace ArenaVirtual.Models {
             _locaisDosJogos = string.Empty;
             _dataInicio = DateTime.Now;
             _dataFim = DateTime.Now;
-
-            // Inicialize as novas propriedades
+            ClientAppId = Guid.NewGuid();
             _descricao = string.Empty;
             _modalidade = string.Empty;
             _regras = string.Empty;

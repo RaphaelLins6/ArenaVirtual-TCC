@@ -26,6 +26,7 @@
 
             <Entry Placeholder="E-mail" Text="{Binding Email}" />
             <Entry
+                Completed="OnLoginEnterPressed"
                 IsPassword="True"
                 Placeholder="Senha"
                 Text="{Binding Senha}" />
@@ -46,6 +47,7 @@
                 TextColor="White" />
         </VerticalStackLayout>
 
+        <!--  A sobreposição (overlay) de carregamento  -->
         <Grid
             BackgroundColor="#000000"
             IsVisible="{Binding IsBusy}"

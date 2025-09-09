@@ -1,4 +1,5 @@
-﻿<ContentPage
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
     x:Class="ArenaVirtual.Views.RegisterPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -7,127 +8,94 @@
     Title="Registrar"
     x:DataType="vm:RegisterViewModel">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="30" Spacing="15">
-            <Entry Placeholder="Nome" Text="{Binding Nome}" />
-            <Entry
-                Keyboard="Email"
-                Placeholder="Email"
-                Text="{Binding Email}" />
-
-            <Picker
-                Title="Selecione o perfil"
-                ItemsSource="{Binding PerfisDisponiveis}"
-                SelectedItem="{Binding PerfilSelecionado}" />
-
-            <Entry Placeholder="Telefone/WhatsApp" Text="{Binding Telefone}" />
-            <Entry Placeholder="Localização (Cidade/Estado)" Text="{Binding Localizacao}" />
-            <Entry Placeholder="Link Rede Social" Text="{Binding LinkRedeSocial}" />
-            <Entry
-                Completed="OnRegisterEnterPressed"
-                IsPassword="True"
-                Placeholder="Senha"
-                Text="{Binding Senha}" />
-            <Entry
-                IsPassword="True"
-                Placeholder="Confirmar Senha"
-                Text="{Binding ConfirmarSenha}" />
-
-            <!--  Campos específicos de perfil organizados  -->
-
-            <!--  Campos do Patrocinador  -->
-            <VerticalStackLayout
-                x:Name="PatrocinadorFields"
-                IsVisible="False"
-                Spacing="10">
-                <VerticalStackLayout.Triggers>
-                    <DataTrigger
-                        Binding="{Binding PerfilSelecionado}"
-                        TargetType="VerticalStackLayout"
-                        Value="{x:Static models:TipoPerfil.Patrocinador}">
-                        <Setter Property="IsVisible" Value="True" />
-                    </DataTrigger>
-                </VerticalStackLayout.Triggers>
-                <Entry Placeholder="Nome da Empresa" Text="{Binding NomeEmpresa}" />
-                <Entry Placeholder="CNPJ/CPF" Text="{Binding Cnpj}" />
-                <Entry Placeholder="Faixa de Orçamento para Patrocínio" Text="{Binding FaixaOrcamentoPatrocinio}" />
-            </VerticalStackLayout>
-
-            <!--  Campos do Organizador  -->
-            <VerticalStackLayout
-                x:Name="OrganizadorFields"
-                IsVisible="False"
-                Spacing="10">
-                <VerticalStackLayout.Triggers>
-                    <DataTrigger
-                        Binding="{Binding PerfilSelecionado}"
-                        TargetType="VerticalStackLayout"
-                        Value="{x:Static models:TipoPerfil.Organizador}">
-                        <Setter Property="IsVisible" Value="True" />
-                    </DataTrigger>
-                </VerticalStackLayout.Triggers>
-                <Entry Placeholder="Nome da Empresa" Text="{Binding NomeEmpresa}" />
-                <Entry Placeholder="CNPJ/CPF" Text="{Binding Cnpj}" />
-            </VerticalStackLayout>
-
-            <!--  Campos do Atleta  -->
-            <VerticalStackLayout
-                x:Name="AtletaFields"
-                IsVisible="False"
-                Spacing="10">
-                <VerticalStackLayout.Triggers>
-                    <DataTrigger
-                        Binding="{Binding PerfilSelecionado}"
-                        TargetType="VerticalStackLayout"
-                        Value="{x:Static models:TipoPerfil.Atleta}">
-                        <Setter Property="IsVisible" Value="True" />
-                    </DataTrigger>
-                </VerticalStackLayout.Triggers>
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="30" Spacing="15">
+                <Entry Placeholder="Nome" Text="{Binding Nome}" />
                 <Entry
-                    Keyboard="Numeric"
-                    Placeholder="Altura (cm)"
-                    Text="{Binding Altura}" />
-                <Entry
-                    Keyboard="Numeric"
-                    Placeholder="Peso (kg)"
-                    Text="{Binding Peso}" />
-            </VerticalStackLayout>
+                    Keyboard="Email"
+                    Placeholder="Email"
+                    Text="{Binding Email}" />
 
-            <!--  Campos compartilhados entre Atleta e Árbitro  -->
-            <VerticalStackLayout
-                x:Name="DataNascimentoGeneroFields"
-                IsVisible="False"
-                Spacing="10">
-                <VerticalStackLayout.Triggers>
-                    <DataTrigger
-                        Binding="{Binding PerfilSelecionado}"
-                        TargetType="VerticalStackLayout"
-                        Value="{x:Static models:TipoPerfil.Atleta}">
-                        <Setter Property="IsVisible" Value="True" />
-                    </DataTrigger>
-                    <DataTrigger
-                        Binding="{Binding PerfilSelecionado}"
-                        TargetType="VerticalStackLayout"
-                        Value="{x:Static models:TipoPerfil.Arbitro}">
-                        <Setter Property="IsVisible" Value="True" />
-                    </DataTrigger>
-                </VerticalStackLayout.Triggers>
                 <Picker
-                    Title="Gênero"
-                    ItemsSource="{Binding GenerosDisponiveis}"
-                    SelectedItem="{Binding GeneroSelecionado}" />
-                <Label Text="Data de Nascimento:" TextColor="White" />
-                <DatePicker Date="{Binding DataNascimento}" Format="dd/MM/yyyy" />
-            </VerticalStackLayout>
+                    Title="Selecione o perfil"
+                    ItemsSource="{Binding PerfisDisponiveis}"
+                    SelectedItem="{Binding PerfilSelecionado}" />
 
-            <Button
-                Command="{Binding RegistrarCommand}"
-                Style="{StaticResource BotaoPrincipal}"
-                Text="Registrar" />
-            <Button
-                Command="{Binding VoltarParaLoginCommand}"
-                Style="{StaticResource BotaoPrincipal}"
-                Text="Voltar" />
-        </VerticalStackLayout>
-    </ScrollView>
+                <Entry Placeholder="Telefone/WhatsApp" Text="{Binding Telefone}" />
+                <Entry Placeholder="Localização (Cidade/Estado)" Text="{Binding Localizacao}" />
+                <Entry Placeholder="Link Rede Social" Text="{Binding LinkRedeSocial}" />
+                <Entry
+                    Completed="OnRegisterEnterPressed"
+                    IsPassword="True"
+                    Placeholder="Senha"
+                    Text="{Binding Senha}" />
+                <Entry
+                    IsPassword="True"
+                    Placeholder="Confirmar Senha"
+                    Text="{Binding ConfirmarSenha}" />
+
+                <VerticalStackLayout
+                    x:Name="PatrocinadorFields"
+                    IsVisible="{Binding PerfilSelecionado, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:TipoPerfil.Patrocinador}}"
+                    Spacing="10">
+                    <Entry Placeholder="Nome da Empresa" Text="{Binding NomeEmpresa}" />
+                    <Entry Placeholder="CNPJ/CPF" Text="{Binding Cnpj}" />
+                    <Entry Placeholder="Faixa de Orçamento para Patrocínio" Text="{Binding FaixaOrcamentoPatrocinio}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout
+                    x:Name="OrganizadorFields"
+                    IsVisible="{Binding PerfilSelecionado, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:TipoPerfil.Organizador}}"
+                    Spacing="10">
+                    <Entry Placeholder="Nome da Empresa" Text="{Binding NomeEmpresa}" />
+                    <Entry Placeholder="CNPJ/CPF" Text="{Binding Cnpj}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout
+                    x:Name="AtletaFields"
+                    IsVisible="{Binding PerfilSelecionado, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:TipoPerfil.Atleta}}"
+                    Spacing="10">
+                    <Entry
+                        Keyboard="Numeric"
+                        Placeholder="Altura (cm)"
+                        Text="{Binding Altura}" />
+                    <Entry
+                        Keyboard="Numeric"
+                        Placeholder="Peso (kg)"
+                        Text="{Binding Peso}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout
+                    x:Name="DataNascimentoGeneroFields"
+                    IsVisible="{Binding PerfilSelecionado, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:TipoPerfil.Atleta}}"
+                    Spacing="10">
+                    <Picker
+                        Title="Gênero"
+                        ItemsSource="{Binding GenerosDisponiveis}"
+                        SelectedItem="{Binding GeneroSelecionado}" />
+                    <Label Text="Data de Nascimento:" TextColor="White" />
+                    <DatePicker Date="{Binding DataNascimento}" Format="dd/MM/yyyy" />
+                </VerticalStackLayout>
+
+                <Button
+                    Command="{Binding RegistrarCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverterBooleanConverter}}"
+                    Style="{StaticResource BotaoPrincipal}"
+                    Text="Registrar" />
+                <Button
+                    Command="{Binding VoltarParaLoginCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverterBooleanConverter}}"
+                    Style="{StaticResource BotaoPrincipal}"
+                    Text="Voltar" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <ActivityIndicator
+            HorizontalOptions="Center"
+            IsRunning="{Binding IsBusy}"
+            IsVisible="{Binding IsBusy}"
+            VerticalOptions="Center"
+            Color="OrangeRed" />
+    </Grid>
 </ContentPage>

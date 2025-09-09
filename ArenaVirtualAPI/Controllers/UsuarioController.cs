@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ArenaVirtualAPI.Models;
 using ArenaVirtualAPI.DTOs;
 using ArenaVirtualAPI.Data;
+using System.Linq;
 
 namespace ArenaVirtualAPI.Controllers {
     [ApiController]
@@ -47,7 +48,7 @@ namespace ArenaVirtualAPI.Controllers {
                 Peso = dto.Peso,
                 Altura = dto.Altura,
                 FaixaOrcamentoPatrocinio = dto.FaixaOrcamentoPatrocinio,
-                TimeId = dto.TimeId
+                TimeClientAppId = dto.TimeClientAppId // Corrigido para usar TimeClientAppId
             };
 
             _context.Usuarios.Add(entity);
@@ -64,7 +65,7 @@ namespace ArenaVirtualAPI.Controllers {
             var entity = await _context.Usuarios.FindAsync(id);
             if (entity == null) return NotFound();
 
-            // atualiza campos
+            // Atualiza campos
             entity.Nome = dto.Nome;
             entity.Email = dto.Email;
             entity.Perfil = dto.Perfil;
@@ -79,7 +80,7 @@ namespace ArenaVirtualAPI.Controllers {
             entity.Peso = dto.Peso;
             entity.Altura = dto.Altura;
             entity.FaixaOrcamentoPatrocinio = dto.FaixaOrcamentoPatrocinio;
-            entity.TimeId = dto.TimeId;
+            entity.TimeClientAppId = dto.TimeClientAppId; // Corrigido para usar TimeClientAppId
 
             // se o cliente mandou nova senha, re-hash
             if (!string.IsNullOrWhiteSpace(dto.NovaSenha)) {
@@ -105,19 +106,20 @@ namespace ArenaVirtualAPI.Controllers {
             Id = u.Id,
             Nome = u.Nome,
             Email = u.Email,
-            Perfil = u.Perfil,
+            Perfil = u.Perfil.ToString(), // Converte Perfil para string
             ImagemPath = u.ImagemPath,
             Localizacao = u.Localizacao,
             Telefone = u.Telefone,
             LinkRedeSocial = u.LinkRedeSocial,
             DataNascimento = u.DataNascimento,
-            Genero = u.Genero,
+            Genero = u.Genero?.ToString(), // Converte Genero para string (com verificação de nulo)
             NomeEmpresa = u.NomeEmpresa,
             CNPJ = u.CNPJ,
             Peso = u.Peso,
             Altura = u.Altura,
             FaixaOrcamentoPatrocinio = u.FaixaOrcamentoPatrocinio,
-            TimeId = u.TimeId
+            TimeClientAppId = u.TimeClientAppId, // Corrigido para usar TimeClientAppId
+            ClientAppId = u.ClientAppId
         };
     }
 }

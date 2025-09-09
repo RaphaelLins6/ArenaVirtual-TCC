@@ -12,7 +12,7 @@ namespace ArenaVirtual.Views.Atleta {
         protected override async void OnAppearing() {
             base.OnAppearing();
             if (BindingContext is MeuTimePageViewModel vm) {
-                await vm.LoadData();
+                await vm.LoadDataAsync();
             }
         }
     }

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ArenaVirtualAPI.DTOs;
 using ArenaVirtualAPI.Data;
+using System.Threading.Tasks;
 
 namespace ArenaVirtualAPI.Controllers {
     [ApiController]
@@ -24,19 +25,27 @@ namespace ArenaVirtualAPI.Controllers {
                 Id = user.Id,
                 Nome = user.Nome,
                 Email = user.Email,
-                Perfil = user.Perfil,
+
+                // CORREÇÃO: Converte o TipoPerfil para string
+                Perfil = user.Perfil.ToString(),
+
                 ImagemPath = user.ImagemPath,
                 Localizacao = user.Localizacao,
                 Telefone = user.Telefone,
                 LinkRedeSocial = user.LinkRedeSocial,
                 DataNascimento = user.DataNascimento,
-                Genero = user.Genero,
+
+                // CORREÇÃO: Converte o GeneroEnum para string
+                Genero = user.Genero?.ToString(),
+
                 NomeEmpresa = user.NomeEmpresa,
                 CNPJ = user.CNPJ,
                 Peso = user.Peso,
                 Altura = user.Altura,
                 FaixaOrcamentoPatrocinio = user.FaixaOrcamentoPatrocinio,
-                TimeId = user.TimeId
+
+                // CORREÇÃO: Usa a propriedade TimeClientAppId
+                TimeClientAppId = user.TimeClientAppId
             });
         }
     }

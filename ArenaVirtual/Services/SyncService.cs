@@ -1,15 +1,22 @@
-﻿using ArenaVirtual.Services;
+﻿using ArenaVirtual.DTOs;
 using ArenaVirtual.Models;
-using System.Text.Json;
+using ArenaVirtual.Services;
+using Microsoft.Maui.Storage;
+using SQLite;
 using System.Collections;
-using ArenaVirtual.DTOs;
+using System.Diagnostics;
+using System.Reflection;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 public class SyncService {
     private readonly DatabaseService _databaseService;
     private readonly ApiService _apiService;
     private bool _isSyncing = false;
+    private Timer? _syncTimer;
 
-    private readonly Type[] _syncableTypes = new Type[] {
+    private readonly Type[] _uploadOrder = new Type[] {
         typeof(Usuario),
         typeof(Campeonato),
         typeof(Time),
@@ -28,6 +35,14 @@ public class SyncService {
         _apiService = apiService;
     }
 
+    public void ScheduleSync() {
+        _syncTimer?.Dispose();
+        _syncTimer = new Timer(async (e) => {
+            _syncTimer?.Dispose();
+            await SyncAsync(new Progress<string>());
+        }, null, 2000, Timeout.Infinite);
+    }
+
     public async Task SyncAsync(IProgress<string> progress) {
         if (_isSyncing) return;
         _isSyncing = true;
@@ -38,17 +53,24 @@ public class SyncService {
             progress?.Report("Recebendo dados do servidor...");
             await DownloadChangesAsync(progress);
             progress?.Report("Sincronização concluída.");
+        } catch (Exception ex) {
+            Debug.WriteLine($"[SyncService] Erro na sincronização: {ex.Message}");
+            progress?.Report($"Erro: {ex.Message}");
         } finally {
             _isSyncing = false;
         }
     }
 
     private async Task UploadChangesAsync(IProgress<string> progress) {
-        foreach (var type in _syncableTypes) {
-            progress?.Report($"Enviando dados de {type.Name}...");
+        var idMapping = new Dictionary<Type, Dictionary<Guid, int>>();
 
-            var getMethod = typeof(DatabaseService).GetMethod("GetUnsyncedItemsAsync");
-            if (getMethod == null) continue;
+        foreach (var type in _uploadOrder) {
+            progress?.Report($"Enviando dados de {type.Name}...");
+            var getMethod = typeof(DatabaseService).GetMethod("GetUnsyncedItemsAsync", BindingFlags.Public | BindingFlags.Instance);
+            if (getMethod == null) {
+                Debug.WriteLine($"[SyncService] Método GetUnsyncedItemsAsync não encontrado para o tipo {type.Name}.");
+                continue;
+            }
 
             var genericGetMethod = getMethod.MakeGenericMethod(type);
             var unsyncedItemsTask = (Task)genericGetMethod.Invoke(_databaseService, null);
@@ -56,108 +78,78 @@ public class SyncService {
             var unsyncedItems = (IList)((dynamic)unsyncedItemsTask).Result;
 
             if (unsyncedItems.Count > 0) {
-                object syncDtos;
-                Type dtoType;
+                var syncDtos = await CreateSyncDtos(unsyncedItems, type, idMapping);
+                var postMethod = typeof(ApiService).GetMethod("PostDataAsync", BindingFlags.Public | BindingFlags.Instance);
 
-                if (type == typeof(Usuario)) {
-                    var items = unsyncedItems.Cast<Usuario>().ToList();
-                    syncDtos = items.Select(item => new UsuarioSyncDto {
-                        Id = item.Id,
-                        Nome = item.Nome,
-                        Email = item.Email,
-                        Perfil = item.Perfil,
-                        ImagemPath = item.ImagemPath,
-                        Localizacao = item.Localizacao,
-                        Telefone = item.Telefone,
-                        LinkRedeSocial = item.LinkRedeSocial,
-                        DataNascimento = item.DataNascimento,
-                        Genero = item.Genero,
-                        NomeEmpresa = item.NomeEmpresa,
-                        CNPJ = item.CNPJ,
-                        Peso = item.Peso,
-                        Altura = item.Altura,
-                        FaixaOrcamentoPatrocinio = item.FaixaOrcamentoPatrocinio,
-                        TimeId = item.TimeId,
-                        UpdatedAt = item.UpdatedAt,
-                        IsSynced = true
-                    }).ToList();
-                    dtoType = typeof(List<UsuarioSyncDto>);
-                } else if (type == typeof(Campeonato)) {
-                    var items = unsyncedItems.Cast<Campeonato>().ToList();
-                    syncDtos = items.Select(item => new CampeonatoSyncDto {
-                        Id = item.Id,
-                        Nome = item.Nome,
-                        Local = item.Local,
-                        DataInicio = item.DataInicio,
-                        DataFim = item.DataFim,
-                        OrganizadorId = item.OrganizadorId,
-                        LogoUrl = item.LogoUrl,
-                        NomeOrganizador = item.NomeOrganizador,
-                        EmailOrganizador = item.EmailOrganizador,
-                        TelefoneOrganizador = item.TelefoneOrganizador,
-                        NumeroMaximoEquipes = item.NumeroMaximoEquipes,
-                        ValorTaxaInscricao = item.ValorTaxaInscricao,
-                        FormatoCampeonato = item.FormatoCampeonato,
-                        LocaisDosJogos = item.LocaisDosJogos,
-                        HaveraPremiacao = item.HaveraPremiacao,
-                        UpdatedAt = item.UpdatedAt,
-                        Descricao = item.Descricao,
-                        Modalidade = item.Modalidade,
-                        Regras = item.Regras,
-                        DataTermino = item.DataTermino,
-                        NumeroEquipes = item.NumeroEquipes,
-                        IsSynced = true
-                    }).ToList();
-                    dtoType = typeof(List<CampeonatoSyncDto>);
-                } else if (type == typeof(Time)) {
-                    var items = unsyncedItems.Cast<Time>().ToList();
-                    syncDtos = items.Select(item => new TimeSyncDto {
-                        Id = item.Id,
-                        Nome = item.Nome,
-                        LogoUrl = item.LogoUrl,
-                        CampeonatoId = item.CampeonatoId,
-                        Descricao = item.Descricao,
-                        DataCriacao = item.DataCriacao,
-                        Regiao = item.Regiao,
-                        PontuacaoTotal = item.PontuacaoTotal,
-                        Vitorias = item.Vitorias,
-                        Derrotas = item.Derrotas,
-                        Empates = item.Empates,
-                        CapitaoId = item.CapitaoId,
-                        UpdatedAt = item.UpdatedAt,
-                        IsSynced = true
-                    }).ToList();
-                    dtoType = typeof(List<TimeSyncDto>);
-                } else if (type == typeof(Convite)) {
-                    var items = unsyncedItems.Cast<Convite>().ToList();
-                    syncDtos = items.Select(item => new ConviteSyncDto {
-                        Id = item.Id,
-                        IdSolicitante = item.IdSolicitante,
-                        TimeId = item.TimeId,
-                        DataEnvio = item.DataEnvio,
-                        Status = item.Status, // Correção: Mapeado de item.Status para Status
-                        ConvidadoEmail = item.ConvidadoEmail, // Mapeamento correto do e-mail
-                        UpdatedAt = item.UpdatedAt,
-                        IsSynced = true
-                    }).ToList();
-                    dtoType = typeof(List<ConviteSyncDto>);
-                } else {
-                    syncDtos = unsyncedItems;
-                    dtoType = unsyncedItems.GetType();
+                if (postMethod == null) {
+                    Debug.WriteLine($"[SyncService] Método PostDataAsync não encontrado para o tipo {type.Name}.");
+                    continue;
                 }
 
-                var postMethod = typeof(ApiService).GetMethod("PostDataAsync");
-                if (postMethod == null) continue;
-                var genericPostMethod = postMethod.MakeGenericMethod(dtoType);
+                var genericPostMethod = postMethod.MakeGenericMethod(syncDtos.GetType());
+                var postTask = (Task<Dictionary<Guid, int>>)genericPostMethod.Invoke(_apiService, new object[] { type.Name, syncDtos });
+                var currentIdMapping = await postTask;
+                idMapping[type] = currentIdMapping;
 
-                await (Task)genericPostMethod.Invoke(_apiService, new object[] { type.Name, syncDtos });
-
-                var markMethod = typeof(DatabaseService).GetMethod("MarkAsSyncedAsync");
-                if (markMethod == null) continue;
-                var genericMarkMethod = markMethod.MakeGenericMethod(type);
-                await (Task)genericMarkMethod.Invoke(_databaseService, new object[] { unsyncedItems });
+                foreach (var item in unsyncedItems.Cast<ISyncable>()) {
+                    if (currentIdMapping.TryGetValue(item.ClientAppId, out int serverId)) {
+                        await _databaseService.UpdateIdAndMarkAsSyncedAsync((dynamic)item, serverId);
+                    }
+                }
             }
         }
+    }
+
+    private async Task<IList> CreateSyncDtos(IList items, Type itemType, Dictionary<Type, Dictionary<Guid, int>> idMapping) {
+        var dtoType = Type.GetType($"ArenaVirtual.DTOs.{itemType.Name}SyncDto");
+        if (dtoType == null) {
+            Debug.WriteLine($"[SyncService] DTO não encontrado para o tipo {itemType.Name}.");
+            return new List<object>();
+        }
+        var listType = typeof(List<>).MakeGenericType(dtoType);
+        var syncDtos = (IList)Activator.CreateInstance(listType);
+
+        foreach (var item in items) {
+            var dto = Activator.CreateInstance(dtoType);
+
+            foreach (var prop in itemType.GetProperties()) {
+                var dtoProp = dtoType.GetProperty(prop.Name);
+                if (dtoProp != null && dtoProp.CanWrite) {
+                    var value = prop.GetValue(item);
+                    dtoProp.SetValue(dto, value);
+                }
+            }
+
+            foreach (var mappingType in idMapping.Keys) {
+                var fkPropName = $"{mappingType.Name}Id";
+                var fkClientAppIdPropName = $"{mappingType.Name}ClientAppId";
+
+                var fkProp = dtoType.GetProperty(fkPropName);
+                var fkClientAppIdProp = itemType.GetProperty(fkClientAppIdPropName);
+
+                if (fkProp != null && fkClientAppIdProp != null) {
+                    var clientAppIdValue = fkClientAppIdProp.GetValue(item);
+                    if (clientAppIdValue is Guid clientAppId && idMapping[mappingType].TryGetValue(clientAppId, out int serverId)) {
+                        fkProp.SetValue(dto, serverId);
+                    }
+                }
+            }
+
+            if (itemType == typeof(Time)) {
+                var timeItem = (Time)item;
+                var userMapping = idMapping.GetValueOrDefault(typeof(Usuario));
+                if (userMapping != null && timeItem.CapitaoId.HasValue) {
+                    var usuarioLocalId = await _databaseService.GetUsuarioClientAppIdById(timeItem.CapitaoId.Value);
+                    if (usuarioLocalId.HasValue && userMapping.TryGetValue(usuarioLocalId.Value, out int serverId)) {
+                        dtoType.GetProperty("CapitaoId")?.SetValue(dto, serverId);
+                    }
+                }
+            }
+
+            dtoType.GetProperty("IsSynced")?.SetValue(dto, true);
+            syncDtos.Add(dto);
+        }
+        return syncDtos;
     }
 
     private async Task DownloadChangesAsync(IProgress<string> progress) {
@@ -166,7 +158,7 @@ public class SyncService {
 
         var updates = await _apiService.GetAllUpdatesAsync(lastSyncTime);
 
-        foreach (var type in _syncableTypes) {
+        foreach (var type in _uploadOrder) {
             var typeName = type.Name;
 
             if (updates.UpdatedItems.TryGetValue(typeName, out var jsonElement)) {
@@ -174,10 +166,13 @@ public class SyncService {
                 var listType = typeof(List<>).MakeGenericType(type);
                 var items = JsonSerializer.Deserialize(rawJson, listType, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                if (items is IList collection && collection.Count > 0) { // Correção da sintaxe de verificação e conversão
+                if (items is IList collection && collection.Count > 0) {
                     progress?.Report($"Atualizando {typeName}...");
-                    var saveMethod = typeof(DatabaseService).GetMethod("SaveDownloadedItemsAsync");
-                    if (saveMethod == null) continue;
+                    var saveMethod = typeof(DatabaseService).GetMethod("SaveDownloadedItemsAsync", BindingFlags.Public | BindingFlags.Instance);
+                    if (saveMethod == null) {
+                        Debug.WriteLine($"[SyncService] Método SaveDownloadedItemsAsync não encontrado para o tipo {type.Name}.");
+                        continue;
+                    }
 
                     var genericSaveMethod = saveMethod.MakeGenericMethod(type);
                     await (Task)genericSaveMethod.Invoke(_databaseService, new object[] { items });

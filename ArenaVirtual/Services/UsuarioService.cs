@@ -3,38 +3,40 @@ using BCrypt.Net;
 using System.Diagnostics;
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
+using SQLite;
 
 namespace ArenaVirtual.Services {
     public class UsuarioService(DatabaseService databaseService, SyncService syncService) {
         private readonly DatabaseService _databaseService = databaseService;
-        private readonly SyncService _syncService = syncService; // Atribua a dependência
+        private readonly SyncService _syncService = syncService;
 
-        public async Task<Usuario?> Cadastrar(Usuario usuario) {
+        public async Task<Usuario?> Cadastrar(Usuario usuario) {
             bool emailExiste = await _databaseService.EmailExisteAsync(usuario.Email);
             if (emailExiste) {
                 Debug.WriteLine("Email já existe.");
                 return null;
             }
 
-            // A lógica de preenchimento está correta
-            usuario.IsSynced = false;
+            usuario.IsSynced = false;
             usuario.UpdatedAt = DateTime.UtcNow;
 
             int result = await _databaseService.InserirUsuarioAsync(usuario);
             Debug.WriteLine($"Resultado da inserção: {result}");
 
             if (result > 0) {
-                // ** DISPARO MANUAL DA SINCRONIZAÇÃO APÓS INSERÇÃO BEM-SUCEDIDA **
-                Debug.WriteLine("[UsuarioService] Novo usuário salvo localmente. Disparando sincronização...");
-
-                // Crie e passe um objeto de progresso vazio para o método SyncAsync
+                Debug.WriteLine("[UsuarioService] Novo usuário salvo localmente. Disparando sincronização...");
                 await _syncService.SyncAsync(new Progress<string>());
 
-                var usuarioRetornado = await _databaseService.ObterUsuarioPorEmailAsync(usuario.Email);
+                // Agora usa o método corrigido para buscar o usuário pelo ClientAppId
+                var usuarioRetornado = await _databaseService.ObterUsuarioPorClientAppIdAsync(usuario.ClientAppId);
+
                 if (usuarioRetornado != null)
                     Debug.WriteLine($"Usuário cadastrado e retornado: {usuarioRetornado.Nome}");
                 else
-                    Debug.WriteLine("Usuário não encontrado após cadastro (possível problema de ID).");
+                    Debug.WriteLine("Usuário não encontrado após cadastro (problema de sincronização ou ID).");
+
                 return usuarioRetornado;
             }
             Debug.WriteLine("Falha ao inserir usuário.");
@@ -59,19 +61,25 @@ namespace ArenaVirtual.Services {
             return BCrypt.Net.BCrypt.HashPassword(senha, workFactor: 12);
         }
 
-        public async Task<List<Usuario>> ListarMembrosDoTimeAsync(int timeId) {
+        // Altera para usar a propriedade de sincronização
+        public async Task<List<Usuario>> ListarMembrosDoTimeAsync(Guid timeClientAppId) {
             var todos = await _databaseService.ListarUsuariosAsync();
-            var membros = todos.Where(u => u.TimeId == timeId).ToList();
-
+            var membros = todos.Where(u => u.TimeClientAppId == timeClientAppId).ToList();
             return membros;
         }
 
-        public async Task<List<Usuario>> GetMembrosByTimeIdAsync(int timeId) {
-            return await _databaseService.GetUsuarioTable().Where(u => u.TimeId == timeId).ToListAsync();
+        // Altera para usar a propriedade de sincronização
+        public async Task<List<Usuario>> GetMembrosByTimeClientAppIdAsync(Guid timeClientAppId) {
+            return await _databaseService.GetUsuarioTable().Where(u => u.TimeClientAppId == timeClientAppId).ToListAsync();
         }
 
         public async Task<Usuario> ObterUsuarioPorIdAsync(int usuarioId) {
             return await _databaseService.GetUsuarioTable().FirstOrDefaultAsync(u => u.Id == usuarioId);
         }
     }
+
+    // Exemplo de como o método deve ser adicionado em DatabaseService
+    // public async Task<Usuario?> ObterUsuarioPorClientAppIdAsync(Guid clientAppId) {
+    //    return await _connection.Table<Usuario>().FirstOrDefaultAsync(u => u.ClientAppId == clientAppId);
+    // }
 }

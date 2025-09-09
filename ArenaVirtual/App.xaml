@@ -7,9 +7,12 @@
 
     <Application.Resources>
         <ResourceDictionary>
+
             <converters:FavoritoIconConverter x:Key="FavoritoIconConverter" />
             <converters:ZeroToTrueConverter x:Key="ZeroToTrueConverter" />
             <converters:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmptyConverter" />
+            <converters:InverterBooleanConverter x:Key="InverterBooleanConverter" />
+            <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
 
             <x:Array x:Key="PerfilTipos" Type="{x:Type x:String}">
                 <x:String>Atleta</x:String>

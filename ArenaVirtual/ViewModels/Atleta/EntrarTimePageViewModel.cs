@@ -67,12 +67,13 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 var todosTimes = await _timeService.ObterTodosAsync();
                 var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
                 var timesFiltrados = string.IsNullOrWhiteSpace(query)
-                  ? todosTimes
-                  : todosTimes.Where(t => t.Nome.ToLower().Contains(query.ToLower())).ToList();
+                 ? todosTimes
+                 : todosTimes.Where(t => t.Nome.ToLower().Contains(query.ToLower())).ToList();
 
                 TimesDisponiveis.Clear();
                 foreach (var time in timesFiltrados) {
-                    var conviteExistente = await _databaseService.ObterConvitePorUsuarioETimeAsync(usuarioAtual.Id, time.Id);
+                    // Corrigido: Usar ClientAppId (Guid) em vez de Id (int)
+                    var conviteExistente = await _databaseService.ObterConvitePorUsuarioETimeAsync(usuarioAtual.ClientAppId, time.ClientAppId);
 
                     string buttonText = "Solicitar Entrada";
                     bool isEnabled = true;
@@ -103,7 +104,8 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     return;
                 }
 
-                var conviteExistente = await _databaseService.ObterConvitePorUsuarioETimeAsync(usuarioAtual.Id, timeItemVM.Time.Id);
+                // Corrigido: Usar ClientAppId (Guid) em vez de Id (int)
+                var conviteExistente = await _databaseService.ObterConvitePorUsuarioETimeAsync(usuarioAtual.ClientAppId, timeItemVM.Time.ClientAppId);
 
                 if (conviteExistente != null) {
                     if (conviteExistente.Status == StatusConvite.Pendente) {
@@ -128,8 +130,9 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 }
 
                 var novoConvite = new Convite {
-                    IdSolicitante = usuarioAtual.Id,
-                    TimeId = timeItemVM.Time.Id,
+                    // Corrigido: Usar ClientAppId (Guid) em vez de Id (int) e a propriedade correta
+                    IdSolicitanteClientAppId = usuarioAtual.ClientAppId,
+                    TimeClientAppId = timeItemVM.Time.ClientAppId,
                     DataEnvio = DateTime.UtcNow,
                     Status = StatusConvite.Pendente
                 };

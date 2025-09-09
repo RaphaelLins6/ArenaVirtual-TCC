@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArenaVirtualAPI.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    [Migration("20250903015417_Migracao4")]
-    partial class Migracao4
+    [Migration("20250909003638_Migracao1")]
+    partial class Migracao1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,11 +33,20 @@ namespace ArenaVirtualAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid>("ClientAppId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("DataFim")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DataInicio")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DataTermino")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Descricao")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailOrganizador")
                         .HasColumnType("nvarchar(max)");
@@ -61,6 +70,9 @@ namespace ArenaVirtualAPI.Migrations
                     b.Property<string>("LogoUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Modalidade")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Nome")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -68,11 +80,17 @@ namespace ArenaVirtualAPI.Migrations
                     b.Property<string>("NomeOrganizador")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("NumeroEquipes")
+                        .HasColumnType("int");
+
                     b.Property<int>("NumeroMaximoEquipes")
                         .HasColumnType("int");
 
                     b.Property<int>("OrganizadorId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Regras")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TelefoneOrganizador")
                         .HasColumnType("nvarchar(max)");
@@ -85,6 +103,8 @@ namespace ArenaVirtualAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OrganizadorId");
+
                     b.ToTable("Campeonatos");
                 });
 
@@ -96,17 +116,16 @@ namespace ArenaVirtualAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid>("ClientAppId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ConvidadoEmail")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DataEnvio")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("IdSolicitante")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdTime")
+                    b.Property<int>("IdSolicitanteServidor")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsSynced")
@@ -115,10 +134,17 @@ namespace ArenaVirtualAPI.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int>("TimeId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IdSolicitanteServidor");
+
+                    b.HasIndex("TimeId");
 
                     b.ToTable("Convites");
                 });
@@ -136,6 +162,9 @@ namespace ArenaVirtualAPI.Migrations
 
                     b.Property<int?>("CapitaoId")
                         .HasColumnType("int");
+
+                    b.Property<Guid>("ClientAppId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("datetime2");
@@ -179,6 +208,8 @@ namespace ArenaVirtualAPI.Migrations
 
                     b.HasIndex("CampeonatoId");
 
+                    b.HasIndex("CapitaoId");
+
                     b.ToTable("Times");
                 });
 
@@ -196,6 +227,9 @@ namespace ArenaVirtualAPI.Migrations
                     b.Property<string>("CNPJ")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ClientAppId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("DataNascimento")
                         .HasColumnType("datetime2");
@@ -250,6 +284,9 @@ namespace ArenaVirtualAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("TimeClientAppId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int?>("TimeId")
                         .HasColumnType("int");
 
@@ -263,11 +300,80 @@ namespace ArenaVirtualAPI.Migrations
                     b.ToTable("Usuarios");
                 });
 
+            modelBuilder.Entity("ArenaVirtualAPI.Models.UsuarioCampeonatoFavorito", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("CampeonatoClientAppId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClientAppId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsSynced")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UsuarioClientAppId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioClientAppId", "CampeonatoClientAppId")
+                        .IsUnique();
+
+                    b.ToTable("UsuarioCampeonatoFavoritos");
+                });
+
+            modelBuilder.Entity("ArenaVirtualAPI.Models.Campeonato", b =>
+                {
+                    b.HasOne("ArenaVirtualAPI.Models.Usuario", "Organizador")
+                        .WithMany()
+                        .HasForeignKey("OrganizadorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organizador");
+                });
+
+            modelBuilder.Entity("ArenaVirtualAPI.Models.Convite", b =>
+                {
+                    b.HasOne("ArenaVirtualAPI.Models.Usuario", "Solicitante")
+                        .WithMany()
+                        .HasForeignKey("IdSolicitanteServidor")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ArenaVirtualAPI.Models.Time", "Time")
+                        .WithMany()
+                        .HasForeignKey("TimeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Solicitante");
+
+                    b.Navigation("Time");
+                });
+
             modelBuilder.Entity("ArenaVirtualAPI.Models.Time", b =>
                 {
-                    b.HasOne("ArenaVirtualAPI.Models.Campeonato", null)
+                    b.HasOne("ArenaVirtualAPI.Models.Campeonato", "Campeonato")
                         .WithMany("Times")
                         .HasForeignKey("CampeonatoId");
+
+                    b.HasOne("ArenaVirtualAPI.Models.Usuario", "Capitao")
+                        .WithMany()
+                        .HasForeignKey("CapitaoId");
+
+                    b.Navigation("Campeonato");
+
+                    b.Navigation("Capitao");
                 });
 
             modelBuilder.Entity("ArenaVirtualAPI.Models.Usuario", b =>

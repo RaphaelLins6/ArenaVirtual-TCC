@@ -4,6 +4,8 @@ namespace ArenaVirtual.Models {
     public class AvaliacaoArbitro : ISyncable {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
+        public Guid ClientAppId { get; set; }
+
         public int ArbitroId { get; set; }
         public int JogoId { get; set; }
         public string Comentarios { get; set; } = string.Empty;

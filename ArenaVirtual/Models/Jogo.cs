@@ -4,6 +4,8 @@ namespace ArenaVirtual.Models {
     public class Jogo : ISyncable {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
+        public Guid ClientAppId { get; set; }
+
         public int TimeAId { get; set; }
         public int TimeBId { get; set; }
         public DateTime DataHora { get; set; }

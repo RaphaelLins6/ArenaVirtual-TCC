@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
@@ -9,6 +10,9 @@ public class Usuario : ISyncable {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
+    // Identificador universal para sincronização
+    public Guid ClientAppId { get; set; }
+
     [Required, MaxLength(200)]
     public string Nome { get; set; } = string.Empty;
 
@@ -16,29 +20,24 @@ public class Usuario : ISyncable {
     public string Email { get; set; } = string.Empty;
 
     [Required]
+    [JsonIgnore] // Garante que a senha não seja exposta via API
     public string SenhaHash { get; set; } = string.Empty;
 
     public TipoPerfil Perfil { get; set; }
-
     public string ImagemPath { get; set; } = string.Empty;
-
     public string Localizacao { get; set; } = string.Empty;
     public string Telefone { get; set; } = string.Empty;
     public string LinkRedeSocial { get; set; } = string.Empty;
-
     public DateTime? DataNascimento { get; set; }
     public GeneroEnum? Genero { get; set; }
-
     public string NomeEmpresa { get; set; } = string.Empty;
     public string CNPJ { get; set; } = string.Empty;
-
     public double? Peso { get; set; }
     public double? Altura { get; set; }
-
     public string FaixaOrcamentoPatrocinio { get; set; } = string.Empty;
 
-    // relacionamento opcional com Time
-    public int? TimeId { get; set; }
+    // Relacionamento com Time usando a chave universal
+    public Guid? TimeClientAppId { get; set; }
 
     // Propriedades de sincronização
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

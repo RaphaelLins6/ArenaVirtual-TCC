@@ -2,9 +2,14 @@
     x:Class="ArenaVirtual.Views.Atleta.MeusTimesPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.Atleta"
     Title="Meu Time"
     BackgroundColor="{AppThemeBinding Light=#F5F5F5,
                                       Dark=#121212}">
+
+    <ContentPage.BindingContext>
+        <vm:MeuTimePageViewModel />
+    </ContentPage.BindingContext>
 
     <ContentPage.Content>
         <Grid Padding="15">
@@ -121,7 +126,6 @@
                     TextColor="White"
                     WidthRequest="200" />
             </VerticalStackLayout>
-
         </Grid>
     </ContentPage.Content>
 </ContentPage>

@@ -4,6 +4,8 @@ namespace ArenaVirtual.Models {
     public class Estatistica : ISyncable {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
+        public Guid ClientAppId { get; set; }
+
         public int UsuarioId { get; set; }
         public int JogoId { get; set; }
         public int Pontos { get; set; }

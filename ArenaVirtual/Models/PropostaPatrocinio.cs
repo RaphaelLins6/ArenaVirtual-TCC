@@ -4,6 +4,8 @@ namespace ArenaVirtual.Models {
     public class PropostaPatrocinio : ISyncable {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
+        public Guid ClientAppId { get; set; }
+
         public int PatrocinadorId { get; set; }
         public int CampeonatoId { get; set; }
         public string Mensagem { get; set; } = string.Empty; // Default value added

@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿// Cliente: ArenaVirtual.Models.Convite
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,11 +10,16 @@ namespace ArenaVirtual.Models {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
 
+        public Guid ClientAppId { get; set; } = Guid.NewGuid();
+
+        public int? IdServidor { get; set; }
+
+        public Guid IdSolicitanteClientAppId { get; set; }
         [Indexed]
-        public int IdSolicitante { get; set; }
+        public Guid SolicitanteClientAppId { get; set; }
 
         [Indexed]
-        public int TimeId { get; set; }
+        public Guid TimeClientAppId { get; set; }
 
         public string? ConvidadoEmail { get; set; }
 
@@ -41,8 +47,10 @@ namespace ArenaVirtual.Models {
             backingField = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-            this.IsSynced = false;
-            this.UpdatedAt = DateTime.UtcNow;
+            if (propertyName != nameof(IsSynced) && propertyName != nameof(UpdatedAt)) {
+                this.IsSynced = false;
+                this.UpdatedAt = DateTime.UtcNow;
+            }
 
             return true;
         }

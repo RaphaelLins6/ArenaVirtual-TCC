@@ -2,6 +2,8 @@
 using ArenaVirtual.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace ArenaVirtual.ViewModels.Atleta {
     public partial class EditarTimePageViewModel : ObservableObject {
@@ -27,8 +29,10 @@ namespace ArenaVirtual.ViewModels.Atleta {
         [RelayCommand]
         public async Task LoadDataAsync() {
             var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
-            if (usuarioAtual?.TimeId != null) {
-                _time = await _timeService.ObterPorIdAsync(usuarioAtual.TimeId.Value);
+            // CORREÇÃO: Usar a propriedade correta 'TimeClientAppId'
+            if (usuarioAtual?.TimeClientAppId != null) {
+                // CORREÇÃO: Usar o método de busca por ClientAppId
+                _time = await _timeService.ObterPorClientAppIdAsync(usuarioAtual.TimeClientAppId.Value);
                 if (_time != null) {
                     NomeTime = _time.Nome;
                     DescricaoTime = _time.Descricao;
@@ -47,7 +51,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
             await _timeService.AtualizarTimeAsync(_time);
             await Shell.Current.DisplayAlert("Sucesso", "Alterações salvas com sucesso!", "OK");
 
-            // Retorna para a página anterior
             await Shell.Current.GoToAsync("..");
         }
 
@@ -59,7 +62,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
             });
 
             if (result != null) {
-                // Lógica para salvar a imagem e atualizar o LogoUrl
                 string logoPath = Path.Combine(FileSystem.AppDataDirectory, result.FileName);
                 using (var stream = await result.OpenReadAsync())
                 using (var fileStream = File.OpenWrite(logoPath)) {
@@ -75,7 +77,8 @@ namespace ArenaVirtual.ViewModels.Atleta {
         public async Task ExcluirTime() {
             bool confirm = await Shell.Current.DisplayAlert("Atenção", "Tem certeza que deseja excluir o time? Essa ação é irreversível.", "Sim", "Não");
             if (confirm && _time != null) {
-                await _timeService.ExcluirTimeAsync(_time.Id);
+                // CORREÇÃO: Usar _time.ClientAppId que é do tipo Guid
+                await _timeService.ExcluirTimeAsync(_time.ClientAppId);
                 await Shell.Current.GoToAsync("//MeusTimesPage");
             }
         }

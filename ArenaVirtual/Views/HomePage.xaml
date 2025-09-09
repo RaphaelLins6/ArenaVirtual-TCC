@@ -1,4 +1,5 @@
-﻿<ContentPage
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
     x:Class="ArenaVirtual.Views.HomePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -8,68 +9,78 @@
     x:Name="HomePageRef"
     x:DataType="vm:HomeViewModel">
 
-    <ScrollView>
-        <StackLayout Padding="20" Spacing="24">
+    <!--  Adiciona o layout para o indicador de atividade  -->
+    <Grid>
+        <ScrollView>
+            <StackLayout Padding="20" Spacing="24">
 
-            <Label
-                FontAttributes="Bold"
-                FontSize="28"
-                HorizontalOptions="Center"
-                Text="Campeonatos"
-                TextColor="OrangeRed" />
-
-            <StackLayout>
                 <Label
                     FontAttributes="Bold"
-                    FontSize="20"
-                    Text="Favoritos"
+                    FontSize="28"
+                    HorizontalOptions="Center"
+                    Text="Campeonatos"
                     TextColor="OrangeRed" />
 
-                <CollectionView ItemsSource="{Binding Favoritos}">
-                    <CollectionView.EmptyView>
-                        <Label
-                            HorizontalOptions="Center"
-                            Text="Nenhum campeonato favoritado."
-                            TextColor="White"
-                            VerticalOptions="Center" />
-                    </CollectionView.EmptyView>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="model:Campeonato">
-                            <local:CampeonatoCard
-                                CampeonatoItem="{Binding .}"
-                                FavoritarCommand="{Binding BindingContext.FavoritarCommand, Source={x:Reference HomePageRef}}"
-                                VerCampeonatoCommand="{Binding BindingContext.VerCampeonatoCommand, Source={x:Reference HomePageRef}}" />
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                <StackLayout>
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="20"
+                        Text="Favoritos"
+                        TextColor="OrangeRed" />
+
+                    <CollectionView ItemsSource="{Binding Favoritos}">
+                        <CollectionView.EmptyView>
+                            <Label
+                                HorizontalOptions="Center"
+                                Text="Nenhum campeonato favoritado."
+                                TextColor="White"
+                                VerticalOptions="Center" />
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="model:Campeonato">
+                                <local:CampeonatoCard
+                                    CampeonatoItem="{Binding .}"
+                                    FavoritarCommand="{Binding BindingContext.FavoritarCommand, Source={x:Reference HomePageRef}}"
+                                    VerCampeonatoCommand="{Binding BindingContext.VerCampeonatoCommand, Source={x:Reference HomePageRef}}" />
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+
+                <StackLayout>
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="20"
+                        Text="Todos os Campeonatos"
+                        TextColor="OrangeRed" />
+
+                    <CollectionView ItemsSource="{Binding Campeonatos}">
+                        <CollectionView.EmptyView>
+                            <Label
+                                HorizontalOptions="Center"
+                                Text="Nenhum campeonato encontrado."
+                                TextColor="White"
+                                VerticalOptions="Center" />
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="model:Campeonato">
+                                <local:CampeonatoCard
+                                    CampeonatoItem="{Binding .}"
+                                    FavoritarCommand="{Binding BindingContext.FavoritarCommand, Source={x:Reference HomePageRef}}"
+                                    VerCampeonatoCommand="{Binding BindingContext.VerCampeonatoCommand, Source={x:Reference HomePageRef}}" />
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+
             </StackLayout>
-
-            <StackLayout>
-                <Label
-                    FontAttributes="Bold"
-                    FontSize="20"
-                    Text="Todos os Campeonatos"
-                    TextColor="OrangeRed" />
-
-                <CollectionView ItemsSource="{Binding Campeonatos}">
-                    <CollectionView.EmptyView>
-                        <Label
-                            HorizontalOptions="Center"
-                            Text="Nenhum campeonato encontrado."
-                            TextColor="White"
-                            VerticalOptions="Center" />
-                    </CollectionView.EmptyView>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="model:Campeonato">
-                            <local:CampeonatoCard
-                                CampeonatoItem="{Binding .}"
-                                FavoritarCommand="{Binding BindingContext.FavoritarCommand, Source={x:Reference HomePageRef}}"
-                                VerCampeonatoCommand="{Binding BindingContext.VerCampeonatoCommand, Source={x:Reference HomePageRef}}" />
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </StackLayout>
-
-        </StackLayout>
-    </ScrollView>
+        </ScrollView>
+        <!--  Novo ActivityIndicator que aparece sobre o resto do conteúdo quando a propriedade IsBusy for verdadeira  -->
+        <ActivityIndicator
+            HorizontalOptions="Center"
+            IsRunning="{Binding IsBusy}"
+            IsVisible="{Binding IsBusy}"
+            VerticalOptions="Center"
+            Color="OrangeRed" />
+    </Grid>
 </ContentPage>

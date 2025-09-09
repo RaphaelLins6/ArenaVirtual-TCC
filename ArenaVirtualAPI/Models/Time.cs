@@ -1,21 +1,26 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization; 
+using System.Text.Json.Serialization;
+using System.Collections.Generic;
 
 namespace ArenaVirtualAPI.Models;
 
 public class Time : ISyncable {
+
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
+
+    [Required]
+    public Guid ClientAppId { get; set; }
+
+    public int? CampeonatoId { get; set; }
 
     [Required, MaxLength(100)]
     public string Nome { get; set; } = string.Empty;
 
     [MaxLength(255)]
-    public string? LogoUrl { get; set; } // guarde aqui uma URL acessível (ex.: Azure Blob)
-
-    public int? CampeonatoId { get; set; }
+    public string? LogoUrl { get; set; }
 
     [MaxLength(500)]
     public string? Descricao { get; set; }
@@ -32,10 +37,18 @@ public class Time : ISyncable {
 
     public int? CapitaoId { get; set; }
 
+    // **PROPRIEDADES DE NAVEGAÇÃO QUE FALTAM**
+    // Adicione esta propriedade para que o .Include(t => t.Capitao) funcione
+    [ForeignKey("CapitaoId")]
+    public Usuario? Capitao { get; set; }
+
+    // Adicione esta propriedade para que o .Include(t => t.Campeonato) funcione
+    [ForeignKey("CampeonatoId")]
+    public Campeonato? Campeonato { get; set; }
+
     [JsonIgnore]
     public ICollection<Usuario>? Membros { get; set; }
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public bool IsSynced { get; set; } = false;
-
 }

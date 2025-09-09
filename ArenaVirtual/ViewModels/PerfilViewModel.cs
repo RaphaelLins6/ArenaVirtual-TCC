@@ -5,11 +5,18 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.Controls;
 using System;
+using System.Threading.Tasks;
 
 namespace ArenaVirtual.ViewModels {
-    public partial class PerfilViewModel : ObservableObject {
-        private readonly IAlertService _alertService;
-        private bool _isUpdating = false; // Variável de controle para evitar recursão
+    // Injeção de dependência via construtor, uma prática mais limpa
+    public partial class PerfilViewModel(IAlertService alertService, DatabaseService databaseService, SyncService syncService) : ObservableObject {
+
+        private readonly IAlertService _alertService = alertService;
+        private readonly DatabaseService _databaseService = databaseService;
+        private readonly SyncService _syncService = syncService;
+
+        // Variável de controle para evitar recursão
+        private bool _isUpdating = false;
 
         // Campos comuns
         [ObservableProperty] private string saudacao = string.Empty;
@@ -38,9 +45,8 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty]
         private Usuario usuarioLogado;
 
-        public PerfilViewModel(Usuario usuario, IAlertService alertService) {
+        public PerfilViewModel(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) : this(alertService, databaseService, syncService) {
             UsuarioLogado = usuario;
-            _alertService = alertService;
             CarregarDadosDoUsuario();
 
             MessagingCenter.Subscribe<object, Usuario>(this, "PerfilAtualizado", (sender, usuarioAtualizado) => {
@@ -112,35 +118,15 @@ namespace ArenaVirtual.ViewModels {
 
         [RelayCommand]
         private async Task EditarPerfil() {
-            // Obtenha os serviços necessários do contêiner de injeção de dependência
-            var services = App.Current?.Handler?.MauiContext?.Services;
-            if (services == null) {
-                // Lidar com o caso em que os serviços não estão disponíveis
-                return;
-            }
-
-            var databaseService = services.GetRequiredService<DatabaseService>();
-            var syncService = services.GetRequiredService<SyncService>();
-
-            // Agora, passe todos os argumentos necessários para o construtor do popup
-            var popup = new EditarPerfilPopup(UsuarioLogado, _alertService, databaseService, syncService);
+            // Os serviços já estão disponíveis via injeção de dependência no construtor
+            var popup = new EditarPerfilPopup(UsuarioLogado, _alertService, _databaseService, _syncService);
             await Shell.Current.Navigation.PushModalAsync(popup);
         }
 
         [RelayCommand]
         private async Task AlterarSenha() {
-            // Obtenha os serviços necessários do contêiner de injeção de dependência
-            var services = App.Current?.Handler?.MauiContext?.Services;
-            if (services == null) {
-                // Lidar com o caso em que os serviços não estão disponíveis
-                return;
-            }
-
-            var databaseService = services.GetRequiredService<DatabaseService>();
-            var syncService = services.GetRequiredService<SyncService>();
-
-            // Agora, passe todos os argumentos necessários para o construtor do popup
-            var popup = new AlterarSenhaPopup(UsuarioLogado, _alertService, databaseService, syncService);
+            // Os serviços já estão disponíveis via injeção de dependência no construtor
+            var popup = new AlterarSenhaPopup(UsuarioLogado, _alertService, _databaseService, _syncService);
             await Shell.Current.Navigation.PushModalAsync(popup);
         }
 

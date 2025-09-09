@@ -8,7 +8,9 @@ namespace ArenaVirtualAPI.Services {
         Task<TModel?> GetByIdAsync(int id);
         Task AddAsync(TModel item);
         Task UpdateAsync(TModel item);
-        Task<IEnumerable<TModel>> GetUpdatedSinceAsync(DateTime lastSyncTime);
+        Task<IEnumerable<TDto>> GetUpdatedSinceAsync(DateTime lastSyncTime);
         Task ProcessItemsAsync(IEnumerable<TDto> items);
+        Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<TDto> items);
+
     }
 }

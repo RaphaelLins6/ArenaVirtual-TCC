@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Diagnostics;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace ArenaVirtual.Services {
@@ -10,14 +11,12 @@ namespace ArenaVirtual.Services {
             Console.WriteLine("[ApiService] Ambiente Android detectado → usando 10.0.2.2");
 
             var handler = new HttpClientHandler {
-                // ignora certificado de dev no Android
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
             };
 
-            // Endpoints possíveis (tenta HTTPS primeiro, depois HTTP)
             var baseUrls = new[] {
-                "https://10.0.2.2:7117/",
-                "http://10.0.2.2:5067/"
+                "https://192.168.15.13:7117/",
+                "http://192.168.15.13:5067/"
             };
 
             _httpClient = CreateHttpClient(handler, baseUrls);
@@ -25,7 +24,6 @@ namespace ArenaVirtual.Services {
             Console.WriteLine("[ApiService] Ambiente Desktop detectado → usando localhost");
 
             var handler = new HttpClientHandler();
-            // Endpoints possíveis (tenta HTTPS primeiro, depois HTTP)
             var baseUrls = new[] {
                 "https://localhost:7117/",
                 "http://localhost:5067/"
@@ -37,9 +35,6 @@ namespace ArenaVirtual.Services {
             Console.WriteLine($"[ApiService] Base URL configurada: {_httpClient.BaseAddress}");
         }
 
-        // ==========================================================
-        // MÉTODO AUXILIAR → testa endpoints até achar um válido
-        // ==========================================================
         private HttpClient CreateHttpClient(HttpClientHandler handler, string[] baseUrls) {
             foreach (var url in baseUrls) {
                 try {
@@ -47,7 +42,6 @@ namespace ArenaVirtual.Services {
                         BaseAddress = new Uri(url)
                     };
 
-                    // teste rápido (chama swagger ou healthcheck)
                     var response = client.GetAsync("swagger/index.html").Result;
                     if (response.IsSuccessStatusCode) {
                         Console.WriteLine($"[ApiService] Usando endpoint: {url}");
@@ -61,11 +55,22 @@ namespace ArenaVirtual.Services {
             throw new Exception("[ApiService] Nenhum endpoint disponível!");
         }
 
-        public async Task PostDataAsync<T>(string typeName, T data) {
+        // AGORA RETORNA UM DICIONÁRIO
+        public async Task<Dictionary<Guid, int>> PostDataAsync<T>(string typeName, T data) {
             try {
+                // Adiciona log do JSON que será enviado
+                var jsonContent = JsonSerializer.Serialize(data);
                 Console.WriteLine($"[ApiService] Enviando {GetItemCount(data)} itens de {typeName} → api/data/sync/{typeName}");
+                Debug.WriteLine($"[ApiService] JSON enviado para {typeName}: {jsonContent}");
+
                 var response = await _httpClient.PostAsJsonAsync($"api/data/sync/{typeName}", data);
                 response.EnsureSuccessStatusCode();
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"[ApiService] JSON recebido de {typeName}: {responseContent}");
+
+                return JsonSerializer.Deserialize<Dictionary<Guid, int>>(responseContent);
+
             } catch (HttpRequestException ex) {
                 Console.WriteLine($"[ApiService] Falha na requisição (UPLOAD {typeName}): {ex.Message}");
                 throw;
@@ -77,6 +82,8 @@ namespace ArenaVirtual.Services {
                 var response = await _httpClient.GetAsync($"api/data/updates?lastSyncTime={lastSyncTime:o}");
                 response.EnsureSuccessStatusCode();
                 var jsonResponse = await response.Content.ReadAsStringAsync();
+
+                Debug.WriteLine($"[ApiService] JSON de atualizações recebido: {jsonResponse}");
 
                 return JsonSerializer.Deserialize<UpdateResponse>(
                     jsonResponse,

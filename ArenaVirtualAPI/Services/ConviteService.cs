@@ -1,11 +1,11 @@
 ﻿using ArenaVirtualAPI.Data;
-using ArenaVirtualAPI.DTOs;
 using ArenaVirtualAPI.Models;
+using ArenaVirtualAPI.DTOs;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace ArenaVirtualAPI.Services {
     public class ConviteService : IBackendService<Convite, ConviteSyncDto> {
@@ -20,59 +20,99 @@ namespace ArenaVirtualAPI.Services {
         }
 
         public async Task AddAsync(Convite item) {
+            item.UpdatedAt = DateTime.UtcNow;
             _context.Convites.Add(item);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Convite item) {
+            item.UpdatedAt = DateTime.UtcNow;
             _context.Entry(item).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Convite>> GetUpdatedSinceAsync(DateTime lastSyncTime) {
-            return await _context.Convites
-                .Where(c => c.UpdatedAt > lastSyncTime)
-                .ToListAsync();
+        public async Task ProcessItemsAsync(IEnumerable<ConviteSyncDto> dtos) {
+            await ProcessAndMapItemsAsync(dtos);
         }
 
-        public async Task ProcessItemsAsync(IEnumerable<ConviteSyncDto> dtos) {
+        // AQUI ESTÁ A CORREÇÃO PRINCIPAL: TIPO DE RETORNO DO DICIONÁRIO E MAPEAMENTO
+        public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<ConviteSyncDto> dtos) {
+            var idMapping = new Dictionary<Guid, int>();
+
+            // Coleta os ClientAppIds para buscar em massa
+            var solicitanteClientAppIds = dtos.Select(d => d.IdSolicitanteClientAppId).ToHashSet();
+            var timeClientAppIds = dtos.Select(d => d.TimeClientAppId).ToHashSet();
+
+            // Busca os IDs de referência do servidor em uma única operação
+            var solicitantes = await _context.Usuarios
+                .Where(u => solicitanteClientAppIds.Contains(u.ClientAppId))
+                .ToDictionaryAsync(u => u.ClientAppId, u => u.Id);
+
+            var times = await _context.Times
+                .Where(t => timeClientAppIds.Contains(t.ClientAppId))
+                .ToDictionaryAsync(t => t.ClientAppId, t => t.Id);
+
             foreach (var dto in dtos) {
-                // Verificação de nulidade no DTO antes de qualquer operação
-                if (string.IsNullOrWhiteSpace(dto.ConvidadoEmail)) {
-                    // Logar ou ignorar o item, pois a propriedade obrigatória está faltando.
-                    // Isso evita que a exceção seja lançada.
-                    // Você pode logar um aviso aqui para depuração.
+                // Valida se as entidades referenciadas existem na API
+                if (!solicitantes.TryGetValue(dto.IdSolicitanteClientAppId, out var solicitanteId)) {
+                    // Logar ou lidar com o erro de entidade não encontrada, se necessário.
                     continue;
                 }
 
-                var existingItem = await GetByIdAsync(dto.Id);
+                if (!times.TryGetValue(dto.TimeClientAppId, out var timeId)) {
+                    // Logar ou lidar com o erro de entidade não encontrada, se necessário.
+                    continue;
+                }
+
+                var existingItem = await _context.Convites.FirstOrDefaultAsync(c => c.ClientAppId == dto.ClientAppId);
 
                 if (existingItem == null) {
-                    // Item não existe, então crie um novo
                     var newItem = new Convite {
-                        Id = dto.Id,
+                        ClientAppId = dto.ClientAppId,
                         ConvidadoEmail = dto.ConvidadoEmail,
                         DataEnvio = dto.DataEnvio,
-                        IdSolicitante = dto.IdSolicitante,
-                        IdTime = dto.TimeId,
+                        // ATRIBUI OS IDS MAPEADOS DO SERVIDOR
+                        IdSolicitanteServidor = solicitanteId,
+                        TimeId = timeId,
                         Status = dto.Status,
-                        IsSynced = false,
-                        UpdatedAt = dto.UpdatedAt
+                        IsSynced = true,
+                        UpdatedAt = DateTime.UtcNow
                     };
-                    await AddAsync(newItem);
+                    _context.Convites.Add(newItem);
+                    await _context.SaveChangesAsync();
+                    idMapping[newItem.ClientAppId] = newItem.Id;
                 } else {
-                    // Item já existe, então atualize se o DTO for mais recente
                     if (dto.UpdatedAt > existingItem.UpdatedAt) {
                         existingItem.ConvidadoEmail = dto.ConvidadoEmail;
                         existingItem.DataEnvio = dto.DataEnvio;
-                        existingItem.IdSolicitante = dto.IdSolicitante;
-                        existingItem.IdTime = dto.TimeId;
+                        // ATRIBUI OS IDS MAPEADOS DO SERVIDOR
+                        existingItem.IdSolicitanteServidor = solicitanteId;
+                        existingItem.TimeId = timeId;
                         existingItem.Status = dto.Status;
-                        existingItem.UpdatedAt = dto.UpdatedAt;
-                        await UpdateAsync(existingItem);
+                        existingItem.UpdatedAt = DateTime.UtcNow;
+                        existingItem.IsSynced = true;
+                        _context.Entry(existingItem).State = EntityState.Modified;
+                        await _context.SaveChangesAsync();
                     }
+                    idMapping[existingItem.ClientAppId] = existingItem.Id;
                 }
             }
+            return idMapping;
+        }
+
+        public async Task<IEnumerable<ConviteSyncDto>> GetUpdatedSinceAsync(DateTime lastSyncTime) {
+            return await _context.Convites
+                .Where(c => c.UpdatedAt > lastSyncTime)
+                .Select(c => new ConviteSyncDto {
+                    ClientAppId = c.ClientAppId,
+                    UpdatedAt = c.UpdatedAt,
+                    ConvidadoEmail = c.ConvidadoEmail,
+                    DataEnvio = c.DataEnvio,
+                    IdSolicitanteClientAppId = c.Solicitante!.ClientAppId,
+                    TimeClientAppId = c.Time!.ClientAppId,
+                    Status = c.Status
+                })
+                .ToListAsync();
         }
     }
 }

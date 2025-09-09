@@ -1,8 +1,12 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
 using MvvmHelpers;
+using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using System.Threading.Tasks;
+using System.Linq;
+using Microsoft.Maui.Controls; // Adicionar para Application e Shell
 
 namespace ArenaVirtual.ViewModels.Atleta {
     public class SolicitacaoTimePageViewModel : BaseViewModel {
@@ -29,19 +33,34 @@ namespace ArenaVirtual.ViewModels.Atleta {
             IsBusy = true;
             try {
                 var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
-                if (usuarioAtual?.TimeId == null) {
-                    await Application.Current.MainPage.DisplayAlert("Aviso", "Você não é capitão de um time.", "OK");
+                if (usuarioAtual?.ClientAppId == Guid.Empty || usuarioAtual?.TimeClientAppId == null) {
+                    await Application.Current.MainPage.DisplayAlert("Aviso", "Você não é o capitão de um time ou não pertence a um time.", "OK");
+                    await Shell.Current.GoToAsync("..");
+                    return;
+                }
+
+                // CORREÇÃO: Usar o método que recebe um Guid
+                var timeDoUsuario = await _timeService.ObterPorClientAppIdAsync(usuarioAtual.TimeClientAppId.Value);
+                if (timeDoUsuario == null || timeDoUsuario.CapitaoClientAppId != usuarioAtual.ClientAppId) {
+                    await Application.Current.MainPage.DisplayAlert("Aviso", "Você não é o capitão do seu time para gerenciar solicitações.", "OK");
                     await Shell.Current.GoToAsync("..");
                     return;
                 }
 
                 ConvitesPendentes.Clear();
 
-                var convites = await _databaseService.ListarConvitesPendentesAsync(usuarioAtual.TimeId.Value);
-                foreach (var convite in convites) {
-                    var solicitante = await _usuarioService.ObterUsuarioPorIdAsync(convite.IdSolicitante);
+                // CORREÇÃO: Passar o ClientAppId do Time para buscar convites
+                var convites = await _databaseService.ListarConvitesPendentesAsync(timeDoUsuario.ClientAppId);
+
+                // OTIMIZAÇÃO: Carregar usuários em paralelo usando Task.WhenAll
+                var tarefas = convites.Select(convite => _databaseService.ObterUsuarioPorClientAppIdAsync(convite.SolicitanteClientAppId)).ToList();
+                var usuarios = await Task.WhenAll(tarefas);
+
+                // Popular a coleção de convites
+                for (int i = 0; i < convites.Count; i++) {
+                    var solicitante = usuarios[i];
                     if (solicitante != null) {
-                        ConvitesPendentes.Add(new ConviteViewModel(convite, solicitante));
+                        ConvitesPendentes.Add(new ConviteViewModel(convites[i], solicitante));
                     }
                 }
 
@@ -59,12 +78,15 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 convite.Status = StatusConvite.Aceito;
                 await _databaseService.AtualizarConviteAsync(convite);
 
-                usuarioSolicitante.TimeId = convite.TimeId;
-                await _databaseService.AtualizarUsuarioAsync(usuarioSolicitante);
+                if (usuarioSolicitante != null) {
+                    // CORREÇÃO: Associar o TimeClientAppId do convite ao usuário solicitante
+                    usuarioSolicitante.TimeClientAppId = convite.TimeClientAppId;
+                    await _databaseService.AtualizarUsuarioAsync(usuarioSolicitante);
+                }
 
                 ConvitesPendentes.Remove(conviteVM);
 
-                await Application.Current.MainPage.DisplayAlert("Sucesso", $"O usuário {usuarioSolicitante.Nome} foi adicionado ao time.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Sucesso", $"O usuário {usuarioSolicitante?.Nome ?? "desconhecido"} foi adicionado ao time.", "OK");
             } finally {
                 IsBusy = false;
             }
@@ -80,7 +102,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
 
                 ConvitesPendentes.Remove(conviteVM);
 
-                await Application.Current.MainPage.DisplayAlert("Aviso", $"O convite do usuário {conviteVM.UsuarioSolicitante.Nome} foi recusado.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Aviso", $"O convite do usuário {conviteVM.UsuarioSolicitante?.Nome ?? "desconhecido"} foi recusado.", "OK");
             } finally {
                 IsBusy = false;
             }

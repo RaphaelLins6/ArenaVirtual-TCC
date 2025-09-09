@@ -11,6 +11,11 @@ namespace ArenaVirtualAPI.Data {
         public DbSet<Time> Times { get; set; }
         public DbSet<Convite> Convites { get; set; }
         public DbSet<UsuarioCampeonatoFavorito> UsuarioCampeonatoFavoritos { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder) {
+            modelBuilder.Entity<Campeonato>()
+                .Property(c => c.ValorTaxaInscricao)
+                .HasPrecision(18, 2); 
+        }
 
     }
 }

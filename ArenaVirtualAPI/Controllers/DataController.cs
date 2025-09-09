@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// DataController.cs
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using ArenaVirtualAPI.Services;
 
@@ -15,34 +16,32 @@ public class DataController : ControllerBase {
 
     [HttpPost("sync/{modelTypeName}")]
     public async Task<IActionResult> Sync([FromBody] JsonElement data, string modelTypeName) {
-        if (data.ValueKind == JsonValueKind.Undefined || string.IsNullOrEmpty(modelTypeName)) {
-            _logger.LogWarning("Requisição de sincronização inválida: dados ou nome do tipo ausentes.");
-            return BadRequest("Dados ou nome do tipo de modelo ausentes.");
-        }
-
-        _logger.LogInformation($"Recebida requisição de sincronização para o tipo: {modelTypeName}");
+        _logger.LogInformation($"[Sync] Recebida requisição de sincronização para o tipo: {modelTypeName}");
+        // Loga o JSON recebido do cliente antes do processamento.
+        _logger.LogDebug($"[Sync] JSON Recebido: {data.GetRawText()}");
 
         try {
-            await _backendSyncService.ProcessUploadAsync(data, modelTypeName);
-            return Ok($"Sincronização de upload de {modelTypeName} bem-sucedida.");
-        } catch (JsonException ex) {
-            _logger.LogError($"Erro de desserialização na sincronização de upload para {modelTypeName}: {ex.Message}");
-            return BadRequest($"Erro no formato dos dados para {modelTypeName}: {ex.Message}");
+            var idMapping = await _backendSyncService.ProcessAndMapItemsAsync(data, modelTypeName);
+            // Loga o JSON que será enviado de volta ao cliente.
+            _logger.LogDebug($"[Sync] JSON de Retorno: {JsonSerializer.Serialize(idMapping)}");
+            return Ok(idMapping);
         } catch (Exception ex) {
-            _logger.LogError($"Erro interno na sincronização de upload para {modelTypeName}: {ex.Message}");
+            _logger.LogError($"[Sync] Erro interno na sincronização de upload para {modelTypeName}: {ex.Message}");
             return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
         }
     }
 
     [HttpGet("updates")]
     public async Task<IActionResult> GetUpdates([FromQuery] DateTime lastSyncTime) {
-        _logger.LogInformation($"Requisição de atualizações recebida. Última sincronização: {lastSyncTime}");
+        _logger.LogInformation($"[Updates] Requisição recebida. Última sincronização: {lastSyncTime}");
 
         try {
             var updatedItems = await _backendSyncService.GetUpdatesAsync(lastSyncTime);
+            // Loga o JSON completo das atualizações antes de enviar.
+            _logger.LogDebug($"[Updates] JSON de Resposta: {JsonSerializer.Serialize(updatedItems.UpdatedItems)}");
             return Ok(updatedItems.UpdatedItems);
         } catch (Exception ex) {
-            _logger.LogError($"Erro ao obter atualizações: {ex.Message}");
+            _logger.LogError($"[Updates] Erro ao obter atualizações: {ex.Message}");
             return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
         }
     }

@@ -1,4 +1,6 @@
 ﻿using SQLite;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -18,121 +20,126 @@ namespace ArenaVirtual.Models {
 
     public partial class Usuario : INotifyPropertyChanged, ISyncable {
 
-        // Campos de suporte (backing fields)
-        private string nome = string.Empty;
-        private string email = string.Empty;
-        private string senhaHash = string.Empty;
-        private TipoPerfil perfil;
-        private string imagemPath = string.Empty;
-        private string localizacao = string.Empty;
-        private string telefone = string.Empty;
-        private string linkRedeSocial = string.Empty;
-        private DateTime? dataNascimento;
-        private GeneroEnum? genero;
-        private string nomeEmpresa = string.Empty;
-        private string cnpj = string.Empty;
-        private double? peso;
-        private double? altura;
-        private string faixaOrcamentoPatrocinio = string.Empty;
-        private int? timeId;
-
-        // Novos campos de suporte para IsSynced e UpdatedAt para evitar recursão
-        private bool isSynced;
-        private DateTime updatedAt;
+        // Campos de Suporte (Backing Fields)
+        private string _nome = string.Empty;
+        private string _email = string.Empty;
+        private string _senhaHash = string.Empty;
+        private TipoPerfil _perfil;
+        private string _imagemPath = string.Empty;
+        private string _localizacao = string.Empty;
+        private string _telefone = string.Empty;
+        private string _linkRedeSocial = string.Empty;
+        private DateTime? _dataNascimento;
+        private GeneroEnum? _genero;
+        private string _nomeEmpresa = string.Empty;
+        private string _cnpj = string.Empty;
+        private double? _peso;
+        private double? _altura;
+        private string _faixaOrcamentoPatrocinio = string.Empty;
+        private Guid? _timeClientAppId;
+        private bool _isSynced;
+        private DateTime _updatedAt;
 
         // Propriedades usando SetProperty
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
 
+        public Guid ClientAppId { get; set; } = Guid.NewGuid();
+
+        public int? IdServidor { get; set; }
+
         public string Nome {
-            get => nome;
-            set => SetProperty(ref nome, value);
+            get => _nome;
+            set => SetProperty(ref _nome, value);
         }
 
         public string Email {
-            get => email;
-            set => SetProperty(ref email, value);
-        }
-
-        public string SenhaHash {
-            get => senhaHash;
-            set => SetProperty(ref senhaHash, value);
+            get => _email;
+            set => SetProperty(ref _email, value);
         }
 
         public TipoPerfil Perfil {
-            get => perfil;
-            set => SetProperty(ref perfil, value);
+            get => _perfil;
+            set => SetProperty(ref _perfil, value);
         }
 
         public string ImagemPath {
-            get => imagemPath;
-            set => SetProperty(ref imagemPath, value);
+            get => _imagemPath;
+            set => SetProperty(ref _imagemPath, value);
         }
 
         public string Localizacao {
-            get => localizacao;
-            set => SetProperty(ref localizacao, value);
+            get => _localizacao;
+            set => SetProperty(ref _localizacao, value);
         }
 
         public string Telefone {
-            get => telefone;
-            set => SetProperty(ref telefone, value);
+            get => _telefone;
+            set => SetProperty(ref _telefone, value);
         }
 
         public string LinkRedeSocial {
-            get => linkRedeSocial;
-            set => SetProperty(ref linkRedeSocial, value);
+            get => _linkRedeSocial;
+            set => SetProperty(ref _linkRedeSocial, value);
         }
 
         public DateTime? DataNascimento {
-            get => dataNascimento;
-            set => SetProperty(ref dataNascimento, value);
+            get => _dataNascimento;
+            set => SetProperty(ref _dataNascimento, value);
         }
 
         public GeneroEnum? Genero {
-            get => genero;
-            set => SetProperty(ref genero, value);
+            get => _genero;
+            set => SetProperty(ref _genero, value);
         }
 
         public string NomeEmpresa {
-            get => nomeEmpresa;
-            set => SetProperty(ref nomeEmpresa, value);
+            get => _nomeEmpresa;
+            set => SetProperty(ref _nomeEmpresa, value);
         }
 
         public string CNPJ {
-            get => cnpj;
-            set => SetProperty(ref cnpj, value);
+            get => _cnpj;
+            set => SetProperty(ref _cnpj, value);
         }
 
         public double? Peso {
-            get => peso;
-            set => SetProperty(ref peso, value);
+            get => _peso;
+            set => SetProperty(ref _peso, value);
         }
 
         public double? Altura {
-            get => altura;
-            set => SetProperty(ref altura, value);
+            get => _altura;
+            set => SetProperty(ref _altura, value);
         }
 
         public string FaixaOrcamentoPatrocinio {
-            get => faixaOrcamentoPatrocinio;
-            set => SetProperty(ref faixaOrcamentoPatrocinio, value);
+            get => _faixaOrcamentoPatrocinio;
+            set => SetProperty(ref _faixaOrcamentoPatrocinio, value);
         }
 
-        public int? TimeId {
-            get => timeId;
-            set => SetProperty(ref timeId, value);
+        // Relacionamento com Time usando a chave universal
+        public Guid? TimeClientAppId {
+            get => _timeClientAppId;
+            set => SetProperty(ref _timeClientAppId, value);
         }
 
-        // Propriedades para sincronização. Elas não chamam SetProperty.
+        // As propriedades de sincronização que não usam SetProperty
         public bool IsSynced {
-            get => isSynced;
-            set => isSynced = value;
+            get => _isSynced;
+            set => _isSynced = value;
         }
 
         public DateTime UpdatedAt {
-            get => updatedAt;
-            set => updatedAt = value;
+            get => _updatedAt;
+            set => _updatedAt = value;
+        }
+
+        // **A propriedade SenhaHash não deve ser sincronizada,
+        // então ela deve ser gerenciada fora da lógica de SetProperty para evitar que a flag de sincronização seja alterada.**
+        public string SenhaHash {
+            get => _senhaHash;
+            set => _senhaHash = value;
         }
 
         public Usuario() { }
@@ -146,9 +153,10 @@ namespace ArenaVirtual.Models {
             backingField = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-            // Atualize os campos de suporte diretamente para evitar recursão
-            this.isSynced = false;
-            this.updatedAt = DateTime.UtcNow;
+            if (propertyName != nameof(IsSynced) && propertyName != nameof(UpdatedAt) && propertyName != nameof(SenhaHash)) {
+                this.IsSynced = false;
+                this.UpdatedAt = DateTime.UtcNow;
+            }
 
             return true;
         }
