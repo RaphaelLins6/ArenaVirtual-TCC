@@ -131,7 +131,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
 
                 var novoConvite = new Convite {
                     // Corrigido: Usar ClientAppId (Guid) em vez de Id (int) e a propriedade correta
-                    IdSolicitanteClientAppId = usuarioAtual.ClientAppId,
+                    SolicitanteClientAppId = usuarioAtual.ClientAppId,
                     TimeClientAppId = timeItemVM.Time.ClientAppId,
                     DataEnvio = DateTime.UtcNow,
                     Status = StatusConvite.Pendente

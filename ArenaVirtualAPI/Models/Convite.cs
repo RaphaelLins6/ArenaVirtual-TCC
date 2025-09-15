@@ -1,5 +1,4 @@
-﻿// API: ArenaVirtualAPI.Models.Convite
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,12 +10,13 @@ namespace ArenaVirtualAPI.Models {
 
         public Guid ClientAppId { get; set; }
 
-        // Referência à entidade de usuário que enviou o convite
+        // Quem enviou o convite/solicitação
         public int IdSolicitanteServidor { get; set; }
 
-        // Referência à entidade de time para qual o convite foi enviado
+        // Time para qual foi enviado
         public int TimeId { get; set; }
 
+        // Email convidado (quando for convite do capitão)
         public string? ConvidadoEmail { get; set; }
 
         public DateTime DataEnvio { get; set; }
@@ -27,12 +27,12 @@ namespace ArenaVirtualAPI.Models {
 
         public DateTime UpdatedAt { get; set; }
 
-        // Navegação de propriedades para facilitar o acesso
-        [ForeignKey("IdSolicitanteServidor")]
-        public virtual Usuario Solicitante { get; set; }
-
+        // 🔑 Identificação no app (linkar com TimeClientAppId)
         [ForeignKey("TimeId")]
         public virtual Time Time { get; set; }
+
+        [ForeignKey("IdSolicitanteServidor")]
+        public virtual Usuario Solicitante { get; set; }
     }
 
     public enum StatusConvite {

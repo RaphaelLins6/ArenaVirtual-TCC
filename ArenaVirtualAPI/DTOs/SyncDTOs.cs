@@ -19,7 +19,7 @@ namespace ArenaVirtualAPI.DTOs {
         public Guid TimeClientAppId { get; set; }
         public StatusConvite Status { get; set; }
         public DateTime UpdatedAt { set; get; }
-        public bool IsSynced { get; set; }
+        public bool IsSynced { set; get; }
     }
 
     public class TimeSyncDto : ISyncableDto {

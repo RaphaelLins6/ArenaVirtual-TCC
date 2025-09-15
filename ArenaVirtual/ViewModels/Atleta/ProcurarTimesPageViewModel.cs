@@ -52,7 +52,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 return;
 
             try {
-                await _timeService.AssociarUsuarioAoTimeAsync(time);
+                await _timeService.SolicitarEntradaNoTimeAsync(time);
                 await Application.Current.MainPage?.DisplayAlert("Sucesso", $"Você entrou no time {time.Nome}", "OK");
                 await Shell.Current.GoToAsync("..");
             } catch (Exception ex) {

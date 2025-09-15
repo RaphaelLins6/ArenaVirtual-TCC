@@ -14,7 +14,6 @@ namespace ArenaVirtual.Models {
 
         public int? IdServidor { get; set; }
 
-        public Guid IdSolicitanteClientAppId { get; set; }
         [Indexed]
         public Guid SolicitanteClientAppId { get; set; }
 

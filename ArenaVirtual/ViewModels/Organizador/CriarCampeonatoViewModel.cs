@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Diagnostics;
 using System.Globalization;
 using System.Windows.Input;
+using Microsoft.Maui.ApplicationModel;
 
 namespace ArenaVirtual.ViewModels {
     public partial class CriarCampeonatoViewModel : ObservableObject {
@@ -34,7 +35,6 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty]
         private string telefoneOrganizador;
 
-        // Propriedades corrigidas para lidar com a entrada de texto do XAML
         [ObservableProperty]
         private string numeroMaximoEquipesTexto;
 
@@ -65,7 +65,6 @@ namespace ArenaVirtual.ViewModels {
             SalvarCampeonatoCommand = new AsyncRelayCommand(SalvarCampeonatoAsync, CanSalvarCampeonato);
             SelecionarLogoCommand = new AsyncRelayCommand(SelecionarLogoAsync);
 
-            // Reage às mudanças nas propriedades para atualizar o estado do comando
             PropertyChanged += (s, e) => {
                 if (e.PropertyName == nameof(Nome) || e.PropertyName == nameof(Local) ||
                     e.PropertyName == nameof(NomeOrganizador) || e.PropertyName == nameof(EmailOrganizador) ||
@@ -86,21 +85,27 @@ namespace ArenaVirtual.ViewModels {
                            !string.IsNullOrWhiteSpace(EmailOrganizador) &&
                            DataFim >= DataInicio &&
                            int.TryParse(numeroMaximoEquipesTexto, out numeroEquipes) && numeroEquipes > 0 &&
+                           // Corrigido para usar a cultura atual, que aceita vírgula como separador decimal
                            decimal.TryParse(valorTaxaInscricaoTexto, NumberStyles.Any, CultureInfo.InvariantCulture, out valorTaxa) && valorTaxa >= 0;
-
-            MensagemValidacao = isValid ? string.Empty : "Preencha todos os campos obrigatórios corretamente.";
-
+            // A mensagem de validação deve ser exibida no método SalvarCampeonatoAsync para
+            // garantir que o usuário veja o erro no momento da ação, não apenas com a mudança de estado do botão.
             return isValid;
         }
 
         private async Task SalvarCampeonatoAsync() {
+            // Verificação de validação final antes de tentar salvar
+            if (!CanSalvarCampeonato()) {
+                MensagemValidacao = "Preencha todos os campos obrigatórios corretamente.";
+                return;
+            }
+
             if (App.CurrentUser == null || App.CurrentUser.Id == 0) {
                 MensagemValidacao = "Erro: O usuário organizador não está logado. Por favor, faça login.";
                 return;
             }
 
             if (!int.TryParse(NumeroMaximoEquipesTexto, out int numeroEquipes) ||
-                !decimal.TryParse(ValorTaxaInscricaoTexto, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal valorTaxa)) {
+                !decimal.TryParse(ValorTaxaInscricaoTexto, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal valorTaxa)) {
                 MensagemValidacao = "Erro na conversão dos dados numéricos. Por favor, verifique a entrada.";
                 return;
             }
@@ -157,7 +162,6 @@ namespace ArenaVirtual.ViewModels {
             NomeOrganizador = string.Empty;
             EmailOrganizador = string.Empty;
             TelefoneOrganizador = string.Empty;
-            // Limpa as novas propriedades de texto
             NumeroMaximoEquipesTexto = string.Empty;
             ValorTaxaInscricaoTexto = string.Empty;
             FormatoCampeonato = string.Empty;
@@ -165,8 +169,6 @@ namespace ArenaVirtual.ViewModels {
             HaveraPremiacao = false;
             LogoImageSource = null;
             MensagemValidacao = string.Empty;
-
-            // Garante que o estado do botão seja atualizado após a limpeza
             SalvarCampeonatoCommand.NotifyCanExecuteChanged();
         }
     }
