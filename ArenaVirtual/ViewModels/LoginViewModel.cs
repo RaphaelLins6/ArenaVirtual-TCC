@@ -42,18 +42,23 @@ namespace ArenaVirtual.ViewModels {
                 SessaoService.Instancia.Login(usuario);
                 Debug.WriteLine($"[LoginViewModel] SessaoService.Instancia.Login() chamado para ID: {usuario.Id}, Email: {usuario.Email}");
 
-                // CORREÇÃO CRÍTICA:
-                // Define o usuário atual estático da aplicação.
-                // Isso garante que outras partes do app, como a Dashboard,
-                // possam acessar o usuário logado para filtrar dados corretamente.
-                App.CurrentUser = usuario;
-
-                Debug.WriteLine("[LoginViewModel] Login bem-sucedido. Disparando sincronização.");
+                // CORREÇÃO:
+                // Se a sua lógica de autenticação ainda não sincronizou o usuário,
+                // o `usuario.Id` pode ser 0 ou um ID local. Vamos forçar a sincronização
+                // e, em seguida, obter o usuário com o ID do servidor.
                 await _syncService.SyncAsync(null);
 
-                Debug.WriteLine("[LoginViewModel] Sincronização concluída. Navegando para a página principal.");
+                // Após a sincronização, o usuário deve ter sido atualizado no banco de dados local
+                // com o ID do servidor. Vamos buscá-lo novamente para garantir.
+                App.CurrentUser = await _usuarioService.GetUsuarioByEmailAsync(Email);
 
-                Application.Current.MainPage = new AppShell(usuario);
+                if (App.CurrentUser == null || App.CurrentUser.Id == 0) {
+                    throw new Exception("Falha na sincronização do usuário.");
+                }
+
+                Debug.WriteLine("[LoginViewModel] Login bem-sucedido. Sincronização e navegação concluídas.");
+
+                Application.Current.MainPage = new AppShell(App.CurrentUser);
             } catch (Exception ex) {
                 Debug.WriteLine($"[LoginViewModel] Erro no processo de login/sincronização: {ex.Message}");
                 await _alertService.DisplayAlert("Erro", "Ocorreu um erro. Tente novamente ou verifique sua conexão.", "OK");

@@ -57,18 +57,21 @@ namespace ArenaVirtual.Services {
             }
         }
 
+        // Método adicionado para corrigir o erro CS1061
+        public async Task<Usuario?> GetUsuarioByEmailAsync(string email) {
+            return await _databaseService.ObterUsuarioPorEmailAsync(email);
+        }
+
         public static string GerarHash(string senha) {
             return BCrypt.Net.BCrypt.HashPassword(senha, workFactor: 12);
         }
 
-        // Altera para usar a propriedade de sincronização
         public async Task<List<Usuario>> ListarMembrosDoTimeAsync(Guid timeClientAppId) {
             var todos = await _databaseService.ListarUsuariosAsync();
             var membros = todos.Where(u => u.TimeClientAppId == timeClientAppId).ToList();
             return membros;
         }
 
-        // Altera para usar a propriedade de sincronização
         public async Task<List<Usuario>> GetMembrosByTimeClientAppIdAsync(Guid timeClientAppId) {
             return await _databaseService.GetUsuarioTable().Where(u => u.TimeClientAppId == timeClientAppId).ToListAsync();
         }
@@ -77,9 +80,4 @@ namespace ArenaVirtual.Services {
             return await _databaseService.GetUsuarioTable().FirstOrDefaultAsync(u => u.Id == usuarioId);
         }
     }
-
-    // Exemplo de como o método deve ser adicionado em DatabaseService
-    // public async Task<Usuario?> ObterUsuarioPorClientAppIdAsync(Guid clientAppId) {
-    //    return await _connection.Table<Usuario>().FirstOrDefaultAsync(u => u.ClientAppId == clientAppId);
-    // }
 }

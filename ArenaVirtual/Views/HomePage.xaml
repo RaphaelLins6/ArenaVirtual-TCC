@@ -9,9 +9,12 @@
     x:Name="HomePageRef"
     x:DataType="vm:HomeViewModel">
 
-    <!--  Adiciona o layout para o indicador de atividade  -->
     <Grid>
-        <ScrollView>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ScrollView Grid.Row="0">
             <StackLayout Padding="20" Spacing="24">
 
                 <Label
@@ -75,12 +78,26 @@
 
             </StackLayout>
         </ScrollView>
-        <!--  Novo ActivityIndicator que aparece sobre o resto do conteúdo quando a propriedade IsBusy for verdadeira  -->
-        <ActivityIndicator
-            HorizontalOptions="Center"
-            IsRunning="{Binding IsBusy}"
-            IsVisible="{Binding IsBusy}"
-            VerticalOptions="Center"
-            Color="OrangeRed" />
+        <VerticalStackLayout
+            Padding="0,20,20,0"
+            HorizontalOptions="End"
+            VerticalOptions="Start">
+            <ImageButton
+                Aspect="AspectFit"
+                BackgroundColor="Transparent"
+                Command="{Binding SincronizarCommand}"
+                HeightRequest="40"
+                HorizontalOptions="End"
+                Source="sync_icon.png"
+                VerticalOptions="Center"
+                WidthRequest="40" />
+
+            <ActivityIndicator
+                HorizontalOptions="Center"
+                IsRunning="{Binding IsBusy}"
+                IsVisible="{Binding IsBusy}"
+                VerticalOptions="Center"
+                Color="OrangeRed" />
+        </VerticalStackLayout>
     </Grid>
 </ContentPage>

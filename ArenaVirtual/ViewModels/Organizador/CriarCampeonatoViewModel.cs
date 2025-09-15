@@ -85,30 +85,23 @@ namespace ArenaVirtual.ViewModels {
                            !string.IsNullOrWhiteSpace(EmailOrganizador) &&
                            DataFim >= DataInicio &&
                            int.TryParse(numeroMaximoEquipesTexto, out numeroEquipes) && numeroEquipes > 0 &&
-                           // Corrigido para usar a cultura atual, que aceita vírgula como separador decimal
                            decimal.TryParse(valorTaxaInscricaoTexto, NumberStyles.Any, CultureInfo.InvariantCulture, out valorTaxa) && valorTaxa >= 0;
-            // A mensagem de validação deve ser exibida no método SalvarCampeonatoAsync para
-            // garantir que o usuário veja o erro no momento da ação, não apenas com a mudança de estado do botão.
+
             return isValid;
         }
 
         private async Task SalvarCampeonatoAsync() {
-            // Verificação de validação final antes de tentar salvar
             if (!CanSalvarCampeonato()) {
                 MensagemValidacao = "Preencha todos os campos obrigatórios corretamente.";
                 return;
             }
 
             if (App.CurrentUser == null || App.CurrentUser.Id == 0) {
-                MensagemValidacao = "Erro: O usuário organizador não está logado. Por favor, faça login.";
+                MensagemValidacao = "Erro: O usuário organizador não está logado ou não foi sincronizado. Por favor, tente novamente.";
                 return;
             }
 
-            if (!int.TryParse(NumeroMaximoEquipesTexto, out int numeroEquipes) ||
-                !decimal.TryParse(ValorTaxaInscricaoTexto, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal valorTaxa)) {
-                MensagemValidacao = "Erro na conversão dos dados numéricos. Por favor, verifique a entrada.";
-                return;
-            }
+            // Removida a validação de TryParse redundante. O método CanSalvarCampeonato já cuida disso.
 
             var novoCampeonato = new Campeonato {
                 Nome = Nome,
@@ -119,8 +112,8 @@ namespace ArenaVirtual.ViewModels {
                 NomeOrganizador = NomeOrganizador,
                 EmailOrganizador = EmailOrganizador,
                 TelefoneOrganizador = TelefoneOrganizador,
-                NumeroMaximoEquipes = numeroEquipes,
-                ValorTaxaInscricao = valorTaxa,
+                NumeroMaximoEquipes = int.Parse(NumeroMaximoEquipesTexto),
+                ValorTaxaInscricao = decimal.Parse(ValorTaxaInscricaoTexto, CultureInfo.InvariantCulture),
                 FormatoCampeonato = FormatoCampeonato,
                 LocaisDosJogos = LocaisDosJogos,
                 HaveraPremiacao = HaveraPremiacao,

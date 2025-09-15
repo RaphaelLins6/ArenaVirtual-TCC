@@ -9,10 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace ArenaVirtual.ViewModels {
-    // Certifique-se de que a classe seja 'partial' para que o código gerado pelo CommunityToolkit funcione
     public partial class HomeViewModel(DatabaseService databaseService, SyncService syncService) : ObservableObject {
 
-        // Propriedade observável que controla a visibilidade do indicador de atividade
         [ObservableProperty]
         private bool isBusy = false;
 
@@ -40,6 +38,13 @@ namespace ArenaVirtual.ViewModels {
             await VerCampeonatoAsync(campeonato);
         }
 
+        // Adiciona um novo comando para o botão de sincronização
+        [RelayCommand]
+        private async Task Sincronizar() {
+            Debug.WriteLine("[HomeViewModel] Comando Sincronizar acionado.");
+            await SincronizarAsync();
+        }
+
         public async Task OnAppearingAsync() {
             Debug.WriteLine("[HomeViewModel] OnAppearingAsync chamado.");
 
@@ -57,6 +62,21 @@ namespace ArenaVirtual.ViewModels {
                 Debug.WriteLine($"[HomeViewModel] Erro em OnAppearingAsync: {ex.Message}");
             } finally {
                 IsBusy = false; // Desliga o indicador
+                _syncSemaphore.Release();
+            }
+        }
+
+        // Método privado para lidar com a lógica de sincronização
+        private async Task SincronizarAsync() {
+            await _syncSemaphore.WaitAsync();
+            try {
+                IsBusy = true;
+                await _syncService.SyncAsync(new Progress<string>());
+                await CarregarTodosCampeonatos();
+            } catch (Exception ex) {
+                Debug.WriteLine($"[HomeViewModel] Erro na sincronização: {ex.Message}");
+            } finally {
+                IsBusy = false;
                 _syncSemaphore.Release();
             }
         }

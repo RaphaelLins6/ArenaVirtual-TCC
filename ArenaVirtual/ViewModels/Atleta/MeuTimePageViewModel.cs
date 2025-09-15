@@ -11,53 +11,51 @@ using System.Threading.Tasks;
 
 namespace ArenaVirtual.ViewModels.Atleta {
 
-    // A classe principal deve ser public e herdar de ObservableObject
-    public partial class MeuTimePageViewModel : ObservableObject {
+    public partial class MeuTimePageViewModel : ObservableObject {
 
-        // Classe interna para a representação de um membro na UI
-        public partial class MembroModel : ObservableObject {
+        public partial class MembroModel : ObservableObject {
             public string Nome { get; set; }
             public ImageSource Foto { get; set; }
         }
 
-        // As propriedades marcadas com [ObservableProperty]
-        // geram o código de notificação de alteração automaticamente.
-        [ObservableProperty]
-        private Time _time;
+        [ObservableProperty]
+        private Time? _time;
 
         [ObservableProperty]
-        private ImageSource _logoImageSource;
+        private ImageSource? _logoImageSource;
 
         [ObservableProperty]
         private ObservableCollection<MembroModel> _membrosDoTime = [];
 
         [ObservableProperty]
-        private string _statusMessageTitle;
+        private string _statusMessageTitle = string.Empty;
 
         [ObservableProperty]
-        private string _statusMessageDescription;
+        private string _statusMessageDescription = string.Empty;
 
         [ObservableProperty]
         private bool _showButtons = true;
 
-        // Propriedades calculadas que notificam o XAML sobre a mudança de estado
-        public bool VinculadoATime => SessaoService.Instancia.GetUsuarioAtual()?.TimeClientAppId != null;
+        // Propriedades calculadas que dependem de outras
+        public bool VinculadoATime => SessaoService.Instancia.GetUsuarioAtual()?.TimeClientAppId != null;
         public bool NaoVinculadoATime => !VinculadoATime;
         public bool UsuarioEhCapitao => SessaoService.Instancia.GetUsuarioAtual()?.ClientAppId == Time?.CapitaoClientAppId;
 
-        // Serviços injetados (simulação de injeção de dependência)
-        private readonly TimeService _timeService;
+        private readonly TimeService _timeService;
         private readonly UsuarioService _usuarioService;
         private readonly DatabaseService _databaseService;
 
-        // CONSTRUTOR PÚBLICO VAZIO para o XAML
-        public MeuTimePageViewModel() { }
+        public MeuTimePageViewModel() { }
 
-        // CONSTRUTOR para injeção de dependência
-        public MeuTimePageViewModel(TimeService timeService, UsuarioService usuarioService, DatabaseService databaseService) {
+        public MeuTimePageViewModel(TimeService timeService, UsuarioService usuarioService, DatabaseService databaseService) {
             _timeService = timeService;
             _usuarioService = usuarioService;
             _databaseService = databaseService;
+        }
+
+        // Método parcial que é executado automaticamente quando a propriedade _time é alterada.
+        partial void OnTimeChanged(Time? value) {
+            OnPropertyChanged(nameof(UsuarioEhCapitao));
         }
 
         [RelayCommand]
@@ -87,6 +85,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     return;
                 }
 
+                // A propriedade 'Time' é atualizada, disparando OnTimeChanged
                 Time = timeDoUsuario;
                 LogoImageSource = GetImageSourceFromFile(Time.LogoUrl);
 
@@ -102,8 +101,8 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     }
                 }
                 MembrosDoTime = membrosCarregados;
-                SetVinculadoState();
 
+                SetVinculadoState();
             } catch (Exception ex) {
                 SetNaoVinculadoState("Erro", "Não foi possível carregar os dados do time.");
                 Debug.WriteLine($"[ERRO GERAL] Falha ao carregar dados do time: {ex.Message}");
@@ -112,21 +111,21 @@ namespace ArenaVirtual.ViewModels.Atleta {
 
         [RelayCommand]
         private async Task CriarMeuTime() =>
-          await Shell.Current.GoToAsync(nameof(CriarTimePage));
+            await Shell.Current.GoToAsync(nameof(CriarTimePage));
 
         [RelayCommand]
         private async Task EntrarTime() =>
-          await Shell.Current.GoToAsync(nameof(EntrarTimePage));
+            await Shell.Current.GoToAsync(nameof(EntrarTimePage));
 
         [RelayCommand]
         private async Task GerenciarTime() =>
-          await Shell.Current.GoToAsync(nameof(EditarTimePage));
+            await Shell.Current.GoToAsync(nameof(EditarTimePage));
 
         [RelayCommand]
         private async Task VerSolicitacoes() =>
-          await Shell.Current.GoToAsync(nameof(SolicitacaoTimePage));
+            await Shell.Current.GoToAsync(nameof(SolicitacaoTimePage));
 
-        private ImageSource GetImageSourceFromFile(string filePath) {
+        private ImageSource? GetImageSourceFromFile(string? filePath) {
             if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) {
                 return ImageSource.FromFile("placeholder.png");
             }
@@ -139,25 +138,31 @@ namespace ArenaVirtual.ViewModels.Atleta {
         }
 
         private void SetNaoVinculadoState(string title, string description) {
-            Time = new Time();
+            Time = null;
             MembrosDoTime.Clear();
             StatusMessageTitle = title;
             StatusMessageDescription = description;
             ShowButtons = true;
+            OnPropertyChanged(nameof(VinculadoATime));
+            OnPropertyChanged(nameof(NaoVinculadoATime));
         }
 
-        private void SetMensagemPendencia(string timeNome) {
+        private void SetMensagemPendencia(string? timeNome) {
             StatusMessageTitle = "Solicitação Pendente";
             StatusMessageDescription = !string.IsNullOrEmpty(timeNome)
-              ? $"Sua solicitação para entrar no time {timeNome} foi enviada. Aguarde a resposta do capitão."
-              : "Sua solicitação para entrar em um time foi enviada. Aguarde a resposta do capitão.";
+                ? $"Sua solicitação para entrar no time {timeNome} foi enviada. Aguarde a resposta do capitão."
+                : "Sua solicitação para entrar em um time foi enviada. Aguarde a resposta do capitão.";
             ShowButtons = false;
+            OnPropertyChanged(nameof(VinculadoATime));
+            OnPropertyChanged(nameof(NaoVinculadoATime));
         }
 
         private void SetVinculadoState() {
             StatusMessageTitle = string.Empty;
             StatusMessageDescription = string.Empty;
             ShowButtons = false;
+            OnPropertyChanged(nameof(VinculadoATime));
+            OnPropertyChanged(nameof(NaoVinculadoATime));
         }
     }
 }

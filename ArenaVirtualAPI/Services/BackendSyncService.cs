@@ -1,21 +1,31 @@
 ﻿using ArenaVirtualAPI.DTOs;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace ArenaVirtualAPI.Services {
     public class BackendSyncService {
         private readonly ILogger<BackendSyncService> _logger;
         private readonly IBackendSyncServiceFactory _syncServiceFactory;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
+        private readonly Dictionary<string, Type> _dtoTypes = new()
+        {
+            { "Usuario", typeof(UsuarioSyncDto) },
+            { "Campeonato", typeof(CampeonatoSyncDto) },
+            { "Time", typeof(TimeSyncDto) },
+            { "Convite", typeof(ConviteSyncDto) },
+            { "UsuarioCampeonatoFavorito", typeof(UsuarioCampeonatoFavoritoSyncDto) },
+            // Adicione outros DTOs de sincronização aqui
+        };
 
-        // A ordem é importante para resolver dependências de chaves estrangeiras
-        private readonly List<string> _entityTypes = new() {
-            "Usuario", "Campeonato", "Time", "Convite", "UsuarioCampeonatoFavorito"
+        // Ordem de processamento com base nas dependências
+        private readonly List<string> _uploadOrder = new()
+        {
+            "Usuario",
+            "Time", // Depende de Usuario (CapitaoId)
+            "Campeonato", // Depende de Usuario (OrganizadorId)
+            "Convite", // Depende de Usuario (IdSolicitante) e Time
+            "UsuarioCampeonatoFavorito" // Depende de Usuario e Campeonato
         };
 
         public BackendSyncService(ILogger<BackendSyncService> logger, IBackendSyncServiceFactory syncServiceFactory) {
@@ -26,10 +36,30 @@ namespace ArenaVirtualAPI.Services {
             };
         }
 
+        public async Task ProcessAllUploadsAsync(AllUploadsDto data) {
+            _logger.LogInformation("[BackendSyncService] Iniciando processamento de todos os uploads.");
+
+            var allItems = new Dictionary<string, JsonElement>();
+
+            // Adicione todos os itens recebidos a um dicionário para fácil acesso
+            if (data.Usuarios != null) allItems.Add("Usuario", JsonSerializer.SerializeToElement(data.Usuarios));
+            if (data.Campeonatos != null) allItems.Add("Campeonato", JsonSerializer.SerializeToElement(data.Campeonatos));
+            if (data.Times != null) allItems.Add("Time", JsonSerializer.SerializeToElement(data.Times));
+            if (data.Convites != null) allItems.Add("Convite", JsonSerializer.SerializeToElement(data.Convites));
+            if (data.UsuarioCampeonatoFavoritos != null) allItems.Add("UsuarioCampeonatoFavorito", JsonSerializer.SerializeToElement(data.UsuarioCampeonatoFavoritos));
+
+            foreach (var entityType in _uploadOrder) {
+                if (allItems.TryGetValue(entityType, out var jsonElement)) {
+                    await ProcessAndMapItemsAsync(jsonElement, entityType);
+                }
+            }
+
+            _logger.LogInformation("[BackendSyncService] Processamento de uploads concluído.");
+        }
+
         public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(JsonElement data, string modelTypeName) {
             try {
-                var dtoType = Type.GetType($"ArenaVirtualAPI.DTOs.{modelTypeName}SyncDto");
-                if (dtoType == null) {
+                if (!_dtoTypes.TryGetValue(modelTypeName, out var dtoType)) {
                     _logger.LogWarning($"[BackendSyncService] DTO de sincronização para {modelTypeName} não encontrado.");
                     return new Dictionary<Guid, int>();
                 }
@@ -41,8 +71,6 @@ namespace ArenaVirtualAPI.Services {
                     return new Dictionary<Guid, int>();
                 }
 
-                // O método 'ProcessAndMapItemsAsync' está na interface IBackendSyncServiceFactory.
-                // A invocação com `dynamic` é a maneira correta de lidar com tipos genéricos em tempo de execução.
                 var method = _syncServiceFactory.GetType().GetMethod("ProcessAndMapItemsAsync");
                 if (method == null) {
                     throw new InvalidOperationException("Método 'ProcessAndMapItemsAsync' não encontrado na fábrica.");
@@ -52,51 +80,34 @@ namespace ArenaVirtualAPI.Services {
 
                 dynamic result = genericMethod.Invoke(_syncServiceFactory, new object[] { items, modelTypeName });
                 return await result;
+
             } catch (Exception ex) {
                 _logger.LogError($"[BackendSyncService] Erro ao processar upload de {modelTypeName}: {ex.Message}");
                 throw;
             }
         }
 
-        public async Task ProcessAllUploadsAsync(AllUploadsDto data) {
-            _logger.LogInformation("[BackendSyncService] Iniciando processamento de todos os uploads.");
-
-            // A ordem de processamento dos dados é essencial para evitar erros de FOREIGN KEY.
-            // Os dados relacionados (ex: Usuário) devem ser processados antes dos que dependem deles (ex: Campeonato, Time).
-            if (data.Usuarios != null) {
-                await _syncServiceFactory.ProcessAndMapItemsAsync<UsuarioSyncDto>(data.Usuarios, "Usuario");
-            }
-            if (data.Campeonatos != null) {
-                await _syncServiceFactory.ProcessAndMapItemsAsync<CampeonatoSyncDto>(data.Campeonatos, "Campeonato");
-            }
-            if (data.Times != null) {
-                await _syncServiceFactory.ProcessAndMapItemsAsync<TimeSyncDto>(data.Times, "Time");
-            }
-            if (data.Convites != null) {
-                await _syncServiceFactory.ProcessAndMapItemsAsync<ConviteSyncDto>(data.Convites, "Convite");
-            }
-            if (data.UsuarioCampeonatoFavoritos != null) {
-                await _syncServiceFactory.ProcessAndMapItemsAsync<UsuarioCampeonatoFavoritoSyncDto>(data.UsuarioCampeonatoFavoritos, "UsuarioCampeonatoFavorito");
-            }
-
-            _logger.LogInformation("[BackendSyncService] Processamento de uploads concluído.");
-        }
-
         public async Task<UpdatesDTO> GetUpdatesAsync(DateTime lastSyncTime) {
             var updates = new UpdatesDTO();
-            foreach (var entityType in _entityTypes) {
+            foreach (var entityType in _uploadOrder) {
                 try {
-                    IEnumerable<ISyncableDto> updatedItems = entityType switch {
-                        "Usuario" => await _syncServiceFactory.GetUpdatesAsync<UsuarioSyncDto>(entityType, lastSyncTime),
-                        "Campeonato" => await _syncServiceFactory.GetUpdatesAsync<CampeonatoSyncDto>(entityType, lastSyncTime),
-                        "Time" => await _syncServiceFactory.GetUpdatesAsync<TimeSyncDto>(entityType, lastSyncTime),
-                        "Convite" => await _syncServiceFactory.GetUpdatesAsync<ConviteSyncDto>(entityType, lastSyncTime),
-                        "UsuarioCampeonatoFavorito" => await _syncServiceFactory.GetUpdatesAsync<UsuarioCampeonatoFavoritoSyncDto>(entityType, lastSyncTime),
-                        _ => null
-                    };
+                    if (_dtoTypes.TryGetValue(entityType, out var dtoType)) {
+                        var method = _syncServiceFactory.GetType().GetMethod("GetUpdatesAsync");
+                        var genericMethod = method.MakeGenericMethod(dtoType);
 
-                    if (updatedItems != null && updatedItems.Any()) {
-                        updates.UpdatedItems.Add(entityType, JsonSerializer.SerializeToElement(updatedItems));
+                        // Invoca o método e espera a Task
+                        var task = (Task)genericMethod.Invoke(_syncServiceFactory, new object[] { entityType, lastSyncTime });
+                        await task;
+
+                        // Usa Reflection para obter o resultado da Task
+                        var resultProperty = task.GetType().GetProperty("Result");
+                        if (resultProperty != null) {
+                            var updatedItems = resultProperty.GetValue(task) as IEnumerable<ISyncableDto>;
+
+                            if (updatedItems != null && updatedItems.Any()) {
+                                updates.UpdatedItems.Add(entityType, JsonSerializer.SerializeToElement(updatedItems));
+                            }
+                        }
                     }
                 } catch (Exception ex) {
                     _logger.LogError($"Erro ao obter atualizações para o tipo {entityType}: {ex.Message}");

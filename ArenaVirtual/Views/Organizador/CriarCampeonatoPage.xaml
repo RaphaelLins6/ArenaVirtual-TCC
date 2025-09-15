@@ -79,14 +79,14 @@
                     Keyboard="Numeric"
                     Placeholder="Ex: 16"
                     Style="{StaticResource EntryStyle}"
-                    Text="{Binding NumeroMaximoEquipes}" />
+                    Text="{Binding NumeroMaximoEquipesTexto}" />
 
                 <Label Style="{StaticResource LabelHeaderStyle}" Text="Valor da Taxa de Inscrição por Equipe (R$)" />
                 <Entry
                     Keyboard="Numeric"
                     Placeholder="Ex: 50.00"
                     Style="{StaticResource EntryStyle}"
-                    Text="{Binding ValorTaxaInscricao}" />
+                    Text="{Binding ValorTaxaInscricaoTexto}" />
 
                 <Label Style="{StaticResource LabelHeaderStyle}" Text="Formato do Campeonato" />
                 <Picker
