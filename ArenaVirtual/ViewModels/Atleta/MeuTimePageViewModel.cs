@@ -11,17 +11,18 @@ using System.Threading.Tasks;
 
 namespace ArenaVirtual.ViewModels.Atleta {
 
-    // A classe principal deve ser public e herdar de ObservableObject
-    public partial class MeuTimePageViewModel : ObservableObject {
+    // A classe principal deve ser public e herdar de ObservableObject
+    public partial class MeuTimePageViewModel : ObservableObject {
 
-        public partial class MembroModel : ObservableObject {
+        // Classe interna para a representação de um membro na UI
+        public partial class MembroModel : ObservableObject {
             public string Nome { get; set; }
             public ImageSource Foto { get; set; }
         }
 
-        // As propriedades marcadas com [ObservableProperty]
-        // não precisam de backing field (_). O compilador cria a propriedade automaticamente.
-        [ObservableProperty]
+        // As propriedades marcadas com [ObservableProperty]
+        // geram o código de notificação de alteração automaticamente.
+        [ObservableProperty]
         private Time _time;
 
         [ObservableProperty]
@@ -39,21 +40,21 @@ namespace ArenaVirtual.ViewModels.Atleta {
         [ObservableProperty]
         private bool _showButtons = true;
 
-        // Propriedades calculadas
-        public bool VinculadoATime => SessaoService.Instancia.GetUsuarioAtual()?.TimeClientAppId != null;
+        // Propriedades calculadas que notificam o XAML sobre a mudança de estado
+        public bool VinculadoATime => SessaoService.Instancia.GetUsuarioAtual()?.TimeClientAppId != null;
         public bool NaoVinculadoATime => !VinculadoATime;
         public bool UsuarioEhCapitao => SessaoService.Instancia.GetUsuarioAtual()?.ClientAppId == Time?.CapitaoClientAppId;
 
-        // Serviços
-        private readonly TimeService _timeService;
+        // Serviços injetados (simulação de injeção de dependência)
+        private readonly TimeService _timeService;
         private readonly UsuarioService _usuarioService;
         private readonly DatabaseService _databaseService;
 
-        // CONSTRUTOR PÚBLICO VAZIO para o XAML
-        public MeuTimePageViewModel() { }
+        // CONSTRUTOR PÚBLICO VAZIO para o XAML
+        public MeuTimePageViewModel() { }
 
-        // CONSTRUTOR para injeção de dependência
-        public MeuTimePageViewModel(TimeService timeService, UsuarioService usuarioService, DatabaseService databaseService) {
+        // CONSTRUTOR para injeção de dependência
+        public MeuTimePageViewModel(TimeService timeService, UsuarioService usuarioService, DatabaseService databaseService) {
             _timeService = timeService;
             _usuarioService = usuarioService;
             _databaseService = databaseService;
@@ -68,18 +69,17 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     return;
                 }
 
-                // CORREÇÃO: Usar a propriedade correta (TimeClientAppId)
                 if (usuarioAtual.TimeClientAppId == null) {
-                    var convitePendente = await _databaseService.ObterConvitePendenteDoUsuarioAsync(usuarioAtual.ClientAppId); if (convitePendente != null) {
-                        // CORREÇÃO: Usar a propriedade correta no convite (TimeId)
-                        var timeConvidado = await _timeService.ObterPorClientAppIdAsync(convitePendente.TimeClientAppId); SetMensagemPendencia(timeConvidado?.Nome);
+                    var convitePendente = await _databaseService.ObterConvitePendenteDoUsuarioAsync(usuarioAtual.ClientAppId);
+                    if (convitePendente != null) {
+                        var timeConvidado = await _timeService.ObterPorClientAppIdAsync(convitePendente.TimeClientAppId);
+                        SetMensagemPendencia(timeConvidado?.Nome);
                     } else {
                         SetNaoVinculadoState("Você ainda não está em um time!", "Crie seu próprio time ou solicite entrada em um time existente.");
                     }
                     return;
                 }
 
-                // CORREÇÃO: Obter o time usando o ClientAppId
                 var timeDoUsuario = await _timeService.ObterPorClientAppIdAsync(usuarioAtual.TimeClientAppId.Value);
 
                 if (timeDoUsuario == null) {
@@ -90,7 +90,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 Time = timeDoUsuario;
                 LogoImageSource = GetImageSourceFromFile(Time.LogoUrl);
 
-                // CORREÇÃO: Buscar membros do time usando a chave de sincronização
                 var usuariosDoTime = await _databaseService.GetMembrosByTimeClientAppIdAsync(Time.ClientAppId);
 
                 var membrosCarregados = new ObservableCollection<MembroModel>();
@@ -113,19 +112,19 @@ namespace ArenaVirtual.ViewModels.Atleta {
 
         [RelayCommand]
         private async Task CriarMeuTime() =>
-            await Shell.Current.GoToAsync(nameof(CriarTimePage));
+          await Shell.Current.GoToAsync(nameof(CriarTimePage));
 
         [RelayCommand]
         private async Task EntrarTime() =>
-            await Shell.Current.GoToAsync(nameof(EntrarTimePage));
+          await Shell.Current.GoToAsync(nameof(EntrarTimePage));
 
         [RelayCommand]
         private async Task GerenciarTime() =>
-            await Shell.Current.GoToAsync(nameof(EditarTimePage));
+          await Shell.Current.GoToAsync(nameof(EditarTimePage));
 
         [RelayCommand]
         private async Task VerSolicitacoes() =>
-            await Shell.Current.GoToAsync(nameof(SolicitacaoTimePage));
+          await Shell.Current.GoToAsync(nameof(SolicitacaoTimePage));
 
         private ImageSource GetImageSourceFromFile(string filePath) {
             if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) {
@@ -139,7 +138,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
             }
         }
 
-        // CORREÇÃO: Usar as propriedades públicas (sem _) nos métodos.
         private void SetNaoVinculadoState(string title, string description) {
             Time = new Time();
             MembrosDoTime.Clear();
@@ -148,16 +146,14 @@ namespace ArenaVirtual.ViewModels.Atleta {
             ShowButtons = true;
         }
 
-        // CORREÇÃO: Usar as propriedades públicas (sem _) nos métodos.
         private void SetMensagemPendencia(string timeNome) {
             StatusMessageTitle = "Solicitação Pendente";
             StatusMessageDescription = !string.IsNullOrEmpty(timeNome)
-                ? $"Sua solicitação para entrar no time {timeNome} foi enviada. Aguarde a resposta do capitão."
-                : "Sua solicitação para entrar em um time foi enviada. Aguarde a resposta do capitão.";
+              ? $"Sua solicitação para entrar no time {timeNome} foi enviada. Aguarde a resposta do capitão."
+              : "Sua solicitação para entrar em um time foi enviada. Aguarde a resposta do capitão.";
             ShowButtons = false;
         }
 
-        // CORREÇÃO: Usar as propriedades públicas (sem _) nos métodos.
         private void SetVinculadoState() {
             StatusMessageTitle = string.Empty;
             StatusMessageDescription = string.Empty;

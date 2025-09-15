@@ -12,6 +12,13 @@
                 Text="Editar Campeonato"
                 TextColor="White" />
 
+            <Label
+                FontSize="14"
+                HorizontalOptions="Center"
+                IsVisible="{Binding ValidationMessage, Converter={StaticResource StringIsNotNullOrEmptyConverter}}"
+                Text="{Binding ValidationMessage}"
+                TextColor="Red" />
+
             <Entry Placeholder="Nome do campeonato" Text="{Binding Campeonato.Nome}" />
             <Entry Placeholder="Local" Text="{Binding Campeonato.Local}" />
             <Button
@@ -43,15 +50,10 @@
             <DatePicker Date="{Binding Campeonato.DataFim}" Format="dd/MM/yyyy" />
 
             <Label Text="Número máximo de equipes" />
-            <Entry Keyboard="Numeric" Text="{Binding Campeonato.NumeroMaximoEquipes}" />
+            <Entry Keyboard="Numeric" Text="{Binding NumeroMaximoEquipesText}" />
 
             <Label Text="Valor da taxa de inscrição" />
-            <Entry Keyboard="Numeric" Text="{Binding Campeonato.ValorTaxaInscricao}" />
-
-            <StackLayout Orientation="Horizontal" VerticalOptions="Center">
-                <Label Text="Favorito" VerticalOptions="Center" />
-                <Switch IsToggled="{Binding Campeonato.EhFavorito}" />
-            </StackLayout>
+            <Entry Keyboard="Numeric" Text="{Binding ValorTaxaInscricaoText}" />
 
             <StackLayout Orientation="Horizontal" VerticalOptions="Center">
                 <Label Text="Haverá premiação?" VerticalOptions="Center" />

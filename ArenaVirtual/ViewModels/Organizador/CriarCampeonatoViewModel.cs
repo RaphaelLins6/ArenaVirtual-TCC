@@ -1,9 +1,10 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
-using CommunityToolkit.Mvvm.ComponentModel; 
-using MvvmHelpers.Commands;
-using MvvmHelpers.Interfaces;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Diagnostics;
+using System.Globalization;
+using System.Windows.Input;
 
 namespace ArenaVirtual.ViewModels {
     public partial class CriarCampeonatoViewModel : ObservableObject {
@@ -16,67 +17,91 @@ namespace ArenaVirtual.ViewModels {
         private string local;
 
         [ObservableProperty]
-        private DateTime dataInicio = DateTime.Today; 
+        private DateTime dataInicio = DateTime.Today;
 
         [ObservableProperty]
-        private DateTime dataFim = DateTime.Today.AddDays(7); 
+        private DateTime dataFim = DateTime.Today.AddDays(7);
 
         [ObservableProperty]
-        private string logoUrl; 
+        private string logoUrl;
 
         [ObservableProperty]
-        private string nomeOrganizador; 
+        private string nomeOrganizador;
 
         [ObservableProperty]
-        private string emailOrganizador; 
+        private string emailOrganizador;
 
         [ObservableProperty]
-        private string telefoneOrganizador; 
+        private string telefoneOrganizador;
+
+        // Propriedades corrigidas para lidar com a entrada de texto do XAML
+        [ObservableProperty]
+        private string numeroMaximoEquipesTexto;
 
         [ObservableProperty]
-        private int numeroMaximoEquipes; 
+        private string valorTaxaInscricaoTexto;
 
         [ObservableProperty]
-        private decimal valorTaxaInscricao; 
-        [ObservableProperty]
-        private string formatoCampeonato; 
+        private string formatoCampeonato;
 
         [ObservableProperty]
-        private string locaisDosJogos; 
+        private string locaisDosJogos;
 
         [ObservableProperty]
-        private bool haveraPremiacao; 
+        private bool haveraPremiacao;
 
         [ObservableProperty]
-        private ImageSource logoImageSource; 
+        private ImageSource logoImageSource;
 
-        public IAsyncCommand SalvarCampeonatoCommand { get; } 
-        public IAsyncCommand SelecionarLogoCommand { get; }
+        [ObservableProperty]
+        private string mensagemValidacao;
+
+        public IAsyncRelayCommand SalvarCampeonatoCommand { get; }
+        public IAsyncRelayCommand SelecionarLogoCommand { get; }
 
         public CriarCampeonatoViewModel(DatabaseService databaseService) {
             _databaseService = databaseService;
-            SalvarCampeonatoCommand = new AsyncCommand(SalvarCampeonato);
-            SelecionarLogoCommand = new AsyncCommand(SelecionarLogoAsync);
+
+            SalvarCampeonatoCommand = new AsyncRelayCommand(SalvarCampeonatoAsync, CanSalvarCampeonato);
+            SelecionarLogoCommand = new AsyncRelayCommand(SelecionarLogoAsync);
+
+            // Reage às mudanças nas propriedades para atualizar o estado do comando
+            PropertyChanged += (s, e) => {
+                if (e.PropertyName == nameof(Nome) || e.PropertyName == nameof(Local) ||
+                    e.PropertyName == nameof(NomeOrganizador) || e.PropertyName == nameof(EmailOrganizador) ||
+                    e.PropertyName == nameof(DataFim) || e.PropertyName == nameof(DataInicio) ||
+                    e.PropertyName == nameof(NumeroMaximoEquipesTexto) || e.PropertyName == nameof(ValorTaxaInscricaoTexto)) {
+                    SalvarCampeonatoCommand.NotifyCanExecuteChanged();
+                }
+            };
         }
 
-        private async Task SalvarCampeonato() {
-            if (string.IsNullOrWhiteSpace(Nome) || string.IsNullOrWhiteSpace(Local) || string.IsNullOrWhiteSpace(NomeOrganizador) || string.IsNullOrWhiteSpace(EmailOrganizador)) {
-                await Application.Current.MainPage.DisplayAlert("Erro", "Preencha todos os campos obrigatórios.", "OK");
+        private bool CanSalvarCampeonato() {
+            int numeroEquipes;
+            decimal valorTaxa;
+
+            bool isValid = !string.IsNullOrWhiteSpace(Nome) &&
+                           !string.IsNullOrWhiteSpace(Local) &&
+                           !string.IsNullOrWhiteSpace(NomeOrganizador) &&
+                           !string.IsNullOrWhiteSpace(EmailOrganizador) &&
+                           DataFim >= DataInicio &&
+                           int.TryParse(numeroMaximoEquipesTexto, out numeroEquipes) && numeroEquipes > 0 &&
+                           decimal.TryParse(valorTaxaInscricaoTexto, NumberStyles.Any, CultureInfo.InvariantCulture, out valorTaxa) && valorTaxa >= 0;
+
+            MensagemValidacao = isValid ? string.Empty : "Preencha todos os campos obrigatórios corretamente.";
+
+            return isValid;
+        }
+
+        private async Task SalvarCampeonatoAsync() {
+            if (App.CurrentUser == null || App.CurrentUser.Id == 0) {
+                MensagemValidacao = "Erro: O usuário organizador não está logado. Por favor, faça login.";
                 return;
             }
 
-            if (DataFim < DataInicio) {
-                await Application.Current.MainPage.DisplayAlert("Erro", "A data final não pode ser anterior à data inicial.", "OK");
-                return;
-            }
-
-            if (NumeroMaximoEquipes <= 0) {
-                await Application.Current.MainPage.DisplayAlert("Erro", "O número máximo de equipes deve ser maior que zero.", "OK");
-                return;
-            }
-
-            if (ValorTaxaInscricao < 0) {
-                await Application.Current.MainPage.DisplayAlert("Erro", "O valor da taxa de inscrição não pode ser negativo.", "OK");
+            if (!int.TryParse(NumeroMaximoEquipesTexto, out int numeroEquipes) ||
+                !decimal.TryParse(ValorTaxaInscricaoTexto, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal valorTaxa)) {
+                MensagemValidacao = "Erro na conversão dos dados numéricos. Por favor, verifique a entrada.";
                 return;
             }
 
@@ -89,21 +114,21 @@ namespace ArenaVirtual.ViewModels {
                 NomeOrganizador = NomeOrganizador,
                 EmailOrganizador = EmailOrganizador,
                 TelefoneOrganizador = TelefoneOrganizador,
-                NumeroMaximoEquipes = NumeroMaximoEquipes,
-                ValorTaxaInscricao = ValorTaxaInscricao,
+                NumeroMaximoEquipes = numeroEquipes,
+                ValorTaxaInscricao = valorTaxa,
                 FormatoCampeonato = FormatoCampeonato,
                 LocaisDosJogos = LocaisDosJogos,
                 HaveraPremiacao = HaveraPremiacao,
-                OrganizadorId = App.CurrentUser?.Id ?? 0 // Use o ID do usuário logado
+                OrganizadorId = App.CurrentUser.Id
             };
 
             try {
                 await _databaseService.InserirCampeonatoAsync(novoCampeonato);
-                await Application.Current.MainPage.DisplayAlert("Sucesso", "Campeonato criado com sucesso!", "OK");
-                LimparCampos(); 
+                MensagemValidacao = "Campeonato criado com sucesso!";
+                LimparCampos();
             } catch (Exception ex) {
                 Debug.WriteLine($"Erro ao criar campeonato: {ex.Message}");
-                await Application.Current.MainPage.DisplayAlert("Erro", $"Falha ao criar campeonato: {ex.Message}", "OK");
+                MensagemValidacao = $"Falha ao criar campeonato: {ex.Message}";
             }
         }
 
@@ -115,16 +140,15 @@ namespace ArenaVirtual.ViewModels {
                 });
 
                 if (result != null) {
-                    LogoUrl = result.FullPath; // Salva o caminho para persistência
-                    LogoImageSource = ImageSource.FromFile(result.FullPath); // Atualiza para exibição
+                    LogoUrl = result.FullPath;
+                    LogoImageSource = ImageSource.FromFile(result.FullPath);
                 }
             } catch (Exception ex) {
-                await Application.Current.MainPage.DisplayAlert("Erro", $"Não foi possível selecionar a imagem: {ex.Message}", "OK");
+                MensagemValidacao = $"Não foi possível selecionar a imagem: {ex.Message}";
             }
         }
 
-        public void LimparCampos()
-        {
+        public void LimparCampos() {
             Nome = string.Empty;
             Local = string.Empty;
             DataInicio = DateTime.Today;
@@ -133,12 +157,17 @@ namespace ArenaVirtual.ViewModels {
             NomeOrganizador = string.Empty;
             EmailOrganizador = string.Empty;
             TelefoneOrganizador = string.Empty;
-            NumeroMaximoEquipes = 0;
-            ValorTaxaInscricao = 0;
+            // Limpa as novas propriedades de texto
+            NumeroMaximoEquipesTexto = string.Empty;
+            ValorTaxaInscricaoTexto = string.Empty;
             FormatoCampeonato = string.Empty;
             LocaisDosJogos = string.Empty;
             HaveraPremiacao = false;
             LogoImageSource = null;
+            MensagemValidacao = string.Empty;
+
+            // Garante que o estado do botão seja atualizado após a limpeza
+            SalvarCampeonatoCommand.NotifyCanExecuteChanged();
         }
     }
 }

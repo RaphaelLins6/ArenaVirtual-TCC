@@ -15,8 +15,8 @@ namespace ArenaVirtual.Services {
             };
 
             var baseUrls = new[] {
-                "https://192.168.15.13:7117/",
-                "http://192.168.15.13:5067/"
+                "https://192.168.15.8:7117/",
+                "http://192.168.15.8:5067/"
             };
 
             _httpClient = CreateHttpClient(handler, baseUrls);

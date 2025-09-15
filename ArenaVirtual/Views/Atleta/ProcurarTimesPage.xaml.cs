@@ -1,11 +1,19 @@
-﻿
+﻿using ArenaVirtual.ViewModels.Atleta;
+using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.Views.Atleta {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class ProcurarTimesPage : ContentPage {
-        public ProcurarTimesPage() {
+        public ProcurarTimesPage(ProcurarTimesPageViewModel viewModel) {
             InitializeComponent();
-            Title = "Procurar Times"; // Set the Title property in the code-behind
+            BindingContext = viewModel;
+        }
+
+        // Use OnAppearing para carregar os dados
+        protected override async void OnAppearing() {
+            base.OnAppearing();
+            if (BindingContext is ProcurarTimesPageViewModel vm) {
+                await vm.CarregarTimesAsync();
+            }
         }
     }
 }

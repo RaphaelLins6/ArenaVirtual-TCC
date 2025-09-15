@@ -12,6 +12,8 @@ namespace ArenaVirtualAPI.Services {
         private readonly ILogger<BackendSyncService> _logger;
         private readonly IBackendSyncServiceFactory _syncServiceFactory;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
+
+        // A ordem é importante para resolver dependências de chaves estrangeiras
         private readonly List<string> _entityTypes = new() {
             "Usuario", "Campeonato", "Time", "Convite", "UsuarioCampeonatoFavorito"
         };
@@ -39,6 +41,8 @@ namespace ArenaVirtualAPI.Services {
                     return new Dictionary<Guid, int>();
                 }
 
+                // O método 'ProcessAndMapItemsAsync' está na interface IBackendSyncServiceFactory.
+                // A invocação com `dynamic` é a maneira correta de lidar com tipos genéricos em tempo de execução.
                 var method = _syncServiceFactory.GetType().GetMethod("ProcessAndMapItemsAsync");
                 if (method == null) {
                     throw new InvalidOperationException("Método 'ProcessAndMapItemsAsync' não encontrado na fábrica.");
@@ -57,23 +61,20 @@ namespace ArenaVirtualAPI.Services {
         public async Task ProcessAllUploadsAsync(AllUploadsDto data) {
             _logger.LogInformation("[BackendSyncService] Iniciando processamento de todos os uploads.");
 
-            // A ordem é importante para resolver as dependências
+            // A ordem de processamento dos dados é essencial para evitar erros de FOREIGN KEY.
+            // Os dados relacionados (ex: Usuário) devem ser processados antes dos que dependem deles (ex: Campeonato, Time).
             if (data.Usuarios != null) {
                 await _syncServiceFactory.ProcessAndMapItemsAsync<UsuarioSyncDto>(data.Usuarios, "Usuario");
             }
-
             if (data.Campeonatos != null) {
                 await _syncServiceFactory.ProcessAndMapItemsAsync<CampeonatoSyncDto>(data.Campeonatos, "Campeonato");
             }
-
             if (data.Times != null) {
                 await _syncServiceFactory.ProcessAndMapItemsAsync<TimeSyncDto>(data.Times, "Time");
             }
-
             if (data.Convites != null) {
                 await _syncServiceFactory.ProcessAndMapItemsAsync<ConviteSyncDto>(data.Convites, "Convite");
             }
-
             if (data.UsuarioCampeonatoFavoritos != null) {
                 await _syncServiceFactory.ProcessAndMapItemsAsync<UsuarioCampeonatoFavoritoSyncDto>(data.UsuarioCampeonatoFavoritos, "UsuarioCampeonatoFavorito");
             }
@@ -81,7 +82,6 @@ namespace ArenaVirtualAPI.Services {
             _logger.LogInformation("[BackendSyncService] Processamento de uploads concluído.");
         }
 
-        // --- INÍCIO DO CÓDIGO CORRIGIDO ---
         public async Task<UpdatesDTO> GetUpdatesAsync(DateTime lastSyncTime) {
             var updates = new UpdatesDTO();
             foreach (var entityType in _entityTypes) {

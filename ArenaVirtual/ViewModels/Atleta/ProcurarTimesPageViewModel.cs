@@ -1,15 +1,14 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Windows.Input;
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.ViewModels.Atleta {
 
-    public partial class ProcurarTimesPageViewModel : ObservableObject { // Removido ", INotifyPropertyChanged"
+    public partial class ProcurarTimesPageViewModel : ObservableObject {
 
         private readonly TimeService _timeService;
 
@@ -24,7 +23,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
         }
 
         [RelayCommand]
-        private async Task CarregarTimesAsync() {
+        public async Task CarregarTimesAsync() {
             if (IsBusy)
                 return;
 
@@ -46,7 +45,9 @@ namespace ArenaVirtual.ViewModels.Atleta {
         }
 
         [RelayCommand]
-        private async Task EntrarNoTimeAsync(Time time) {
+        // O método deve ser público para que o comando seja acessível
+        // ou o atributo RelayCommand deve ser público
+        public async Task EntrarNoTimeAsync(Time time) {
             if (time == null)
                 return;
 

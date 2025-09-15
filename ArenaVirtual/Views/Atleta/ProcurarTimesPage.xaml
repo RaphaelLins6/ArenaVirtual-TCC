@@ -1,7 +1,9 @@
-﻿<ContentPage
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
     x:Class="ArenaVirtual.Views.Atleta.ProcurarTimesPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:ArenaVirtual.Models"
     xmlns:viewmodels="clr-namespace:ArenaVirtual.ViewModels.Atleta"
     x:Name="thisPage"
     Title="Procurar Times"
@@ -9,7 +11,7 @@
 
     <CollectionView ItemsSource="{Binding Times}">
         <CollectionView.ItemTemplate>
-            <DataTemplate>
+            <DataTemplate x:DataType="models:Time">
                 <Frame Margin="10" Padding="12">
                     <VerticalStackLayout>
                         <Label
@@ -18,7 +20,7 @@
                             Text="{Binding Nome}" />
                         <Label FontSize="14" Text="{Binding Descricao}" />
                         <Button
-                            Command="{Binding Path=BindingContext.EntrarNoTimeCommand, Source={x:Reference thisPage}}"
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:ProcurarTimesPageViewModel}}, Path=EntrarNoTimeCommand}"
                             CommandParameter="{Binding .}"
                             Text="Entrar no Time" />
                     </VerticalStackLayout>

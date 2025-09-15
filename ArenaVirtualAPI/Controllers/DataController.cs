@@ -1,7 +1,8 @@
-﻿// DataController.cs
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using ArenaVirtualAPI.Services;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -17,13 +18,11 @@ public class DataController : ControllerBase {
     [HttpPost("sync/{modelTypeName}")]
     public async Task<IActionResult> Sync([FromBody] JsonElement data, string modelTypeName) {
         _logger.LogInformation($"[Sync] Recebida requisição de sincronização para o tipo: {modelTypeName}");
-        // Loga o JSON recebido do cliente antes do processamento.
-        _logger.LogDebug($"[Sync] JSON Recebido: {data.GetRawText()}");
+        _logger.LogDebug($"[Sync] JSON Recebido: {data.GetRawText()}");
 
         try {
             var idMapping = await _backendSyncService.ProcessAndMapItemsAsync(data, modelTypeName);
-            // Loga o JSON que será enviado de volta ao cliente.
-            _logger.LogDebug($"[Sync] JSON de Retorno: {JsonSerializer.Serialize(idMapping)}");
+            _logger.LogDebug($"[Sync] JSON de Retorno: {JsonSerializer.Serialize(idMapping)}");
             return Ok(idMapping);
         } catch (Exception ex) {
             _logger.LogError($"[Sync] Erro interno na sincronização de upload para {modelTypeName}: {ex.Message}");
@@ -37,8 +36,7 @@ public class DataController : ControllerBase {
 
         try {
             var updatedItems = await _backendSyncService.GetUpdatesAsync(lastSyncTime);
-            // Loga o JSON completo das atualizações antes de enviar.
-            _logger.LogDebug($"[Updates] JSON de Resposta: {JsonSerializer.Serialize(updatedItems.UpdatedItems)}");
+            _logger.LogDebug($"[Updates] JSON de Resposta: {JsonSerializer.Serialize(updatedItems.UpdatedItems)}");
             return Ok(updatedItems.UpdatedItems);
         } catch (Exception ex) {
             _logger.LogError($"[Updates] Erro ao obter atualizações: {ex.Message}");

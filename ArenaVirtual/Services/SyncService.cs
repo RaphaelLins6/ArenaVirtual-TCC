@@ -1,14 +1,9 @@
-﻿using ArenaVirtual.DTOs;
-using ArenaVirtual.Models;
+﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
-using Microsoft.Maui.Storage;
-using SQLite;
 using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 public class SyncService {
     private readonly DatabaseService _databaseService;
@@ -78,9 +73,11 @@ public class SyncService {
             var unsyncedItems = (IList)((dynamic)unsyncedItemsTask).Result;
 
             if (unsyncedItems.Count > 0) {
+                // Passa o mapeamento de IDs para que o DTO de sincronização possa
+                // ser construído com os IDs do servidor corretos para chaves estrangeiras.
                 var syncDtos = await CreateSyncDtos(unsyncedItems, type, idMapping);
-                var postMethod = typeof(ApiService).GetMethod("PostDataAsync", BindingFlags.Public | BindingFlags.Instance);
 
+                var postMethod = typeof(ApiService).GetMethod("PostDataAsync", BindingFlags.Public | BindingFlags.Instance);
                 if (postMethod == null) {
                     Debug.WriteLine($"[SyncService] Método PostDataAsync não encontrado para o tipo {type.Name}.");
                     continue;
@@ -106,6 +103,7 @@ public class SyncService {
             Debug.WriteLine($"[SyncService] DTO não encontrado para o tipo {itemType.Name}.");
             return new List<object>();
         }
+
         var listType = typeof(List<>).MakeGenericType(dtoType);
         var syncDtos = (IList)Activator.CreateInstance(listType);
 
@@ -120,7 +118,9 @@ public class SyncService {
                 }
             }
 
+            // Mapeia chaves estrangeiras com base nos IDs do servidor.
             foreach (var mappingType in idMapping.Keys) {
+                // Padrão: {NomeDaEntidade}Id para FK e {NomeDaEntidade}ClientAppId para o local.
                 var fkPropName = $"{mappingType.Name}Id";
                 var fkClientAppIdPropName = $"{mappingType.Name}ClientAppId";
 
@@ -135,12 +135,14 @@ public class SyncService {
                 }
             }
 
+            // Tratamento especial para o 'CapitaoId' no 'Time'
+            // O `CapitaoId` é o ID do servidor do usuário.
+            // O `CapitaoClientAppId` deve ser usado para encontrar o ID do servidor.
             if (itemType == typeof(Time)) {
                 var timeItem = (Time)item;
                 var userMapping = idMapping.GetValueOrDefault(typeof(Usuario));
-                if (userMapping != null && timeItem.CapitaoId.HasValue) {
-                    var usuarioLocalId = await _databaseService.GetUsuarioClientAppIdById(timeItem.CapitaoId.Value);
-                    if (usuarioLocalId.HasValue && userMapping.TryGetValue(usuarioLocalId.Value, out int serverId)) {
+                if (userMapping != null && timeItem.CapitaoClientAppId.HasValue) {
+                    if (userMapping.TryGetValue(timeItem.CapitaoClientAppId.Value, out int serverId)) {
                         dtoType.GetProperty("CapitaoId")?.SetValue(dto, serverId);
                     }
                 }
@@ -179,7 +181,6 @@ public class SyncService {
                 }
             }
         }
-
         Preferences.Set("LastSyncTime", DateTime.UtcNow);
         progress?.Report("Sincronização de download concluída.");
     }

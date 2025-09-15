@@ -10,37 +10,95 @@ using System.Threading.Tasks;
 namespace ArenaVirtual.ViewModels.Organizador;
 
 public partial class EditarCampeonatoViewModel : ObservableObject {
-    // A dependência do DatabaseService não é mais estritamente necessária aqui,
-    // pois a lógica de atualização foi movida para o CampeonatoService.
     private readonly CampeonatoService _campeonatoService;
+    private readonly SessaoService _sessaoService;
+    private readonly SyncService _syncService; // Adicione o serviço de sincronização
 
-    [ObservableProperty]
+    [ObservableProperty]
     private Campeonato campeonato;
 
     [ObservableProperty]
     private ImageSource? logoImageSource;
 
+    [ObservableProperty]
+    private string? numeroMaximoEquipesText;
+
+    [ObservableProperty]
+    private string? valorTaxaInscricaoText;
+
+    [ObservableProperty]
+    private string? validationMessage;
+
     public IRelayCommand SalvarCommand { get; }
     public IRelayCommand SelecionarLogoCommand { get; }
 
-    // O construtor agora recebe o CampeonatoService, que encapsula a lógica de atualização e sincronização.
-    public EditarCampeonatoViewModel(CampeonatoService campeonatoService, Campeonato campeonato) {
+    // Atualize o construtor para receber o SyncService via injeção de dependência
+    public EditarCampeonatoViewModel(CampeonatoService campeonatoService, SessaoService sessaoService, SyncService syncService, Campeonato campeonato) {
         _campeonatoService = campeonatoService;
+        _sessaoService = sessaoService;
+        _syncService = syncService;
         Campeonato = campeonato;
-        SalvarCommand = new RelayCommand(async () => await SalvarAsync());
-        SelecionarLogoCommand = new RelayCommand(async () => await SelecionarLogoAsync());
 
-        if (!string.IsNullOrEmpty(Campeonato.LogoUrl) && File.Exists(Campeonato.LogoUrl))
+        NumeroMaximoEquipesText = Campeonato.NumeroMaximoEquipes.ToString();
+        ValorTaxaInscricaoText = Campeonato.ValorTaxaInscricao.ToString();
+
+        SalvarCommand = new AsyncRelayCommand(SalvarAsync);
+        SelecionarLogoCommand = new AsyncRelayCommand(SelecionarLogoAsync);
+
+        if (!string.IsNullOrEmpty(Campeonato.LogoUrl) && File.Exists(Campeonato.LogoUrl)) {
             LogoImageSource = ImageSource.FromFile(Campeonato.LogoUrl);
+        }
     }
 
     private async Task SalvarAsync() {
-        // O ViewModel delega a lógica de atualização e sincronização para o serviço.
-        // O CampeonatoService.AtualizarAsync já se encarregará de marcar o objeto
-        // como não sincronizado e chamar o SyncService.
-        await _campeonatoService.AtualizarAsync(Campeonato);
+        ValidationMessage = string.Empty;
 
-        await Shell.Current.GoToAsync("..");
+        if (!int.TryParse(NumeroMaximoEquipesText, out int numeroEquipes)) {
+            ValidationMessage = "Número máximo de equipes deve ser um número válido.";
+            return;
+        }
+
+        if (!decimal.TryParse(ValorTaxaInscricaoText, out decimal valorTaxa)) {
+            ValidationMessage = "Valor da taxa de inscrição deve ser um número válido.";
+            return;
+        }
+
+        Campeonato.NumeroMaximoEquipes = numeroEquipes;
+        Campeonato.ValorTaxaInscricao = valorTaxa;
+
+        try {
+            var usuarioLogado = _sessaoService.GetUsuarioAtual();
+            if (usuarioLogado == null) {
+                Debug.WriteLine("[EditarCampeonatoViewModel] Nenhum usuário logado encontrado. Não foi possível salvar o campeonato.");
+                ValidationMessage = "Nenhum usuário logado. Por favor, faça login novamente.";
+                return;
+            }
+
+            // VERIFICAÇÃO E SINCRONIZAÇÃO DO ID DO ORGANIZADOR
+            if (!usuarioLogado.IdServidor.HasValue) {
+                ValidationMessage = "Sincronizando seu perfil para salvar o campeonato. Por favor, aguarde...";
+                await _syncService.SyncAsync(new Progress<string>());
+
+                // Recarrega os dados do usuário para obter o ID do servidor recém-sincronizado
+                usuarioLogado = _sessaoService.GetUsuarioAtual();
+                if (usuarioLogado?.IdServidor.HasValue == true) {
+                    Campeonato.OrganizadorId = usuarioLogado.IdServidor.Value;
+                } else {
+                    ValidationMessage = "Não foi possível sincronizar o perfil. Tente novamente.";
+                    return;
+                }
+            } else {
+                // Usa o ID do servidor se já estiver disponível
+                Campeonato.OrganizadorId = usuarioLogado.IdServidor.Value;
+            }
+
+            await _campeonatoService.AtualizarAsync(Campeonato);
+
+            await Shell.Current.GoToAsync("..");
+        } catch (Exception ex) {
+            Debug.WriteLine($"[EditarCampeonatoViewModel] Erro ao salvar campeonato: {ex.Message}");
+            await Application.Current.MainPage.DisplayAlert("Erro", $"Falha ao salvar o campeonato: {ex.Message}", "OK");
+        }
     }
 
     private async Task SelecionarLogoAsync() {
@@ -51,7 +109,6 @@ public partial class EditarCampeonatoViewModel : ObservableObject {
             });
 
             if (result != null) {
-                // Copia a imagem selecionada para o diretório de dados do app para garantir que ela persista.
                 var newFilePath = Path.Combine(FileSystem.AppDataDirectory, result.FileName);
                 using (var stream = await result.OpenReadAsync()) {
                     using (var newFileStream = File.OpenWrite(newFilePath)) {

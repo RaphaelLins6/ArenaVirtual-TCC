@@ -3,28 +3,32 @@
     x:Class="ArenaVirtual.Views.Organizador.CriarCampeonatoPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
+    Title="Criar Campeonato"
     x:DataType="vm:CriarCampeonatoViewModel">
+
+    <ContentPage.Resources>
+        <converters:IsNotNullOrEmptyConverter x:Key="IsNotNullOrEmptyConverter" />
+        <Style x:Key="LabelHeaderStyle" TargetType="Label">
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="FontSize" Value="Medium" />
+            <Setter Property="TextColor" Value="White" />
+            <Setter Property="Margin" Value="0,10,0,0" />
+        </Style>
+    </ContentPage.Resources>
 
     <ContentPage.Content>
         <ScrollView>
             <VerticalStackLayout Padding="20" Spacing="15">
 
-                <Label
-                    FontAttributes="Bold"
-                    FontSize="Medium"
-                    Text="Nome do Campeonato"
-                    TextColor="White" />
+                <Label Style="{StaticResource LabelHeaderStyle}" Text="Nome do Campeonato" />
                 <Entry
                     Placeholder="Nome do Campeonato"
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding Nome}" />
-                <Label
-                    Margin="0,10,0,0"
-                    FontAttributes="Bold"
-                    FontSize="Medium"
-                    Text="Logo do Campeonato"
-                    TextColor="White" />
+
+                <Label Style="{StaticResource LabelHeaderStyle}" Text="Logo do Campeonato" />
                 <Button
                     Command="{Binding SelecionarLogoCommand}"
                     Style="{StaticResource BotaoPrincipal}"
@@ -35,99 +39,56 @@
                     HeightRequest="100"
                     Source="{Binding LogoImageSource}"
                     WidthRequest="100" />
-                <Label
-                    Margin="0,10,0,0"
-                    FontAttributes="Bold"
-                    FontSize="Medium"
-                    Text="Nome do Organizador/Organização"
-                    TextColor="White" />
+
+                <Label Style="{StaticResource LabelHeaderStyle}" Text="Nome do Organizador/Organização" />
                 <Entry
                     Placeholder="Ex: Sua Empresa S.A. ou Seu Nome"
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding NomeOrganizador}" />
 
-                <Label
-                    Margin="0,10,0,0"
-                    FontAttributes="Bold"
-                    FontSize="Medium"
-                    Text="Email do Organizador/Organização"
-                    TextColor="White" />
+                <Label Style="{StaticResource LabelHeaderStyle}" Text="Email do Organizador/Organização" />
                 <Entry
                     Keyboard="Email"
                     Placeholder="email@exemplo.com"
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding EmailOrganizador}" />
 
-                <Label
-                    Margin="0,10,0,0"
-                    FontAttributes="Bold"
-                    FontSize="Medium"
-                    Text="Telefone do Organizador"
-                    TextColor="White" />
+                <Label Style="{StaticResource LabelHeaderStyle}" Text="Telefone do Organizador" />
                 <Entry
                     Keyboard="Telephone"
                     Placeholder="(XX) XXXXX-XXXX"
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding TelefoneOrganizador}" />
 
-                <Label
-                    Margin="0,10,0,0"
-                    FontAttributes="Bold"
-                    FontSize="Medium"
-                    Text="Local do Campeonato"
-                    TextColor="White" />
+                <Label Style="{StaticResource LabelHeaderStyle}" Text="Local do Campeonato" />
                 <Entry
                     Placeholder="Endereço completo ou nome do local"
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding Local}" />
 
-                <Label
-                    Margin="0,10,0,0"
-                    FontAttributes="Bold"
-                    FontSize="Medium"
-                    Text="Data de Início"
-                    TextColor="White" />
-                <DatePicker Date="{Binding DataInicio}" Format="dd/mm/yy" />
-                <Label
-                    Margin="0,10,0,0"
-                    FontAttributes="Bold"
-                    FontSize="Medium"
-                    Text="Data de Término"
-                    TextColor="White" />
+                <Label Style="{StaticResource LabelHeaderStyle}" Text="Data de Início" />
+                <DatePicker Date="{Binding DataInicio}" Format="dd/MM/yy" />
+                <Label Style="{StaticResource LabelHeaderStyle}" Text="Data de Término" />
                 <DatePicker
                     Date="{Binding DataFim}"
-                    Format="dd/mm/yy"
+                    Format="dd/MM/yy"
                     MinimumDate="{Binding DataInicio}" />
-                <Label
-                    Margin="0,10,0,0"
-                    FontAttributes="Bold"
-                    FontSize="Medium"
-                    Text="Número Máximo de Equipes"
-                    TextColor="White" />
+
+                <Label Style="{StaticResource LabelHeaderStyle}" Text="Número Máximo de Equipes" />
                 <Entry
                     Keyboard="Numeric"
                     Placeholder="Ex: 16"
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding NumeroMaximoEquipes}" />
 
-                <Label
-                    Margin="0,10,0,0"
-                    FontAttributes="Bold"
-                    FontSize="Medium"
-                    Text="Valor da Taxa de Inscrição por Equipe (R$)"
-                    TextColor="White" />
+                <Label Style="{StaticResource LabelHeaderStyle}" Text="Valor da Taxa de Inscrição por Equipe (R$)" />
                 <Entry
                     Keyboard="Numeric"
                     Placeholder="Ex: 50.00"
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding ValorTaxaInscricao}" />
 
-                <Label
-                    Margin="0,10,0,0"
-                    FontAttributes="Bold"
-                    FontSize="Medium"
-                    Text="Formato do Campeonato"
-                    TextColor="White" />
+                <Label Style="{StaticResource LabelHeaderStyle}" Text="Formato do Campeonato" />
                 <Picker
                     Title="Selecione o Formato"
                     SelectedItem="{Binding FormatoCampeonato}"
@@ -143,12 +104,7 @@
                     </Picker.ItemsSource>
                 </Picker>
 
-                <Label
-                    Margin="0,10,0,0"
-                    FontAttributes="Bold"
-                    FontSize="Medium"
-                    Text="Local(is) dos Jogos"
-                    TextColor="White" />
+                <Label Style="{StaticResource LabelHeaderStyle}" Text="Local(is) dos Jogos" />
                 <Editor
                     AutoSize="TextChanges"
                     HeightRequest="80"
@@ -174,6 +130,12 @@
                     Command="{Binding SalvarCampeonatoCommand}"
                     Style="{StaticResource BotaoPrincipal}"
                     Text="Criar Campeonato" />
+
+                <Label
+                    HorizontalOptions="Center"
+                    IsVisible="{Binding MensagemValidacao, Converter={StaticResource IsNotNullOrEmptyConverter}}"
+                    Text="{Binding MensagemValidacao}"
+                    TextColor="Red" />
 
             </VerticalStackLayout>
         </ScrollView>
