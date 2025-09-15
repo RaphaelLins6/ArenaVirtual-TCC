@@ -42,19 +42,17 @@ namespace ArenaVirtual.ViewModels {
                 SessaoService.Instancia.Login(usuario);
                 Debug.WriteLine($"[LoginViewModel] SessaoService.Instancia.Login() chamado para ID: {usuario.Id}, Email: {usuario.Email}");
 
-                // CORREÇÃO:
-                // Se a sua lógica de autenticação ainda não sincronizou o usuário,
-                // o `usuario.Id` pode ser 0 ou um ID local. Vamos forçar a sincronização
-                // e, em seguida, obter o usuário com o ID do servidor.
                 await _syncService.SyncAsync(null);
 
-                // Após a sincronização, o usuário deve ter sido atualizado no banco de dados local
-                // com o ID do servidor. Vamos buscá-lo novamente para garantir.
                 App.CurrentUser = await _usuarioService.GetUsuarioByEmailAsync(Email);
 
                 if (App.CurrentUser == null || App.CurrentUser.Id == 0) {
                     throw new Exception("Falha na sincronização do usuário.");
                 }
+
+                // AQUI ESTÁ A CORREÇÃO:
+                // Atualize a sessão do serviço com o usuário sincronizado.
+                SessaoService.Instancia.Login(App.CurrentUser);
 
                 Debug.WriteLine("[LoginViewModel] Login bem-sucedido. Sincronização e navegação concluídas.");
 

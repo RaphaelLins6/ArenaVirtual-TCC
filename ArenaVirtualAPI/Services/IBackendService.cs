@@ -1,5 +1,5 @@
 ﻿using ArenaVirtualAPI.Models;
-using ArenaVirtualAPI.DTOs; // Adicione esta referência para o namespace de DTOs
+using ArenaVirtualAPI.DTOs;
 
 namespace ArenaVirtualAPI.Services {
     public interface IBackendService<TModel, TDto>
@@ -9,8 +9,10 @@ namespace ArenaVirtualAPI.Services {
         Task AddAsync(TModel item);
         Task UpdateAsync(TModel item);
         Task<IEnumerable<TDto>> GetUpdatedSinceAsync(DateTime lastSyncTime);
-        Task ProcessItemsAsync(IEnumerable<TDto> items);
-        Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<TDto> items);
+        // Remova a linha abaixo para resolver o erro:
+        // Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<TDto> items);
 
+        // Mantenha apenas a sobrecarga que será usada no BackendSyncService
+        Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<TDto> items, Dictionary<string, Dictionary<Guid, int>> idMappings);
     }
 }

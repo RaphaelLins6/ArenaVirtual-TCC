@@ -36,10 +36,22 @@ namespace ArenaVirtual.ViewModels.Atleta {
         [ObservableProperty]
         private bool _showButtons = true;
 
-        // Propriedades calculadas que dependem de outras
-        public bool VinculadoATime => SessaoService.Instancia.GetUsuarioAtual()?.TimeClientAppId != null;
+        [ObservableProperty]
+        private bool _mostraBotaoCancelar = false;
+
+        // Propriedade para controlar a visibilidade do botão "Ver Solicitações"
+        [ObservableProperty]
+        private bool _mostraBotaoVerSolicitacoes = false;
+
+        // Propriedade para controlar se o usuário é o capitão do time
+        [ObservableProperty]
+        private bool _usuarioEhCapitao = false;
+
+        // As propriedades abaixo não precisam ser Observable, pois são recomputadas no LoadDataAsync.
+        public bool VinculadoATime => SessaoService.Instancia.GetUsuarioAtual()?.TimeClientAppId != null;
+
         public bool NaoVinculadoATime => !VinculadoATime;
-        public bool UsuarioEhCapitao => SessaoService.Instancia.GetUsuarioAtual()?.ClientAppId == Time?.CapitaoClientAppId;
+
 
         private readonly TimeService _timeService;
         private readonly UsuarioService _usuarioService;
@@ -53,15 +65,13 @@ namespace ArenaVirtual.ViewModels.Atleta {
             _databaseService = databaseService;
         }
 
-        // Método parcial que é executado automaticamente quando a propriedade _time é alterada.
-        partial void OnTimeChanged(Time? value) {
-            OnPropertyChanged(nameof(UsuarioEhCapitao));
-        }
-
         [RelayCommand]
         public async Task LoadDataAsync() {
             try {
                 var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
+                OnPropertyChanged(nameof(VinculadoATime));
+                OnPropertyChanged(nameof(NaoVinculadoATime));
+
                 if (usuarioAtual == null) {
                     SetNaoVinculadoState("Erro de Sessão", "Não foi possível carregar as informações do usuário.");
                     return;
@@ -85,7 +95,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     return;
                 }
 
-                // A propriedade 'Time' é atualizada, disparando OnTimeChanged
                 Time = timeDoUsuario;
                 LogoImageSource = GetImageSourceFromFile(Time.LogoUrl);
 
@@ -103,6 +112,18 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 MembrosDoTime = membrosCarregados;
 
                 SetVinculadoState();
+
+                // Atribuindo o valor ao campo de suporte da propriedade ObservableProperty
+                _usuarioEhCapitao = usuarioAtual.ClientAppId == Time.CapitaoClientAppId;
+
+                // Lógica para exibir o botão "Ver Solicitações"
+                if (UsuarioEhCapitao) {
+                    var convitesPendentes = await _databaseService.ListarConvitesPendentesAsync(Time.ClientAppId);
+                    MostraBotaoVerSolicitacoes = convitesPendentes.Count > 0;
+                } else {
+                    MostraBotaoVerSolicitacoes = false;
+                }
+
             } catch (Exception ex) {
                 SetNaoVinculadoState("Erro", "Não foi possível carregar os dados do time.");
                 Debug.WriteLine($"[ERRO GERAL] Falha ao carregar dados do time: {ex.Message}");
@@ -111,19 +132,43 @@ namespace ArenaVirtual.ViewModels.Atleta {
 
         [RelayCommand]
         private async Task CriarMeuTime() =>
-            await Shell.Current.GoToAsync(nameof(CriarTimePage));
+        await Shell.Current.GoToAsync(nameof(CriarTimePage));
 
         [RelayCommand]
         private async Task EntrarTime() =>
-            await Shell.Current.GoToAsync(nameof(EntrarTimePage));
+        await Shell.Current.GoToAsync(nameof(EntrarTimePage));
 
         [RelayCommand]
         private async Task GerenciarTime() =>
-            await Shell.Current.GoToAsync(nameof(EditarTimePage));
+        await Shell.Current.GoToAsync(nameof(EditarTimePage));
 
         [RelayCommand]
         private async Task VerSolicitacoes() =>
-            await Shell.Current.GoToAsync(nameof(SolicitacaoTimePage));
+        await Shell.Current.GoToAsync(nameof(SolicitacaoTimePage));
+
+        [RelayCommand]
+        private async Task CancelarSolicitacao() {
+            bool confirmacao = await Application.Current.MainPage.DisplayAlert(
+            "Cancelar Solicitação",
+            "Tem certeza de que deseja cancelar sua solicitação de entrada no time?",
+            "Sim",
+            "Não");
+
+            if (!confirmacao) {
+                return;
+            }
+
+            try {
+                var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
+                if (usuarioAtual != null) {
+                    await _databaseService.DeletarConvitePendenteDoUsuarioAsync(usuarioAtual.ClientAppId);
+                    SetNaoVinculadoState("Solicitação Cancelada", "Você ainda não está em um time. Crie seu próprio time ou solicite entrada em um time existente.");
+                }
+            } catch (Exception ex) {
+                Debug.WriteLine($"[ERRO DE CANCELAMENTO] Falha ao cancelar a solicitação: {ex.Message}");
+                await Application.Current.MainPage.DisplayAlert("Erro", "Não foi possível cancelar a solicitação. Tente novamente mais tarde.", "OK");
+            }
+        }
 
         private ImageSource? GetImageSourceFromFile(string? filePath) {
             if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) {
@@ -143,26 +188,36 @@ namespace ArenaVirtual.ViewModels.Atleta {
             StatusMessageTitle = title;
             StatusMessageDescription = description;
             ShowButtons = true;
+            MostraBotaoCancelar = false;
+            // Corrigido
+            _usuarioEhCapitao = false;
             OnPropertyChanged(nameof(VinculadoATime));
             OnPropertyChanged(nameof(NaoVinculadoATime));
+            OnPropertyChanged(nameof(UsuarioEhCapitao));
         }
 
         private void SetMensagemPendencia(string? timeNome) {
             StatusMessageTitle = "Solicitação Pendente";
             StatusMessageDescription = !string.IsNullOrEmpty(timeNome)
-                ? $"Sua solicitação para entrar no time {timeNome} foi enviada. Aguarde a resposta do capitão."
-                : "Sua solicitação para entrar em um time foi enviada. Aguarde a resposta do capitão.";
+             ? $"Sua solicitação para entrar no time {timeNome} foi enviada. Aguarde a resposta do capitão."
+             : "Sua solicitação para entrar em um time foi enviada. Aguarde a resposta do capitão.";
             ShowButtons = false;
+            MostraBotaoCancelar = true;
+            // Corrigido
+            _usuarioEhCapitao = false;
             OnPropertyChanged(nameof(VinculadoATime));
             OnPropertyChanged(nameof(NaoVinculadoATime));
+            OnPropertyChanged(nameof(UsuarioEhCapitao));
         }
 
         private void SetVinculadoState() {
             StatusMessageTitle = string.Empty;
             StatusMessageDescription = string.Empty;
             ShowButtons = false;
+            MostraBotaoCancelar = false;
             OnPropertyChanged(nameof(VinculadoATime));
             OnPropertyChanged(nameof(NaoVinculadoATime));
+            OnPropertyChanged(nameof(UsuarioEhCapitao));
         }
     }
 }

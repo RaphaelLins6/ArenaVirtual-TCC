@@ -35,14 +35,16 @@ public class Time : ISyncable {
     public int Derrotas { get; set; } = 0;
     public int Empates { get; set; } = 0;
 
+    // Chave estrangeira para o ID do capitão no servidor (int)
     public int? CapitaoId { get; set; }
 
-    // **PROPRIEDADES DE NAVEGAÇÃO QUE FALTAM**
-    // Adicione esta propriedade para que o .Include(t => t.Capitao) funcione
+    // **Chave universal do capitão (Guid) para sincronização**
+    public Guid? CapitaoClientAppId { get; set; }
+
+    // Propriedades de navegação
     [ForeignKey("CapitaoId")]
     public Usuario? Capitao { get; set; }
 
-    // Adicione esta propriedade para que o .Include(t => t.Campeonato) funcione
     [ForeignKey("CampeonatoId")]
     public Campeonato? Campeonato { get; set; }
 

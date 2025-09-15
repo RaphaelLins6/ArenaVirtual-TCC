@@ -1,7 +1,4 @@
-﻿// Cliente: ArenaVirtual.Models.Convite
-using SQLite;
-using System;
-using System.Collections.Generic;
+﻿using SQLite;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -19,6 +16,10 @@ namespace ArenaVirtual.Models {
 
         [Indexed]
         public Guid TimeClientAppId { get; set; }
+
+        // Propriedade adicionada para corrigir o erro.
+        [Indexed]
+        public Guid UsuarioClientAppId { get; set; }
 
         public string? ConvidadoEmail { get; set; }
 

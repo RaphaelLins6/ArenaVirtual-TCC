@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
+﻿using ArenaVirtualAPI.DTOs;
 using ArenaVirtualAPI.Services;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -15,17 +16,15 @@ public class DataController : ControllerBase {
         _logger = logger;
     }
 
-    [HttpPost("sync/{modelTypeName}")]
-    public async Task<IActionResult> Sync([FromBody] JsonElement data, string modelTypeName) {
-        _logger.LogInformation($"[Sync] Recebida requisição de sincronização para o tipo: {modelTypeName}");
-        _logger.LogDebug($"[Sync] JSON Recebido: {data.GetRawText()}");
+    [HttpPost("sync")]
+    public async Task<IActionResult> Sync([FromBody] AllUploadsDto data) {
+        _logger.LogInformation($"[Sync] Recebida requisição de sincronização.");
 
         try {
-            var idMapping = await _backendSyncService.ProcessAndMapItemsAsync(data, modelTypeName);
-            _logger.LogDebug($"[Sync] JSON de Retorno: {JsonSerializer.Serialize(idMapping)}");
-            return Ok(idMapping);
+            await _backendSyncService.ProcessAllUploadsAsync(data);
+            return Ok(new { message = "Sincronização concluída com sucesso." });
         } catch (Exception ex) {
-            _logger.LogError($"[Sync] Erro interno na sincronização de upload para {modelTypeName}: {ex.Message}");
+            _logger.LogError($"[Sync] Erro interno na sincronização de upload: {ex.Message}");
             return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
         }
     }

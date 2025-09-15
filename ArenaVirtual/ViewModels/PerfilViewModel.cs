@@ -78,7 +78,7 @@ namespace ArenaVirtual.ViewModels {
                 LinkRedeSocialUsuario = UsuarioLogado.LinkRedeSocial;
 
                 // Limpa campos específicos
-                DataNascimentoUsuario = null;
+                //DataNascimentoUsuario = null;
                 GeneroUsuario = null;
                 NomeEmpresaUsuario = string.Empty;
                 CnpjUsuario = string.Empty;

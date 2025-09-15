@@ -13,6 +13,11 @@ namespace ArenaVirtualAPI.Models {
 
         public Guid ClientAppId { get; set; }
 
+        // Novos campos para os IDs de servidor (chaves estrangeiras)
+        public int UsuarioId { get; set; }
+        public int CampeonatoId { get; set; }
+
+        // Mantém os campos de GUID para sincronização
         public Guid UsuarioClientAppId { get; set; }
         public Guid CampeonatoClientAppId { get; set; }
 

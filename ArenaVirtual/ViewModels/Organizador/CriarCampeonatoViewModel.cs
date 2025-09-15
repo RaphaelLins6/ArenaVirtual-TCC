@@ -101,8 +101,6 @@ namespace ArenaVirtual.ViewModels {
                 return;
             }
 
-            // Removida a validação de TryParse redundante. O método CanSalvarCampeonato já cuida disso.
-
             var novoCampeonato = new Campeonato {
                 Nome = Nome,
                 Local = Local,
@@ -124,6 +122,8 @@ namespace ArenaVirtual.ViewModels {
                 await _databaseService.InserirCampeonatoAsync(novoCampeonato);
                 MensagemValidacao = "Campeonato criado com sucesso!";
                 LimparCampos();
+                // Adicione esta linha para voltar para a página anterior, que irá atualizar a lista de campeonatos.
+                await Shell.Current.GoToAsync("..");
             } catch (Exception ex) {
                 Debug.WriteLine($"Erro ao criar campeonato: {ex.Message}");
                 MensagemValidacao = $"Falha ao criar campeonato: {ex.Message}";

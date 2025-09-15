@@ -171,5 +171,10 @@ namespace ArenaVirtual.Services {
             _database.Table<Convite>()
                      .Where(c => c.SolicitanteClientAppId == solicitanteClientAppId && c.Status == StatusConvite.Pendente)
                      .FirstOrDefaultAsync();
+
+        public Task<int> DeletarConvitePendenteDoUsuarioAsync(Guid usuarioClientAppId) =>
+            _database.Table<Convite>()
+                .Where(c => c.UsuarioClientAppId == usuarioClientAppId && c.Status == StatusConvite.Pendente)
+                .DeleteAsync();
     }
 }

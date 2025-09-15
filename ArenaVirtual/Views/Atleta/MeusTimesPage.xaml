@@ -7,10 +7,6 @@
     BackgroundColor="{AppThemeBinding Light=#F5F5F5,
                                       Dark=#121212}">
 
-    <ContentPage.BindingContext>
-        <vm:MeuTimePageViewModel />
-    </ContentPage.BindingContext>
-
     <ContentPage.Content>
         <Grid Padding="15">
 
@@ -56,7 +52,7 @@
                         BackgroundColor="#2196F3"
                         Command="{Binding VerSolicitacoesCommand}"
                         CornerRadius="20"
-                        IsVisible="{Binding UsuarioEhCapitao}"
+                        IsVisible="{Binding MostraBotaoVerSolicitacoes}"
                         Text="Solicitações"
                         TextColor="White" />
 
@@ -123,6 +119,16 @@
                     HorizontalOptions="Center"
                     IsVisible="{Binding ShowButtons}"
                     Text="Entrar em um Time"
+                    TextColor="White"
+                    WidthRequest="200" />
+
+                <Button
+                    BackgroundColor="Red"
+                    Command="{Binding CancelarSolicitacaoCommand}"
+                    CornerRadius="20"
+                    HorizontalOptions="Center"
+                    IsVisible="{Binding MostraBotaoCancelar}"
+                    Text="Cancelar Solicitação"
                     TextColor="White"
                     WidthRequest="200" />
             </VerticalStackLayout>

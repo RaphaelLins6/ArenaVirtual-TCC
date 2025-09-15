@@ -3,10 +3,6 @@ using ArenaVirtualAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using ArenaVirtualAPI.Models;
 using ArenaVirtualAPI.DTOs;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System;
 
 public class CampeonatoService : IBackendService<Campeonato, CampeonatoSyncDto> {
     private readonly ApiDbContext _context;
@@ -15,56 +11,26 @@ public class CampeonatoService : IBackendService<Campeonato, CampeonatoSyncDto> 
         _context = context;
     }
 
-    public async Task<Campeonato?> GetByIdAsync(int id) {
-        return await _context.Campeonatos.FindAsync(id);
-    }
-
-    public async Task AddAsync(Campeonato campeonato) {
-        campeonato.IsSynced = true;
-        campeonato.UpdatedAt = DateTime.UtcNow;
-        _context.Campeonatos.Add(campeonato);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task UpdateAsync(Campeonato campeonato) {
-        var existingCampeonato = await _context.Campeonatos.FindAsync(campeonato.Id);
-        if (existingCampeonato != null) {
-            existingCampeonato.Nome = campeonato.Nome;
-            existingCampeonato.Descricao = campeonato.Descricao;
-            existingCampeonato.DataInicio = campeonato.DataInicio;
-            existingCampeonato.DataFim = campeonato.DataFim;
-            existingCampeonato.Regras = campeonato.Regras;
-            existingCampeonato.IsSynced = true;
-            existingCampeonato.UpdatedAt = DateTime.UtcNow;
-            _context.Campeonatos.Update(existingCampeonato);
-            await _context.SaveChangesAsync();
-        }
-    }
-
-    public async Task ProcessItemsAsync(IEnumerable<CampeonatoSyncDto> items) {
-        await ProcessAndMapItemsAsync(items);
-    }
-
-    public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<CampeonatoSyncDto> items) {
+    // O método ProcessAndMapItemsAsync agora aceita o dicionário de mapeamentos
+    public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<CampeonatoSyncDto> items, Dictionary<string, Dictionary<Guid, int>> idMappings) {
         var idMapping = new Dictionary<Guid, int>();
 
-        // Busca o OrganizadorId (int) correspondente ao OrganizadorClientAppId (Guid)
-        var organizadorClientAppIds = items
-            .Where(i => i.OrganizadorClientAppId != Guid.Empty)
-            .Select(i => i.OrganizadorClientAppId)
-            .ToHashSet();
-
-        var organizadorApiIds = await _context.Usuarios
-            .Where(u => organizadorClientAppIds.Contains(u.ClientAppId))
-            .ToDictionaryAsync(u => u.ClientAppId, u => u.Id);
+        // Busca o dicionário de mapeamento de IDs de Usuarios
+        if (!idMappings.TryGetValue("Usuario", out var userMappings)) {
+            // Se o mapeamento de usuários não existe, é um erro.
+            throw new InvalidOperationException("Mapeamento de Usuário não encontrado. O upload deve processar Usuários antes de Campeonatos.");
+        }
 
         foreach (var dto in items) {
             var existingItem = await _context.Campeonatos.FirstOrDefaultAsync(c => c.ClientAppId == dto.ClientAppId);
 
             // Mapeia o Guid do organizador para o Id do banco de dados da API
             int? apiOrganizadorId = null;
-            if (dto.OrganizadorClientAppId != Guid.Empty && organizadorApiIds.TryGetValue(dto.OrganizadorClientAppId, out int matchedId)) {
+            if (userMappings.TryGetValue(dto.OrganizadorClientAppId, out int matchedId)) {
                 apiOrganizadorId = matchedId;
+            } else {
+                // Caso o organizador não seja encontrado, lança uma exceção para evitar a falha de FK
+                throw new InvalidOperationException($"Organizador com ClientAppId {dto.OrganizadorClientAppId} não foi encontrado no mapeamento.");
             }
 
             if (existingItem == null) {
@@ -74,7 +40,7 @@ public class CampeonatoService : IBackendService<Campeonato, CampeonatoSyncDto> 
                     Local = dto.Local,
                     DataInicio = dto.DataInicio,
                     DataFim = dto.DataFim,
-                    OrganizadorId = apiOrganizadorId ?? 0, // Usando o ID mapeado
+                    OrganizadorId = apiOrganizadorId.Value, // Usa o ID mapeado
                     LogoUrl = dto.LogoUrl,
                     NomeOrganizador = dto.NomeOrganizador,
                     EmailOrganizador = dto.EmailOrganizador,
@@ -100,7 +66,7 @@ public class CampeonatoService : IBackendService<Campeonato, CampeonatoSyncDto> 
                 existingItem.Local = dto.Local;
                 existingItem.DataInicio = dto.DataInicio;
                 existingItem.DataFim = dto.DataFim;
-                existingItem.OrganizadorId = apiOrganizadorId ?? 0; // Usando o ID mapeado
+                existingItem.OrganizadorId = apiOrganizadorId.Value; // Usa o ID mapeado
                 existingItem.LogoUrl = dto.LogoUrl;
                 existingItem.NomeOrganizador = dto.NomeOrganizador;
                 existingItem.EmailOrganizador = dto.EmailOrganizador;
@@ -122,6 +88,38 @@ public class CampeonatoService : IBackendService<Campeonato, CampeonatoSyncDto> 
             }
         }
         return idMapping;
+    }
+
+    // GetByIdAsync e os outros métodos permanecem inalterados, pois o problema é no upload.
+    public async Task<Campeonato?> GetByIdAsync(int id) {
+        return await _context.Campeonatos.FindAsync(id);
+    }
+    public async Task AddAsync(Campeonato campeonato) {
+        campeonato.IsSynced = true;
+        campeonato.UpdatedAt = DateTime.UtcNow;
+        _context.Campeonatos.Add(campeonato);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(Campeonato campeonato) {
+        var existingCampeonato = await _context.Campeonatos.FindAsync(campeonato.Id);
+        if (existingCampeonato != null) {
+            existingCampeonato.Nome = campeonato.Nome;
+            existingCampeonato.Descricao = campeonato.Descricao;
+            existingCampeonato.DataInicio = campeonato.DataInicio;
+            existingCampeonato.DataFim = campeonato.DataFim;
+            existingCampeonato.Regras = campeonato.Regras;
+            existingCampeonato.IsSynced = true;
+            existingCampeonato.UpdatedAt = DateTime.UtcNow;
+            _context.Campeonatos.Update(existingCampeonato);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task ProcessItemsAsync(IEnumerable<CampeonatoSyncDto> items) {
+        // Este método não foi alterado, mas não será mais usado diretamente pelo BackendSyncService
+        // O método ProcessAndMapItemsAsync com o mapeamento será chamado no lugar
+        await ProcessAndMapItemsAsync(items, new Dictionary<string, Dictionary<Guid, int>>());
     }
 
     public async Task<IEnumerable<CampeonatoSyncDto>> GetUpdatedSinceAsync(DateTime lastSyncTime) {

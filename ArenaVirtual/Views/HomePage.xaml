@@ -30,7 +30,6 @@
                         FontSize="20"
                         Text="Favoritos"
                         TextColor="OrangeRed" />
-
                     <CollectionView ItemsSource="{Binding Favoritos}">
                         <CollectionView.EmptyView>
                             <Label
@@ -56,7 +55,6 @@
                         FontSize="20"
                         Text="Todos os Campeonatos"
                         TextColor="OrangeRed" />
-
                     <CollectionView ItemsSource="{Binding Campeonatos}">
                         <CollectionView.EmptyView>
                             <Label
@@ -75,29 +73,36 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
                 </StackLayout>
-
             </StackLayout>
         </ScrollView>
-        <VerticalStackLayout
-            Padding="0,20,20,0"
-            HorizontalOptions="End"
-            VerticalOptions="Start">
-            <ImageButton
-                Aspect="AspectFit"
-                BackgroundColor="Transparent"
-                Command="{Binding SincronizarCommand}"
-                HeightRequest="40"
-                HorizontalOptions="End"
-                Source="sync_icon.png"
-                VerticalOptions="Center"
-                WidthRequest="40" />
 
+        <ImageButton
+            Grid.Row="0"
+            Margin="0,20,20,0"
+            Aspect="AspectFit"
+            BackgroundColor="Transparent"
+            Command="{Binding SincronizarCommand}"
+            HeightRequest="40"
+            HorizontalOptions="End"
+            Source="sync_icon.png"
+            VerticalOptions="Start"
+            WidthRequest="40" />
+
+        <Grid
+            Grid.Row="0"
+            BackgroundColor="#000000"
+            HorizontalOptions="FillAndExpand"
+            InputTransparent="True"
+            IsVisible="{Binding IsBusy}"
+            Opacity="0.5"
+            VerticalOptions="FillAndExpand">
             <ActivityIndicator
                 HorizontalOptions="Center"
                 IsRunning="{Binding IsBusy}"
                 IsVisible="{Binding IsBusy}"
+                Scale="2"
                 VerticalOptions="Center"
                 Color="OrangeRed" />
-        </VerticalStackLayout>
+        </Grid>
     </Grid>
 </ContentPage>
