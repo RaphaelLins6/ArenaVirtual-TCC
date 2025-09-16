@@ -11,6 +11,10 @@
     <Color x:Key="SecondaryDarkText">#FF5900</Color>
     <Color x:Key="Tertiary">#FF5900</Color>
 
+    <Color x:Key="CorFundoPrincipal">#242424</Color>
+    <Color x:Key="CorTextoPrincipal">#FF5900</Color>
+    <Color x:Key="CorLink">White</Color>
+
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
     <Color x:Key="Magenta">#D600AA</Color>

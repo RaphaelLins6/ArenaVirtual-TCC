@@ -36,8 +36,9 @@ public static class MauiProgram {
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "arenavirtual.db3");
         builder.Services.AddSingleton(new DatabaseService(dbPath));
         builder.Services.AddSingleton<ApiService>();
-        builder.Services.AddSingleton<SyncService>(); // Registra o serviço de sincronização
-        builder.Services.AddSingleton<CampeonatoService>(); // Registra o serviço de campeonatos
+        builder.Services.AddSingleton<SyncService>(); 
+        builder.Services.AddSingleton<CampeonatoService>(); 
+        builder.Services.AddSingleton<ConnectivityService>();
 
         // Registre os serviços de domínio como Transients
         builder.Services.AddTransient<UsuarioService>();

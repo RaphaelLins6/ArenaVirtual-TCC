@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ArenaVirtualAPI.Services;
 using ArenaVirtualAPI.Models;
 using ArenaVirtualAPI.DTOs;
-using Microsoft.OpenApi.Models; // Adiciona a diretiva using para OpenApi
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,11 +27,7 @@ builder.Services.AddSwaggerGen(c => {
 // CONFIGURAÇÃO DO KESTREL PARA HABILITAR HTTP E HTTPS
 // ==========================================================
 builder.WebHost.ConfigureKestrel(options => {
-    // HTTP normal (sem SSL) na porta 5067.
-    // O endereço AnyIP permite escutar em todos os endereços IP disponíveis, incluindo o 10.0.2.2.
     options.ListenAnyIP(5067);
-
-    // HTTPS com certificado de desenvolvimento na porta 7117.
     options.ListenAnyIP(7117, listenOptions => {
         listenOptions.UseHttps();
     });
@@ -40,32 +36,25 @@ builder.WebHost.ConfigureKestrel(options => {
 // ==========================================================
 // REGISTRO DOS SERVIÇOS DE SINCRONIZAÇÃO
 // ==========================================================
-// Registra os serviços específicos
 builder.Services.AddScoped<IBackendService<Usuario, UsuarioSyncDto>, UsuarioService>();
 builder.Services.AddScoped<IBackendService<Campeonato, CampeonatoSyncDto>, CampeonatoService>();
 builder.Services.AddScoped<IBackendService<Time, TimeSyncDto>, TimeService>();
 builder.Services.AddScoped<IBackendService<Convite, ConviteSyncDto>, ConviteService>();
 builder.Services.AddScoped<IBackendService<UsuarioCampeonatoFavorito, UsuarioCampeonatoFavoritoSyncDto>, UsuarioCampeonatoFavoritoService>();
 
-// Registra a fábrica de serviços de sincronização
-builder.Services.AddScoped<IBackendSyncServiceFactory, BackendSyncServiceFactory>();
-
-// Registra o serviço principal de sincronização
 builder.Services.AddScoped<BackendSyncService>();
 
 var app = builder.Build();
 
 // Configura o pipeline HTTP
 if (app.Environment.IsDevelopment()) {
-    // Habilita o middleware para servir o Swagger gerado como um endpoint JSON.
+    // Habilita a página de exceção detalhada em ambiente de desenvolvimento
+    app.UseDeveloperExceptionPage();
     app.UseSwagger();
-
-    // Habilita o middleware para servir a página da UI do Swagger.
     app.UseSwaggerUI(c => {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "ArenaVirtualAPI v1");
     });
 } else {
-    // Para ambientes de produção, redirecione para HTTPS para garantir segurança.
     app.UseHttpsRedirection();
 }
 

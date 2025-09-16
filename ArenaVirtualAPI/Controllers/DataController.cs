@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -21,8 +23,8 @@ public class DataController : ControllerBase {
         _logger.LogInformation($"[Sync] Recebida requisição de sincronização.");
 
         try {
-            await _backendSyncService.ProcessAllUploadsAsync(data);
-            return Ok(new { message = "Sincronização concluída com sucesso." });
+            var idMappings = await _backendSyncService.ProcessAllUploadsAsync(data);
+            return Ok(idMappings);
         } catch (Exception ex) {
             _logger.LogError($"[Sync] Erro interno na sincronização de upload: {ex.Message}");
             return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
@@ -35,8 +37,8 @@ public class DataController : ControllerBase {
 
         try {
             var updatedItems = await _backendSyncService.GetUpdatesAsync(lastSyncTime);
-            _logger.LogDebug($"[Updates] JSON de Resposta: {JsonSerializer.Serialize(updatedItems.UpdatedItems)}");
-            return Ok(updatedItems.UpdatedItems);
+            _logger.LogDebug($"[Updates] JSON de Resposta: {JsonSerializer.Serialize(updatedItems)}");
+            return Ok(updatedItems);
         } catch (Exception ex) {
             _logger.LogError($"[Updates] Erro ao obter atualizações: {ex.Message}");
             return StatusCode(500, $"Erro interno do servidor: {ex.Message}");

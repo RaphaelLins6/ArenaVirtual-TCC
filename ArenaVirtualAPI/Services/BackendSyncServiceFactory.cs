@@ -1,5 +1,12 @@
-﻿using ArenaVirtualAPI.DTOs;
+﻿// BackendSyncServiceFactory.cs (Corrigido)
+
+using ArenaVirtualAPI.DTOs;
 using ArenaVirtualAPI.Models;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ArenaVirtualAPI.Services {
     public class BackendSyncServiceFactory : IBackendSyncServiceFactory {
@@ -16,7 +23,7 @@ namespace ArenaVirtualAPI.Services {
             _serviceProvider = serviceProvider;
         }
 
-        public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync<T>(IEnumerable<T> items, string entityType) where T : ISyncableDto {
+        public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync<T>(IEnumerable<T> items, string entityType, Dictionary<string, Dictionary<Guid, int>> idMappings) where T : ISyncableDto {
             if (items == null || !items.Any()) {
                 return new Dictionary<Guid, int>();
             }
@@ -28,9 +35,8 @@ namespace ArenaVirtualAPI.Services {
             var serviceType = typeof(IBackendService<,>).MakeGenericType(types.EntityType, types.DtoType);
             dynamic service = _serviceProvider.GetRequiredService(serviceType);
 
-            // O método na interface IBackendService já retorna Dictionary<Guid, int>,
-            // então a chamada aqui está correta.
-            return await service.ProcessAndMapItemsAsync(items);
+            // Repassamos os itens E o dicionário de mapeamentos para o serviço individual
+            return await service.ProcessAndMapItemsAsync(items, idMappings);
         }
 
         public async Task<IEnumerable<T>> GetUpdatesAsync<T>(string entityType, DateTime lastSyncTime) where T : ISyncableDto {

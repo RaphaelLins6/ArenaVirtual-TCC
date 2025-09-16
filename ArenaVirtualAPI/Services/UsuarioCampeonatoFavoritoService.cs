@@ -49,7 +49,6 @@ namespace ArenaVirtualAPI.Services {
         public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<UsuarioCampeonatoFavoritoSyncDto> items, Dictionary<string, Dictionary<Guid, int>> idMappings) {
             var idMapping = new Dictionary<Guid, int>();
 
-            // Pega os dicionários de mapeamento para o tipo de entidade correto
             if (!idMappings.TryGetValue("Usuario", out var usuarioMapping)) {
                 throw new InvalidOperationException("Mapeamento de Usuário não encontrado.");
             }
@@ -58,7 +57,6 @@ namespace ArenaVirtualAPI.Services {
             }
 
             foreach (var dto in items) {
-                // Mapeia o ClientAppId para o ID do servidor
                 if (!usuarioMapping.TryGetValue(dto.UsuarioClientAppId, out int usuarioId)) continue;
                 if (!campeonatoMapping.TryGetValue(dto.CampeonatoClientAppId, out int campeonatoId)) continue;
 
@@ -68,28 +66,25 @@ namespace ArenaVirtualAPI.Services {
                 if (existingItem == null) {
                     var newItem = new UsuarioCampeonatoFavorito {
                         ClientAppId = dto.ClientAppId,
-                        // Atribui os IDs do servidor (int) às novas propriedades
                         UsuarioId = usuarioId,
                         CampeonatoId = campeonatoId,
-                        // Atribui os IDs de cliente (Guid) diretamente do DTO
                         UsuarioClientAppId = dto.UsuarioClientAppId,
                         CampeonatoClientAppId = dto.CampeonatoClientAppId,
                         IsSynced = true,
                         UpdatedAt = DateTime.UtcNow
                     };
                     _context.UsuarioCampeonatoFavoritos.Add(newItem);
-                    await _context.SaveChangesAsync();
                     idMapping[newItem.ClientAppId] = newItem.Id;
                 } else {
-                    if (dto.UpdatedAt > existingItem.UpdatedAt) {
-                        existingItem.UpdatedAt = DateTime.UtcNow;
-                        existingItem.IsSynced = true;
-                        _context.Entry(existingItem).State = EntityState.Modified;
-                        await _context.SaveChangesAsync();
-                    }
+                    existingItem.UpdatedAt = DateTime.UtcNow;
+                    existingItem.IsSynced = true;
+                    _context.Entry(existingItem).State = EntityState.Modified;
                     idMapping[existingItem.ClientAppId] = existingItem.Id;
                 }
             }
+
+            // Chama SaveChangesAsync apenas uma vez no final do loop
+            await _context.SaveChangesAsync();
             return idMapping;
         }
     }

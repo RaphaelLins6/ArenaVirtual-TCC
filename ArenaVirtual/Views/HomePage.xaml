@@ -84,6 +84,7 @@
             Command="{Binding SincronizarCommand}"
             HeightRequest="40"
             HorizontalOptions="End"
+            IsVisible="{Binding IsOnline}"
             Source="sync_icon.png"
             VerticalOptions="Start"
             WidthRequest="40" />

@@ -1,4 +1,5 @@
-﻿using ArenaVirtual.Models;
+﻿using ArenaVirtual.DTOs;
+using ArenaVirtual.Models;
 using ArenaVirtual.Services;
 using System.Collections;
 using System.Diagnostics;
@@ -57,47 +58,82 @@ public class SyncService {
     }
 
     private async Task UploadChangesAsync(IProgress<string> progress) {
-        var idMapping = new Dictionary<Type, Dictionary<Guid, int>>();
+        var allUploads = new AllUploadsDto();
+        var allItems = new Dictionary<Type, IList>();
+        var requiredDependencies = new HashSet<Guid>();
 
+        // 1. Coletar todos os itens não sincronizados e suas dependências
         foreach (var type in _uploadOrder) {
-            progress?.Report($"Enviando dados de {type.Name}...");
-            var getMethod = typeof(DatabaseService).GetMethod("GetUnsyncedItemsAsync", BindingFlags.Public | BindingFlags.Instance);
-            if (getMethod == null) {
-                Debug.WriteLine($"[SyncService] Método GetUnsyncedItemsAsync não encontrado para o tipo {type.Name}.");
-                continue;
-            }
-
-            var genericGetMethod = getMethod.MakeGenericMethod(type);
-            var unsyncedItemsTask = (Task)genericGetMethod.Invoke(_databaseService, null);
-            await unsyncedItemsTask;
-            var unsyncedItems = (IList)((dynamic)unsyncedItemsTask).Result;
+            var unsyncedItems = await GetUnsyncedItemsWithTypeAsync(type);
 
             if (unsyncedItems.Count > 0) {
-                // Passa o mapeamento de IDs para que o DTO de sincronização possa
-                // ser construído com os IDs do servidor corretos para chaves estrangeiras.
-                var syncDtos = await CreateSyncDtos(unsyncedItems, type, idMapping);
+                allItems[type] = unsyncedItems;
 
-                var postMethod = typeof(ApiService).GetMethod("PostDataAsync", BindingFlags.Public | BindingFlags.Instance);
-                if (postMethod == null) {
-                    Debug.WriteLine($"[SyncService] Método PostDataAsync não encontrado para o tipo {type.Name}.");
-                    continue;
+                // Lógica para adicionar dependências de usuário
+                if (type == typeof(Campeonato)) {
+                    foreach (dynamic item in unsyncedItems) {
+                        requiredDependencies.Add(item.OrganizadorClientAppId);
+                    }
                 }
+                if (type == typeof(Time)) {
+                    foreach (dynamic item in unsyncedItems) {
+                        if (item.CapitaoClientAppId != null) {
+                            requiredDependencies.Add(item.CapitaoClientAppId);
+                        }
+                    }
+                }
+            }
+        }
 
-                var genericPostMethod = postMethod.MakeGenericMethod(syncDtos.GetType());
-                var postTask = (Task<Dictionary<Guid, int>>)genericPostMethod.Invoke(_apiService, new object[] { type.Name, syncDtos });
-                var currentIdMapping = await postTask;
-                idMapping[type] = currentIdMapping;
+        // 2. Coletar as dependências que não foram incluídas
+        if (requiredDependencies.Count > 0) {
+            var userItems = await _databaseService.GetItemsByClientAppIdsAsync<Usuario>(requiredDependencies);
+            if (userItems.Any()) {
+                if (allItems.ContainsKey(typeof(Usuario))) {
+                    foreach (var user in userItems) {
+                        if (!((List<Usuario>)allItems[typeof(Usuario)]).Any(u => u.ClientAppId == user.ClientAppId)) {
+                            allItems[typeof(Usuario)].Add(user);
+                        }
+                    }
+                } else {
+                    allItems[typeof(Usuario)] = userItems;
+                }
+            }
+        }
 
-                foreach (var item in unsyncedItems.Cast<ISyncable>()) {
-                    if (currentIdMapping.TryGetValue(item.ClientAppId, out int serverId)) {
-                        await _databaseService.UpdateIdAndMarkAsSyncedAsync((dynamic)item, serverId);
+        if (!allItems.Any()) {
+            progress?.Report("Nenhum dado para enviar.");
+            return;
+        }
+
+        // 3. Criar e popular os DTOs para envio, respeitando a ordem de upload
+        foreach (var type in _uploadOrder) {
+            if (allItems.TryGetValue(type, out var itemsToUpload)) {
+                var syncDtos = CreateSyncDtos(itemsToUpload, type);
+                var prop = typeof(AllUploadsDto).GetProperty($"{type.Name}s");
+                prop?.SetValue(allUploads, syncDtos);
+            }
+        }
+
+        // 4. Enviar a requisição para o servidor
+        progress?.Report("Enviando todos os dados para o servidor...");
+        var idMappings = await _apiService.PostDataAsync("AllUploads", allUploads);
+
+        // 5. Atualizar os IDs locais (seu código já estava correto aqui)
+        foreach (var type in _uploadOrder) {
+            if (idMappings.TryGetValue(type.Name, out var mapping)) {
+                if (allItems.TryGetValue(type, out var itemsToUpdate)) {
+                    foreach (var item in itemsToUpdate.Cast<ISyncable>()) {
+                        if (mapping.TryGetValue(item.ClientAppId, out int serverId)) {
+                            await _databaseService.UpdateIdAndMarkAsSyncedAsync((dynamic)item, serverId);
+                        }
                     }
                 }
             }
         }
     }
 
-    private async Task<IList> CreateSyncDtos(IList items, Type itemType, Dictionary<Type, Dictionary<Guid, int>> idMapping) {
+    private IList CreateSyncDtos(IList items, Type itemType) {
         var dtoType = Type.GetType($"ArenaVirtual.DTOs.{itemType.Name}SyncDto");
         if (dtoType == null) {
             Debug.WriteLine($"[SyncService] DTO não encontrado para o tipo {itemType.Name}.");
@@ -110,6 +146,8 @@ public class SyncService {
         foreach (var item in items) {
             var dto = Activator.CreateInstance(dtoType);
 
+            // Apenas copia as propriedades do modelo para o DTO.
+            // O mapeamento de FKs agora é responsabilidade do backend.
             foreach (var prop in itemType.GetProperties()) {
                 var dtoProp = dtoType.GetProperty(prop.Name);
                 if (dtoProp != null && dtoProp.CanWrite) {
@@ -118,34 +156,10 @@ public class SyncService {
                 }
             }
 
-            // Mapeia chaves estrangeiras com base nos IDs do servidor.
-            foreach (var mappingType in idMapping.Keys) {
-                // Padrão: {NomeDaEntidade}Id para FK e {NomeDaEntidade}ClientAppId para o local.
-                var fkPropName = $"{mappingType.Name}Id";
-                var fkClientAppIdPropName = $"{mappingType.Name}ClientAppId";
-
-                var fkProp = dtoType.GetProperty(fkPropName);
-                var fkClientAppIdProp = itemType.GetProperty(fkClientAppIdPropName);
-
-                if (fkProp != null && fkClientAppIdProp != null) {
-                    var clientAppIdValue = fkClientAppIdProp.GetValue(item);
-                    if (clientAppIdValue is Guid clientAppId && idMapping[mappingType].TryGetValue(clientAppId, out int serverId)) {
-                        fkProp.SetValue(dto, serverId);
-                    }
-                }
-            }
-
-            // Tratamento especial para o 'CapitaoId' no 'Time'
-            // O `CapitaoId` é o ID do servidor do usuário.
-            // O `CapitaoClientAppId` deve ser usado para encontrar o ID do servidor.
+            // Tratamento especial para o 'CapitaoClientAppId' no 'Time'
             if (itemType == typeof(Time)) {
                 var timeItem = (Time)item;
-                var userMapping = idMapping.GetValueOrDefault(typeof(Usuario));
-                if (userMapping != null && timeItem.CapitaoClientAppId.HasValue) {
-                    if (userMapping.TryGetValue(timeItem.CapitaoClientAppId.Value, out int serverId)) {
-                        dtoType.GetProperty("CapitaoId")?.SetValue(dto, serverId);
-                    }
-                }
+                dtoType.GetProperty("CapitaoClientAppId")?.SetValue(dto, timeItem.CapitaoClientAppId);
             }
 
             dtoType.GetProperty("IsSynced")?.SetValue(dto, true);
@@ -159,10 +173,13 @@ public class SyncService {
         progress?.Report("Buscando todas as atualizações no servidor...");
 
         var updates = await _apiService.GetAllUpdatesAsync(lastSyncTime);
+        if (updates == null || updates.UpdatedItems == null) {
+            progress?.Report("Nenhuma atualização encontrada no servidor.");
+            return;
+        }
 
         foreach (var type in _uploadOrder) {
             var typeName = type.Name;
-
             if (updates.UpdatedItems.TryGetValue(typeName, out var jsonElement)) {
                 var rawJson = jsonElement.GetRawText();
                 var listType = typeof(List<>).MakeGenericType(type);
@@ -183,5 +200,18 @@ public class SyncService {
         }
         Preferences.Set("LastSyncTime", DateTime.UtcNow);
         progress?.Report("Sincronização de download concluída.");
+    }
+
+    private async Task<IList> GetUnsyncedItemsWithTypeAsync(Type type) {
+        var getMethod = typeof(DatabaseService).GetMethod("GetUnsyncedItemsAsync", BindingFlags.Public | BindingFlags.Instance);
+        if (getMethod == null) {
+            Debug.WriteLine($"[SyncService] Método GetUnsyncedItemsAsync não encontrado para o tipo {type.Name}.");
+            return new List<object>();
+        }
+
+        var genericGetMethod = getMethod.MakeGenericMethod(type);
+        var unsyncedItemsTask = (Task)genericGetMethod.Invoke(_databaseService, null);
+        await unsyncedItemsTask;
+        return (IList)((dynamic)unsyncedItemsTask).Result;
     }
 }

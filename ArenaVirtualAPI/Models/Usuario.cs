@@ -39,6 +39,11 @@ public class Usuario : ISyncable {
     // Relacionamento com Time usando a chave universal
     public Guid? TimeClientAppId { get; set; }
 
+    // Chave estrangeira e propriedade de navegação para a entidade Time
+    public int? TimeId { get; set; }
+    [ForeignKey("TimeId")]
+    public virtual Time? Time { get; set; }
+
     // Propriedades de sincronização
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public bool IsSynced { get; set; } = false;

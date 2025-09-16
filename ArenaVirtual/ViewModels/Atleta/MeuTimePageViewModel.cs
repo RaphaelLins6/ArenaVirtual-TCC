@@ -49,7 +49,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
 
         public bool NaoVinculadoATime => !VinculadoATime;
 
-
         private readonly TimeService _timeService;
         private readonly UsuarioService _usuarioService;
         private readonly DatabaseService _databaseService;
@@ -66,9 +65,8 @@ namespace ArenaVirtual.ViewModels.Atleta {
         public async Task LoadDataAsync() {
             try {
                 var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
-                // Remove as chamadas OnPropertyChanged daqui. Elas serão chamadas nos métodos de estado.
 
-                if (usuarioAtual == null) {
+                if (usuarioAtual == null) {
                     SetNaoVinculadoState("Erro de Sessão", "Não foi possível carregar as informações do usuário.");
                     return;
                 }
@@ -91,8 +89,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     return;
                 }
 
-                // Agora o objeto Time está carregado, pode-se usar suas propriedades
-                Time = timeDoUsuario;
+                Time = timeDoUsuario;
                 LogoImageSource = GetImageSourceFromFile(Time.LogoUrl);
 
                 var usuariosDoTime = await _databaseService.GetMembrosByTimeClientAppIdAsync(Time.ClientAppId);
@@ -108,17 +105,11 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 }
                 MembrosDoTime = membrosCarregados;
 
-                // A ordem das chamadas é crucial.
-                // Define se o usuário é o capitão APENAS DEPOIS que a propriedade Time foi populada.
-                UsuarioEhCapitao = usuarioAtual.ClientAppId == Time.CapitaoClientAppId;
+                // Lógica de visibilidade dos botões.
+                UsuarioEhCapitao = usuarioAtual.ClientAppId == Time.CapitaoClientAppId;
 
-                // A lógica para exibir o botão de solicitações agora depende do valor atualizado de UsuarioEhCapitao.
-                if (UsuarioEhCapitao) {
-                    var convitesPendentes = await _databaseService.ListarConvitesPendentesAsync(Time.ClientAppId);
-                    MostraBotaoVerSolicitacoes = convitesPendentes.Count > 0;
-                } else {
-                    MostraBotaoVerSolicitacoes = false;
-                }
+                // Botão de solicitações aparece se, e somente se, o usuário for o capitão.
+                MostraBotaoVerSolicitacoes = UsuarioEhCapitao;
 
                 SetVinculadoState();
 
@@ -188,8 +179,9 @@ namespace ArenaVirtual.ViewModels.Atleta {
             StatusMessageDescription = description;
             ShowButtons = true;
             MostraBotaoCancelar = false;
-            // Garante que as propriedades de estado sejam atualizadas.
-            UsuarioEhCapitao = false;
+            // Garante que as propriedades de estado sejam atualizadas.
+            UsuarioEhCapitao = false;
+            MostraBotaoVerSolicitacoes = false; // Garante que esteja false
             OnPropertyChanged(nameof(VinculadoATime));
             OnPropertyChanged(nameof(NaoVinculadoATime));
         }
@@ -201,8 +193,9 @@ namespace ArenaVirtual.ViewModels.Atleta {
             : "Sua solicitação para entrar em um time foi enviada. Aguarde a resposta do capitão.";
             ShowButtons = false;
             MostraBotaoCancelar = true;
-            // Garante que as propriedades de estado sejam atualizadas.
-            UsuarioEhCapitao = false;
+            // Garante que as propriedades de estado sejam atualizadas.
+            UsuarioEhCapitao = false;
+            MostraBotaoVerSolicitacoes = false; // Garante que esteja false
             OnPropertyChanged(nameof(VinculadoATime));
             OnPropertyChanged(nameof(NaoVinculadoATime));
         }
@@ -212,6 +205,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
             StatusMessageDescription = string.Empty;
             ShowButtons = false;
             MostraBotaoCancelar = false;
+            // A visibilidade dos botões de capitão é definida em LoadDataAsync
             OnPropertyChanged(nameof(VinculadoATime));
             OnPropertyChanged(nameof(NaoVinculadoATime));
         }

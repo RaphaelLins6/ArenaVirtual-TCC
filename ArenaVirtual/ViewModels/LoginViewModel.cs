@@ -3,16 +3,13 @@ using ArenaVirtual.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Diagnostics;
-using System.Threading.Tasks;
-using System;
-using ArenaVirtual.Models; // Adicionado para acessar o modelo de usuário, se necessário
+using Microsoft.Maui.ApplicationModel;
 
 namespace ArenaVirtual.ViewModels {
-    public partial class LoginViewModel(IAlertService alertService, UsuarioService usuarioService, SyncService syncService) : ObservableObject {
-        private readonly IAlertService _alertService = alertService;
-        private readonly UsuarioService _usuarioService = usuarioService;
-        private readonly SyncService _syncService = syncService;
+    // A injeção de dependência acontece aqui no construtor primário
+    public partial class LoginViewModel(IAlertService alertService, UsuarioService usuarioService, SyncService syncService, ConnectivityService connectivityService) : ObservableObject {
 
+        // Propriedades Observáveis
         [ObservableProperty]
         private string email = string.Empty;
 
@@ -22,44 +19,73 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty]
         private bool isBusy = false;
 
+        [ObservableProperty]
+        private bool isOffline = false;
+
+        public LoginViewModel(ConnectivityService connectivityService) : this(null!, null!, null!, null!) {
+            connectivityService.ConnectivityChanged += OnConnectivityChanged;
+            UpdateConnectivityStatus();
+        }
+
+        private void OnConnectivityChanged(object sender, ConnectivityChangedEventArgs e) {
+            UpdateConnectivityStatus();
+        }
+
+        private void UpdateConnectivityStatus() {
+            // A propriedade NetworkAccess é parte da classe Microsoft.Maui.ApplicationModel.Connectivity.
+            // Assumindo que seu ConnectivityService tem uma propriedade IsConnected
+            IsOffline = !connectivityService.IsConnected;
+            Debug.WriteLine($"[LoginViewModel] Status de conectividade atualizado. Está offline: {IsOffline}");
+        }
+
+        // Comandos Relay
         [RelayCommand]
         private async Task Login() {
             if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha)) {
-                await _alertService.DisplayAlert("Erro", "Preencha o e-mail e a senha.", "OK");
+                await alertService.DisplayAlert("Erro", "Preencha o e-mail e a senha.", "OK");
                 return;
             }
 
             IsBusy = true;
 
             try {
-                var usuario = await _usuarioService.Autenticar(Email, Senha);
+                if (IsOffline) {
+                    var usuarioOffline = await usuarioService.AutenticarOffline(Email, Senha);
+                    if (usuarioOffline != null) {
+                        SessaoService.Instancia.Login(usuarioOffline);
+                        App.CurrentUser = usuarioOffline;
+                        Application.Current.MainPage = new AppShell(App.CurrentUser);
+                        Debug.WriteLine("[LoginViewModel] Login offline bem-sucedido.");
+                        return;
+                    } else {
+                        await alertService.DisplayAlert("Erro", "Você está offline e não foi possível encontrar suas credenciais no dispositivo. Tente se conectar à internet.", "OK");
+                        return;
+                    }
+                }
 
+                var usuario = await usuarioService.Autenticar(Email, Senha);
                 if (usuario == null) {
-                    await _alertService.DisplayAlert("Erro", "E-mail ou senha inválidos.", "OK");
+                    await alertService.DisplayAlert("Erro", "E-mail ou senha inválidos.", "OK");
                     return;
                 }
 
                 SessaoService.Instancia.Login(usuario);
                 Debug.WriteLine($"[LoginViewModel] SessaoService.Instancia.Login() chamado para ID: {usuario.Id}, Email: {usuario.Email}");
 
-                await _syncService.SyncAsync(null);
-
-                App.CurrentUser = await _usuarioService.GetUsuarioByEmailAsync(Email);
+                await syncService.SyncAsync(null);
+                App.CurrentUser = await usuarioService.GetUsuarioByEmailAsync(Email);
 
                 if (App.CurrentUser == null || App.CurrentUser.Id == 0) {
                     throw new Exception("Falha na sincronização do usuário.");
                 }
 
-                // AQUI ESTÁ A CORREÇÃO:
-                // Atualize a sessão do serviço com o usuário sincronizado.
                 SessaoService.Instancia.Login(App.CurrentUser);
-
                 Debug.WriteLine("[LoginViewModel] Login bem-sucedido. Sincronização e navegação concluídas.");
 
                 Application.Current.MainPage = new AppShell(App.CurrentUser);
             } catch (Exception ex) {
                 Debug.WriteLine($"[LoginViewModel] Erro no processo de login/sincronização: {ex.Message}");
-                await _alertService.DisplayAlert("Erro", "Ocorreu um erro. Tente novamente ou verifique sua conexão.", "OK");
+                await alertService.DisplayAlert("Erro", "Ocorreu um erro. Tente novamente ou verifique sua conexão.", "OK");
             } finally {
                 IsBusy = false;
             }
@@ -68,16 +94,15 @@ namespace ArenaVirtual.ViewModels {
         [RelayCommand]
         private async Task IrParaRegistro() {
             var localServiceProvider = Application.Current?.Handler?.MauiContext?.Services;
-
             if (localServiceProvider != null) {
                 var registerPage = localServiceProvider.GetService<RegisterPage>();
                 if (registerPage != null && Application.Current?.Windows.Count > 0) {
                     Application.Current.Windows[0].Page = registerPage;
                 } else {
-                    await _alertService.DisplayAlert("Erro", "Página de registro não pôde ser carregada. Contate o suporte.", "OK");
+                    await alertService.DisplayAlert("Erro", "Página de registro não pôde ser carregada. Contate o suporte.", "OK");
                 }
             } else {
-                await _alertService.DisplayAlert("Erro", "Serviços do aplicativo não disponíveis. Contate o suporte.", "OK");
+                await alertService.DisplayAlert("Erro", "Serviços do aplicativo não disponíveis. Contate o suporte.", "OK");
             }
         }
     }

@@ -43,6 +43,7 @@
                                 Command="{Binding GerenciarTimeCommand}"
                                 CornerRadius="20"
                                 HeightRequest="40"
+                                IsVisible="{Binding UsuarioEhCapitao}"
                                 Text="Editar Time"
                                 TextColor="White" />
                         </VerticalStackLayout>

@@ -50,7 +50,6 @@ namespace ArenaVirtualAPI.Services {
         public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<ConviteSyncDto> dtos, Dictionary<string, Dictionary<Guid, int>> idMappings) {
             var idMapping = new Dictionary<Guid, int>();
 
-            // Pega os dicionários de mapeamento para o tipo de entidade correto
             if (!idMappings.TryGetValue("Usuario", out var usuarioMapping)) {
                 throw new InvalidOperationException("Mapeamento de Usuário não encontrado.");
             }
@@ -59,7 +58,6 @@ namespace ArenaVirtualAPI.Services {
             }
 
             foreach (var dto in dtos) {
-                // Mapeia o ClientAppId para o ID do servidor
                 if (!usuarioMapping.TryGetValue(dto.IdSolicitanteClientAppId, out var solicitanteId)) continue;
                 if (!timeMapping.TryGetValue(dto.TimeClientAppId, out var timeId)) continue;
 
@@ -70,7 +68,6 @@ namespace ArenaVirtualAPI.Services {
                         ClientAppId = dto.ClientAppId,
                         ConvidadoEmail = dto.ConvidadoEmail,
                         DataEnvio = dto.DataEnvio,
-                        // Usa os IDs do servidor
                         IdSolicitanteServidor = solicitanteId,
                         TimeId = timeId,
                         Status = dto.Status,
@@ -78,23 +75,20 @@ namespace ArenaVirtualAPI.Services {
                         UpdatedAt = DateTime.UtcNow
                     };
                     _context.Convites.Add(newItem);
-                    await _context.SaveChangesAsync();
                     idMapping[newItem.ClientAppId] = newItem.Id;
                 } else {
-                    if (dto.UpdatedAt > existingItem.UpdatedAt) {
-                        existingItem.ConvidadoEmail = dto.ConvidadoEmail;
-                        existingItem.DataEnvio = dto.DataEnvio;
-                        existingItem.IdSolicitanteServidor = solicitanteId;
-                        existingItem.TimeId = timeId;
-                        existingItem.Status = dto.Status;
-                        existingItem.UpdatedAt = DateTime.UtcNow;
-                        existingItem.IsSynced = true;
-                        _context.Entry(existingItem).State = EntityState.Modified;
-                        await _context.SaveChangesAsync();
-                    }
+                    existingItem.ConvidadoEmail = dto.ConvidadoEmail;
+                    existingItem.DataEnvio = dto.DataEnvio;
+                    existingItem.IdSolicitanteServidor = solicitanteId;
+                    existingItem.TimeId = timeId;
+                    existingItem.Status = dto.Status;
+                    existingItem.UpdatedAt = DateTime.UtcNow;
+                    existingItem.IsSynced = true;
+                    _context.Entry(existingItem).State = EntityState.Modified;
                     idMapping[existingItem.ClientAppId] = existingItem.Id;
                 }
             }
+            await _context.SaveChangesAsync();
             return idMapping;
         }
     }

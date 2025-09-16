@@ -29,7 +29,6 @@ namespace ArenaVirtual.Services {
                 Debug.WriteLine("[UsuarioService] Novo usuário salvo localmente. Disparando sincronização...");
                 await _syncService.SyncAsync(new Progress<string>());
 
-                // Agora usa o método corrigido para buscar o usuário pelo ClientAppId
                 var usuarioRetornado = await _databaseService.ObterUsuarioPorClientAppIdAsync(usuario.ClientAppId);
 
                 if (usuarioRetornado != null)
@@ -57,7 +56,23 @@ namespace ArenaVirtual.Services {
             }
         }
 
-        // Método adicionado para corrigir o erro CS1061
+        public async Task<Usuario?> AutenticarOffline(string email, string senha) {
+            try {
+                var usuario = await _databaseService.ObterUsuarioPorEmailAsync(email);
+
+                if (usuario != null && BCrypt.Net.BCrypt.Verify(senha, usuario.SenhaHash)) {
+                    Debug.WriteLine($"[UsuarioService] Autenticação offline bem-sucedida para o usuário: {email}");
+                    return usuario;
+                } else {
+                    Debug.WriteLine($"[UsuarioService] Falha na autenticação offline para o usuário: {email}");
+                    return null;
+                }
+            } catch (Exception ex) {
+                Debug.WriteLine($"[UsuarioService] Erro ao autenticar offline: {ex.Message}");
+                return null;
+            }
+        }
+
         public async Task<Usuario?> GetUsuarioByEmailAsync(string email) {
             return await _databaseService.ObterUsuarioPorEmailAsync(email);
         }

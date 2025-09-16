@@ -65,6 +65,7 @@ public class UsuarioService : IBackendService<Usuario, UsuarioSyncDto> {
             var existingItem = await _context.Usuarios.FirstOrDefaultAsync(u => u.ClientAppId == dto.ClientAppId);
 
             if (existingItem == null) {
+                // Lógica para novo item (INSERIR)
                 var newItem = new Usuario {
                     ClientAppId = dto.ClientAppId,
                     Nome = dto.Nome,
@@ -90,25 +91,34 @@ public class UsuarioService : IBackendService<Usuario, UsuarioSyncDto> {
                 await _context.SaveChangesAsync();
                 idMapping[newItem.ClientAppId] = newItem.Id;
             } else {
-                if (dto.UpdatedAt > existingItem.UpdatedAt) {
-                    existingItem.Nome = dto.Nome ?? existingItem.Nome;
-                    existingItem.Perfil = dto.Perfil;
-                    existingItem.ImagemPath = dto.ImagemPath ?? existingItem.ImagemPath;
-                    existingItem.Localizacao = dto.Localizacao ?? existingItem.Localizacao;
-                    existingItem.Telefone = dto.Telefone ?? existingItem.Telefone;
-                    existingItem.LinkRedeSocial = dto.LinkRedeSocial ?? existingItem.LinkRedeSocial;
-                    existingItem.DataNascimento = dto.DataNascimento ?? existingItem.DataNascimento;
-                    existingItem.Genero = dto.Genero ?? existingItem.Genero;
-                    existingItem.NomeEmpresa = dto.NomeEmpresa ?? existingItem.NomeEmpresa;
-                    existingItem.CNPJ = dto.CNPJ ?? existingItem.CNPJ;
-                    existingItem.Peso = dto.Peso ?? existingItem.Peso;
-                    existingItem.Altura = dto.Altura ?? existingItem.Altura;
-                    existingItem.FaixaOrcamentoPatrocinio = dto.FaixaOrcamentoPatrocinio ?? existingItem.FaixaOrcamentoPatrocinio;
-                    existingItem.TimeClientAppId = dto.TimeClientAppId ?? existingItem.TimeClientAppId;
-                    existingItem.UpdatedAt = DateTime.UtcNow;
-                    existingItem.IsSynced = true;
-                    _context.Entry(existingItem).State = EntityState.Modified;
+                // Lógica para item existente (ATUALIZAR)
+                // Remove a verificação de 'dto.UpdatedAt' para sempre atualizar
+                // se o item com 'ClientAppId' já existir no servidor.
+                existingItem.Nome = dto.Nome ?? existingItem.Nome;
+                existingItem.Perfil = dto.Perfil;
+                existingItem.ImagemPath = dto.ImagemPath ?? existingItem.ImagemPath;
+                existingItem.Localizacao = dto.Localizacao ?? existingItem.Localizacao;
+                existingItem.Telefone = dto.Telefone ?? existingItem.Telefone;
+                existingItem.LinkRedeSocial = dto.LinkRedeSocial ?? existingItem.LinkRedeSocial;
+                existingItem.DataNascimento = dto.DataNascimento ?? existingItem.DataNascimento;
+                existingItem.Genero = dto.Genero ?? existingItem.Genero;
+                existingItem.NomeEmpresa = dto.NomeEmpresa ?? existingItem.NomeEmpresa;
+                existingItem.CNPJ = dto.CNPJ ?? existingItem.CNPJ;
+                existingItem.Peso = dto.Peso ?? existingItem.Peso;
+                existingItem.Altura = dto.Altura ?? existingItem.Altura;
+                existingItem.FaixaOrcamentoPatrocinio = dto.FaixaOrcamentoPatrocinio ?? existingItem.FaixaOrcamentoPatrocinio;
+
+                // O mapeamento de TimeClientAppId é crucial aqui
+                if (dto.TimeClientAppId.HasValue) {
+                    var newTimeId = idMappings["Time"][dto.TimeClientAppId.Value];
+                    existingItem.TimeId = newTimeId;
+                } else {
+                    existingItem.TimeId = null;
                 }
+
+                existingItem.UpdatedAt = DateTime.UtcNow;
+                existingItem.IsSynced = true;
+                _context.Entry(existingItem).State = EntityState.Modified;
             }
         }
         await _context.SaveChangesAsync();

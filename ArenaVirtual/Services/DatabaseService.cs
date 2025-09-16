@@ -125,6 +125,11 @@ namespace ArenaVirtual.Services {
         // Métodos de Sincronização
         public Task<List<T>> GetUnsyncedItemsAsync<T>() where T : ISyncable, new() =>
             _database.Table<T>().Where(i => !i.IsSynced).ToListAsync();
+
+        public async Task<List<T>> GetItemsByClientAppIdsAsync<T>(HashSet<Guid> clientAppIds) where T : ISyncable, new() {
+            return await _database.Table<T>().Where(i => clientAppIds.Contains(i.ClientAppId)).ToListAsync();
+        }
+
         public async Task MarkAsSyncedAsync<T>(List<T> items) where T : ISyncable {
             foreach (var item in items) {
                 item.IsSynced = true;
@@ -169,8 +174,8 @@ namespace ArenaVirtual.Services {
 
         public Task<Convite?> ObterConvitePendenteDoUsuarioAsync(Guid solicitanteClientAppId) =>
             _database.Table<Convite>()
-                     .Where(c => c.SolicitanteClientAppId == solicitanteClientAppId && c.Status == StatusConvite.Pendente)
-                     .FirstOrDefaultAsync();
+                        .Where(c => c.SolicitanteClientAppId == solicitanteClientAppId && c.Status == StatusConvite.Pendente)
+                        .FirstOrDefaultAsync();
 
         public Task<int> DeletarConvitePendenteDoUsuarioAsync(Guid usuarioClientAppId) =>
             _database.Table<Convite>()

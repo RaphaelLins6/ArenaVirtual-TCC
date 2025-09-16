@@ -75,7 +75,7 @@
                         ItemsSource="{Binding GenerosDisponiveis}"
                         SelectedItem="{Binding GeneroSelecionado}" />
                     <Label Text="Data de Nascimento:" TextColor="White" />
-                    <DatePicker Date="{Binding DataNascimento}" Format="dd/MM/yyyy" />
+                    <DatePicker Date="{Binding DataNascimento, Mode=TwoWay}" Format="dd/MM/yyyy" />
                 </VerticalStackLayout>
 
                 <Button

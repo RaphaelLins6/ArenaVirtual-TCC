@@ -4,15 +4,22 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Threading;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Maui.ApplicationModel;
 
 namespace ArenaVirtual.ViewModels {
-    public partial class HomeViewModel(DatabaseService databaseService, SyncService syncService) : ObservableObject {
+    // Usando o construtor primário para a injeção de dependência.
+    public partial class HomeViewModel(DatabaseService databaseService, SyncService syncService, ConnectivityService connectivityService) : ObservableObject {
 
         [ObservableProperty]
         private bool isBusy = false;
+
+        [ObservableProperty]
+        private bool isOnline;
 
         private readonly ObservableCollection<Campeonato> _campeonatos = new();
         public ObservableCollection<Campeonato> Campeonatos => _campeonatos;
@@ -23,9 +30,22 @@ namespace ArenaVirtual.ViewModels {
         private bool _isFirstLoad = true;
         private readonly DatabaseService _databaseService = databaseService;
         private readonly SyncService _syncService = syncService;
+        private readonly ConnectivityService _connectivityService = connectivityService;
         private readonly SemaphoreSlim _syncSemaphore = new(1, 1);
 
-        // O atributo [RelayCommand] gera automaticamente as propriedades public ICommand FavoritarCommand e VerCampeonatoCommand
+        public HomeViewModel(ConnectivityService connectivityService) : this(null!, null!, null!) {
+            connectivityService.ConnectivityChanged += OnConnectivityChanged;
+            UpdateConnectivityStatus();
+        }
+
+        private void OnConnectivityChanged(object sender, ConnectivityChangedEventArgs e) {
+            UpdateConnectivityStatus();
+        }
+
+        private void UpdateConnectivityStatus() {
+            IsOnline = _connectivityService.IsConnected;
+        }
+
         [RelayCommand]
         private async Task Favoritar(Campeonato campeonato) {
             if (campeonato == null || IsBusy) return;
@@ -38,7 +58,6 @@ namespace ArenaVirtual.ViewModels {
             await VerCampeonatoAsync(campeonato);
         }
 
-        // Adiciona um novo comando para o botão de sincronização
         [RelayCommand]
         private async Task Sincronizar() {
             Debug.WriteLine("[HomeViewModel] Comando Sincronizar acionado.");
@@ -47,12 +66,11 @@ namespace ArenaVirtual.ViewModels {
 
         public async Task OnAppearingAsync() {
             Debug.WriteLine("[HomeViewModel] OnAppearingAsync chamado.");
-
             await _syncSemaphore.WaitAsync();
             try {
                 if (_isFirstLoad) {
                     _isFirstLoad = false;
-                    IsBusy = true; // Inicia o indicador
+                    IsBusy = true;
                     await _syncService.SyncAsync(new Progress<string>());
                     await CarregarTodosCampeonatos();
                 } else {
@@ -61,12 +79,11 @@ namespace ArenaVirtual.ViewModels {
             } catch (Exception ex) {
                 Debug.WriteLine($"[HomeViewModel] Erro em OnAppearingAsync: {ex.Message}");
             } finally {
-                IsBusy = false; // Desliga o indicador
+                IsBusy = false;
                 _syncSemaphore.Release();
             }
         }
 
-        // Método privado para lidar com a lógica de sincronização
         private async Task SincronizarAsync() {
             await _syncSemaphore.WaitAsync();
             try {

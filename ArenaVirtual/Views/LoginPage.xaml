@@ -7,48 +7,66 @@
     xmlns:viewmodels="clr-namespace:ArenaVirtual.ViewModels"
     Title="Login"
     x:DataType="viewmodels:LoginViewModel"
+    BackgroundColor="{StaticResource CorFundoPrincipal}"
     Shell.NavBarIsVisible="False">
 
-    <Grid>
-        <VerticalStackLayout
-            Padding="20"
-            HorizontalOptions="CenterAndExpand"
-            Spacing="20"
-            VerticalOptions="CenterAndExpand">
+    <Grid RowDefinitions="Auto, *">
+        <Label
+            Grid.Row="0"
+            Padding="5"
+            BackgroundColor="Red"
+            HorizontalTextAlignment="Center"
+            IsVisible="{Binding IsOffline}"
+            Text="Você está offline"
+            TextColor="White"
+            VerticalOptions="Start" />
 
-            <Label
-                Margin="0,0,0,10"
-                FontAttributes="Bold"
-                FontSize="22"
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout
+                Padding="20"
                 HorizontalOptions="Center"
-                HorizontalTextAlignment="Center"
-                Text="Seja bem-vindo, faça seu login!" />
+                Spacing="20"
+                VerticalOptions="CenterAndExpand">
 
-            <Entry Placeholder="E-mail" Text="{Binding Email}" />
-            <Entry
-                Completed="OnLoginEnterPressed"
-                IsPassword="True"
-                Placeholder="Senha"
-                Text="{Binding Senha}" />
+                <Label
+                    Margin="0,0,0,10"
+                    FontAttributes="Bold"
+                    FontSize="22"
+                    HorizontalOptions="Center"
+                    HorizontalTextAlignment="Center"
+                    Text="Seja bem-vindo, faça seu login!"
+                    TextColor="{StaticResource CorTextoPrincipal}" />
 
-            <Button
-                Command="{Binding LoginCommand}"
-                Style="{StaticResource BotaoPrincipal}"
-                Text="Entrar" />
+                <Entry
+                    Keyboard="Email"
+                    Placeholder="E-mail"
+                    Text="{Binding Email}" />
 
-            <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
-                <Label Text="Não tem uma conta?" />
-            </HorizontalStackLayout>
+                <Entry
+                    Completed="OnLoginEnterPressed"
+                    IsPassword="True"
+                    Keyboard="Default"
+                    Placeholder="Senha"
+                    ReturnType="Go"
+                    Text="{Binding Senha}" />
 
-            <Button
-                BackgroundColor="Transparent"
-                Command="{Binding IrParaRegistroCommand}"
-                Text="Registre-se"
-                TextColor="White" />
-        </VerticalStackLayout>
+                <Button Command="{Binding LoginCommand}" Text="Entrar" />
 
-        <!--  A sobreposição (overlay) de carregamento  -->
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
+                    <Label Text="Não tem uma conta?" TextColor="{StaticResource CorTextoPrincipal}" />
+                    <Label
+                        Text="Registre-se"
+                        TextColor="{StaticResource CorLink}"
+                        TextDecorations="Underline">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding IrParaRegistroCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
         <Grid
+            Grid.RowSpan="2"
             BackgroundColor="#000000"
             IsVisible="{Binding IsBusy}"
             Opacity="0.5">
