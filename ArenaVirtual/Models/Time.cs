@@ -9,7 +9,6 @@ using System.Text.Json.Serialization;
 namespace ArenaVirtual.Models {
     public partial class Time : INotifyPropertyChanged, ISyncable {
 
-        // Campos de suporte privados para todas as propriedades
         private string nome = string.Empty;
         private string? logoUrl;
         private int? campeonatoId;
@@ -20,9 +19,13 @@ namespace ArenaVirtual.Models {
         private int derrotas;
         private int empates;
         private int? capitaoId;
-        public Guid? CapitaoClientAppId { get; set; }
+        private Guid? capitaoClientAppId;
+        public Guid? CapitaoClientAppId {
+            get => capitaoClientAppId;
+            set => SetProperty(ref capitaoClientAppId, value);
+        }
         private DateTime dataCriacao;
-        private Guid clientAppId; // Campo de suporte para o ClientAppId
+        private Guid clientAppId; 
         private Guid campeonatoClientAppId;
         private bool isSynced;
         private DateTime updatedAt;
@@ -31,7 +34,6 @@ namespace ArenaVirtual.Models {
         [JsonIgnore]
         public int Id { get; set; }
 
-        // A chave de sincronização que será usada para mapear com a API
         [NotNull, Unique]
         public Guid ClientAppId {
             get => clientAppId;
@@ -61,7 +63,6 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref campeonatoClientAppId, value);
         }
 
-        // ... (o restante das propriedades e métodos)
 
         [MaxLength(500)]
         public string? Descricao {
