@@ -14,7 +14,29 @@ namespace ArenaVirtualAPI.Data {
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             modelBuilder.Entity<Campeonato>()
                 .Property(c => c.ValorTaxaInscricao)
-                .HasPrecision(18, 2); 
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Time>()
+                .HasOne(t => t.Capitao)
+                .WithOne(u => u.TimeCapitao)
+                .HasForeignKey<Time>(t => t.CapitaoId)
+                .OnDelete(DeleteBehavior.SetNull); // Permite que um Time exista sem Capitão
+
+            // Configura o relacionamento N:1 entre Usuario e Time (Membros)
+            modelBuilder.Entity<Usuario>()
+                .HasOne(u => u.Time)
+                .WithMany(t => t.Membros)
+                .HasForeignKey(u => u.TimeId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Configura o relacionamento N:1 entre Time e Campeonato
+            modelBuilder.Entity<Time>()
+                .HasOne(t => t.Campeonato)
+                .WithMany(c => c.Times)
+                .HasForeignKey(t => t.CampeonatoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            base.OnModelCreating(modelBuilder);
         }
 
     }

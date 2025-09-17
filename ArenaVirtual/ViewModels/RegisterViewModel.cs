@@ -99,6 +99,11 @@ namespace ArenaVirtual.ViewModels {
                     return;
                 }
 
+                if (DataNascimento == null) {
+                    await _alertService.DisplayAlert("Campo Obrigatório", "Por favor, informe a sua data de nascimento.", "OK");
+                    return;
+                }
+
                 var usuario = new Usuario {
                     Nome = this.Nome,
                     Email = this.Email,

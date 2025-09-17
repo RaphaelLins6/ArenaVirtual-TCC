@@ -145,7 +145,7 @@
                                 <Label
                                     FontAttributes="Bold"
                                     FontSize="16"
-                                    Text="{Binding DataNascimentoUsuarioFormatado}"
+                                    Text="{Binding UsuarioLogado.DataNascimento, StringFormat='{0:dd/MM/yyyy}'}"
                                     TextColor="{AppThemeBinding Light=Black,
                                                                 Dark=White}" />
                             </VerticalStackLayout>

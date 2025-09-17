@@ -43,6 +43,8 @@ public class Usuario : ISyncable {
     public int? TimeId { get; set; }
     [ForeignKey("TimeId")]
     public virtual Time? Time { get; set; }
+    [InverseProperty("Capitao")]
+    public virtual Time? TimeCapitao { get; set; }
 
     // Propriedades de sincronização
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

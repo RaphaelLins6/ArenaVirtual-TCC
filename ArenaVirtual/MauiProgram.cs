@@ -49,6 +49,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<RegisterViewModel>();
         builder.Services.AddTransient<PerfilViewModel>();
+        builder.Services.AddTransient<HomeViewModel>();
         builder.Services.AddTransient<CriarTimePageViewModel>();
         builder.Services.AddTransient<MeuTimePageViewModel>();
         builder.Services.AddTransient<EntrarTimePageViewModel>();
@@ -61,6 +62,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<RegisterPage>();
         builder.Services.AddTransient<PerfilPage>();
+        builder.Services.AddTransient<HomePage>();
         builder.Services.AddTransient<CriarTimePage>();
         builder.Services.AddTransient<MeusTimesPage>();
         builder.Services.AddTransient<AppShell>();

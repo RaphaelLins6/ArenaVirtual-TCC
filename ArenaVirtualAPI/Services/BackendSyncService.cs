@@ -15,9 +15,9 @@ public class BackendSyncService {
     private readonly IServiceProvider _serviceProvider;
 
     private readonly string[] _uploadOrder = new string[] {
-        "Usuario",
         "Campeonato",
-        "Time",
+        "Time", 
+        "Usuario",
         "Partida",
         "AvaliacaoArbitro",
         "CampanhaPatrocinio",
@@ -29,17 +29,17 @@ public class BackendSyncService {
     };
 
     private readonly string[] _downloadOrder = new string[] {
-        "Convite",
-        "UsuarioCampeonatoFavorito",
-        "PropostaPatrocinio",
-        "Jogo",
-        "Estatistica",
-        "CampanhaPatrocinio",
-        "AvaliacaoArbitro",
-        "Partida",
-        "Time",
         "Campeonato",
-        "Usuario"
+        "Time",
+        "Usuario",
+        "Partida",
+        "AvaliacaoArbitro",
+        "CampanhaPatrocinio",
+        "Estatistica",
+        "Jogo",
+        "PropostaPatrocinio",
+        "UsuarioCampeonatoFavorito",
+        "Convite"
     };
 
     public BackendSyncService(ILogger<BackendSyncService> logger, IServiceProvider serviceProvider) {

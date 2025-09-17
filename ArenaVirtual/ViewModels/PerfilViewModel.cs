@@ -78,7 +78,7 @@ namespace ArenaVirtual.ViewModels {
                 LinkRedeSocialUsuario = UsuarioLogado.LinkRedeSocial;
 
                 // Limpa campos específicos
-                //DataNascimentoUsuario = null;
+                DataNascimentoUsuario = null;
                 GeneroUsuario = null;
                 NomeEmpresaUsuario = string.Empty;
                 CnpjUsuario = string.Empty;
@@ -130,9 +130,5 @@ namespace ArenaVirtual.ViewModels {
             await Shell.Current.Navigation.PushModalAsync(popup);
         }
 
-        public string DataNascimentoUsuarioFormatado =>
-            DataNascimentoUsuario.HasValue
-                ? DataNascimentoUsuario.Value.ToString("dd/MM/yyyy")
-                : string.Empty;
     }
 }
