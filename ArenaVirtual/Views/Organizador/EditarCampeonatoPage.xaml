@@ -3,7 +3,13 @@
     x:Class="ArenaVirtual.Views.Organizador.EditarCampeonatoPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     Title="Editar Campeonato">
+
+    <ContentPage.Resources>
+        <converters:StringNotNullOrEmptyConverter x:Key="StringIsNotNullOrEmptyConverter" />
+    </ContentPage.Resources>
+
     <ScrollView>
         <StackLayout Padding="20" Spacing="16">
             <Label

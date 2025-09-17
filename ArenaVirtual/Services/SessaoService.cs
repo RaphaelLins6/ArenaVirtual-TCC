@@ -5,7 +5,7 @@ namespace ArenaVirtual.Services {
 public class SessaoService {
         private static SessaoService? _instancia; 
 
-        private SessaoService() { }
+        public SessaoService() { }
 
         private Usuario? _usuarioAtual; 
 
