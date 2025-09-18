@@ -5,45 +5,64 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using Microsoft.Maui.Controls;
+using System.ComponentModel;
 
 namespace ArenaVirtual.Popups;
 
-public partial class EditarPerfilPopup : ContentPage {
+public partial class EditarPerfilPopup : ContentPage, INotifyPropertyChanged {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged(string propertyName) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    private bool _isBusy;
+    public bool IsBusy {
+        get => _isBusy;
+        set {
+            if (_isBusy != value) {
+                _isBusy = value;
+                OnPropertyChanged(nameof(IsBusy));
+            }
+        }
+    }
+
     private readonly Usuario _usuario;
     private readonly IAlertService _alertService;
     private readonly DatabaseService _databaseService;
-    private readonly SyncService _syncService; // Adicionando a dependência
+    private readonly SyncService _syncService;
 
-    // Injeção de dependências no construtor
-    public EditarPerfilPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
+    public EditarPerfilPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
         InitializeComponent();
         _usuario = usuario;
         _alertService = alertService;
         _databaseService = databaseService;
         _syncService = syncService;
 
-        // Preenche campos comuns
-        NomeEntry.Text = _usuario.Nome;
+        // É crucial definir o BindingContext para que o XAML "veja" as propriedades do Code-Behind.
+        BindingContext = this;
+
+        // Preenche campos comuns
+        NomeEntry.Text = _usuario.Nome;
         EmailEntry.Text = _usuario.Email;
         TelefoneEntry.Text = _usuario.Telefone;
         LocalizacaoEntry.Text = _usuario.Localizacao;
         LinkRedeSocialEntry.Text = _usuario.LinkRedeSocial;
 
-        // Visibilidade por perfil
-        AtletaSection.IsVisible = _usuario.Perfil == TipoPerfil.Atleta;
+        // Visibilidade por perfil
+        AtletaSection.IsVisible = _usuario.Perfil == TipoPerfil.Atleta;
         OrganizadorSection.IsVisible = _usuario.Perfil == TipoPerfil.Organizador;
         PatrocinadorSection.IsVisible = _usuario.Perfil == TipoPerfil.Patrocinador;
         ArbitroSection.IsVisible = _usuario.Perfil == TipoPerfil.Arbitro;
 
-        // Campos específicos
-        if (_usuario.Perfil == TipoPerfil.Atleta) {
+        // Campos específicos
+        if (_usuario.Perfil == TipoPerfil.Atleta) {
             GeneroPicker.ItemsSource = Enum.GetValues<GeneroEnum>().Cast<GeneroEnum>().ToList();
             GeneroPicker.SelectedItem = _usuario.Genero;
             DataNascimentoPicker.Date = _usuario.DataNascimento ?? DateTime.Now;
             PesoEntry.Text = _usuario.Peso?.ToString();
             AlturaEntry.Text = _usuario.Altura?.ToString();
         }
-        if (_usuario.Perfil == TipoPerfil.Organizador || _usuario.Perfil == TipoPerfil.Patrocinador) {
+        if (_usuario.Perfil == TipoPerfil.Organizador) {
             NomeEmpresaEntry.Text = _usuario.NomeEmpresa;
             CnpjEntry.Text = _usuario.CNPJ;
         }
@@ -64,47 +83,53 @@ public partial class EditarPerfilPopup : ContentPage {
     }
 
     private async void Salvar_Clicked(object sender, EventArgs e) {
-        _usuario.Nome = NomeEntry.Text?.Trim() ?? string.Empty;
-        _usuario.Email = EmailEntry.Text?.Trim() ?? string.Empty;
-        _usuario.Telefone = TelefoneEntry.Text?.Trim() ?? string.Empty;
-        _usuario.Localizacao = LocalizacaoEntry.Text?.Trim() ?? string.Empty;
-        _usuario.LinkRedeSocial = LinkRedeSocialEntry.Text?.Trim() ?? string.Empty;
+        if (IsBusy) return;
 
-        if (_usuario.Perfil == TipoPerfil.Atleta) {
-            _usuario.DataNascimento = DataNascimentoPicker.Date;
-            _usuario.Genero = Enum.TryParse<GeneroEnum>(GeneroPicker.SelectedItem?.ToString(), out var genero) ? genero : null;
-            _usuario.Peso = double.TryParse(PesoEntry.Text, out var peso) ? peso : null;
-            _usuario.Altura = double.TryParse(AlturaEntry.Text, out var altura) ? altura : null;
+        IsBusy = true; // Ativa o indicador de carregamento.
+
+        try {
+            _usuario.Nome = NomeEntry.Text?.Trim() ?? string.Empty;
+            _usuario.Email = EmailEntry.Text?.Trim() ?? string.Empty;
+            _usuario.Telefone = TelefoneEntry.Text?.Trim() ?? string.Empty;
+            _usuario.Localizacao = LocalizacaoEntry.Text?.Trim() ?? string.Empty;
+            _usuario.LinkRedeSocial = LinkRedeSocialEntry.Text?.Trim() ?? string.Empty;
+
+            if (_usuario.Perfil == TipoPerfil.Atleta) {
+                _usuario.DataNascimento = DataNascimentoPicker.Date;
+                _usuario.Genero = Enum.TryParse<GeneroEnum>(GeneroPicker.SelectedItem?.ToString(), out var genero) ? genero : null;
+                _usuario.Peso = double.TryParse(PesoEntry.Text, out var peso) ? peso : null;
+                _usuario.Altura = double.TryParse(AlturaEntry.Text, out var altura) ? altura : null;
+            }
+            if (_usuario.Perfil == TipoPerfil.Organizador) {
+                _usuario.NomeEmpresa = NomeEmpresaEntry.Text?.Trim() ?? string.Empty;
+                _usuario.CNPJ = CnpjEntry.Text?.Trim() ?? string.Empty;
+            }
+            if (_usuario.Perfil == TipoPerfil.Patrocinador) {
+                _usuario.NomeEmpresa = NomeEmpresaPatrocinadorEntry.Text?.Trim() ?? string.Empty;
+                _usuario.CNPJ = CnpjCpfPatrocinadorEntry.Text?.Trim() ?? string.Empty;
+                _usuario.FaixaOrcamentoPatrocinio = FaixaOrcamentoPatrocinioEntry.Text?.Trim() ?? string.Empty;
+            }
+            if (_usuario.Perfil == TipoPerfil.Arbitro) {
+                _usuario.DataNascimento = DataNascimentoPickerArbitro.Date;
+                _usuario.Genero = Enum.TryParse<GeneroEnum>(GeneroArbitroPicker.SelectedItem?.ToString(), out var genero) ? genero : null;
+            }
+
+            _usuario.IsSynced = false;
+            _usuario.UpdatedAt = DateTime.UtcNow;
+
+            await _databaseService.AtualizarUsuarioAsync(_usuario);
+
+            Debug.WriteLine("[EditarPerfilPopup] Perfil de usuário atualizado localmente. Disparando sincronização...");
+            await _syncService.SyncAsync(new Progress<string>());
+
+            MessagingCenter.Send(this, "Perfil Atualizado", _usuario);
+
+            await _alertService.DisplayAlert("Sucesso", "Perfil atualizado com sucesso!", "OK");
+            await Navigation.PopModalAsync();
+        } catch (Exception ex) {
+            await _alertService.DisplayAlert("Erro", $"Ocorreu um erro ao salvar o perfil: {ex.Message}", "OK");
+        } finally {
+            IsBusy = false; // Desativa o indicador de carregamento, mesmo em caso de erro.
         }
-        if (_usuario.Perfil == TipoPerfil.Organizador) {
-            _usuario.NomeEmpresa = NomeEmpresaEntry.Text?.Trim() ?? string.Empty;
-            _usuario.CNPJ = CnpjEntry.Text?.Trim() ?? string.Empty;
-        }
-        if (_usuario.Perfil == TipoPerfil.Patrocinador) {
-            _usuario.NomeEmpresa = NomeEmpresaPatrocinadorEntry.Text?.Trim() ?? string.Empty;
-            _usuario.CNPJ = CnpjCpfPatrocinadorEntry.Text?.Trim() ?? string.Empty;
-            _usuario.FaixaOrcamentoPatrocinio = FaixaOrcamentoPatrocinioEntry.Text?.Trim() ?? string.Empty;
-        }
-        if (_usuario.Perfil == TipoPerfil.Arbitro) {
-            _usuario.DataNascimento = DataNascimentoPickerArbitro.Date;
-            _usuario.Genero = Enum.TryParse<GeneroEnum>(GeneroArbitroPicker.SelectedItem?.ToString(), out var genero) ? genero : null;
-        }
-
-        // ** Marcar usuário para sincronização antes de atualizar **
-        _usuario.IsSynced = false;
-        _usuario.UpdatedAt = DateTime.UtcNow;
-
-        await _databaseService.AtualizarUsuarioAsync(_usuario);
-
-        // ** DISPARO MANUAL APÓS ATUALIZAÇÃO DO PERFIL **
-        Debug.WriteLine("[EditarPerfilPopup] Perfil de usuário atualizado localmente. Disparando sincronização...");
-
-        // Adicione o objeto de progresso vazio para a chamada
-        await _syncService.SyncAsync(new Progress<string>());
-
-        MessagingCenter.Send(this, "Perfil Atualizado", _usuario);
-
-        await _alertService.DisplayAlert("Sucesso", "Perfil atualizado com sucesso!", "OK");
-        await Navigation.PopModalAsync();
     }
 }

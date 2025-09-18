@@ -6,49 +6,65 @@
     Padding="30"
     BackgroundColor="#80000000">
 
-    <Border
-        Padding="20"
-        BackgroundColor="White"
-        HorizontalOptions="Center"
-        VerticalOptions="Center"
-        WidthRequest="300">
+    <Grid>
+        <!--  Conteúdo do Popup  -->
+        <Border
+            Padding="20"
+            BackgroundColor="White"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            WidthRequest="300">
 
-        <VerticalStackLayout Spacing="15">
-            <Label
-                FontAttributes="Bold"
-                FontSize="22"
+            <VerticalStackLayout Spacing="15">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="22"
+                    HorizontalOptions="Center"
+                    Text="Alterar Senha" />
+
+                <Entry
+                    x:Name="SenhaAtualEntry"
+                    IsPassword="True"
+                    Placeholder="Senha atual"
+                    PlaceholderColor="Black"
+                    TextColor="Black" />
+                <Entry
+                    x:Name="NovaSenhaEntry"
+                    IsPassword="True"
+                    Placeholder="Nova senha"
+                    PlaceholderColor="Black"
+                    TextColor="Black" />
+                <Entry
+                    x:Name="ConfirmarNovaSenhaEntry"
+                    IsPassword="True"
+                    Placeholder="Confirmar nova senha"
+                    PlaceholderColor="Black"
+                    TextColor="Black" />
+
+                <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
+                    <Button
+                        Clicked="Cancelar_Clicked"
+                        Style="{StaticResource BotaoPrincipal}"
+                        Text="Cancelar" />
+                    <Button
+                        Clicked="Salvar_Clicked"
+                        Style="{StaticResource BotaoPrincipal}"
+                        Text="Salvar" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
+        <!--  Indicador de Carregamento  -->
+        <Grid
+            Grid.RowSpan="2"
+            BackgroundColor="#000000"
+            IsVisible="{Binding IsBusy}"
+            Opacity="0.5">
+            <ActivityIndicator
                 HorizontalOptions="Center"
-                Text="Alterar Senha" />
-
-            <Entry
-                x:Name="SenhaAtualEntry"
-                IsPassword="True"
-                Placeholder="Senha atual"
-                PlaceholderColor="Black"
-                TextColor="Black" />
-            <Entry
-                x:Name="NovaSenhaEntry"
-                IsPassword="True"
-                Placeholder="Nova senha"
-                PlaceholderColor="Black"
-                TextColor="Black" />
-            <Entry
-                x:Name="ConfirmarNovaSenhaEntry"
-                IsPassword="True"
-                Placeholder="Confirmar nova senha"
-                PlaceholderColor="Black"
-                TextColor="Black" />
-
-            <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
-                <Button
-                    Clicked="Cancelar_Clicked"
-                    Style="{StaticResource BotaoPrincipal}"
-                    Text="Cancelar" />
-                <Button
-                    Clicked="Salvar_Clicked"
-                    Style="{StaticResource BotaoPrincipal}"
-                    Text="Salvar" />
-            </HorizontalStackLayout>
-        </VerticalStackLayout>
-    </Border>
+                IsRunning="{Binding IsBusy}"
+                VerticalOptions="Center"
+                Color="OrangeRed" />
+        </Grid>
+    </Grid>
 </ContentPage>

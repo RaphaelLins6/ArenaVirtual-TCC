@@ -11,8 +11,52 @@
     Shell.NavBarIsVisible="False">
 
     <Grid RowDefinitions="Auto, *">
+        <HorizontalStackLayout
+            Grid.Row="0"
+            Padding="20"
+            HorizontalOptions="End"
+            Spacing="10"
+            VerticalOptions="Start">
+            <Label
+                FontSize="16"
+                Text="Status:"
+                TextColor="White"
+                VerticalOptions="Center" />
+            <Ellipse
+                HeightRequest="15"
+                Stroke="White"
+                StrokeThickness="1"
+                VerticalOptions="Center"
+                WidthRequest="15">
+                <Ellipse.Fill>
+                    <SolidColorBrush>
+                        <SolidColorBrush.Color>
+                            <OnPlatform x:TypeArguments="Color">
+                                <On Platform="iOS, Android, WinUI" Value="Red" />
+                            </OnPlatform>
+                        </SolidColorBrush.Color>
+                    </SolidColorBrush>
+                </Ellipse.Fill>
+                <Ellipse.Triggers>
+                    <DataTrigger
+                        Binding="{Binding IsOffline}"
+                        TargetType="Ellipse"
+                        Value="False">
+                        <Setter Property="Fill" Value="Green" />
+                    </DataTrigger>
+                    <DataTrigger
+                        Binding="{Binding IsOffline}"
+                        TargetType="Ellipse"
+                        Value="True">
+                        <Setter Property="Fill" Value="Red" />
+                    </DataTrigger>
+                </Ellipse.Triggers>
+            </Ellipse>
+        </HorizontalStackLayout>
+
         <Label
             Grid.Row="0"
+            Margin="0,50,0,0"
             Padding="5"
             BackgroundColor="Red"
             HorizontalTextAlignment="Center"
@@ -65,6 +109,7 @@
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </ScrollView>
+
         <Grid
             Grid.RowSpan="2"
             BackgroundColor="#000000"
@@ -74,7 +119,7 @@
                 HorizontalOptions="Center"
                 IsRunning="{Binding IsBusy}"
                 VerticalOptions="Center"
-                Color="White" />
+                Color="OrangeRed" />
         </Grid>
     </Grid>
 </ContentPage>

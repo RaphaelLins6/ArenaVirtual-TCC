@@ -1,5 +1,6 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Maui.Controls;
@@ -7,7 +8,24 @@ using Microsoft.Maui.Storage;
 
 namespace ArenaVirtual.Popups;
 
-public partial class AlterarImagemPopup : ContentPage {
+public partial class AlterarImagemPopup : ContentPage, INotifyPropertyChanged {
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged(string propertyName) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    private bool _isBusy;
+    public bool IsBusy {
+        get => _isBusy;
+        set {
+            if (_isBusy != value) {
+                _isBusy = value;
+                OnPropertyChanged(nameof(IsBusy));
+            }
+        }
+    }
+
     private readonly Usuario _usuario;
     private readonly IAlertService _alertService;
     private readonly DatabaseService _databaseService;
@@ -16,8 +34,6 @@ public partial class AlterarImagemPopup : ContentPage {
     public event EventHandler<string>? ImagemAtualizada;
 
     private string? _caminhoNovaImagemSelecionada;
-    // Adicione uma variável de controle para o estado de salvamento
-    private bool _isSaving = false;
 
     public AlterarImagemPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
         InitializeComponent();
@@ -25,6 +41,9 @@ public partial class AlterarImagemPopup : ContentPage {
         _alertService = alertService;
         _databaseService = databaseService;
         _syncService = syncService;
+
+        // É crucial definir o BindingContext para que o XAML "veja" as propriedades do Code-Behind.
+        BindingContext = this;
 
         AtualizarImagemUI(_usuario.ImagemPath);
     }
@@ -58,23 +77,21 @@ public partial class AlterarImagemPopup : ContentPage {
     }
 
     private async void Salvar_Clicked(object sender, EventArgs e) {
-        // Verifica a variável de controle para evitar múltiplos cliques
-        if (_isSaving) return;
+        if (IsBusy) return;
 
         if (string.IsNullOrEmpty(_caminhoNovaImagemSelecionada)) {
             await _alertService.DisplayAlert("Aviso", "Por favor, escolha uma imagem primeiro.", "OK");
             return;
         }
 
-        _isSaving = true; // Inicia o estado de salvamento
+        IsBusy = true; // Ativa o indicador de carregamento.
 
-        try {
+        try {
             string diretorioImagens = FileSystem.AppDataDirectory;
             string nomeArquivo = Path.GetFileName(_caminhoNovaImagemSelecionada);
             string caminhoFinalImagem = Path.Combine(diretorioImagens, nomeArquivo);
 
-            // Otimização: evite a cópia se a imagem já estiver no diretório correto.
-            if (!File.Exists(caminhoFinalImagem)) {
+            if (!File.Exists(caminhoFinalImagem)) {
                 File.Copy(_caminhoNovaImagemSelecionada, caminhoFinalImagem, true);
             }
 
@@ -94,8 +111,8 @@ public partial class AlterarImagemPopup : ContentPage {
         } catch (Exception ex) {
             await _alertService.DisplayAlert("Erro", $"Erro ao salvar imagem: {ex.Message}", "OK");
         } finally {
-            _isSaving = false; // Finaliza o estado de salvamento
-        }
+            IsBusy = false; // Desativa o indicador de carregamento.
+        }
     }
 
     private async void Cancelar_Clicked(object sender, EventArgs e) {

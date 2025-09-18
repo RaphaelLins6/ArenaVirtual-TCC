@@ -7,8 +7,8 @@ using ArenaVirtual.Views;
 using System.Diagnostics;
 
 namespace ArenaVirtual.ViewModels {
-    // Certifique-se de que a classe seja 'partial' para que o código gerado funcione
-    public partial class RegisterViewModel(IAlertService alertService, UsuarioService usuarioService, SyncService syncService) : ObservableObject {
+    // Certifique-se de que a classe seja 'partial' para que o código gerado funcione
+    public partial class RegisterViewModel(IAlertService alertService, UsuarioService usuarioService, SyncService syncService) : ObservableObject {
 
         [ObservableProperty]
         private bool isBusy = false;
@@ -25,13 +25,13 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty]
         private string confirmarSenha = string.Empty;
 
-        // Use [NotifyPropertyChangedFor] para atualizar a propriedade IsPatrocinador quando o perfil muda
-        [ObservableProperty]
+        // Use [NotifyPropertyChangedFor] para atualizar a propriedade IsPatrocinador quando o perfil muda
+        [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsPatrocinador))]
         private TipoPerfil perfilSelecionado = TipoPerfil.Atleta;
 
-        // Novos campos
-        [ObservableProperty]
+        // Novos campos
+        [ObservableProperty]
         private string telefone = string.Empty;
 
         [ObservableProperty]
@@ -74,13 +74,19 @@ namespace ArenaVirtual.ViewModels {
         private readonly UsuarioService _usuarioService = usuarioService;
         private readonly SyncService _syncService = syncService;
 
-        // Propriedade de conveniência que agora é observável graças ao NotifyPropertyChangedFor
-        public bool IsPatrocinador => PerfilSelecionado == TipoPerfil.Patrocinador;
+        // Propriedade de conveniência que agora é observável graças ao NotifyPropertyChangedFor
+        public bool IsPatrocinador => PerfilSelecionado == TipoPerfil.Patrocinador;
+
+        // Propriedade de conveniência para campos de Atleta/Árbitro
+        public bool IsAtletaOrArbitro => PerfilSelecionado == TipoPerfil.Atleta || PerfilSelecionado == TipoPerfil.Arbitro;
+
 
         [RelayCommand]
         public async Task Registrar() {
             try {
+                // Primeira ação: Defina IsBusy como true imediatamente e permita que a UI atualize.
                 IsBusy = true;
+                await Task.Yield();
 
                 if (string.IsNullOrWhiteSpace(Nome) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha) || string.IsNullOrWhiteSpace(ConfirmarSenha)) {
                     await _alertService.DisplayAlert("Campos Vazios", "Por favor, preencha todos os campos obrigatórios.", "OK");
@@ -97,8 +103,8 @@ namespace ArenaVirtual.ViewModels {
                     return;
                 }
 
-                // Validação condicional para a Data de Nascimento
-                if ((PerfilSelecionado == TipoPerfil.Atleta || PerfilSelecionado == TipoPerfil.Arbitro) && DataNascimento == null) {
+                // Validação condicional para a Data de Nascimento para Atleta e Árbitro
+                if ((PerfilSelecionado == TipoPerfil.Atleta || PerfilSelecionado == TipoPerfil.Arbitro) && DataNascimento == null) {
                     await _alertService.DisplayAlert("Campo Obrigatório", "Por favor, informe a sua data de nascimento.", "OK");
                     return;
                 }
@@ -125,8 +131,8 @@ namespace ArenaVirtual.ViewModels {
                 if (usuarioCadastrado != null) {
                     await _alertService.DisplayAlert("Sucesso", "Usuário registrado com sucesso!", "OK");
 
-                    // Limpa os campos após o registro
-                    Nome = string.Empty;
+                    // Limpa os campos após o registro
+                    Nome = string.Empty;
                     Email = string.Empty;
                     Senha = string.Empty;
                     ConfirmarSenha = string.Empty;

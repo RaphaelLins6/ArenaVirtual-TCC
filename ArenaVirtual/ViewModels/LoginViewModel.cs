@@ -4,6 +4,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Diagnostics;
 using Microsoft.Maui.ApplicationModel;
+using System;
+using System.Threading.Tasks;
 
 namespace ArenaVirtual.ViewModels {
     // A injeção de dependência acontece aqui no construtor primário
@@ -22,18 +24,9 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty]
         private bool isOffline = false;
 
-        public LoginViewModel(ConnectivityService connectivityService) : this(null!, null!, null!, null!) {
-            connectivityService.ConnectivityChanged += OnConnectivityChanged;
-            UpdateConnectivityStatus();
-        }
-
-        private void OnConnectivityChanged(object sender, ConnectivityChangedEventArgs e) {
-            UpdateConnectivityStatus();
-        }
-
-        private void UpdateConnectivityStatus() {
-            // A propriedade NetworkAccess é parte da classe Microsoft.Maui.ApplicationModel.Connectivity.
-            // Assumindo que seu ConnectivityService tem uma propriedade IsConnected
+        // Removemos o construtor secundário, agora a lógica de status será controlada pela página.
+        // A propriedade IsOffline é mantida e será atualizada pelo método público.
+        public void UpdateConnectivityStatus() {
             IsOffline = !connectivityService.IsConnected;
             Debug.WriteLine($"[LoginViewModel] Status de conectividade atualizado. Está offline: {IsOffline}");
         }

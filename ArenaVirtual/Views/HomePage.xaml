@@ -7,14 +7,62 @@
     xmlns:model="clr-namespace:ArenaVirtual.Models"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
     x:Name="HomePageRef"
+    Title="Início"
     x:DataType="vm:HomeViewModel">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <Grid RowDefinitions="Auto, *">
+        <HorizontalStackLayout
+            Grid.Row="0"
+            Padding="20"
+            HorizontalOptions="End"
+            Spacing="10">
+            <Label
+                FontSize="16"
+                Text="Status:"
+                VerticalOptions="Center" />
+            <Ellipse
+                HeightRequest="15"
+                StrokeThickness="1"
+                VerticalOptions="Center"
+                WidthRequest="15">
+                <Ellipse.Fill>
+                    <SolidColorBrush>
+                        <SolidColorBrush.Color>
+                            <OnPlatform x:TypeArguments="Color">
+                                <On Platform="iOS, Android" Value="Gray" />
+                                <On Platform="WinUI" Value="Black" />
+                            </OnPlatform>
+                        </SolidColorBrush.Color>
+                    </SolidColorBrush>
+                </Ellipse.Fill>
+                <Ellipse.Triggers>
+                    <DataTrigger
+                        Binding="{Binding IsOnline}"
+                        TargetType="Ellipse"
+                        Value="True">
+                        <Setter Property="Fill" Value="Green" />
+                    </DataTrigger>
+                    <DataTrigger
+                        Binding="{Binding IsOnline}"
+                        TargetType="Ellipse"
+                        Value="False">
+                        <Setter Property="Fill" Value="Red" />
+                    </DataTrigger>
+                </Ellipse.Triggers>
+            </Ellipse>
+            <ImageButton
+                Margin="10,0,0,0"
+                Aspect="AspectFit"
+                BackgroundColor="Transparent"
+                Command="{Binding SincronizarCommand}"
+                HeightRequest="40"
+                HorizontalOptions="End"
+                IsVisible="{Binding IsOnline}"
+                Source="sync_icon.png"
+                WidthRequest="40" />
+        </HorizontalStackLayout>
 
-        <ScrollView Grid.Row="0">
+        <ScrollView Grid.Row="1">
             <StackLayout Padding="20" Spacing="24">
 
                 <Label
@@ -76,32 +124,14 @@
             </StackLayout>
         </ScrollView>
 
-        <ImageButton
-            Grid.Row="0"
-            Margin="0,20,20,0"
-            Aspect="AspectFit"
-            BackgroundColor="Transparent"
-            Command="{Binding SincronizarCommand}"
-            HeightRequest="40"
-            HorizontalOptions="End"
-            IsVisible="{Binding IsOnline}"
-            Source="sync_icon.png"
-            VerticalOptions="Start"
-            WidthRequest="40" />
-
         <Grid
-            Grid.Row="0"
+            Grid.RowSpan="2"
             BackgroundColor="#000000"
-            HorizontalOptions="FillAndExpand"
-            InputTransparent="True"
             IsVisible="{Binding IsBusy}"
-            Opacity="0.5"
-            VerticalOptions="FillAndExpand">
+            Opacity="0.5">
             <ActivityIndicator
                 HorizontalOptions="Center"
                 IsRunning="{Binding IsBusy}"
-                IsVisible="{Binding IsBusy}"
-                Scale="2"
                 VerticalOptions="Center"
                 Color="OrangeRed" />
         </Grid>

@@ -6,50 +6,64 @@
     Padding="30"
     BackgroundColor="#80000000">
 
-    <Border
-        Padding="20"
-        BackgroundColor="White"
-        HorizontalOptions="Center"
-        VerticalOptions="Center"
-        WidthRequest="300">
+    <Grid>
+        <Border
+            Padding="20"
+            BackgroundColor="White"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            WidthRequest="300">
 
-        <VerticalStackLayout Spacing="20">
-            <Label
-                FontAttributes="Bold"
-                FontSize="20"
-                HorizontalOptions="Center"
-                Text="Alterar Imagem" />
+            <VerticalStackLayout Spacing="20">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="20"
+                    HorizontalOptions="Center"
+                    Text="Alterar Imagem" />
 
-            <Border
-                BackgroundColor="#eee"
-                HeightRequest="150"
-                HorizontalOptions="Center"
-                VerticalOptions="Center"
-                WidthRequest="150">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="75" />
-                </Border.StrokeShape>
-                <Image
-                    x:Name="ImagemPerfil"
-                    Aspect="AspectFill"
+                <Border
+                    BackgroundColor="#eee"
                     HeightRequest="150"
-                    WidthRequest="150" />
-            </Border>
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    WidthRequest="150">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="75" />
+                    </Border.StrokeShape>
+                    <Image
+                        x:Name="ImagemPerfil"
+                        Aspect="AspectFill"
+                        HeightRequest="150"
+                        WidthRequest="150" />
+                </Border>
 
-            <Button
-                Clicked="EscolherImagem_Clicked"
-                Style="{StaticResource BotaoPrincipal}"
-                Text="Escolher imagem" />
-            <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
                 <Button
-                    Clicked="Cancelar_Clicked"
+                    Clicked="EscolherImagem_Clicked"
                     Style="{StaticResource BotaoPrincipal}"
-                    Text="Cancelar" />
-                <Button
-                    Clicked="Salvar_Clicked"
-                    Style="{StaticResource BotaoPrincipal}"
-                    Text="Salvar" />
-            </HorizontalStackLayout>
-        </VerticalStackLayout>
-    </Border>
+                    Text="Escolher imagem" />
+                <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
+                    <Button
+                        Clicked="Cancelar_Clicked"
+                        Style="{StaticResource BotaoPrincipal}"
+                        Text="Cancelar" />
+                    <Button
+                        Clicked="Salvar_Clicked"
+                        Style="{StaticResource BotaoPrincipal}"
+                        Text="Salvar" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
+        <Grid
+            Grid.RowSpan="2"
+            BackgroundColor="#000000"
+            IsVisible="{Binding IsBusy}"
+            Opacity="0.5">
+            <ActivityIndicator
+                HorizontalOptions="Center"
+                IsRunning="{Binding IsBusy}"
+                VerticalOptions="Center"
+                Color="OrangeRed" />
+        </Grid>
+    </Grid>
 </ContentPage>

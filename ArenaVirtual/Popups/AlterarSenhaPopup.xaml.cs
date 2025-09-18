@@ -5,29 +5,50 @@ using CommunityToolkit.Maui.Views;
 using System;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
+using System.ComponentModel;
 
 namespace ArenaVirtual.Popups;
 
-public partial class AlterarSenhaPopup : ContentPage {
+public partial class AlterarSenhaPopup : ContentPage, INotifyPropertyChanged {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged(string propertyName) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    private bool _isBusy;
+    public bool IsBusy {
+        get => _isBusy;
+        set {
+            if (_isBusy != value) {
+                _isBusy = value;
+                OnPropertyChanged(nameof(IsBusy));
+            }
+        }
+    }
+
     private readonly Usuario _usuario;
     private readonly IAlertService _alertService;
     private readonly DatabaseService _databaseService;
-    private readonly SyncService _syncService; // Adicionando a dependência
+    private readonly SyncService _syncService;
 
-    // Injeção de dependências no construtor
-    public AlterarSenhaPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
+    public AlterarSenhaPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
         InitializeComponent();
         _usuario = usuario;
         _alertService = alertService;
         _databaseService = databaseService;
-        _syncService = syncService; // Atribuindo a dependência
-    }
+        _syncService = syncService;
+
+        // É crucial definir o BindingContext para que o XAML "veja" as propriedades do Code-Behind.
+        BindingContext = this;
+    }
 
     private async void Cancelar_Clicked(object sender, EventArgs e) {
         await Navigation.PopModalAsync();
     }
 
     private async void Salvar_Clicked(object sender, EventArgs e) {
+        if (IsBusy) return;
+
         string senhaAtual = SenhaAtualEntry.Text?.Trim() ?? string.Empty;
         string novaSenha = NovaSenhaEntry.Text?.Trim() ?? string.Empty;
         string confirmarNovaSenha = ConfirmarNovaSenhaEntry.Text?.Trim() ?? string.Empty;
@@ -49,14 +70,14 @@ public partial class AlterarSenhaPopup : ContentPage {
             return;
         }
 
-        // Gera o novo hash da senha antes de atualizar o objeto
-        _usuario.SenhaHash = UsuarioService.GerarHash(novaSenha);
-
-        // ** Marca o usuário para sincronização antes de atualizar **
-        _usuario.IsSynced = false;
-        _usuario.UpdatedAt = DateTime.UtcNow;
+        IsBusy = true; // Ativa o indicador de carregamento.
 
         try {
+            _usuario.SenhaHash = UsuarioService.GerarHash(novaSenha);
+
+            _usuario.IsSynced = false;
+            _usuario.UpdatedAt = DateTime.UtcNow;
+
             int rowsAffected = await _databaseService.AtualizarUsuarioAsync(_usuario);
 
             if (rowsAffected > 0) {
@@ -64,10 +85,8 @@ public partial class AlterarSenhaPopup : ContentPage {
                     App.CurrentUser.SenhaHash = _usuario.SenhaHash;
                 }
 
-                // ** DISPARO MANUAL APÓS ATUALIZAÇÃO DA SENHA DO USUÁRIO **
-                Debug.WriteLine("[AlterarSenhaPopup] Senha do usuário atualizada localmente. Disparando sincronização...");
+                Debug.WriteLine("[AlterarSenhaPopup] Senha do usuário atualizada localmente. Disparando sincronização...");
 
-                // Crie e passe um objeto de progresso vazio para o método SyncAsync
                 await _syncService.SyncAsync(new Progress<string>());
 
                 await _alertService.DisplayAlert("Sucesso", "Senha atualizada com sucesso!", "OK");
@@ -77,6 +96,8 @@ public partial class AlterarSenhaPopup : ContentPage {
             }
         } catch (Exception ex) {
             await _alertService.DisplayAlert("Erro", $"Ocorreu um erro ao salvar a senha: {ex.Message}", "OK");
+        } finally {
+            IsBusy = false; // Desativa o indicador de carregamento.
         }
     }
 }

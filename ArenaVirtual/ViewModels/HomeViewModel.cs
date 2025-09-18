@@ -27,14 +27,14 @@ namespace ArenaVirtual.ViewModels {
         private readonly ObservableCollection<Campeonato> _favoritos = new();
         public ObservableCollection<Campeonato> Favoritos => _favoritos;
 
-        private bool _isFirstLoad = true;
         private readonly DatabaseService _databaseService = databaseService;
         private readonly SyncService _syncService = syncService;
         private readonly ConnectivityService _connectivityService = connectivityService;
         private readonly SemaphoreSlim _syncSemaphore = new(1, 1);
 
-        public HomeViewModel(ConnectivityService connectivityService) : this(null!, null!, null!) {
-            connectivityService.ConnectivityChanged += OnConnectivityChanged;
+        // Construtor sem parâmetros para a visualização em design-time.
+        public HomeViewModel() : this(null!, null!, null!) {
+            _connectivityService.ConnectivityChanged += OnConnectivityChanged;
             UpdateConnectivityStatus();
         }
 
@@ -42,7 +42,7 @@ namespace ArenaVirtual.ViewModels {
             UpdateConnectivityStatus();
         }
 
-        private void UpdateConnectivityStatus() {
+        public void UpdateConnectivityStatus() {
             IsOnline = _connectivityService.IsConnected;
         }
 
@@ -66,16 +66,12 @@ namespace ArenaVirtual.ViewModels {
 
         public async Task OnAppearingAsync() {
             Debug.WriteLine("[HomeViewModel] OnAppearingAsync chamado.");
+            UpdateConnectivityStatus();
             await _syncSemaphore.WaitAsync();
             try {
-                if (_isFirstLoad) {
-                    _isFirstLoad = false;
-                    IsBusy = true;
-                    await _syncService.SyncAsync(new Progress<string>());
-                    await CarregarTodosCampeonatos();
-                } else {
-                    await CarregarFavoritos();
-                }
+                IsBusy = true;
+                await _syncService.SyncAsync(new Progress<string>());
+                await CarregarTodosCampeonatos();
             } catch (Exception ex) {
                 Debug.WriteLine($"[HomeViewModel] Erro em OnAppearingAsync: {ex.Message}");
             } finally {
@@ -85,6 +81,7 @@ namespace ArenaVirtual.ViewModels {
         }
 
         private async Task SincronizarAsync() {
+            if (!IsOnline) return;
             await _syncSemaphore.WaitAsync();
             try {
                 IsBusy = true;
