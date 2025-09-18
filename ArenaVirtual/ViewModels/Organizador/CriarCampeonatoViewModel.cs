@@ -96,7 +96,8 @@ namespace ArenaVirtual.ViewModels {
                 return;
             }
 
-            if (App.CurrentUser == null || App.CurrentUser.Id == 0) {
+            var usuarioLogado = SessaoService.Instancia.GetUsuarioAtual();
+            if (usuarioLogado == null || usuarioLogado.Id == 0) {
                 MensagemValidacao = "Erro: O usuário organizador não está logado ou não foi sincronizado. Por favor, tente novamente.";
                 return;
             }

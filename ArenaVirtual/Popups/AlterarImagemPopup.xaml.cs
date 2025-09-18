@@ -1,6 +1,9 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
 using System.Diagnostics;
+using System.IO;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Storage;
 
 namespace ArenaVirtual.Popups;
 
@@ -13,9 +16,10 @@ public partial class AlterarImagemPopup : ContentPage {
     public event EventHandler<string>? ImagemAtualizada;
 
     private string? _caminhoNovaImagemSelecionada;
+    // Adicione uma variável de controle para o estado de salvamento
+    private bool _isSaving = false;
 
-    // Injeção de dependências no construtor
-    public AlterarImagemPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
+    public AlterarImagemPopup(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
         InitializeComponent();
         _usuario = usuario;
         _alertService = alertService;
@@ -28,8 +32,7 @@ public partial class AlterarImagemPopup : ContentPage {
     private void AtualizarImagemUI(string? caminhoImagem) {
         if (!string.IsNullOrEmpty(caminhoImagem) && File.Exists(caminhoImagem)) {
             try {
-                byte[] imageBytes = File.ReadAllBytes(caminhoImagem);
-                ImagemPerfil.Source = ImageSource.FromStream(() => new MemoryStream(imageBytes));
+                ImagemPerfil.Source = ImageSource.FromFile(caminhoImagem);
             } catch {
                 ImagemPerfil.Source = "default_profile.png";
             }
@@ -55,32 +58,33 @@ public partial class AlterarImagemPopup : ContentPage {
     }
 
     private async void Salvar_Clicked(object sender, EventArgs e) {
+        // Verifica a variável de controle para evitar múltiplos cliques
+        if (_isSaving) return;
+
         if (string.IsNullOrEmpty(_caminhoNovaImagemSelecionada)) {
             await _alertService.DisplayAlert("Aviso", "Por favor, escolha uma imagem primeiro.", "OK");
             return;
         }
 
-        try {
+        _isSaving = true; // Inicia o estado de salvamento
+
+        try {
             string diretorioImagens = FileSystem.AppDataDirectory;
             string nomeArquivo = Path.GetFileName(_caminhoNovaImagemSelecionada);
             string caminhoFinalImagem = Path.Combine(diretorioImagens, nomeArquivo);
 
-            if (_caminhoNovaImagemSelecionada != caminhoFinalImagem) {
+            // Otimização: evite a cópia se a imagem já estiver no diretório correto.
+            if (!File.Exists(caminhoFinalImagem)) {
                 File.Copy(_caminhoNovaImagemSelecionada, caminhoFinalImagem, true);
             }
 
             _usuario.ImagemPath = caminhoFinalImagem;
-
-            // Marcar usuário para sincronização antes de atualizar no banco de dados
-            _usuario.IsSynced = false;
+            _usuario.IsSynced = false;
             _usuario.UpdatedAt = DateTime.UtcNow;
 
             await _databaseService.AtualizarUsuarioAsync(_usuario);
 
-            // Disparo manual da sincronização após a atualização local
-            Debug.WriteLine("[AlterarImagemPopup] Imagem de usuário atualizada localmente. Disparando sincronização...");
-
-            // Crie e passe um objeto de progresso vazio
+            Debug.WriteLine("[AlterarImagemPopup] Imagem de usuário atualizada localmente. Disparando sincronização...");
             await _syncService.SyncAsync(new Progress<string>());
 
             ImagemAtualizada?.Invoke(this, _usuario.ImagemPath);
@@ -89,7 +93,9 @@ public partial class AlterarImagemPopup : ContentPage {
             await Navigation.PopModalAsync();
         } catch (Exception ex) {
             await _alertService.DisplayAlert("Erro", $"Erro ao salvar imagem: {ex.Message}", "OK");
-        }
+        } finally {
+            _isSaving = false; // Finaliza o estado de salvamento
+        }
     }
 
     private async void Cancelar_Clicked(object sender, EventArgs e) {
