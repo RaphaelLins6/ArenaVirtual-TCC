@@ -116,7 +116,9 @@ namespace ArenaVirtual.ViewModels {
                 FormatoCampeonato = FormatoCampeonato,
                 LocaisDosJogos = LocaisDosJogos,
                 HaveraPremiacao = HaveraPremiacao,
-                OrganizadorId = App.CurrentUser.Id
+                // CORREÇÃO: Use o objeto de sessão validado
+                OrganizadorId = usuarioLogado.Id,
+                OrganizadorClientAppId = usuarioLogado.ClientAppId
             };
 
             try {

@@ -20,6 +20,7 @@ namespace ArenaVirtual.Models {
         private DateTime _dataInicio;
         private DateTime _dataFim;
         private int _organizadorId;
+        private Guid? _organizadorClientAppId; // Adicione esta linha
         private string? _logoUrl;
         private string? _nomeOrganizador;
         private string? _emailOrganizador;
@@ -72,6 +73,12 @@ namespace ArenaVirtual.Models {
         public int OrganizadorId {
             get => _organizadorId;
             set => SetProperty(ref _organizadorId, value);
+        }
+
+        // Adicione esta nova propriedade
+        public Guid? OrganizadorClientAppId {
+            get => _organizadorClientAppId;
+            set => SetProperty(ref _organizadorClientAppId, value);
         }
 
         public string? LogoUrl {
