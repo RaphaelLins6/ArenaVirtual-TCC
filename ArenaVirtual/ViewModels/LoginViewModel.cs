@@ -8,8 +8,8 @@ using System;
 using System.Threading.Tasks;
 
 namespace ArenaVirtual.ViewModels {
-    // A injeção de dependência acontece aqui no construtor primário
-    public partial class LoginViewModel(IAlertService alertService, UsuarioService usuarioService, SyncService syncService, ConnectivityService connectivityService) : ObservableObject {
+    // Adicione IServiceProvider ao construtor primário para injetá-lo automaticamente
+    public partial class LoginViewModel(IAlertService alertService, UsuarioService usuarioService, SyncService syncService, ConnectivityService connectivityService, IServiceProvider serviceProvider) : ObservableObject {
 
         // Propriedades Observáveis
         [ObservableProperty]
@@ -24,14 +24,11 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty]
         private bool isOffline = false;
 
-        // Removemos o construtor secundário, agora a lógica de status será controlada pela página.
-        // A propriedade IsOffline é mantida e será atualizada pelo método público.
         public void UpdateConnectivityStatus() {
             IsOffline = !connectivityService.IsConnected;
             Debug.WriteLine($"[LoginViewModel] Status de conectividade atualizado. Está offline: {IsOffline}");
         }
 
-        // Comandos Relay
         [RelayCommand]
         private async Task Login() {
             if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha)) {
@@ -47,7 +44,8 @@ namespace ArenaVirtual.ViewModels {
                     if (usuarioOffline != null) {
                         SessaoService.Instancia.Login(usuarioOffline);
                         App.CurrentUser = usuarioOffline;
-                        Application.Current.MainPage = new AppShell(App.CurrentUser);
+                        // Passe o serviceProvider para o construtor do AppShell
+                        Application.Current.MainPage = new AppShell(App.CurrentUser, serviceProvider);
                         Debug.WriteLine("[LoginViewModel] Login offline bem-sucedido.");
                         return;
                     } else {
@@ -75,7 +73,8 @@ namespace ArenaVirtual.ViewModels {
                 SessaoService.Instancia.Login(App.CurrentUser);
                 Debug.WriteLine("[LoginViewModel] Login bem-sucedido. Sincronização e navegação concluídas.");
 
-                Application.Current.MainPage = new AppShell(App.CurrentUser);
+                // Passe o serviceProvider para o construtor do AppShell
+                Application.Current.MainPage = new AppShell(App.CurrentUser, serviceProvider);
             } catch (Exception ex) {
                 Debug.WriteLine($"[LoginViewModel] Erro no processo de login/sincronização: {ex.Message}");
                 await alertService.DisplayAlert("Erro", "Ocorreu um erro. Tente novamente ou verifique sua conexão.", "OK");

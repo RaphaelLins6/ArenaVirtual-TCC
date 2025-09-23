@@ -123,7 +123,7 @@
 			<Generator></Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\CampeonatoPage\CampeonatoDetailPage.xaml">
-			<Generator></Generator>
+		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\Components\CampeonatoCard.xaml">
 			<Generator></Generator>

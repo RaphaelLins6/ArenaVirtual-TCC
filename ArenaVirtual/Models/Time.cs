@@ -18,6 +18,8 @@ namespace ArenaVirtual.Models {
         private int vitorias;
         private int derrotas;
         private int empates;
+        private int posicao;
+
         private int? capitaoId;
         private Guid? capitaoClientAppId;
         public Guid? CapitaoClientAppId {
@@ -25,10 +27,15 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref capitaoClientAppId, value);
         }
         private DateTime dataCriacao;
-        private Guid clientAppId; 
+        private Guid clientAppId;
         private Guid campeonatoClientAppId;
         private bool isSynced;
         private DateTime updatedAt;
+
+        // Propriedades adicionadas para simulação no ViewModel
+        private double _porcentagemVitoria;
+        private int _jogosAtras;
+        private string? _sequencia;
 
         [PrimaryKey, AutoIncrement]
         [JsonIgnore]
@@ -63,7 +70,6 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref campeonatoClientAppId, value);
         }
 
-
         [MaxLength(500)]
         public string? Descricao {
             get => descricao;
@@ -88,17 +94,40 @@ namespace ArenaVirtual.Models {
 
         public int Vitorias {
             get => vitorias;
-            set => SetProperty(ref vitorias, value);
+            set {
+                SetProperty(ref vitorias, value);
+                OnPropertyChanged(nameof(JogosDisputados));
+            }
         }
 
         public int Derrotas {
             get => derrotas;
-            set => SetProperty(ref derrotas, value);
+            set {
+                SetProperty(ref derrotas, value);
+                OnPropertyChanged(nameof(JogosDisputados));
+            }
         }
 
         public int Empates {
             get => empates;
-            set => SetProperty(ref empates, value);
+            set {
+                SetProperty(ref empates, value);
+                OnPropertyChanged(nameof(JogosDisputados));
+            }
+        }
+
+        // Adicionando a propriedade Posicao para a UI
+        [Ignore]
+        public int Posicao {
+            get => posicao;
+            set => SetProperty(ref posicao, value);
+        }
+
+        // Adicionando a propriedade JogosDisputados, que é calculada
+        [Ignore]
+        public int JogosDisputados {
+            get => Vitorias + Derrotas + Empates;
+            set { } // Set vazio para não haver erro de compilação
         }
 
         [ForeignKey("CapitaoId")]
@@ -117,6 +146,25 @@ namespace ArenaVirtual.Models {
             set => updatedAt = value;
         }
 
+        // Propriedades de simulação
+        [Ignore]
+        public double PorcentagemVitoria {
+            get => _porcentagemVitoria;
+            set => SetProperty(ref _porcentagemVitoria, value);
+        }
+
+        [Ignore]
+        public int JogosAtras {
+            get => _jogosAtras;
+            set => SetProperty(ref _jogosAtras, value);
+        }
+
+        [Ignore]
+        public string? Sequencia {
+            get => _sequencia;
+            set => SetProperty(ref _sequencia, value);
+        }
+
         public Time() {
             isSynced = false;
             updatedAt = DateTime.UtcNow;
@@ -131,11 +179,13 @@ namespace ArenaVirtual.Models {
 
             backingField = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
             this.isSynced = false;
             this.updatedAt = DateTime.UtcNow;
-
             return true;
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

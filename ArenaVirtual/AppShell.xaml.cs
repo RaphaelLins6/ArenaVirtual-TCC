@@ -3,6 +3,7 @@ using ArenaVirtual.Services;
 using ArenaVirtual.Views;
 using ArenaVirtual.Views.Arbitro;
 using ArenaVirtual.Views.Atleta;
+using ArenaVirtual.Views.CampeonatoPage;
 using ArenaVirtual.Views.Organizador;
 using ArenaVirtual.Views.Patrocinador;
 
@@ -10,7 +11,7 @@ namespace ArenaVirtual {
     public partial class AppShell : Shell {
         private readonly Usuario _usuarioLogado;
 
-        public AppShell(Usuario usuarioLogado) {
+        public AppShell(Usuario usuarioLogado, IServiceProvider serviceProvider) {
             InitializeComponent();
             _usuarioLogado = usuarioLogado;
 
@@ -23,6 +24,7 @@ namespace ArenaVirtual {
             Routing.RegisterRoute(nameof(EntrarTimePage), typeof(EntrarTimePage));
             Routing.RegisterRoute(nameof(SolicitacaoTimePage), typeof(SolicitacaoTimePage));
             Routing.RegisterRoute(nameof(EditarTimePage), typeof(EditarTimePage));
+            Routing.RegisterRoute("campeonatoDetalhes", typeof(CampeonatoDetailPage));
             CriarMenuPorPerfil(usuarioLogado);
         }
 

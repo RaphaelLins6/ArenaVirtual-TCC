@@ -1,4 +1,4 @@
-﻿// ArenaVirtual.Models/Campeonato.cs
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -7,20 +7,20 @@ using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace ArenaVirtual.Models {
-    public partial class Campeonato : INotifyPropertyChanged, ISyncable {
+    public partial class Campeonato : ObservableObject, ISyncable {
         [PrimaryKey, AutoIncrement]
         [JsonIgnore]
         public int Id { get; set; }
+        [NotNull, Unique]
         public Guid ClientAppId { get; set; }
 
-        // Variáveis de apoio (backing fields)
         private string? _nome;
         private string? _local;
         private bool _ehFavorito;
         private DateTime _dataInicio;
         private DateTime _dataFim;
         private int _organizadorId;
-        private Guid? _organizadorClientAppId; // Adicione esta linha
+        private Guid? _organizadorClientAppId;
         private string? _logoUrl;
         private string? _nomeOrganizador;
         private string? _emailOrganizador;
@@ -30,25 +30,23 @@ namespace ArenaVirtual.Models {
         private string? _formatoCampeonato;
         private string? _locaisDosJogos;
         private bool _haveraPremiacao;
-
-        // Novas variáveis de apoio para as propriedades adicionadas
         private string? _descricao;
         private string? _modalidade;
         private string? _regras;
         private DateTime? _dataTermino;
         private int? _numeroEquipes;
+        private string? _bannerUrl;
 
-        // As backing fields de sincronização não precisam de SetProperty,
-        // então não precisam de _underscore.
         public bool IsSynced { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-        // Propriedades mutáveis que usam SetProperty
+        [NotNull, MaxLength(100)]
         public string? Nome {
             get => _nome;
             set => SetProperty(ref _nome, value);
         }
 
+        [MaxLength(150)]
         public string? Local {
             get => _local;
             set => SetProperty(ref _local, value);
@@ -60,11 +58,13 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref _ehFavorito, value);
         }
 
+        [NotNull]
         public DateTime DataInicio {
             get => _dataInicio;
             set => SetProperty(ref _dataInicio, value);
         }
 
+        [NotNull]
         public DateTime DataFim {
             get => _dataFim;
             set => SetProperty(ref _dataFim, value);
@@ -75,27 +75,36 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref _organizadorId, value);
         }
 
-        // Adicione esta nova propriedade
         public Guid? OrganizadorClientAppId {
             get => _organizadorClientAppId;
             set => SetProperty(ref _organizadorClientAppId, value);
         }
 
+        [MaxLength(255)]
         public string? LogoUrl {
             get => _logoUrl;
             set => SetProperty(ref _logoUrl, value);
         }
 
+        [MaxLength(255)]
+        public string? BannerUrl {
+            get => _bannerUrl;
+            set => SetProperty(ref _bannerUrl, value);
+        }
+
+        [MaxLength(100)]
         public string? NomeOrganizador {
             get => _nomeOrganizador;
             set => SetProperty(ref _nomeOrganizador, value);
         }
 
+        [MaxLength(100)]
         public string? EmailOrganizador {
             get => _emailOrganizador;
             set => SetProperty(ref _emailOrganizador, value);
         }
 
+        [MaxLength(20)]
         public string? TelefoneOrganizador {
             get => _telefoneOrganizador;
             set => SetProperty(ref _telefoneOrganizador, value);
@@ -111,11 +120,13 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref _valorTaxaInscricao, value);
         }
 
+        [MaxLength(50)]
         public string? FormatoCampeonato {
             get => _formatoCampeonato;
             set => SetProperty(ref _formatoCampeonato, value);
         }
 
+        [MaxLength(255)]
         public string? LocaisDosJogos {
             get => _locaisDosJogos;
             set => SetProperty(ref _locaisDosJogos, value);
@@ -126,17 +137,19 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref _haveraPremiacao, value);
         }
 
-        // Novas propriedades com SetProperty
+        [MaxLength(500)]
         public string? Descricao {
             get => _descricao;
             set => SetProperty(ref _descricao, value);
         }
 
+        [MaxLength(50)]
         public string? Modalidade {
             get => _modalidade;
             set => SetProperty(ref _modalidade, value);
         }
 
+        [MaxLength(500)]
         public string? Regras {
             get => _regras;
             set => SetProperty(ref _regras, value);
@@ -152,15 +165,13 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref _numeroEquipes, value);
         }
 
-
-        // Construtor
         public Campeonato() {
-            // Inicialize as propriedades diretamente
             IsSynced = false;
             UpdatedAt = DateTime.UtcNow;
             _nome = string.Empty;
             _local = string.Empty;
             _logoUrl = string.Empty;
+            _bannerUrl = string.Empty;
             _nomeOrganizador = string.Empty;
             _emailOrganizador = string.Empty;
             _telefoneOrganizador = string.Empty;
@@ -184,7 +195,6 @@ namespace ArenaVirtual.Models {
             backingField = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-            // Agora a atribuição a IsSynced e UpdatedAt não causa recursão
             this.IsSynced = false;
             this.UpdatedAt = DateTime.UtcNow;
 

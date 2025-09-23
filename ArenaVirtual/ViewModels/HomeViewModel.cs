@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.ViewModels {
     // Usando o construtor primário para a injeção de dependência.
@@ -172,14 +173,20 @@ namespace ArenaVirtual.ViewModels {
             });
         }
 
-        private static async Task VerCampeonatoAsync(Campeonato campeonato) {
+        private async Task VerCampeonatoAsync(Campeonato campeonato) {
             Debug.WriteLine($"[HomeViewModel] VerCampeonatoAsync chamado. Campeonato: {campeonato?.Nome ?? "NULO"}, ID: {campeonato?.Id ?? 0}");
             if (campeonato == null) {
                 Debug.WriteLine("[DEBUG] VerCampeonatoCommand acionado, mas campeonato é nulo.");
                 return;
             }
-            Debug.WriteLine($"[DEBUG] VerCampeonatoCommand acionado para: {campeonato.Nome ?? "N/A"}, ID: {campeonato.Id}");
-            await Shell.Current.Navigation.PushAsync(new Views.CampeonatoPage.CampeonatoDetailPage(campeonato));
+
+            // Usando o roteamento do Shell para navegar e passar o objeto
+            var navigationParameter = new Dictionary<string, object> {
+                { "Campeonato", campeonato }
+            };
+
+            // A rota deve ser a mesma que você registrou no AppShell.xaml.cs
+            await Shell.Current.GoToAsync("campeonatoDetalhes", navigationParameter);
         }
     }
 }
