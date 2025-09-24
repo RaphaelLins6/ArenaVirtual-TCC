@@ -41,6 +41,7 @@ builder.Services.AddScoped<IBackendService<Campeonato, CampeonatoSyncDto>, Campe
 builder.Services.AddScoped<IBackendService<Time, TimeSyncDto>, TimeService>();
 builder.Services.AddScoped<IBackendService<Convite, ConviteSyncDto>, ConviteService>();
 builder.Services.AddScoped<IBackendService<UsuarioCampeonatoFavorito, UsuarioCampeonatoFavoritoSyncDto>, UsuarioCampeonatoFavoritoService>();
+builder.Services.AddScoped<IBackendSyncServiceFactory, BackendSyncServiceFactory>();
 
 builder.Services.AddScoped<BackendSyncService>();
 

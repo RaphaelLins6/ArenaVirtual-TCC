@@ -19,23 +19,25 @@ public class DataController : ControllerBase {
     }
 
     [HttpPost("sync")]
-    public async Task<IActionResult> Sync([FromBody] AllUploadsDto data) {
-        _logger.LogInformation($"[Sync] Recebida requisição de sincronização.");
+    public async Task<IActionResult> SyncAll([FromBody] AllUploadsDto data, [FromQuery] DateTime lastSyncTime) {
+        _logger.LogInformation($"[Sync] Recebida requisição de sincronização completa.");
 
         try {
-            var idMappings = await _backendSyncService.ProcessAllUploadsAsync(data);
-            return Ok(idMappings);
+            var allUpdates = await _backendSyncService.SyncDataAsync(data, lastSyncTime);
+            return Ok(allUpdates);
         } catch (Exception ex) {
-            _logger.LogError($"[Sync] Erro interno na sincronização de upload: {ex.Message}");
+            _logger.LogError($"[Sync] Erro interno na sincronização: {ex.Message}");
             return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
         }
     }
 
+    // Seu DataController.cs corrigido
     [HttpGet("updates")]
     public async Task<IActionResult> GetUpdates([FromQuery] DateTime lastSyncTime) {
         _logger.LogInformation($"[Updates] Requisição recebida. Última sincronização: {lastSyncTime}");
 
         try {
+            // A chamada foi corrigida para passar apenas a data
             var updatedItems = await _backendSyncService.GetUpdatesAsync(lastSyncTime);
             _logger.LogDebug($"[Updates] JSON de Resposta: {JsonSerializer.Serialize(updatedItems)}");
             return Ok(updatedItems);

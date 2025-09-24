@@ -15,7 +15,7 @@ namespace ArenaVirtual.Services {
                     ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
                 };
 
-                var baseUrl = "http://192.168.15.8:5067/";
+                var baseUrl = "http://192.168.15.10:5067/";
                 
                 _httpClient = new HttpClient(handler) {
                     BaseAddress = new Uri(baseUrl)

@@ -1,11 +1,15 @@
-﻿using SQLite;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using SQLite;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace ArenaVirtual.Models {
-    public class Jogo : INotifyPropertyChanged {
+    public partial class Jogo : ObservableObject, ISyncable {
 
-        // Propriedades privadas para o backing field
+        // ... (suas propriedades e campos de apoio) ...
         private int id;
         private Guid clientAppId;
         private int timeAId;
@@ -19,6 +23,13 @@ namespace ArenaVirtual.Models {
         private string placarA = string.Empty;
         private string placarB = string.Empty;
 
+        // Adicione este construtor público sem parâmetros
+        public Jogo() {
+            // Inicialização padrão das propriedades, se necessário
+            this.IsSynced = false;
+            this.UpdatedAt = DateTime.UtcNow;
+        }
+
         [PrimaryKey, AutoIncrement]
         public int Id {
             get => id;
@@ -30,24 +41,23 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref clientAppId, value);
         }
 
-        // Propriedades para as chaves estrangeiras
         public int TimeAId {
             get => timeAId;
             set => SetProperty(ref timeAId, value);
         }
+
         public int TimeBId {
             get => timeBId;
             set => SetProperty(ref timeBId, value);
         }
 
-        // Propriedades de navegação para a interface de usuário
-        [Ignore] // Ignore estas propriedades no SQLite, pois elas são para a UI
+        [Ignore]
         public Time TimeA {
             get => timeA;
             set => SetProperty(ref timeA, value);
         }
 
-        [Ignore] // Ignore estas propriedades no SQLite, pois elas são para a UI
+        [Ignore]
         public Time TimeB {
             get => timeB;
             set => SetProperty(ref timeB, value);
@@ -73,7 +83,6 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref local, value);
         }
 
-        // Adicione as propriedades de placar
         public string PlacarA {
             get => placarA;
             set => SetProperty(ref placarA, value);

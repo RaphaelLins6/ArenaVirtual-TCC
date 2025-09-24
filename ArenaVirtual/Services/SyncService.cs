@@ -119,15 +119,37 @@ public class SyncService {
         progress?.Report("Enviando todos os dados para o servidor...");
         var idMappings = await _apiService.PostDataAsync("AllUploads", allUploads);
 
-        // 5. Atualizar os IDs locais (seu código já estava correto aqui)
+        // 5. Atualizar os IDs locais (agora com validação e tratamento de erros)
         foreach (var type in _uploadOrder) {
-            if (idMappings.TryGetValue(type.Name, out var mapping)) {
-                if (allItems.TryGetValue(type, out var itemsToUpdate)) {
+            if (idMappings.TryGetValue(type.Name, out var mappingRaw)) {
+                // AQUI: Usando 'as' para uma conversão segura para o tipo que esperamos
+                var mapping = mappingRaw as IDictionary<Guid, object>;
+
+                if (mapping != null && allItems.TryGetValue(type, out var itemsToUpdate)) {
                     foreach (var item in itemsToUpdate.Cast<ISyncable>()) {
-                        if (mapping.TryGetValue(item.ClientAppId, out int serverId)) {
+                        if (mapping.TryGetValue(item.ClientAppId, out object rawValue)) {
+                            int serverId = 0;
+
+                            // A lógica de verificação foi reescrita para evitar o erro de compilação
+                            if (rawValue is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.Number) {
+                                serverId = jsonElement.GetInt32();
+                            } else if (rawValue is int intValue) {
+                                serverId = intValue;
+                            } else {
+                                Debug.WriteLine($"[SyncService] Valor inesperado no mapeamento da entidade {type.Name}, ClientAppId={item.ClientAppId}: {rawValue}");
+                                continue;
+                            }
+
+                            if (serverId == 0) {
+                                Debug.WriteLine($"[SyncService] Ignorando mapeamento inválido (ID=0) para {type.Name}, ClientAppId={item.ClientAppId}");
+                                continue;
+                            }
+
                             await _databaseService.UpdateIdAndMarkAsSyncedAsync((dynamic)item, serverId);
                         }
                     }
+                } else {
+                    Debug.WriteLine($"[SyncService] Mapeamento para {type.Name} não é um IDictionary<Guid, object>. Tipo recebido: {mappingRaw?.GetType().Name ?? "null"}");
                 }
             }
         }

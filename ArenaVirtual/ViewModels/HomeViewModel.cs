@@ -99,7 +99,18 @@ namespace ArenaVirtual.ViewModels {
         private async Task CarregarTodosCampeonatos() {
             try {
                 var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
-                if (usuarioAtual == null || usuarioAtual.ClientAppId == Guid.Empty) return;
+
+                if (usuarioAtual == null) {
+                    Debug.WriteLine("[HomeViewModel] SessaoService.GetUsuarioAtual() retornou NULL em CarregarTodosCampeonatos.");
+                    return;
+                }
+
+                if (usuarioAtual.ClientAppId == Guid.Empty) {
+                    Debug.WriteLine("[HomeViewModel] usuarioAtual.ClientAppId está vazio (Guid.Empty) em CarregarTodosCampeonatos.");
+                    return;
+                }
+
+                Debug.WriteLine($"[HomeViewModel] Usuário atual OK em CarregarTodosCampeonatos: {usuarioAtual.Nome} | ID: {usuarioAtual.ClientAppId}");
 
                 var todosCampeonatos = await _databaseService.ListarCampeonatosAsync() ?? new List<Campeonato>();
                 var favoritosDoUsuario = await _databaseService.ListarFavoritosPorUsuarioAsync(usuarioAtual.ClientAppId);
@@ -117,9 +128,10 @@ namespace ArenaVirtual.ViewModels {
                     }
                 });
             } catch (Exception ex) {
-                Debug.WriteLine($"Erro ao carregar campeonatos: {ex.Message}");
+                Debug.WriteLine($"[HomeViewModel] Erro ao carregar campeonatos: {ex.Message}");
             }
         }
+
 
         private async Task CarregarFavoritos() {
             try {

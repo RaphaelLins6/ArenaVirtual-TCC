@@ -15,6 +15,53 @@ namespace ArenaVirtualAPI.Services {
             _context = context;
         }
 
+        public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<UsuarioCampeonatoFavoritoSyncDto> items) {
+            var idMapping = new Dictionary<Guid, int>();
+            foreach (var dto in items) {
+                var existingItem = await _context.UsuarioCampeonatoFavoritos
+                  .FirstOrDefaultAsync(f => f.ClientAppId == dto.ClientAppId);
+
+                if (existingItem == null) {
+                    var newItem = new UsuarioCampeonatoFavorito {
+                        ClientAppId = dto.ClientAppId,
+                        IsSynced = true,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+                    _context.UsuarioCampeonatoFavoritos.Add(newItem);
+                    idMapping[newItem.ClientAppId] = newItem.Id;
+                } else {
+                    existingItem.UpdatedAt = DateTime.UtcNow;
+                    existingItem.IsSynced = true;
+                    _context.Entry(existingItem).State = EntityState.Modified;
+                    idMapping[existingItem.ClientAppId] = existingItem.Id;
+                }
+            }
+            return idMapping;
+        }
+
+        public async Task UpdateForeignKeysAsync(IEnumerable<UsuarioCampeonatoFavoritoSyncDto> dtos, Dictionary<string, Dictionary<Guid, int>> idMappings) {
+            if (!idMappings.TryGetValue("Usuario", out var usuarioMapping)) {
+                return;
+            }
+            if (!idMappings.TryGetValue("Campeonato", out var campeonatoMapping)) {
+                return;
+            }
+
+            foreach (var dto in dtos) {
+                var existingItem = await _context.UsuarioCampeonatoFavoritos
+                  .FirstOrDefaultAsync(f => f.ClientAppId == dto.ClientAppId);
+
+                if (existingItem != null) {
+                    if (usuarioMapping.TryGetValue(dto.UsuarioClientAppId, out int usuarioId) &&
+                      campeonatoMapping.TryGetValue(dto.CampeonatoClientAppId, out int campeonatoId)) {
+                        existingItem.UsuarioId = usuarioId;
+                        existingItem.CampeonatoId = campeonatoId;
+                        _context.Entry(existingItem).State = EntityState.Modified;
+                    }
+                }
+            }
+        }
+
         public async Task<UsuarioCampeonatoFavorito?> GetByIdAsync(int id) {
             return await _context.UsuarioCampeonatoFavoritos.FindAsync(id);
         }
@@ -35,57 +82,14 @@ namespace ArenaVirtualAPI.Services {
 
         public async Task<IEnumerable<UsuarioCampeonatoFavoritoSyncDto>> GetUpdatedSinceAsync(DateTime lastSyncTime) {
             return await _context.UsuarioCampeonatoFavoritos
-                .Where(f => f.UpdatedAt > lastSyncTime)
-                .Select(f => new UsuarioCampeonatoFavoritoSyncDto {
-                    ClientAppId = f.ClientAppId,
-                    UpdatedAt = f.UpdatedAt,
-                    UsuarioClientAppId = f.UsuarioClientAppId,
-                    CampeonatoClientAppId = f.CampeonatoClientAppId
-                })
-                .ToListAsync();
-        }
-
-        // Método corrigido para usar o dicionário de mapeamentos
-        public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<UsuarioCampeonatoFavoritoSyncDto> items, Dictionary<string, Dictionary<Guid, int>> idMappings) {
-            var idMapping = new Dictionary<Guid, int>();
-
-            if (!idMappings.TryGetValue("Usuario", out var usuarioMapping)) {
-                throw new InvalidOperationException("Mapeamento de Usuário não encontrado.");
-            }
-            if (!idMappings.TryGetValue("Campeonato", out var campeonatoMapping)) {
-                throw new InvalidOperationException("Mapeamento de Campeonato não encontrado.");
-            }
-
-            foreach (var dto in items) {
-                if (!usuarioMapping.TryGetValue(dto.UsuarioClientAppId, out int usuarioId)) continue;
-                if (!campeonatoMapping.TryGetValue(dto.CampeonatoClientAppId, out int campeonatoId)) continue;
-
-                var existingItem = await _context.UsuarioCampeonatoFavoritos
-                    .FirstOrDefaultAsync(f => f.UsuarioClientAppId == dto.UsuarioClientAppId && f.CampeonatoClientAppId == dto.CampeonatoClientAppId);
-
-                if (existingItem == null) {
-                    var newItem = new UsuarioCampeonatoFavorito {
-                        ClientAppId = dto.ClientAppId,
-                        UsuarioId = usuarioId,
-                        CampeonatoId = campeonatoId,
-                        UsuarioClientAppId = dto.UsuarioClientAppId,
-                        CampeonatoClientAppId = dto.CampeonatoClientAppId,
-                        IsSynced = true,
-                        UpdatedAt = DateTime.UtcNow
-                    };
-                    _context.UsuarioCampeonatoFavoritos.Add(newItem);
-                    idMapping[newItem.ClientAppId] = newItem.Id;
-                } else {
-                    existingItem.UpdatedAt = DateTime.UtcNow;
-                    existingItem.IsSynced = true;
-                    _context.Entry(existingItem).State = EntityState.Modified;
-                    idMapping[existingItem.ClientAppId] = existingItem.Id;
-                }
-            }
-
-            // Chama SaveChangesAsync apenas uma vez no final do loop
-            await _context.SaveChangesAsync();
-            return idMapping;
+              .Where(f => f.UpdatedAt > lastSyncTime)
+              .Select(f => new UsuarioCampeonatoFavoritoSyncDto {
+                  ClientAppId = f.ClientAppId,
+                  UpdatedAt = f.UpdatedAt,
+                  UsuarioClientAppId = f.UsuarioClientAppId,
+                  CampeonatoClientAppId = f.CampeonatoClientAppId
+              })
+              .ToListAsync();
         }
     }
 }
