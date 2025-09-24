@@ -101,6 +101,9 @@
 		<MauiXaml Update="AppShell.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
+		<MauiXaml Update="Popups\AlterarBannerPopup.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Popups\AlterarImagemPopup.xaml">
 			<Generator></Generator>
 		</MauiXaml>

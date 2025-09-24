@@ -13,18 +13,18 @@
         <ScrollView>
             <VerticalStackLayout Spacing="25">
                 <Grid HeightRequest="200">
-                    <Image Aspect="AspectFill" Source="{Binding Campeonato.BannerUrl}" />
+                    <Image Aspect="AspectFill" Source="{Binding BannerSource}" />
 
                     <ImageButton
-                        Source="icone_editar.png"
-                        Command="{Binding AlterarBannerCommand}"
-                        VerticalOptions="Start"
-                        HorizontalOptions="End"
                         Margin="10"
-                        WidthRequest="40"
-                        HeightRequest="40"
                         BackgroundColor="Transparent"
-                        IsVisible="{Binding IsOrganizador}" />
+                        Command="{Binding AlterarBannerCommand}"
+                        HeightRequest="40"
+                        HorizontalOptions="End"
+                        IsVisible="{Binding IsOrganizador}"
+                        Source="icone_editar.png"
+                        VerticalOptions="Start"
+                        WidthRequest="40" />
 
                     <VerticalStackLayout
                         Margin="15"
@@ -63,13 +63,13 @@
                     <Label Text="{Binding Campeonato.DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}" TextColor="OrangeRed" />
 
                     <Button
-                        Text="Gerenciar Solicitações"
-                        Command="{Binding GerenciarSolicitacoesCommand}"
-                        BackgroundColor="OrangeRed"
-                        TextColor="White"
-                        CornerRadius="10"
                         Margin="0,15,0,0"
-                        IsVisible="{Binding IsOrganizador}" />
+                        BackgroundColor="OrangeRed"
+                        Command="{Binding GerenciarSolicitacoesCommand}"
+                        CornerRadius="10"
+                        IsVisible="{Binding IsOrganizador}"
+                        Text="Gerenciar Solicitações"
+                        TextColor="White" />
                 </VerticalStackLayout>
 
                 <BoxView
