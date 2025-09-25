@@ -41,6 +41,7 @@ public static class MauiProgram {
         builder.Services.AddSingleton<SyncService>();
         builder.Services.AddSingleton<CampeonatoService>();
         builder.Services.AddSingleton<ConnectivityService>();
+        builder.Services.AddSingleton(SessaoService.Instancia);
 
         // Registre os serviços de domínio como Transients
         builder.Services.AddTransient<UsuarioService>();

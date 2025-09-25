@@ -1,4 +1,5 @@
-﻿using ArenaVirtual.Models;
+﻿// Em ArenaVirtual/ViewModels/Atleta/ProcurarCampeonatosViewModel.cs
+using ArenaVirtual.Models;
 using ArenaVirtual.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -33,7 +34,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
     public partial class ProcurarCampeonatosViewModel : ObservableObject {
 
         [ObservableProperty]
-        //[NotifyCanExecuteChangedFor(nameof(PesquisarCampeonatosCommand))]
         [NotifyCanExecuteChangedFor(nameof(SolicitarInscricaoCommand))]
         private bool isBusy;
 
@@ -60,48 +60,54 @@ namespace ArenaVirtual.ViewModels.Atleta {
             // await PesquisarCampeonatosAsync(string.Empty);
         }
 
-        //[RelayCommand(CanExecute = nameof(IsNotBusy))]
-        //public async Task PesquisarCampeonatosAsync(string query) {
-        //    IsBusy = true;
-        //    try {
-        //        var todosCampeonatos = await _campeonatoService.ObterTodosAsync();
-        //        var timeAtual = await _sessaoService.GetTimeAtualAsync();
+        // ⚡️ ADICIONE ESTE MÉTODO
+        public async Task OnAppearingAsync() {
+            Debug.WriteLine("[ProcurarCampeonatosViewModel] OnAppearingAsync chamado.");
+            await PesquisarCampeonatosAsync(string.Empty);
+        }
 
-        //        if (timeAtual == null) {
-        //            Debug.WriteLine("Usuário não pertence a nenhum time. Não é possível solicitar inscrição em campeonatos.");
-        //            MainThread.BeginInvokeOnMainThread(() => {
-        //                CampeonatosDisponiveis.Clear();
-        //            });
-        //            return;
-        //        }
+        [RelayCommand(CanExecute = nameof(IsNotBusy))]
+        public async Task PesquisarCampeonatosAsync(string query) {
+            IsBusy = true;
+            try {
+                var todosCampeonatos = await _campeonatoService.ObterTodosAsync();
+                var timeAtual = await _sessaoService.GetTimeAtualAsync();
 
-        //        var campeonatosFiltrados = string.IsNullOrWhiteSpace(query)
-        //        ? todosCampeonatos
-        //        : todosCampeonatos.Where(c => c.Nome.ToLower().Contains(query.ToLower())).ToList();
+                if (timeAtual == null) {
+                    Debug.WriteLine("Usuário não pertence a nenhum time. Não é possível solicitar inscrição em campeonatos.");
+                    MainThread.BeginInvokeOnMainThread(() => {
+                        CampeonatosDisponiveis.Clear();
+                    });
+                    return;
+                }
 
-        //        MainThread.BeginInvokeOnMainThread(async () => {
-        //            CampeonatosDisponiveis.Clear();
-        //            foreach (var campeonato in campeonatosFiltrados) {
-        //                var solicitacaoExistente = await _databaseService.ObterSolicitacaoPorTimeECampeonatoAsync(timeAtual.ClientAppId, campeonato.ClientAppId);
+                var campeonatosFiltrados = string.IsNullOrWhiteSpace(query)
+                ? todosCampeonatos
+                : todosCampeonatos.Where(c => c.Nome.ToLower().Contains(query.ToLower())).ToList();
 
-        //                string buttonText = "Solicitar Inscrição";
-        //                bool isEnabled = true;
-        //                Color buttonColor = Color.FromArgb("#FF9800");
+                MainThread.BeginInvokeOnMainThread(async () => {
+                    CampeonatosDisponiveis.Clear();
+                    foreach (var campeonato in campeonatosFiltrados) {
+                        var solicitacaoExistente = await _databaseService.ObterSolicitacaoPorTimeECampeonatoAsync(timeAtual.ClientAppId.ToString(), campeonato.ClientAppId.ToString());
 
-        //                // CORREÇÃO: Comparando diretamente com o enum para evitar erros
-        //                if (solicitacaoExistente?.Status == StatusConvite.Pendente) {
-        //                    buttonText = "Pendente";
-        //                    isEnabled = false;
-        //                    buttonColor = Color.FromArgb("#9E9E9E");
-        //                }
+                        string buttonText = "Solicitar Inscrição";
+                        bool isEnabled = true;
+                        Color buttonColor = Color.FromArgb("#FF9800");
 
-        //                CampeonatosDisponiveis.Add(new CampeonatoItemViewModel(campeonato, buttonText, isEnabled, buttonColor));
-        //            }
-        //        });
-        //    } finally {
-        //        IsBusy = false;
-        //    }
-        //}
+                        // CORREÇÃO: Comparando diretamente com o enum para evitar erros
+                        if (solicitacaoExistente?.Status == StatusConvite.Pendente) {
+                            buttonText = "Pendente";
+                            isEnabled = false;
+                            buttonColor = Color.FromArgb("#9E9E9E");
+                        }
+
+                        CampeonatosDisponiveis.Add(new CampeonatoItemViewModel(campeonato, buttonText, isEnabled, buttonColor));
+                    }
+                });
+            } finally {
+                IsBusy = false;
+            }
+        }
 
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
         private async Task SolicitarInscricaoAsync(CampeonatoItemViewModel campeonatoItemVM) {

@@ -58,7 +58,7 @@
                         TextColor="White" />
 
                     <Button
-                        BackgroundColor="Orange"
+                        BackgroundColor="Green"
                         Command="{Binding ProcurarCampeonatosCommand}"
                         CornerRadius="20"
                         Text="Procurar Campeonatos"

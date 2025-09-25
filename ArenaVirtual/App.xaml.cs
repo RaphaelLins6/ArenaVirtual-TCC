@@ -6,9 +6,13 @@ namespace ArenaVirtual;
 
 public partial class App : Application {
     public static TimeService? TimeService { get; private set; }
+    public static string DatabasePath { get; private set; }
+
 
     public App() {
         InitializeComponent();
+        DatabasePath = Path.Combine(FileSystem.AppDataDirectory, "arenavirtual.db3");
+
     }
 
     protected override Window CreateWindow(IActivationState? activationState) {

@@ -21,6 +21,8 @@ namespace ArenaVirtual.Models {
         [Indexed]
         public Guid UsuarioClientAppId { get; set; }
 
+        public Guid CampeonatoClientAppId { get; set; }
+
         public string? ConvidadoEmail { get; set; }
 
         public DateTime DataEnvio { get; set; }

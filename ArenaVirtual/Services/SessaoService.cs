@@ -46,5 +46,19 @@ namespace ArenaVirtual.Services {
         public void SetUsuarioAtual(Usuario usuario) {
             _usuarioAtual = usuario;
         }
+
+        public async Task<Time?> GetTimeAtualAsync() {
+            Debug.WriteLine($"[SessaoService] GetTimeAtualAsync chamado.");
+            if (_usuarioAtual == null) {
+                Debug.WriteLine("[SessaoService] Usuário atual é nulo. Retornando null.");
+                return null;
+            }
+
+            var databaseService = new DatabaseService(App.DatabasePath);
+            if (_usuarioAtual.TimeClientAppId.HasValue) {
+                return await databaseService.GetTimeByClientAppIdAsync(_usuarioAtual.TimeClientAppId.Value);
+            }
+            return null;
+        }
     }
 }

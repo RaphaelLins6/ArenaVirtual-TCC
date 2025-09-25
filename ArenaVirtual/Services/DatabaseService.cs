@@ -181,5 +181,17 @@ namespace ArenaVirtual.Services {
             _database.Table<Convite>()
                 .Where(c => c.SolicitanteClientAppId == usuarioClientAppId && c.Status == StatusConvite.Pendente)
                 .DeleteAsync();
+
+
+        public async Task<Convite?> ObterSolicitacaoPorTimeECampeonatoAsync(string timeId, string campeonatoId) {
+            if (!Guid.TryParse(timeId, out var timeGuid) || !Guid.TryParse(campeonatoId, out var campeonatoGuid)) {
+                return null;
+            }
+            var solicitacao = await _database.Table<Convite>()
+                .Where(s => s.TimeClientAppId == timeGuid && s.CampeonatoClientAppId == campeonatoGuid)
+                .FirstOrDefaultAsync();
+            return solicitacao;
+        }
     }
+
 }
