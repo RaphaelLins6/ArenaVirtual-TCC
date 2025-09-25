@@ -1,8 +1,22 @@
 ﻿using SQLite;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 
 namespace ArenaVirtual.Models {
+
+    public enum TipoConvite {
+        InscricaoCampeonato = 0,
+        ConviteTime = 1
+    }
+
+    public enum StatusConvite {
+        Pendente,
+        Aceito,
+        Recusado
+    }
+
     public class Convite : ISyncable, INotifyPropertyChanged {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
@@ -17,15 +31,18 @@ namespace ArenaVirtual.Models {
         [Indexed]
         public Guid TimeClientAppId { get; set; }
 
-        // Propriedade adicionada para corrigir o erro.
-        [Indexed]
+        [Indexed]
         public Guid UsuarioClientAppId { get; set; }
 
         public Guid CampeonatoClientAppId { get; set; }
 
+        public TipoConvite Tipo { get; set; }
+
         public string? ConvidadoEmail { get; set; }
 
+        // ⚡️ Propriedade renomeada para DataEnvio, para resolver o erro de compilação
         public DateTime DataEnvio { get; set; }
+        public DateTime DataCriacao { get; set; }
 
         public StatusConvite Status { get; set; }
 
@@ -58,11 +75,5 @@ namespace ArenaVirtual.Models {
 
             return true;
         }
-    }
-
-    public enum StatusConvite {
-        Pendente,
-        Aceito,
-        Recusado
     }
 }
