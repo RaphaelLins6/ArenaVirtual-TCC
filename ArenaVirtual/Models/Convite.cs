@@ -27,6 +27,8 @@ namespace ArenaVirtual.Models {
 
         public StatusConvite Status { get; set; }
 
+        public Convite() { }
+
         private bool _isSynced;
         public bool IsSynced {
             get => _isSynced;

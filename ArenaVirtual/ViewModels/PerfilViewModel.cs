@@ -4,21 +4,20 @@ using ArenaVirtual.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.Controls;
-using System;
+using System.IO;
 using System.Threading.Tasks;
+using System;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArenaVirtual.ViewModels {
-    // Injeção de dependência via construtor, uma prática mais limpa
-    public partial class PerfilViewModel(IAlertService alertService, DatabaseService databaseService, SyncService syncService) : ObservableObject {
+    public partial class PerfilViewModel : ObservableObject {
 
-        private readonly IAlertService _alertService = alertService;
-        private readonly DatabaseService _databaseService = databaseService;
-        private readonly SyncService _syncService = syncService;
+        private readonly IAlertService _alertService;
+        private readonly DatabaseService _databaseService;
+        private readonly SyncService _syncService;
 
-        // Variável de controle para evitar recursão
         private bool _isUpdating = false;
 
-        // Campos comuns
         [ObservableProperty] private string saudacao = string.Empty;
         [ObservableProperty] private string nomeUsuario = string.Empty;
         [ObservableProperty] private string emailUsuario = string.Empty;
@@ -27,7 +26,6 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty] private string telefoneUsuario = string.Empty;
         [ObservableProperty] private string linkRedeSocialUsuario = string.Empty;
 
-        // Campos específicos
         [ObservableProperty] private DateTime? dataNascimentoUsuario;
         [ObservableProperty] private GeneroEnum? generoUsuario;
         [ObservableProperty] private string nomeEmpresaUsuario = string.Empty;
@@ -36,7 +34,6 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty] private double? alturaUsuario = 0;
         [ObservableProperty] private string faixaOrcamentoPatrocinioUsuario = string.Empty;
 
-        // Exemplo de propriedades de visibilidade no ViewModel
         [ObservableProperty] private bool isAtleta;
         [ObservableProperty] private bool isOrganizador;
         [ObservableProperty] private bool isArbitro;
@@ -45,23 +42,50 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty]
         private Usuario usuarioLogado;
 
-        public PerfilViewModel(Usuario usuario, IAlertService alertService, DatabaseService databaseService, SyncService syncService) : this(alertService, databaseService, syncService) {
-            UsuarioLogado = usuario;
+        [ObservableProperty]
+        private ImageSource imagemPerfilSource;
+
+        [ObservableProperty]
+        private string? caminhoNovaImagemSelecionada;
+
+        [ObservableProperty]
+        private bool isBusy;
+
+        public PerfilViewModel(IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
+            _alertService = alertService;
+            _databaseService = databaseService;
+            _syncService = syncService;
+
+            UsuarioLogado = SessaoService.Instancia.GetUsuarioAtual();
             CarregarDadosDoUsuario();
 
             MessagingCenter.Subscribe<object, Usuario>(this, "PerfilAtualizado", (sender, usuarioAtualizado) => {
-                // Checa a variável de controle para evitar a recursão
                 if (_isUpdating) return;
 
                 MainThread.BeginInvokeOnMainThread(() => {
-                    _isUpdating = true; // Inicia o bloqueio
-
+                    _isUpdating = true;
                     UsuarioLogado = usuarioAtualizado;
                     CarregarDadosDoUsuario();
-
-                    _isUpdating = false; // Libera o bloqueio
+                    _isUpdating = false;
                 });
             });
+        }
+
+        [RelayCommand]
+        private async Task AlterarImagem() {
+            if (UsuarioLogado == null) {
+                await _alertService.DisplayAlert("Erro", "Nenhum usuário logado para alterar a imagem.", "OK");
+                return;
+            }
+
+            var services = App.Current?.Handler?.MauiContext?.Services;
+            if (services == null) {
+                await _alertService.DisplayAlert("Erro", "Serviços do aplicativo não estão disponíveis.", "OK");
+                return;
+            }
+
+            var popup = services.GetRequiredService<AlterarImagemPopup>();
+            await Shell.Current.Navigation.PushModalAsync(popup);
         }
 
         public void CarregarDadosDoUsuario() {
@@ -77,7 +101,6 @@ namespace ArenaVirtual.ViewModels {
                 TelefoneUsuario = UsuarioLogado.Telefone;
                 LinkRedeSocialUsuario = UsuarioLogado.LinkRedeSocial;
 
-                // Limpa campos específicos
                 DataNascimentoUsuario = null;
                 GeneroUsuario = null;
                 NomeEmpresaUsuario = string.Empty;
@@ -86,7 +109,6 @@ namespace ArenaVirtual.ViewModels {
                 AlturaUsuario = null;
                 FaixaOrcamentoPatrocinioUsuario = string.Empty;
 
-                // Preenche campos específicos conforme o perfil
                 switch (UsuarioLogado.Perfil) {
                     case TipoPerfil.Atleta:
                         DataNascimentoUsuario = UsuarioLogado.DataNascimento;
@@ -113,22 +135,85 @@ namespace ArenaVirtual.ViewModels {
                 IsOrganizador = UsuarioLogado.Perfil == TipoPerfil.Organizador;
                 IsArbitro = UsuarioLogado.Perfil == TipoPerfil.Arbitro;
                 IsPatrocinador = UsuarioLogado.Perfil == TipoPerfil.Patrocinador;
+
+                AtualizarImagemSource();
+            }
+        }
+
+        private void AtualizarImagemSource() {
+            var caminhoDaImagem = UsuarioLogado.ImagemPath;
+            if (!string.IsNullOrEmpty(caminhoDaImagem) && File.Exists(caminhoDaImagem)) {
+                try {
+                    byte[] imageBytes = File.ReadAllBytes(caminhoDaImagem);
+                    ImagemPerfilSource = ImageSource.FromStream(() => new MemoryStream(imageBytes));
+                    System.Diagnostics.Debug.WriteLine($"[PerfilViewModel] Imagem carregada via FromStream de: {caminhoDaImagem}");
+                } catch (Exception ex) {
+                    System.Diagnostics.Debug.WriteLine($"[PerfilViewModel] ERRO ao carregar imagem: {ex.Message}");
+                    ImagemPerfilSource = "placeholder.png";
+                }
+            } else {
+                ImagemPerfilSource = "placeholder.png";
             }
         }
 
         [RelayCommand]
         private async Task EditarPerfil() {
-            // Os serviços já estão disponíveis via injeção de dependência no construtor
             var popup = new EditarPerfilPopup(UsuarioLogado, _alertService, _databaseService, _syncService);
             await Shell.Current.Navigation.PushModalAsync(popup);
         }
 
         [RelayCommand]
         private async Task AlterarSenha() {
-            // Os serviços já estão disponíveis via injeção de dependência no construtor
             var popup = new AlterarSenhaPopup(UsuarioLogado, _alertService, _databaseService, _syncService);
             await Shell.Current.Navigation.PushModalAsync(popup);
         }
 
+        [RelayCommand]
+        public async Task SalvarImagem() {
+            if (string.IsNullOrEmpty(CaminhoNovaImagemSelecionada)) {
+                await _alertService.DisplayAlert("Aviso", "Por favor, escolha uma imagem primeiro.", "OK");
+                return;
+            }
+
+            IsBusy = true;
+
+            try {
+                string diretorioImagens = FileSystem.AppDataDirectory;
+                string nomeArquivo = Path.GetFileName(CaminhoNovaImagemSelecionada);
+                string caminhoFinalImagem = Path.Combine(diretorioImagens, nomeArquivo);
+
+                if (!File.Exists(caminhoFinalImagem)) {
+                    File.Copy(CaminhoNovaImagemSelecionada, caminhoFinalImagem, true);
+                }
+
+                UsuarioLogado.ImagemPath = caminhoFinalImagem;
+                UsuarioLogado.IsSynced = false;
+                UsuarioLogado.UpdatedAt = DateTime.UtcNow;
+
+                await _databaseService.AtualizarUsuarioAsync(UsuarioLogado);
+                SessaoService.Instancia.SetUsuarioAtual(UsuarioLogado);
+
+                await _syncService.SyncAsync(new Progress<string>());
+
+                // AQUI ESTÁ A CORREÇÃO: Chamar o método para atualizar a imagem na UI
+                // Esta chamada garante que o PerfilViewModel, que está ligado à tela
+                // principal, vai atualizar a propriedade ImagemPerfilSource.
+                AtualizarImagemSource();
+
+                await _alertService.DisplayAlert("Sucesso", "Imagem de perfil atualizada!", "OK");
+
+                await Shell.Current.Navigation.PopModalAsync();
+            } catch (Exception ex) {
+                await _alertService.DisplayAlert("Erro", $"Erro ao salvar imagem: {ex.Message}", "OK");
+            } finally {
+                IsBusy = false;
+            }
+        }
+
+        [RelayCommand]
+        private async Task Cancelar() {
+            // Este comando agora está na ViewModel para maior coesão
+            await Shell.Current.Navigation.PopModalAsync();
+        }
     }
 }

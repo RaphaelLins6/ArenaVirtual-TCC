@@ -6,8 +6,9 @@ namespace ArenaVirtual.Services {
         private static SessaoService? _instancia;
         private Usuario? _usuarioAtual;
 
-        public SessaoService() {
-            Debug.WriteLine("[SessaoService] Construtor chamado.");
+        // Construtor privado para evitar a criação de novas instâncias
+        private SessaoService() {
+            Debug.WriteLine("[SessaoService] Construtor privado chamado.");
         }
 
         public static SessaoService Instancia {
@@ -40,6 +41,10 @@ namespace ArenaVirtual.Services {
                 Debug.WriteLine($"[SessaoService] EstaLogado verificado: {_usuarioAtual != null}");
                 return _usuarioAtual != null;
             }
+        }
+
+        public void SetUsuarioAtual(Usuario usuario) {
+            _usuarioAtual = usuario;
         }
     }
 }

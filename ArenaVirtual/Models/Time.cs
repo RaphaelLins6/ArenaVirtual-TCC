@@ -8,7 +8,6 @@ using System.Text.Json.Serialization;
 
 namespace ArenaVirtual.Models {
     public partial class Time : INotifyPropertyChanged, ISyncable {
-
         private string nome = string.Empty;
         private string? logoUrl;
         private int? campeonatoId;
@@ -31,6 +30,13 @@ namespace ArenaVirtual.Models {
         private Guid campeonatoClientAppId;
         private bool isSynced;
         private DateTime updatedAt;
+
+        // Novas propriedades que foram adicionadas
+        private string? corUniforme;
+        private string? corSecundaria;
+        private Guid adminClientAppId;
+        private string? nomeResponsavel;
+        private string? telefoneResponsavel;
 
         // Propriedades adicionadas para simulação no ViewModel
         private double _porcentagemVitoria;
@@ -57,6 +63,18 @@ namespace ArenaVirtual.Models {
         public string? LogoUrl {
             get => logoUrl;
             set => SetProperty(ref logoUrl, value);
+        }
+
+        [MaxLength(10)]
+        public string? CorUniforme {
+            get => corUniforme;
+            set => SetProperty(ref corUniforme, value);
+        }
+
+        [MaxLength(10)]
+        public string? CorSecundaria {
+            get => corSecundaria;
+            set => SetProperty(ref corSecundaria, value);
         }
 
         public int? CampeonatoId {
@@ -114,6 +132,23 @@ namespace ArenaVirtual.Models {
                 SetProperty(ref empates, value);
                 OnPropertyChanged(nameof(JogosDisputados));
             }
+        }
+
+        public Guid AdminClientAppId {
+            get => adminClientAppId;
+            set => SetProperty(ref adminClientAppId, value);
+        }
+
+        [MaxLength(100)]
+        public string? NomeResponsavel {
+            get => nomeResponsavel;
+            set => SetProperty(ref nomeResponsavel, value);
+        }
+
+        [MaxLength(20)]
+        public string? TelefoneResponsavel {
+            get => telefoneResponsavel;
+            set => SetProperty(ref telefoneResponsavel, value);
         }
 
         // Adicionando a propriedade Posicao para a UI

@@ -41,7 +41,7 @@
                     x:Name="ImagemPerfil"
                     Aspect="AspectFill"
                     HorizontalOptions="Center"
-                    Source="user_avatar_placeholder.png"
+                    Source="{Binding ImagemPerfilSource}"
                     VerticalOptions="Center" />
             </Border>
             <Label
@@ -530,7 +530,7 @@
             Margin="0,20,0,0"
             Spacing="10">
             <Button
-                Clicked="AlterarImagem_Clicked"
+                Command="{Binding AlterarImagemCommand}"
                 Style="{StaticResource BotaoPrincipal}"
                 Text="Alterar Imagem" />
             <Button

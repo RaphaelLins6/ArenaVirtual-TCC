@@ -41,9 +41,10 @@
                             WidthRequest="80">
                             <Image
                                 Aspect="AspectFit"
+                                HeightRequest="80"
                                 HorizontalOptions="Center"
-                                Source="{Binding Campeonato.LogoUrl}"
-                                VerticalOptions="Center" />
+                                Source="{Binding LogoSource}"
+                                WidthRequest="80" />
                         </Frame>
                         <Label
                             FontAttributes="Bold"

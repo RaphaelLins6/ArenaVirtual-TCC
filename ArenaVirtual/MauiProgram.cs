@@ -39,7 +39,6 @@ public static class MauiProgram {
         builder.Services.AddSingleton(new DatabaseService(dbPath));
         builder.Services.AddSingleton<ApiService>();
         builder.Services.AddSingleton<SyncService>();
-        builder.Services.AddSingleton<SessaoService>();
         builder.Services.AddSingleton<CampeonatoService>();
         builder.Services.AddSingleton<ConnectivityService>();
 
@@ -59,8 +58,8 @@ public static class MauiProgram {
         builder.Services.AddTransient<EditarTimePageViewModel>();
         builder.Services.AddTransient<EditarCampeonatoViewModel>();
         builder.Services.AddTransient<CriarCampeonatoViewModel>();
-
-        // Adicionado: Registro da ViewModel para a página de detalhes do campeonato
+        builder.Services.AddTransient<ProcurarCampeonatosViewModel>();
+        builder.Services.AddTransient<GerenciarSolicitacoesViewModel>();
         builder.Services.AddTransient<CampeonatoDetailViewModel>();
 
         // Registre as Páginas e Popups como Transient
@@ -76,8 +75,8 @@ public static class MauiProgram {
         builder.Services.AddTransient<EditarTimePage>();
         builder.Services.AddTransient<CriarCampeonatoViewModel>();
         builder.Services.AddTransient<EditarCampeonatoPage>();
-
-        // Adicionado: Registro da página de detalhes do campeonato
+        builder.Services.AddTransient<ProcurarCampeonatosPage>();
+        builder.Services.AddTransient<GerenciarSolicitacoesPage>();
         builder.Services.AddTransient<CampeonatoDetailPage>();
 
         // Registre os popups que agora recebem injeção de dependência

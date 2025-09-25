@@ -6,8 +6,9 @@ using ArenaVirtual.Services;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Maui.Storage;
-using ArenaVirtual.Popups; // Adicione esta linha para usar o popup
-using System.IO; // Adicionar para usar Path
+using ArenaVirtual.Popups;
+using System.IO;
+using ArenaVirtual.Views.CampeonatoPage;
 
 namespace ArenaVirtual.ViewModels.CampeonatoPage {
     public partial class CampeonatoDetailViewModel : ObservableObject, IQueryAttributable {
@@ -29,13 +30,16 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         [ObservableProperty]
         private ImageSource bannerSource;
 
+        [ObservableProperty]
+        private ImageSource logoSource;
+
         private readonly Dictionary<int, ObservableCollection<Jogo>> _jogosPorRodada = new();
 
         private readonly IAlertService _alertService;
         private readonly DatabaseService _databaseService;
         private readonly SyncService _syncService;
 
-        // Construtor com injeção de dependência para os serviços
+        // Agora o construtor não injeta SessaoService
         public CampeonatoDetailViewModel(IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
             TabelaClassificacao = new ObservableCollection<Time>();
             TabelaJogos = new ObservableCollection<Jogo>();
@@ -61,6 +65,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             Campeonato = campeonato;
 
+            // Usa a propriedade estática Instancia para acessar o serviço
             var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
             IsOrganizador = (campeonato.OrganizadorId == usuarioAtual?.Id);
 
@@ -80,25 +85,35 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             Debug.WriteLine($"[CampeonatoDetailViewModel] Campeonato.BannerUrl: '{Campeonato.BannerUrl}'");
             if (!string.IsNullOrEmpty(Campeonato.BannerUrl)) {
-                // Tenta carregar a imagem a partir de um arquivo local.
-                // O `File.Exists` é a forma mais robusta de verificar.
                 if (File.Exists(Campeonato.BannerUrl)) {
                     BannerSource = ImageSource.FromFile(Campeonato.BannerUrl);
                     Debug.WriteLine("[CampeonatoDetailViewModel] Banner carregado de um arquivo local.");
-                }
-                // Se não for um arquivo local válido, tenta carregar como uma URL.
-                else if (Uri.IsWellFormedUriString(Campeonato.BannerUrl, UriKind.Absolute)) {
+                } else if (Uri.IsWellFormedUriString(Campeonato.BannerUrl, UriKind.Absolute)) {
                     BannerSource = ImageSource.FromUri(new Uri(Campeonato.BannerUrl));
                     Debug.WriteLine("[CampeonatoDetailViewModel] Banner carregado de uma URL.");
                 } else {
-                    // Se o caminho não for nem um arquivo local nem uma URL, usa o padrão.
                     BannerSource = ImageSource.FromFile("default_banner.png");
                     Debug.WriteLine("[CampeonatoDetailViewModel] Caminho do banner inválido. Usando imagem padrão.");
                 }
             } else {
-                // Se não houver URL ou caminho, usa a imagem padrão.
                 BannerSource = ImageSource.FromFile("default_banner.png");
                 Debug.WriteLine("[CampeonatoDetailViewModel] Nenhum BannerUrl encontrado. Usando imagem padrão.");
+            }
+
+            if (!string.IsNullOrEmpty(Campeonato.LogoUrl)) {
+                if (File.Exists(Campeonato.LogoUrl)) {
+                    LogoSource = ImageSource.FromFile(Campeonato.LogoUrl);
+                    Debug.WriteLine("[CampeonatoDetailViewModel] Logo carregada de um arquivo local.");
+                } else if (Uri.IsWellFormedUriString(Campeonato.LogoUrl, UriKind.Absolute)) {
+                    LogoSource = ImageSource.FromUri(new Uri(Campeonato.LogoUrl));
+                    Debug.WriteLine("[CampeonatoDetailViewModel] Logo carregada de uma URL.");
+                } else {
+                    LogoSource = ImageSource.FromFile("default_logo.png");
+                    Debug.WriteLine("[CampeonatoDetailViewModel] Caminho da logo inválido. Usando imagem padrão.");
+                }
+            } else {
+                LogoSource = ImageSource.FromFile("default_logo.png");
+                Debug.WriteLine("[CampeonatoDetailViewModel] Nenhum LogoUrl encontrado. Usando imagem padrão.");
             }
         }
 
@@ -107,7 +122,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             Debug.WriteLine("[CampeonatoDetailViewModel] Botão 'Alterar Banner' clicado.");
             var popup = new AlterarBannerPopup(Campeonato, _alertService, _databaseService, _syncService);
 
-            // Assine o evento para atualizar a imagem quando o popup fechar
             popup.BannerAtualizado += (s, newBannerPath) => {
                 Debug.WriteLine($"[CampeonatoDetailViewModel] Evento BannerAtualizado recebido com caminho: '{newBannerPath}'");
                 MainThread.BeginInvokeOnMainThread(() => {
@@ -175,8 +189,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         [RelayCommand]
         private async Task GerenciarSolicitacoes() {
-            Debug.WriteLine($"[CampeonatoDetailViewModel] Botão 'Gerenciar Solicitações' clicado para o campeonato: {Campeonato?.Nome}");
-            await Application.Current.MainPage.DisplayAlert("Ação", "Você clicou em Gerenciar Solicitações. Implemente a navegação.", "OK");
+            if (Campeonato != null) {
+                await Shell.Current.GoToAsync(nameof(GerenciarSolicitacoesPage), new Dictionary<string, object>
+                {
+                    {"Campeonato", Campeonato}
+                });
+            }
         }
     }
 }

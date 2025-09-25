@@ -1,93 +1,22 @@
-﻿using ArenaVirtual.Models;
-using ArenaVirtual.Popups;
-using ArenaVirtual.Services;
-using ArenaVirtual.ViewModels;
+﻿using ArenaVirtual.ViewModels;
+using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.Views {
     public partial class PerfilPage : ContentPage {
-        private readonly IAlertService _alertService;
         private readonly PerfilViewModel _viewModel;
 
-        public PerfilPage(Usuario usuarioLogado, IAlertService alertService, IServiceProvider serviceProvider) {
+        // O construtor agora recebe apenas o ViewModel, que é um serviço que o DI pode resolver.
+        public PerfilPage(PerfilViewModel viewModel) {
             InitializeComponent();
-            _alertService = alertService;
-            _viewModel = ActivatorUtilities.CreateInstance<PerfilViewModel>(serviceProvider, usuarioLogado, alertService);
+            _viewModel = viewModel;
             BindingContext = _viewModel;
         }
 
         protected override void OnAppearing() {
             base.OnAppearing();
+            // A lógica de carregar os dados ainda é chamada aqui.
             _viewModel.CarregarDadosDoUsuario();
-            AtualizarImagemPerfilUI();
             this.Focus();
-        }
-
-        private void AtualizarImagemPerfilUI() {
-            var usuario = _viewModel.UsuarioLogado;
-            var imagemPerfil = this.FindByName<Image>("ImagemPerfil");
-            if (imagemPerfil != null && usuario != null) {
-                var caminhoDaImagem = usuario.ImagemPath;
-                if (!string.IsNullOrEmpty(caminhoDaImagem) && File.Exists(caminhoDaImagem)) {
-                    try {
-                        byte[] imageBytes = File.ReadAllBytes(caminhoDaImagem);
-                        imagemPerfil.Source = ImageSource.FromStream(() => new MemoryStream(imageBytes));
-                        System.Diagnostics.Debug.WriteLine($"[PerfilPage] Imagem carregada via FromStream de: {caminhoDaImagem}");
-                    } catch (Exception ex) {
-                        System.Diagnostics.Debug.WriteLine($"[PerfilPage] ERRO ao carregar imagem via FromStream: {ex.Message}");
-                        imagemPerfil.Source = "default_profile.png";
-                    }
-                } else {
-                    imagemPerfil.Source = "default_profile.png";
-                }
-            }
-        }
-
-        private async void AlterarImagem_Clicked(object sender, EventArgs e) {
-            var usuario = _viewModel.UsuarioLogado;
-            if (usuario == null) {
-                await _alertService.DisplayAlert("Erro", "Nenhum usuário logado para alterar a imagem.", "OK");
-                return;
-            }
-
-            // Obtenha os serviços necessários do contêiner de injeção de dependência.
-            var services = App.Current?.Handler?.MauiContext?.Services;
-            if (services == null) {
-                // Tratar o caso em que os serviços não estão disponíveis.
-                await _alertService.DisplayAlert("Erro", "Serviços do aplicativo não estão disponíveis.", "OK");
-                return;
-            }
-
-            var databaseService = services.GetRequiredService<DatabaseService>();
-            var syncService = services.GetRequiredService<SyncService>();
-
-            // Crie o popup, passando todos os argumentos exigidos pelo construtor.
-            var popup = new AlterarImagemPopup(usuario, _alertService, databaseService, syncService);
-
-            popup.ImagemAtualizada += AlterarImagemPopup_ImagemAtualizada;
-            await Navigation.PushModalAsync(popup);
-        }
-
-        private void AlterarImagemPopup_ImagemAtualizada(object? sender, string novoCaminhoImagem) {
-            var usuario = _viewModel.UsuarioLogado;
-            MainThread.BeginInvokeOnMainThread(() => {
-                usuario.ImagemPath = novoCaminhoImagem;
-                var imagemPerfil = this.FindByName<Image>("ImagemPerfil");
-                if (imagemPerfil != null && !string.IsNullOrEmpty(novoCaminhoImagem) && File.Exists(novoCaminhoImagem)) {
-                    try {
-                        byte[] imageBytes = File.ReadAllBytes(novoCaminhoImagem);
-                        imagemPerfil.Source = ImageSource.FromStream(() => new MemoryStream(imageBytes));
-                        System.Diagnostics.Debug.WriteLine($"[PerfilPage] Imagem carregada via FromStream de: {novoCaminhoImagem}");
-                    } catch (Exception ex) {
-                        System.Diagnostics.Debug.WriteLine($"[PerfilPage] ERRO ao carregar imagem via FromStream: {ex.Message}");
-                        imagemPerfil.Source = "default_profile.png";
-                    }
-                } else {
-                    imagemPerfil.Source = "default_profile.png";
-                }
-            });
-            if (sender is AlterarImagemPopup popup) {
-                popup.ImagemAtualizada -= AlterarImagemPopup_ImagemAtualizada;
-            }
         }
 
         protected override void OnDisappearing() {

@@ -29,56 +29,60 @@ namespace ArenaVirtualAPI.Services {
         }
 
         private async Task ProcessAllUploadsAsync(AllUploadsDto data) {
-            _logger.LogInformation("[BackendSyncService] Iniciando processamento de uploads em duas etapas.");
+            _logger.LogInformation("[BackendSyncService] Iniciando processamento de uploads em etapas sequenciais.");
             var idMappings = new Dictionary<string, Dictionary<Guid, int>>();
 
-            var phase1Entities = new List<(string Name, dynamic Dtos)> {
-                ("Usuario", data.Usuarios),
-                ("Campeonato", data.Campeonatos),
-                ("Time", data.Times)
-            };
-
-            var phase2Entities = new List<(string Name, dynamic Dtos)> {
-                ("Convite", data.Convites),
-                ("UsuarioCampeonatoFavorito", data.UsuarioCampeonatoFavoritos)
-            };
-
-            // Etapa 1: Processamento inicial (upsert) para entidades primárias
-            foreach (var entity in phase1Entities) {
-                if (entity.Dtos != null) {
-                    try {
-                        var newMappings = await _syncServiceFactory.ProcessAndMapItemsAsync(entity.Dtos, entity.Name);
-                        if (newMappings.Count > 0) {
-                            idMappings[entity.Name] = newMappings;
-                            _logger.LogInformation($"[BackendSyncService] Concluído o mapeamento de IDs para {entity.Name}.");
-                        }
-                    } catch (Exception ex) {
-                        _logger.LogError(ex, $"[BackendSyncService] Erro ao processar upload de {entity.Name} na Etapa 1: {ex.Message}");
-                        throw;
-                    }
-                }
+            // Fase 1: Processa e mapeia IDs para entidades primárias ou independentes
+            // As entidades de `Campeonatos` e `Times` agora são processadas aqui.
+            if (data.Usuarios != null) {
+                idMappings["Usuario"] = await _syncServiceFactory.ProcessAndMapItemsAsync(data.Usuarios, "Usuario");
+                _logger.LogInformation("[BackendSyncService] Concluído o mapeamento de IDs para Usuario.");
+            }
+            if (data.Times != null) {
+                idMappings["Time"] = await _syncServiceFactory.ProcessAndMapItemsAsync(data.Times, "Time");
+                _logger.LogInformation("[BackendSyncService] Concluído o mapeamento de IDs para Time.");
+            }
+            if (data.Campeonatos != null) {
+                idMappings["Campeonato"] = await _syncServiceFactory.ProcessAndMapItemsAsync(data.Campeonatos, "Campeonato");
+                _logger.LogInformation("[BackendSyncService] Concluído o mapeamento de IDs para Campeonato.");
             }
 
-            // Salva todas as alterações da Etapa 1 em um único lote.
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("[BackendSyncService] Entidades da Etapa 1 salvas no banco de dados.");
-
-            // Etapa 2: Atualização de chaves estrangeiras para entidades secundárias
-            foreach (var entity in phase2Entities) {
-                if (entity.Dtos != null) {
-                    try {
-                        await _syncServiceFactory.UpdateForeignKeysAsync(entity.Dtos, entity.Name, idMappings);
-                        _logger.LogInformation($"[BackendSyncService] Concluído o processamento de {entity.Name} na Etapa 2.");
-                    } catch (Exception ex) {
-                        _logger.LogError(ex, $"[BackendSyncService] Erro ao processar upload de {entity.Name} na Etapa 2: {ex.Message}");
-                        throw;
-                    }
-                }
+            // As entidades `Convites` e `UsuarioCampeonatoFavoritos` também precisam ter seu ID mapeado.
+            if (data.Convites != null) {
+                idMappings["Convite"] = await _syncServiceFactory.ProcessAndMapItemsAsync(data.Convites, "Convite");
+                _logger.LogInformation("[BackendSyncService] Concluído o mapeamento de IDs para Convite.");
+            }
+            if (data.UsuarioCampeonatoFavoritos != null) {
+                idMappings["UsuarioCampeonatoFavorito"] = await _syncServiceFactory.ProcessAndMapItemsAsync(data.UsuarioCampeonatoFavoritos, "UsuarioCampeonatoFavorito");
+                _logger.LogInformation("[BackendSyncService] Concluído o mapeamento de IDs para UsuarioCampeonatoFavorito.");
             }
 
-            // Salva todas as alterações da Etapa 2 em um único lote.
+            // A chamada para `_context.SaveChangesAsync()` é removida daqui.
+
+            _logger.LogInformation("[BackendSyncService] Entidades primárias adicionadas ao contexto. Iniciando a resolução de chaves estrangeiras.");
+
+            // Fase 2: Atualiza as chaves estrangeiras
+            if (data.Usuarios != null) {
+                await _syncServiceFactory.UpdateForeignKeysAsync(data.Usuarios, "Usuario", idMappings);
+            }
+            if (data.Times != null) {
+                await _syncServiceFactory.UpdateForeignKeysAsync(data.Times, "Time", idMappings);
+            }
+            if (data.Campeonatos != null) {
+                await _syncServiceFactory.UpdateForeignKeysAsync(data.Campeonatos, "Campeonato", idMappings);
+            }
+            if (data.Convites != null) {
+                await _syncServiceFactory.UpdateForeignKeysAsync(data.Convites, "Convite", idMappings);
+            }
+            if (data.UsuarioCampeonatoFavoritos != null) {
+                await _syncServiceFactory.UpdateForeignKeysAsync(data.UsuarioCampeonatoFavoritos, "UsuarioCampeonatoFavorito", idMappings);
+            }
+
+            _logger.LogInformation("[BackendSyncService] Chaves estrangeiras resolvidas. Salvando todas as alterações.");
+
+            // Fase 3: Salva todas as alterações pendentes no banco de dados.
             await _context.SaveChangesAsync();
-            _logger.LogInformation("[BackendSyncService] Entidades da Etapa 2 salvas no banco de dados.");
+            _logger.LogInformation("[BackendSyncService] Todas as alterações salvas no banco de dados.");
         }
 
         private async Task GetUpdatesFromAllEntitiesAsync(AllUpdatesDto allUpdates, DateTime lastSyncTime) {

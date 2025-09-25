@@ -13,5 +13,6 @@ namespace ArenaVirtual.Models {
         public string Descricao { get; set; } = string.Empty;
         public bool IsSynced { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public CampanhaPatrocinio() { }
     }
 }

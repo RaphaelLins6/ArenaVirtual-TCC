@@ -8,6 +8,7 @@ using ArenaVirtual.Models;
 using System.Diagnostics;
 using System;
 using System.Threading.Tasks;
+using ArenaVirtual.Views.CampeonatoPage;
 
 namespace ArenaVirtual.ViewModels.Atleta {
 
@@ -208,6 +209,11 @@ namespace ArenaVirtual.ViewModels.Atleta {
             // A visibilidade dos botões de capitão é definida em LoadDataAsync
             OnPropertyChanged(nameof(VinculadoATime));
             OnPropertyChanged(nameof(NaoVinculadoATime));
+        }
+
+        [RelayCommand]
+        private async Task ProcurarCampeonatos() {
+            await Shell.Current.GoToAsync(nameof(ProcurarCampeonatosPage));
         }
     }
 }

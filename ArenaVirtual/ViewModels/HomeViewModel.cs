@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
+using ArenaVirtual.Views.CampeonatoPage;
 
 namespace ArenaVirtual.ViewModels {
     // Usando o construtor primário para a injeção de dependência.
@@ -194,11 +195,12 @@ namespace ArenaVirtual.ViewModels {
 
             // Usando o roteamento do Shell para navegar e passar o objeto
             var navigationParameter = new Dictionary<string, object> {
-                { "Campeonato", campeonato }
-            };
+        { "Campeonato", campeonato }
+    };
 
             // A rota deve ser a mesma que você registrou no AppShell.xaml.cs
-            await Shell.Current.GoToAsync("campeonatoDetalhes", navigationParameter);
+            // Agora usando nameof() para garantir a consistência
+            await Shell.Current.GoToAsync(nameof(CampeonatoDetailPage), navigationParameter);
         }
     }
 }

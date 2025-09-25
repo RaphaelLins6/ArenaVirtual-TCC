@@ -6,6 +6,7 @@ using System.Text.Json;
 namespace ArenaVirtualAPI.DTOs {
     public interface ISyncableDto {
         public int Id { get; set; }
+        public Guid ClientAppId { get; set; }
         public DateTime UpdatedAt { get; set; }
         public bool IsSynced { get; set; }
     }

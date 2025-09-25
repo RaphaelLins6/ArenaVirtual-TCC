@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ArenaVirtual.Views.CampeonatoPage.GerenciarSolicitacoesPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.CampeonatoPage"
+    Title="Gerenciar Solicitações">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding LoadSolicitacoesCommand}" EventName="Loaded" />
+    </ContentPage.Behaviors>
+
+    <Grid>
+        <VerticalStackLayout Padding="15" Spacing="10">
+            <Label
+                Margin="0,10,0,0"
+                FontAttributes="Bold"
+                FontSize="22"
+                HorizontalOptions="Center"
+                Text="Solicitações de Inscrição" />
+
+            <!--  CORREÇÃO: A chave do conversor agora é "InverterBooleanConverter"  -->
+            <Label
+                FontSize="16"
+                HorizontalOptions="Center"
+                IsVisible="{Binding SolicitacoesPendentes.Count, Converter={StaticResource InverterBooleanConverter}}"
+                Text="Nenhuma solicitação pendente."
+                TextColor="Gray"
+                VerticalOptions="CenterAndExpand" />
+
+            <CollectionView IsVisible="{Binding SolicitacoesPendentes.Count, Converter={StaticResource ZeroToTrueConverter}}" ItemsSource="{Binding SolicitacoesPendentes}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame
+                            Margin="0,5"
+                            Padding="10"
+                            BackgroundColor="{AppThemeBinding Light=White,
+                                                              Dark=#1e1e1e}"
+                            CornerRadius="10">
+                            <VerticalStackLayout Spacing="5">
+                                <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                                    <Image
+                                        Aspect="AspectFit"
+                                        HeightRequest="50"
+                                        Source="{Binding Time.LogoUrl}"
+                                        VerticalOptions="Center"
+                                        WidthRequest="50" />
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label
+                                            FontAttributes="Bold"
+                                            FontSize="18"
+                                            Text="{Binding Time.Nome}" />
+                                        <Label
+                                            FontSize="14"
+                                            Text="{Binding Time.Descricao}"
+                                            TextColor="Gray" />
+                                    </VerticalStackLayout>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
+                                    <Button
+                                        BackgroundColor="#4CAF50"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GerenciarSolicitacoesViewModel}}, Path=AceitarSolicitacaoCommand}"
+                                        CommandParameter="{Binding .}"
+                                        CornerRadius="20"
+                                        Text="Aceitar"
+                                        TextColor="White"
+                                        WidthRequest="100" />
+                                    <Button
+                                        BackgroundColor="#F44336"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GerenciarSolicitacoesViewModel}}, Path=RecusarSolicitacaoCommand}"
+                                        CommandParameter="{Binding .}"
+                                        CornerRadius="20"
+                                        Text="Recusar"
+                                        TextColor="White"
+                                        WidthRequest="100" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

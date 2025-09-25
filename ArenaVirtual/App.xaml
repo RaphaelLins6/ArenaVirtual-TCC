@@ -7,7 +7,12 @@
 
     <Application.Resources>
         <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
 
+            <!--  Conversores e outros recursos definidos após os dicionários mesclados  -->
             <converters:FavoritoIconConverter x:Key="FavoritoIconConverter" />
             <converters:ZeroToTrueConverter x:Key="ZeroToTrueConverter" />
             <converters:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmptyConverter" />
@@ -20,6 +25,7 @@
                 <x:String>Patrocinador</x:String>
                 <x:String>Organizador</x:String>
             </x:Array>
+
             <Style x:Key="BotaoPrincipal" TargetType="Button">
                 <Setter Property="BackgroundColor" Value="#FF4500" />
                 <Setter Property="TextColor" Value="Black" />
@@ -47,10 +53,6 @@
                     </VisualStateGroupList>
                 </Setter>
             </Style>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
-                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
-            </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

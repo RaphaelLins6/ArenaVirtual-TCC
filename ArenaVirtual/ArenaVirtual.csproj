@@ -122,10 +122,16 @@
 		<MauiXaml Update="Views\Atleta\EntrarTimePage.xaml">
 			<Generator></Generator>
 		</MauiXaml>
+		<MauiXaml Update="Views\Atleta\ProcurarCampeonatosPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Views\Atleta\SolicitacaoTimePage.xaml">
 			<Generator></Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\CampeonatoPage\CampeonatoDetailPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\CampeonatoPage\GerenciarSolicitacoesPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\Components\CampeonatoCard.xaml">

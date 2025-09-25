@@ -3,7 +3,9 @@
     x:Class="ArenaVirtual.Popups.AlterarImagemPopup"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewmodels="clr-namespace:ArenaVirtual.ViewModels"
     Padding="30"
+    x:DataType="viewmodels:PerfilViewModel"
     BackgroundColor="#80000000">
 
     <Grid>
@@ -34,6 +36,7 @@
                         x:Name="ImagemPerfil"
                         Aspect="AspectFill"
                         HeightRequest="150"
+                        Source="{Binding ImagemPerfilSource, Mode=TwoWay}"
                         WidthRequest="150" />
                 </Border>
 
@@ -43,11 +46,11 @@
                     Text="Escolher imagem" />
                 <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
                     <Button
-                        Clicked="Cancelar_Clicked"
+                        Command="{Binding CancelarCommand}"
                         Style="{StaticResource BotaoPrincipal}"
                         Text="Cancelar" />
                     <Button
-                        Clicked="Salvar_Clicked"
+                        Command="{Binding SalvarImagemCommand}"
                         Style="{StaticResource BotaoPrincipal}"
                         Text="Salvar" />
                 </HorizontalStackLayout>

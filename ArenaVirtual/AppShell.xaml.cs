@@ -6,14 +6,17 @@ using ArenaVirtual.Views.Atleta;
 using ArenaVirtual.Views.CampeonatoPage;
 using ArenaVirtual.Views.Organizador;
 using ArenaVirtual.Views.Patrocinador;
+using System.Diagnostics;
 
 namespace ArenaVirtual {
     public partial class AppShell : Shell {
         private readonly Usuario _usuarioLogado;
+        private readonly IServiceProvider _serviceProvider;
 
         public AppShell(Usuario usuarioLogado, IServiceProvider serviceProvider) {
             InitializeComponent();
             _usuarioLogado = usuarioLogado;
+            _serviceProvider = serviceProvider;
 
             Routing.RegisterRoute(nameof(HomePage), typeof(HomePage));
             Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));
@@ -24,67 +27,67 @@ namespace ArenaVirtual {
             Routing.RegisterRoute(nameof(EntrarTimePage), typeof(EntrarTimePage));
             Routing.RegisterRoute(nameof(SolicitacaoTimePage), typeof(SolicitacaoTimePage));
             Routing.RegisterRoute(nameof(EditarTimePage), typeof(EditarTimePage));
-            Routing.RegisterRoute("campeonatoDetalhes", typeof(CampeonatoDetailPage));
+            Routing.RegisterRoute(nameof(CampeonatoDetailPage), typeof(CampeonatoDetailPage));
+            Routing.RegisterRoute(nameof(GerenciarSolicitacoesPage), typeof(GerenciarSolicitacoesPage));
+            Routing.RegisterRoute(nameof(ProcurarCampeonatosPage), typeof(ProcurarCampeonatosPage));
+
             CriarMenuPorPerfil(usuarioLogado);
         }
 
         private void CriarMenuPorPerfil(Usuario usuario) {
             this.Items.Clear();
 
-            var serviceProvider = Application.Current?.Handler?.MauiContext?.Services;
-            if (serviceProvider == null) {
-                Console.WriteLine("Erro: ServiceProvider não pôde ser resolvido.");
-                return;
-            }
-            var alertService = serviceProvider.GetService<IAlertService>();
-
             this.Items.Add(new FlyoutItem {
                 Title = "Início",
                 Route = "HomePage",
-                Icon = "home_icon.png", 
+                Icon = "home_icon.png",
                 Items = {
                     new ShellContent {
-                        ContentTemplate = new DataTemplate(() => new HomePage())
+                        ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<HomePage>())
                     }
                 }
             });
 
-            this.Items.Add(new ShellContent {
+            // CORREÇÃO: Usando o serviceProvider para obter a instância da PerfilPage
+            this.Items.Add(new FlyoutItem {
                 Title = "Meu Perfil",
-                ContentTemplate = new DataTemplate(() => {
-                    return new PerfilPage(_usuarioLogado, alertService!, serviceProvider!);
-                })
+                Route = "PerfilPage",
+                Items = {
+                    new ShellContent {
+                        ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<PerfilPage>())
+                    }
+                }
             });
 
             if (usuario.Perfil == TipoPerfil.Atleta) {
                 this.Items.Add(new FlyoutItem {
                     Title = "Meu Time",
                     Items = {
-                        new ShellContent { Title = "Informações do Time", ContentTemplate = new DataTemplate(() => new MeusTimesPage()) },
-                        new ShellContent { Title = "Jogos", ContentTemplate = new DataTemplate(() => new Views.Atleta.PartidasPage()) }
+                        new ShellContent { Title = "Informações do Time", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<MeusTimesPage>()) },
+                        new ShellContent { Title = "Jogos", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<Views.Atleta.PartidasPage>()) }
                     }
                 });
             } else if (usuario.Perfil == TipoPerfil.Organizador) {
                 this.Items.Add(new FlyoutItem {
                     Title = "Gerenciar Campeonatos",
                     Items = {
-                        new ShellContent { Title = "Criar Campeonato", ContentTemplate = new DataTemplate(() => new CriarCampeonatoPage()) },
-                        new ShellContent { Title = "Meus Campeonatos", ContentTemplate = new DataTemplate(() => new DashboardOrganizadorPage()) }
+                        new ShellContent { Title = "Criar Campeonato", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<CriarCampeonatoPage>()) },
+                        new ShellContent { Title = "Meus Campeonatos", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<DashboardOrganizadorPage>()) }
                     }
                 });
             } else if (usuario.Perfil == TipoPerfil.Arbitro) {
                 this.Items.Add(new FlyoutItem {
                     Title = "Meus Jogos",
                     Items = {
-                        new ShellContent { Title = "Ver Jogos Atribuidos", ContentTemplate = new DataTemplate(() => new MinhasPartidasPage()) }
+                        new ShellContent { Title = "Ver Jogos Atribuidos", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<MinhasPartidasPage>()) }
                     }
                 });
             } else if (usuario.Perfil == TipoPerfil.Patrocinador) {
                 this.Items.Add(new FlyoutItem {
                     Title = "Minhas Campanhas",
                     Items = {
-                        new ShellContent { Title = "Criar Campanha", ContentTemplate = new DataTemplate(() => new PropostasPatrocinioPage()) },
-                        new ShellContent { Title = "Ver Campanhas", ContentTemplate = new DataTemplate(() => new CampanhasPage()) }
+                        new ShellContent { Title = "Criar Campanha", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<PropostasPatrocinioPage>()) },
+                        new ShellContent { Title = "Ver Campanhas", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<CampanhasPage>()) }
                     }
                 });
             }
@@ -93,18 +96,11 @@ namespace ArenaVirtual {
                 Text = "Sair",
                 Command = new Command(() => {
                     MainThread.BeginInvokeOnMainThread(() => {
-                        var localServiceProvider = Application.Current?.Handler?.MauiContext?.Services;
-                        if (localServiceProvider != null) {
-                            if (Application.Current?.Windows.Count > 0) {
-                                var loginPage = localServiceProvider.GetService<LoginPage>();
-                                if (loginPage != null) {
-                                    Application.Current.Windows[0].Page = loginPage;
-                                } else {
-                                    Console.WriteLine("Erro: LoginPage não pôde ser resolvido pelo ServiceProvider.");
-                                }
-                            } else {
-                                Console.WriteLine("Erro: Nenhuma janela do aplicativo encontrada.");
-                            }
+                        var loginPage = _serviceProvider.GetService<LoginPage>();
+                        if (loginPage != null) {
+                            Application.Current.MainPage = loginPage;
+                        } else {
+                            Debug.WriteLine("Erro: LoginPage não pôde ser resolvido pelo ServiceProvider.");
                         }
                     });
                 })

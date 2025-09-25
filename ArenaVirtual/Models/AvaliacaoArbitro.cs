@@ -12,5 +12,6 @@ namespace ArenaVirtual.Models {
         public int Nota { get; set; }
         public bool IsSynced { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public AvaliacaoArbitro() { }
     }
 }

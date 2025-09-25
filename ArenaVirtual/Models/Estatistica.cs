@@ -13,5 +13,7 @@ namespace ArenaVirtual.Models {
         public int Assistencias { get; set; }
         public bool IsSynced { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public Estatistica() { }
+
     }
 }

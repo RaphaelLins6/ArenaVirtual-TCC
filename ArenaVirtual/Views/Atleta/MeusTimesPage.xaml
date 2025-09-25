@@ -57,6 +57,13 @@
                         Text="Solicitações"
                         TextColor="White" />
 
+                    <Button
+                        BackgroundColor="Orange"
+                        Command="{Binding ProcurarCampeonatosCommand}"
+                        CornerRadius="20"
+                        Text="Procurar Campeonatos"
+                        TextColor="White" />
+
                     <Label
                         FontAttributes="Bold"
                         FontSize="18"
