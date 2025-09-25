@@ -39,6 +39,7 @@ namespace ArenaVirtual.Models {
 
         public bool IsSynced { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public Guid CapitaoClientAppId { get; set; }
 
         [NotNull, MaxLength(100)]
         public string? Nome {

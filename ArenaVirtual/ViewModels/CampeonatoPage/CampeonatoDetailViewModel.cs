@@ -188,13 +188,22 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         }
 
         [RelayCommand]
-        private async Task GerenciarSolicitacoes() {
-            if (Campeonato != null) {
-                await Shell.Current.GoToAsync(nameof(GerenciarSolicitacoesPage), new Dictionary<string, object>
-                {
-                    {"Campeonato", Campeonato}
-                });
+        public async Task GerenciarSolicitacoes() {
+            if (Campeonato is null) {
+                // Certifique-se de que o objeto não é nulo antes de tentar navegar.
+                // Se for nulo, você pode exibir uma mensagem de erro ou retornar.
+                Debug.WriteLine("Erro: Campeonato é nulo.");
+                return;
             }
+
+            // Criar um dicionário para passar os parâmetros de navegação.
+            var navigationParameters = new ShellNavigationQueryParameters
+            {
+                { "Campeonato", Campeonato }
+            };
+
+            // Navegar para a página, passando o objeto Campeonato.
+            await Shell.Current.GoToAsync("GerenciarSolicitacoesPage", navigationParameters);
         }
     }
 }

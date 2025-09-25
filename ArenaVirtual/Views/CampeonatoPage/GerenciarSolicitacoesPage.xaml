@@ -3,9 +3,18 @@
     x:Class="ArenaVirtual.Views.CampeonatoPage.GerenciarSolicitacoesPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.CampeonatoPage"
-    Title="Gerenciar Solicitações">
+    Title="Gerenciar Solicitações"
+    BackgroundColor="{AppThemeBinding Light=#f0f0f0,
+                                      Dark=Black}"
+    Shell.NavBarIsVisible="True">
+
+    <ContentPage.Resources>
+        <converters:NotZeroToTrueConverter x:Key="NotZeroToTrueConverter" />
+        <converters:InverterBooleanConverter x:Key="InverterBooleanConverter" />
+    </ContentPage.Resources>
 
     <ContentPage.Behaviors>
         <toolkit:EventToCommandBehavior Command="{Binding LoadSolicitacoesCommand}" EventName="Loaded" />
@@ -18,42 +27,46 @@
                 FontAttributes="Bold"
                 FontSize="22"
                 HorizontalOptions="Center"
-                Text="Solicitações de Inscrição" />
+                Text="Solicitações de Inscrição"
+                TextColor="{AppThemeBinding Light=Black,
+                                            Dark=White}" />
 
-            <!--  CORREÇÃO: A chave do conversor agora é "InverterBooleanConverter"  -->
             <Label
                 FontSize="16"
                 HorizontalOptions="Center"
-                IsVisible="{Binding SolicitacoesPendentes.Count, Converter={StaticResource InverterBooleanConverter}}"
+                IsVisible="{Binding IsListEmpty}"
                 Text="Nenhuma solicitação pendente."
                 TextColor="Gray"
-                VerticalOptions="CenterAndExpand" />
+                VerticalOptions="Center" />
 
-            <CollectionView IsVisible="{Binding SolicitacoesPendentes.Count, Converter={StaticResource ZeroToTrueConverter}}" ItemsSource="{Binding SolicitacoesPendentes}">
+            <CollectionView IsVisible="{Binding IsListEmpty, Converter={StaticResource InverterBooleanConverter}}" ItemsSource="{Binding SolicitacoesPendentes}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Frame
                             Margin="0,5"
                             Padding="10"
-                            BackgroundColor="{AppThemeBinding Light=White,
-                                                              Dark=#1e1e1e}"
-                            CornerRadius="10">
+                            Background="{AppThemeBinding Light=White,
+                                                         Dark=#1e1e1e}"
+                            CornerRadius="10"
+                            HasShadow="True">
                             <VerticalStackLayout Spacing="5">
                                 <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
                                     <Image
                                         Aspect="AspectFit"
                                         HeightRequest="50"
-                                        Source="{Binding Time.LogoUrl}"
+                                        Source="{Binding ImagemTime}"
                                         VerticalOptions="Center"
                                         WidthRequest="50" />
                                     <VerticalStackLayout Spacing="2">
                                         <Label
                                             FontAttributes="Bold"
                                             FontSize="18"
-                                            Text="{Binding Time.Nome}" />
+                                            Text="{Binding NomeTime}"
+                                            TextColor="{AppThemeBinding Light=Black,
+                                                                        Dark=White}" />
                                         <Label
                                             FontSize="14"
-                                            Text="{Binding Time.Descricao}"
+                                            Text="{Binding DescricaoTime}"
                                             TextColor="Gray" />
                                     </VerticalStackLayout>
                                 </HorizontalStackLayout>
