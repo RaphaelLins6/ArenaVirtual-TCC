@@ -11,10 +11,10 @@ namespace ArenaVirtualAPI.Models {
         public Guid ClientAppId { get; set; }
 
         // Quem enviou o convite/solicitação
-        public int IdSolicitanteServidor { get; set; }
+        public int? IdSolicitanteServidor { get; set; }
 
         // Time para qual foi enviado
-        public int TimeId { get; set; }
+        public int? TimeId { get; set; }
 
         // Email convidado (quando for convite do capitão)
         public string? ConvidadoEmail { get; set; }

@@ -24,7 +24,7 @@ namespace ArenaVirtualAPI.Models {
         public DateTime DataFim { get; set; }
 
         // Chave estrangeira para o organizador
-        public int OrganizadorId { get; set; }
+        public int? OrganizadorId { get; set; }
 
         public string? LogoUrl { get; set; }
         public string? NomeOrganizador { get; set; }

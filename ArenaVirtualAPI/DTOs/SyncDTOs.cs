@@ -16,8 +16,8 @@ namespace ArenaVirtualAPI.DTOs {
         public int Id { get; set; }
         public string? ConvidadoEmail { get; set; }
         public DateTime DataEnvio { get; set; }
-        public Guid IdSolicitanteClientAppId { get; set; }
-        public Guid TimeClientAppId { get; set; }
+        public Guid? IdSolicitanteClientAppId { get; set; }
+        public Guid? TimeClientAppId { get; set; }
         public StatusConvite Status { get; set; }
         public DateTime UpdatedAt { set; get; }
         public bool IsSynced { set; get; }

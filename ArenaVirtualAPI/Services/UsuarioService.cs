@@ -15,8 +15,8 @@ public class UsuarioService : IBackendService<Usuario, UsuarioSyncDto> {
         _context = context;
     }
 
-    // Primeira fase: upsert (criação/atualização)
-    public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<UsuarioSyncDto> dtos) {
+    // Primeira fase: upsert (criação/atualização)
+    public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<UsuarioSyncDto> dtos) {
         var idMapping = new Dictionary<Guid, int>();
         foreach (var dto in dtos) {
             var existingItem = await _context.Usuarios.FirstOrDefaultAsync(u => u.ClientAppId == dto.ClientAppId);
@@ -64,48 +64,48 @@ public class UsuarioService : IBackendService<Usuario, UsuarioSyncDto> {
                 idMapping[existingItem.ClientAppId] = existingItem.Id;
             }
         }
-        // REMOVA esta linha
-        // await _context.SaveChangesAsync();
-        return idMapping;
+        return idMapping;
     }
 
-    // Segunda fase: atualização de chaves estrangeiras
-    public async Task UpdateForeignKeysAsync(IEnumerable<UsuarioSyncDto> dtos, Dictionary<string, Dictionary<Guid, int>> idMappings) {
+    // Segunda fase: atualização de chaves estrangeiras
+    public async Task UpdateForeignKeysAsync(IEnumerable<UsuarioSyncDto> dtos, Dictionary<string, Dictionary<Guid, int>> idMappings) {
         if (!idMappings.TryGetValue("Time", out var timeMappings)) {
             return;
         }
 
+        // Pré-carregar os Usuários para evitar múltiplas consultas
+        var clientAppIds = dtos.Select(d => d.ClientAppId).ToHashSet();
+        var existingItems = await _context.Usuarios
+            .Where(u => clientAppIds.Contains(u.ClientAppId))
+            .ToDictionaryAsync(u => u.ClientAppId);
+
         foreach (var dto in dtos) {
-            var existingItem = await _context.Usuarios.FirstOrDefaultAsync(u => u.ClientAppId == dto.ClientAppId);
-            if (existingItem != null && dto.TimeClientAppId.HasValue) {
-                if (timeMappings.TryGetValue(dto.TimeClientAppId.Value, out int newTimeId)) {
-                    existingItem.TimeId = newTimeId;
+            if (existingItems.TryGetValue(dto.ClientAppId, out var existingItem)) {
+                if (dto.TimeClientAppId.HasValue && dto.TimeClientAppId.Value != Guid.Empty) {
+                    // Tenta resolver o ClientAppId para o ID inteiro
+                    if (timeMappings.TryGetValue(dto.TimeClientAppId.Value, out int newTimeId)) {
+                        existingItem.TimeId = newTimeId;
+                    } else {
+                        // Se o time for novo e não tiver sido mapeado nesta fase, preserva o TimeId
+                        // ou, se a regra for que o FK deve ser resolvido, define como null/0.
+                        // Para evitar erro de FK, vamos definir explicitamente como null se não for mapeado
+                        existingItem.TimeId = null;
+                    }
                 } else {
+                    // Se o DTO enviar TimeClientAppId nulo ou Guid.Empty, remove a ligação
                     existingItem.TimeId = null;
                 }
-            } else if (existingItem != null) {
-                existingItem.TimeId = null;
+                _context.Entry(existingItem).State = EntityState.Modified;
             }
         }
     }
 
-    public async Task<Usuario?> GetByIdAsync(int id) {
-        return await _context.Usuarios.FindAsync(id);
-    }
-    public async Task AddAsync(Usuario usuario) {
-        usuario.IsSynced = true;
-        usuario.UpdatedAt = DateTime.UtcNow;
-        _context.Usuarios.Add(usuario);
-        await _context.SaveChangesAsync();
-    }
-    public async Task UpdateAsync(Usuario usuario) {
-        _context.Entry(usuario).State = EntityState.Modified;
-        usuario.IsSynced = true;
-        usuario.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
-    }
+    // Terceira fase: GetUpdates (correção aqui)
     public async Task<IEnumerable<UsuarioSyncDto>> GetUpdatedSinceAsync(DateTime lastSyncTime) {
         return await _context.Usuarios
+            // Incluindo a propriedade de navegação Time para garantir que a FK Guid seja populada corretamente
+            // NOTE: Isso pode ser removido se 'u.TimeClientAppId' já for uma coluna no DB e for Guid?
+            // Se 'u.TimeClientAppId' for uma coluna no DB:
             .Where(u => u.UpdatedAt > lastSyncTime)
             .Select(u => new UsuarioSyncDto {
                 ClientAppId = u.ClientAppId,
@@ -124,8 +124,26 @@ public class UsuarioService : IBackendService<Usuario, UsuarioSyncDto> {
                 Peso = u.Peso,
                 Altura = u.Altura,
                 FaixaOrcamentoPatrocinio = u.FaixaOrcamentoPatrocinio,
-                TimeClientAppId = u.TimeClientAppId
+                // CORREÇÃO: Força o tratamento do GUID nulo para evitar erros de serialização JSON
+                TimeClientAppId = u.TimeClientAppId.HasValue && u.TimeClientAppId.Value != Guid.Empty ? u.TimeClientAppId.Value : (Guid?)null
             })
             .ToListAsync();
+    }
+
+    // Outros métodos não alterados
+    public async Task<Usuario?> GetByIdAsync(int id) {
+        return await _context.Usuarios.FindAsync(id);
+    }
+    public async Task AddAsync(Usuario usuario) {
+        usuario.IsSynced = true;
+        usuario.UpdatedAt = DateTime.UtcNow;
+        _context.Usuarios.Add(usuario);
+        await _context.SaveChangesAsync();
+    }
+    public async Task UpdateAsync(Usuario usuario) {
+        _context.Entry(usuario).State = EntityState.Modified;
+        usuario.IsSynced = true;
+        usuario.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
     }
 }

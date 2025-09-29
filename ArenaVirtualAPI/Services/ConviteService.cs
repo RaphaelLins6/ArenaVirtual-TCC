@@ -17,8 +17,10 @@ namespace ArenaVirtualAPI.Services {
 
         public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<ConviteSyncDto> dtos) {
             var idMapping = new Dictionary<Guid, int>();
+
             foreach (var dto in dtos) {
-                var existingItem = await _context.Convites.FirstOrDefaultAsync(c => c.ClientAppId == dto.ClientAppId);
+                var existingItem = await _context.Convites
+                    .FirstOrDefaultAsync(c => c.ClientAppId == dto.ClientAppId);
 
                 if (existingItem == null) {
                     var newItem = new Convite {
@@ -35,12 +37,14 @@ namespace ArenaVirtualAPI.Services {
                     existingItem.ConvidadoEmail = dto.ConvidadoEmail;
                     existingItem.DataEnvio = dto.DataEnvio;
                     existingItem.Status = dto.Status;
-                    existingItem.UpdatedAt = DateTime.UtcNow;
                     existingItem.IsSynced = true;
+                    existingItem.UpdatedAt = DateTime.UtcNow;
                     _context.Entry(existingItem).State = EntityState.Modified;
+
                     idMapping[existingItem.ClientAppId] = existingItem.Id;
                 }
             }
+
             return idMapping;
         }
 
@@ -53,18 +57,21 @@ namespace ArenaVirtualAPI.Services {
             }
 
             foreach (var dto in dtos) {
-                var existingItem = await _context.Convites.FirstOrDefaultAsync(c => c.ClientAppId == dto.ClientAppId);
-                if (existingItem != null) {
-                    if (usuarioMapping.TryGetValue(dto.IdSolicitanteClientAppId, out var solicitanteId)) {
-                        existingItem.IdSolicitanteServidor = solicitanteId;
-                    }
-                    if (timeMapping.TryGetValue(dto.TimeClientAppId, out var timeId)) {
-                        existingItem.TimeId = timeId;
-                    }
-                    _context.Entry(existingItem).State = EntityState.Modified;
+                var existingItem = await _context.Convites
+                    .FirstOrDefaultAsync(c => c.ClientAppId == dto.ClientAppId);
+
+                if (dto.IdSolicitanteClientAppId.HasValue &&
+                    usuarioMapping.TryGetValue(dto.IdSolicitanteClientAppId.Value, out var solicitanteId)) {
+                    existingItem.IdSolicitanteServidor = solicitanteId;
+                }
+
+                if (dto.TimeClientAppId.HasValue &&
+                    timeMapping.TryGetValue(dto.TimeClientAppId.Value, out var timeId)) {
+                    existingItem.TimeId = timeId;
                 }
             }
         }
+
 
         public async Task<Convite?> GetByIdAsync(int id) {
             return await _context.Convites.FirstOrDefaultAsync(c => c.Id == id);
@@ -83,18 +90,21 @@ namespace ArenaVirtualAPI.Services {
         }
 
         public async Task<IEnumerable<ConviteSyncDto>> GetUpdatedSinceAsync(DateTime lastSyncTime) {
-            return await _context.Convites
-              .Where(c => c.UpdatedAt > lastSyncTime)
-              .Select(c => new ConviteSyncDto {
-                  ClientAppId = c.ClientAppId,
-                  UpdatedAt = c.UpdatedAt,
-                  ConvidadoEmail = c.ConvidadoEmail,
-                  DataEnvio = c.DataEnvio,
-                  IdSolicitanteClientAppId = c.Solicitante!.ClientAppId,
-                  TimeClientAppId = c.Time!.ClientAppId,
-                  Status = c.Status
-              })
-              .ToListAsync();
+            var convites = await _context.Convites
+                .Include(c => c.Solicitante)
+                .Include(c => c.Time)
+                .Where(c => c.UpdatedAt > lastSyncTime)
+                .ToListAsync(); // traz os dados para memória
+
+            return convites.Select(c => new ConviteSyncDto {
+                ClientAppId = c.ClientAppId,
+                UpdatedAt = c.UpdatedAt,
+                ConvidadoEmail = c.ConvidadoEmail,
+                DataEnvio = c.DataEnvio,
+                IdSolicitanteClientAppId = c.Solicitante?.ClientAppId,
+                TimeClientAppId = c.Time?.ClientAppId,
+                Status = c.Status
+            }).ToList();
         }
     }
 }
