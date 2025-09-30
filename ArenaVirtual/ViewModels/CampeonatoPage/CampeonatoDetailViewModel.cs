@@ -4,15 +4,8 @@ using CommunityToolkit.Mvvm.Input;
 using System.Diagnostics;
 using ArenaVirtual.Services;
 using System.Collections.ObjectModel;
-using System.Linq;
-using Microsoft.Maui.Storage;
 using ArenaVirtual.Popups;
-using System.IO;
 using ArenaVirtual.Views.CampeonatoPage;
-using Microsoft.Maui.Devices;
-using System.Collections.Generic; // Necessário para Dictionary
-using System.Threading.Tasks; // Necessário para Task
-using Microsoft.Maui.Controls; // Necessário para ImageSource, Application e MainThread
 
 namespace ArenaVirtual.ViewModels.CampeonatoPage {
     public partial class CampeonatoDetailViewModel : ObservableObject, IQueryAttributable {
@@ -22,8 +15,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         [ObservableProperty]
         private ObservableCollection<Time> tabelaClassificacao;
 
-        // CORREÇÃO/GARANTIA: TabelaJogos deve ser [ObservableProperty] se for alterada no LoadRodada
-        [ObservableProperty]
+        [ObservableProperty]
         private ObservableCollection<Jogo> tabelaJogos;
 
         [ObservableProperty]
@@ -54,8 +46,8 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             _databaseService = databaseService;
             _syncService = syncService;
 
-            // Verifica o idioma do dispositivo para definir IsDesktop
-            IsDesktop = DeviceInfo.Idiom == DeviceIdiom.Desktop || DeviceInfo.Idiom == DeviceIdiom.Tablet;
+            // Verifica o idioma do dispositivo para definir IsDesktop
+            IsDesktop = DeviceInfo.Idiom == DeviceIdiom.Desktop || DeviceInfo.Idiom == DeviceIdiom.Tablet;
 
             Debug.WriteLine($"[CampeonatoDetailViewModel] Device Idiom: {DeviceInfo.Idiom}. IsDesktop: {IsDesktop}");
         }
@@ -64,8 +56,8 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             Debug.WriteLine("[CampeonatoDetailViewModel] ApplyQueryAttributes chamado.");
             if (query.ContainsKey("Campeonato")) {
                 var campeonatoRecebido = query["Campeonato"] as Campeonato;
-                // Chamada LoadCampeonato com await para garantir que a UI não trave e que os dados sejam carregados
-                await LoadCampeonato(campeonatoRecebido);
+                // Chamada LoadCampeonato com await para garantir que a UI não trave e que os dados sejam carregados
+                await LoadCampeonato(campeonatoRecebido);
             }
         }
 
@@ -83,17 +75,20 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             Debug.WriteLine($"[CampeonatoDetailViewModel] É organizador? {IsOrganizador}");
 
-            // 🚀 CHAMADA DE DADOS REAIS E POPULAÇÃO DAS TABELAS
-            await LoadTabelaClassificacaoAsync();
+            // 🚀 CHAMADA DE DADOS REAIS E POPULAÇÃO DAS TABELAS
+            await LoadTabelaClassificacaoAsync();
 
-            // 🆕 Inicia a Rodada Atual.
-            RodadaAtual = _jogosPorRodada.Keys.Any() ? _jogosPorRodada.Keys.Min() : 0;
+            // 🆕 Chama a Geração de Jogos após carregar a classificação para usar a lista de times.
+            await GerarTabelaJogosAsync(campeonato);
+
+            // 🆕 Inicia a Rodada Atual.
+            RodadaAtual = _jogosPorRodada.Keys.Any() ? _jogosPorRodada.Keys.Min() : 0;
             if (RodadaAtual > 0) {
                 LoadRodada(RodadaAtual);
             }
 
-            // Carregamento de Banner e Logo (mantido inalterado)
-            if (!string.IsNullOrEmpty(Campeonato.BannerUrl)) {
+            // Carregamento de Banner e Logo (mantido inalterado)
+            if (!string.IsNullOrEmpty(Campeonato.BannerUrl)) {
                 if (File.Exists(Campeonato.BannerUrl)) {
                     BannerSource = ImageSource.FromFile(Campeonato.BannerUrl);
                 } else if (Uri.IsWellFormedUriString(Campeonato.BannerUrl, UriKind.Absolute)) {
@@ -135,12 +130,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 });
             };
 
-            // Em MAUI/Xamarin, o PushModalAsync deve ser feito no MainThread
-            await Application.Current.MainPage.Navigation.PushModalAsync(popup);
+            // Em MAUI/Xamarin, o PushModalAsync deve ser feito no MainThread
+            await Application.Current.MainPage.Navigation.PushModalAsync(popup);
         }
 
-        // MÉTODO CORRIGIDO E MELHORADO: Carrega times e simula a primeira rodada
-        private async Task LoadTabelaClassificacaoAsync() {
+        // MÉTODO MELHORADO: Carrega times e popula a classificação
+        private async Task LoadTabelaClassificacaoAsync() {
             if (Campeonato is null) return;
 
             // 1. Busca os times reais inscritos
@@ -148,58 +143,128 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             // 2. Lógica de Classificação (ordenar e calcular estatísticas)
             var timesOrdenados = timesInscritos
-                    .OrderByDescending(t => t.PontuacaoTotal)
-                    .ToList();
+                        .OrderByDescending(t => t.PontuacaoTotal)
+                        .ToList();
 
             TabelaClassificacao.Clear();
 
-            // 3. Popula a Tabela de Classificação
-            for (int i = 0; i < timesOrdenados.Count; i++) {
+            // 3. Popula a Tabela de Classificação
+            for (int i = 0; i < timesOrdenados.Count; i++) {
                 var time = timesOrdenados[i];
 
-                // 3.1. Atribui a posição e calcula as colunas.
-                time.Posicao = i + 1;
+                // 3.1. Atribui a posição e calcula as colunas.
+                time.Posicao = i + 1;
 
-                // Garantindo que a Porcentagem de Vitória seja calculada:
-                int totalJogosDecididos = time.Vitorias + time.Derrotas;
+                // Garantindo que a Porcentagem de Vitória seja calculada:
+                int totalJogosDecididos = time.Vitorias + time.Derrotas;
                 time.PorcentagemVitoria = (totalJogosDecididos > 0) ? (double)time.Vitorias / totalJogosDecididos : 0.0;
 
-                // Valores simulados/incompletos para JA e Sequencia até a lógica real ser implementada
-                time.JogosAtras = 0;
+                // Valores simulados/incompletos para JA e Sequencia até a lógica real ser implementada
+                time.JogosAtras = 0;
                 time.Sequencia = time.Vitorias > 0 ? "V" : (time.Derrotas > 0 ? "D" : "N/A");
 
                 TabelaClassificacao.Add(time);
             }
+        }
 
-            // 4. Lógica de Jogos por Rodada - AGORA UTILIZA OS TIMES REAIS
-            _jogosPorRodada.Clear();
+        // NOVO MÉTODO: Geração da Tabela de Jogos usando Round-Robin com distribuição de datas por rodada
+        private async Task GerarTabelaJogosAsync(Campeonato campeonato) {
+            _jogosPorRodada.Clear();
+            var times = TabelaClassificacao.ToList();
+            int n = times.Count;
 
-            // Simulação da Rodada 1 para exibição inicial
-            if (TabelaClassificacao.Count >= 2) {
-                var rodada1Jogos = new ObservableCollection<Jogo>();
+            if (n < 2) return; // Mínimo de 2 times para jogos
 
-                // Cria pares de jogos a partir dos times carregados
-                for (int i = 0; i < TabelaClassificacao.Count; i += 2) {
-                    if (i + 1 < TabelaClassificacao.Count) {
-                        // Emparelha o time 'i' com o time 'i+1'
-                        rodada1Jogos.Add(new Jogo {
-                            TimeA = TabelaClassificacao[i],
-                            TimeB = TabelaClassificacao[i + 1],
-                            PlacarA = "X", // Placeholder
-                            PlacarB = "Y", // Placeholder
-                            Rodada = 1 // Atribui a Rodada
-                        });
-                    } else {
-                        // Se for um número ímpar de times, o último time "folga" ou joga contra um placeholder.
-                        Debug.WriteLine($"[CampeonatoDetailViewModel] Time {TabelaClassificacao[i].Nome} tem folga na Rodada 1 (simulação).");
+            // Trata número ímpar: adiciona um "time dummy" (Folga)
+            if (n % 2 != 0) {
+                // Adiciona um time temporário para facilitar o Round-Robin
+                times.Add(new Time { Id = -1, Nome = "Folga", LogoUrl = "" });
+                n++; // O número de elementos para o algoritmo se torna par
+            }
+
+            int numRodadas = n - 1; // Para turno único (ex: 4 times -> 3 rodadas)
+            int numJogosPorRodada = n / 2; // (ex: 4 times -> 2 jogos por rodada)
+
+            // --- LÓGICA DE DISTRIBUIÇÃO DE DATAS POR RODADA ---
+
+            // Data/Hora base do jogo (ex: 18:00h no dia de início)
+            DateTime dataHoraBase = campeonato.DataInicio.Date.AddHours(18);
+
+            // Calcula a duração total do campeonato (dias)
+            TimeSpan duracaoCampeonato = campeonato.DataFim.Date - campeonato.DataInicio.Date;
+            int totalDias = (int)duracaoCampeonato.TotalDays;
+
+            // Se o campeonato tiver mais de um dia e mais de uma rodada, calcula o espaçamento médio.
+            double intervaloDiasPorRodada = 0;
+            if (totalDias > 0 && numRodadas > 1) {
+                // Divide a duração total pelos intervalos de rodada (numRodadas - 1)
+                intervaloDiasPorRodada = (double)totalDias / (numRodadas - 1);
+            }
+            // ----------------------------------------------------
+
+            // Implementação do Algoritmo Cíclico (Round-Robin)
+            // O primeiro time (times[0]) fica fixo.
+            var timesRotativos = times.Skip(1).ToList();
+
+            for (int r = 1; r <= numRodadas; r++) {
+                var rodadaJogos = new ObservableCollection<Jogo>();
+
+                // 1. Definição da Data/Hora para toda a Rodada
+                // A data avança a cada rodada, baseada no intervalo calculado.
+                DateTime dataHoraRodada = dataHoraBase.AddDays((r - 1) * intervaloDiasPorRodada);
+
+                // Garante que a data não ultrapasse o final do campeonato
+                if (dataHoraRodada.Date > campeonato.DataFim.Date) {
+                    dataHoraRodada = campeonato.DataFim.Date.AddHours(dataHoraBase.Hour);
+                }
+
+                // 2. Jogo Fixo (Times[0] vs Times Rotativos[0])
+                Time timeA = times[0];
+                Time timeB = timesRotativos[0];
+
+                if (timeB.Id != -1) { // Verifica se não é a Folga
+                    rodadaJogos.Add(CriarNovoJogo(timeA, timeB, r, campeonato.Local, dataHoraRodada));
+                } else {
+                    Debug.WriteLine($"Rodada {r}: {timeA.Nome} Folga.");
+                }
+
+                // 3. Outros Jogos (Times Rotativos emparelhados de fora para dentro)
+                for (int i = 1; i < numJogosPorRodada; i++) {
+                    Time timeX = timesRotativos[i];
+                    Time timeY = timesRotativos[numRodadas - i];
+
+                    if (timeX.Id != -1 && timeY.Id != -1) { // Garante que nenhum é a Folga
+                        // Todos os jogos na rodada usam a mesma DataHora e Local
+                        rodadaJogos.Add(CriarNovoJogo(timeX, timeY, r, campeonato.Local, dataHoraRodada));
                     }
                 }
 
-                if (rodada1Jogos.Any()) {
-                    _jogosPorRodada.Add(1, rodada1Jogos);
+                // Adiciona a rodada ao dicionário
+                if (rodadaJogos.Any()) {
+                    _jogosPorRodada.Add(r, rodadaJogos);
                 }
+
+                // 4. Rotaciona os times rotativos (mecanismo do Round-Robin)
+                // O último time rotativo vai para a primeira posição (logo após o fixo)
+                var ultimoTime = timesRotativos.Last();
+                timesRotativos.RemoveAt(timesRotativos.Count - 1);
+                timesRotativos.Insert(0, ultimoTime);
             }
         }
+
+        // Método auxiliar para criar um novo Jogo
+        private Jogo CriarNovoJogo(Time timeA, Time timeB, int rodada, string localCampeonato, DateTime dataHora) {
+            return new Jogo {
+                TimeA = timeA,
+                TimeB = timeB,
+                PlacarA = "X", // Placeholder
+                PlacarB = "Y", // Placeholder
+                Rodada = rodada,
+                DataHora = dataHora,
+                Local = localCampeonato
+            };
+        }
+
 
         [RelayCommand]
         private void MudarRodadaAnterior() {
@@ -219,8 +284,8 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         private void LoadRodada(int rodada) {
             if (_jogosPorRodada.ContainsKey(rodada)) {
-                // ATUALIZA A PROPRIEDADE OBSERVÁVEL
-                TabelaJogos = _jogosPorRodada[rodada];
+                // ATUALIZA A PROPRIEDADE OBSERVÁVEL
+                TabelaJogos = _jogosPorRodada[rodada];
             } else {
                 TabelaJogos.Clear();
             }

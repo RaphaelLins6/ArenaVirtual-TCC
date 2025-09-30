@@ -273,77 +273,106 @@
                                     Padding="15"
                                     BackgroundColor="#282828"
                                     CornerRadius="5">
-                                    <Grid
-                                        ColumnDefinitions="*, Auto, *"
-                                        ColumnSpacing="10"
-                                        HorizontalOptions="FillAndExpand"
-                                        RowDefinitions="Auto, Auto, Auto">
+                                    <VerticalStackLayout Spacing="5">
+                                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
+                                            <Label
+                                                FontAttributes="Bold"
+                                                FontSize="12"
+                                                Text="{Binding DataHora, StringFormat='{0:ddd, dd/MM - HH:mm}'}"
+                                                TextColor="Gray" />
+                                        </HorizontalStackLayout>
                                         <Label
-                                            Grid.Row="0"
-                                            Grid.Column="0"
-                                            FontAttributes="Bold"
-                                            HorizontalOptions="End"
-                                            Text="{Binding PlacarA}"
-                                            TextColor="OrangeRed"
-                                            VerticalOptions="Center" />
-                                        <Label
-                                            Grid.Row="0"
-                                            Grid.Column="1"
-                                            FontAttributes="Bold"
+                                            FontSize="12"
                                             HorizontalOptions="Center"
-                                            Text="-"
+                                            Text="{Binding Local}"
                                             TextColor="OrangeRed"
                                             VerticalOptions="Center" />
-                                        <Label
-                                            Grid.Row="0"
-                                            Grid.Column="2"
-                                            FontAttributes="Bold"
-                                            HorizontalOptions="Start"
-                                            Text="{Binding PlacarB}"
-                                            TextColor="OrangeRed"
-                                            VerticalOptions="Center" />
+                                        <Grid
+                                            Margin="0,5,0,0"
+                                            ColumnDefinitions="*, Auto, *"
+                                            ColumnSpacing="10"
+                                            HorizontalOptions="FillAndExpand"
+                                            RowDefinitions="Auto, Auto">
 
-                                        <Image
-                                            Grid.Row="1"
-                                            Grid.Column="0"
-                                            Aspect="AspectFit"
-                                            HeightRequest="40"
-                                            HorizontalOptions="End"
-                                            Source="{Binding TimeA.LogoUrl}" />
-                                        <Label
-                                            Grid.Row="1"
-                                            Grid.Column="1"
-                                            FontAttributes="Bold"
-                                            FontSize="14"
-                                            HorizontalOptions="Center"
-                                            Text="vs"
-                                            TextColor="White"
-                                            VerticalOptions="Center" />
-                                        <Image
-                                            Grid.Row="1"
-                                            Grid.Column="2"
-                                            Aspect="AspectFit"
-                                            HeightRequest="40"
-                                            HorizontalOptions="Start"
-                                            Source="{Binding TimeB.LogoUrl}" />
+                                            <HorizontalStackLayout
+                                                Grid.Row="0"
+                                                Grid.Column="0"
+                                                HorizontalOptions="End"
+                                                Spacing="5">
+                                                <Label
+                                                    FontAttributes="Bold"
+                                                    Text="{Binding PlacarA}"
+                                                    TextColor="OrangeRed"
+                                                    VerticalOptions="Center" />
+                                                <Label
+                                                    FontAttributes="Bold"
+                                                    Text="-"
+                                                    TextColor="OrangeRed"
+                                                    VerticalOptions="Center" />
+                                            </HorizontalStackLayout>
 
-                                        <Label
-                                            Grid.Row="2"
-                                            Grid.Column="0"
-                                            FontAttributes="Bold"
-                                            FontSize="16"
-                                            HorizontalOptions="End"
-                                            Text="{Binding TimeA.Nome}"
-                                            TextColor="White" />
-                                        <Label
-                                            Grid.Row="2"
-                                            Grid.Column="2"
-                                            FontAttributes="Bold"
-                                            FontSize="16"
-                                            HorizontalOptions="Start"
-                                            Text="{Binding TimeB.Nome}"
-                                            TextColor="White" />
-                                    </Grid>
+                                            <Label
+                                                Grid.Row="0"
+                                                Grid.Column="1"
+                                                FontAttributes="Bold"
+                                                FontSize="14"
+                                                HorizontalOptions="Center"
+                                                Text="vs"
+                                                TextColor="White"
+                                                VerticalOptions="Center" />
+
+                                            <HorizontalStackLayout
+                                                Grid.Row="0"
+                                                Grid.Column="2"
+                                                HorizontalOptions="Start"
+                                                Spacing="5">
+                                                <Label
+                                                    FontAttributes="Bold"
+                                                    Text="-"
+                                                    TextColor="OrangeRed"
+                                                    VerticalOptions="Center" />
+                                                <Label
+                                                    FontAttributes="Bold"
+                                                    Text="{Binding PlacarB}"
+                                                    TextColor="OrangeRed"
+                                                    VerticalOptions="Center" />
+                                            </HorizontalStackLayout>
+
+                                            <Image
+                                                Grid.Row="1"
+                                                Grid.Column="0"
+                                                Aspect="AspectFit"
+                                                HeightRequest="40"
+                                                HorizontalOptions="End"
+                                                Source="{Binding TimeA.LogoUrl}"
+                                                VerticalOptions="Center" />
+                                            <Image
+                                                Grid.Row="1"
+                                                Grid.Column="2"
+                                                Aspect="AspectFit"
+                                                HeightRequest="40"
+                                                HorizontalOptions="Start"
+                                                Source="{Binding TimeB.LogoUrl}"
+                                                VerticalOptions="Center" />
+                                        </Grid>
+
+                                        <Grid ColumnDefinitions="*, Auto, *" ColumnSpacing="10">
+                                            <Label
+                                                Grid.Column="0"
+                                                FontAttributes="Bold"
+                                                FontSize="16"
+                                                HorizontalOptions="End"
+                                                Text="{Binding TimeA.Nome}"
+                                                TextColor="White" />
+                                            <Label
+                                                Grid.Column="2"
+                                                FontAttributes="Bold"
+                                                FontSize="16"
+                                                HorizontalOptions="Start"
+                                                Text="{Binding TimeB.Nome}"
+                                                TextColor="White" />
+                                        </Grid>
+                                    </VerticalStackLayout>
                                 </Frame>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
