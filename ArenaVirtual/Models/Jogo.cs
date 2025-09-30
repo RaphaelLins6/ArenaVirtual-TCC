@@ -19,6 +19,7 @@ namespace ArenaVirtual.Models {
         private DateTime dataHora;
         private int campeonatoId;
         private int arbitroId;
+        public int Rodada { get; set; }
         private string local = string.Empty;
         private string placarA = string.Empty;
         private string placarB = string.Empty;

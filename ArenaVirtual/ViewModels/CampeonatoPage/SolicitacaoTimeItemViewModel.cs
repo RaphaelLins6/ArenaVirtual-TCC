@@ -1,23 +1,25 @@
-﻿using ArenaVirtual.Models;
+﻿// EM: ArenaVirtual.ViewModels.CampeonatoPage/SolicitacaoTimeItemViewModel.cs
+using ArenaVirtual.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using System.Diagnostics;
 
 namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
-    // [ObservableObject] não é necessário aqui, pois a classe não contém propriedades observáveis
-    public partial class SolicitacaoTimeItemViewModel {
+    // A classe SolicitacaoTimeItemViewModel deve herdar de ObservableObject
+    // se você planeja adicionar comandos [RelayCommand] ou propriedades observáveis no futuro.
+    public partial class SolicitacaoTimeItemViewModel : ObservableObject {
 
-        public Convite ConviteOriginal { get; }
+        // CORREÇÃO: Propriedade agora é do tipo Convite
+        public Convite SolicitacaoOriginal { get; }
 
         public Time TimeSolicitante { get; }
 
         public string NomeTime => TimeSolicitante?.Nome ?? "Nome indisponível";
         public string ImagemTime => TimeSolicitante?.LogoUrl ?? "default_team_image.png";
 
-        public SolicitacaoTimeItemViewModel(Convite convite, Time time) {
-            // **Correção:** O construtor agora recebe um objeto do tipo Convite
-            ConviteOriginal = convite;
+        // CORREÇÃO: O construtor agora aceita o tipo Convite (Resolve CS1503)
+        public SolicitacaoTimeItemViewModel(Convite solicitacao, Time time) {
+            SolicitacaoOriginal = solicitacao;
             TimeSolicitante = time;
         }
     }

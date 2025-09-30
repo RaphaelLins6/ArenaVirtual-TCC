@@ -1,8 +1,8 @@
-﻿using SQLite;
-using System;
+﻿using System.ComponentModel.DataAnnotations; 
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace ArenaVirtual.Models {
+namespace ArenaVirtualAPI.Models {
     public enum StatusInscricao {
         Pendente,
         Aceita,
@@ -11,12 +11,12 @@ namespace ArenaVirtual.Models {
 
     [Table("SolicitacoesCampeonato")]
     public class SolicitacaoCampeonato : ISyncable {
-        [PrimaryKey, AutoIncrement]
+
+        [Key]
         [JsonIgnore]
         public int Id { get; set; }
 
-        [NotNull, Unique]
-        public Guid ClientAppId { get; set; } = Guid.NewGuid();
+        public Guid ClientAppId { get; set; } = Guid.NewGuid();
 
         public Guid TimeClientAppId { get; set; }
 
@@ -26,8 +26,7 @@ namespace ArenaVirtual.Models {
 
         public DateTime DataSolicitacao { get; set; }
 
-        // Propriedades da interface ISyncable
-        public bool IsSynced { get; set; } = false;
+        public bool IsSynced { get; set; } = false;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     }

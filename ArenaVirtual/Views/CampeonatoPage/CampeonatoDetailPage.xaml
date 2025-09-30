@@ -51,7 +51,7 @@
                             FontSize="24"
                             HorizontalOptions="Center"
                             Text="{Binding Campeonato.Nome}"
-                            TextColor="Orange" />
+                            TextColor="OrangeRed" />
                     </VerticalStackLayout>
                 </Grid>
 
@@ -71,6 +71,14 @@
                         IsVisible="{Binding IsOrganizador}"
                         Text="Gerenciar Solicitações"
                         TextColor="White" />
+
+                    <Button
+                        Margin="0,5,0,0"
+                        BackgroundColor="DarkOrange"
+                        Command="{Binding ListarTimesInscritosCommand}"
+                        CornerRadius="10"
+                        Text="Ver Times Inscritos"
+                        TextColor="White" />
                 </VerticalStackLayout>
 
                 <BoxView
@@ -84,6 +92,7 @@
                         FontSize="20"
                         Text="Tabela de Classificação"
                         TextColor="White" />
+
                     <Grid Padding="0,5" ColumnDefinitions="40, 40, *, 40, 40, 60, 40, 60, 60">
                         <Label
                             Grid.Column="0"
@@ -118,21 +127,25 @@
                             Grid.Column="6"
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
+                            IsVisible="{Binding IsDesktop}"
                             Text="JA"
                             TextColor="Orange" />
                         <Label
                             Grid.Column="7"
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
-                            Text="Últ. Seq."
+                            IsVisible="{Binding IsDesktop}"
+                            Text="Total Pts."
                             TextColor="Orange" />
                         <Label
                             Grid.Column="8"
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
+                            IsVisible="{Binding IsDesktop}"
                             Text="Seq."
                             TextColor="Orange" />
                     </Grid>
+
                     <CollectionView
                         HorizontalOptions="Start"
                         ItemsSource="{Binding TabelaClassificacao}"
@@ -180,18 +193,21 @@
                                     <Label
                                         Grid.Column="6"
                                         HorizontalOptions="Center"
+                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=IsDesktop}"
                                         Text="{Binding JogosAtras}"
                                         TextColor="White"
                                         VerticalOptions="Center" />
                                     <Label
                                         Grid.Column="7"
                                         HorizontalOptions="Center"
-                                        Text="{Binding Sequencia}"
+                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=IsDesktop}"
+                                        Text="{Binding PontuacaoTotal}"
                                         TextColor="White"
                                         VerticalOptions="Center" />
                                     <Label
                                         Grid.Column="8"
                                         HorizontalOptions="Center"
+                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=IsDesktop}"
                                         Text="{Binding Sequencia}"
                                         TextColor="White"
                                         VerticalOptions="Center" />
@@ -262,6 +278,31 @@
                                         ColumnSpacing="10"
                                         HorizontalOptions="FillAndExpand"
                                         RowDefinitions="Auto, Auto, Auto">
+                                        <Label
+                                            Grid.Row="0"
+                                            Grid.Column="0"
+                                            FontAttributes="Bold"
+                                            HorizontalOptions="End"
+                                            Text="{Binding PlacarA}"
+                                            TextColor="OrangeRed"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            Grid.Row="0"
+                                            Grid.Column="1"
+                                            FontAttributes="Bold"
+                                            HorizontalOptions="Center"
+                                            Text="-"
+                                            TextColor="OrangeRed"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            Grid.Row="0"
+                                            Grid.Column="2"
+                                            FontAttributes="Bold"
+                                            HorizontalOptions="Start"
+                                            Text="{Binding PlacarB}"
+                                            TextColor="OrangeRed"
+                                            VerticalOptions="Center" />
+
                                         <Image
                                             Grid.Row="1"
                                             Grid.Column="0"
@@ -269,14 +310,6 @@
                                             HeightRequest="40"
                                             HorizontalOptions="End"
                                             Source="{Binding TimeA.LogoUrl}" />
-                                        <Label
-                                            Grid.Row="2"
-                                            Grid.Column="0"
-                                            FontAttributes="Bold"
-                                            FontSize="16"
-                                            HorizontalOptions="End"
-                                            Text="{Binding TimeA.Nome}"
-                                            TextColor="White" />
                                         <Label
                                             Grid.Row="1"
                                             Grid.Column="1"
@@ -293,6 +326,15 @@
                                             HeightRequest="40"
                                             HorizontalOptions="Start"
                                             Source="{Binding TimeB.LogoUrl}" />
+
+                                        <Label
+                                            Grid.Row="2"
+                                            Grid.Column="0"
+                                            FontAttributes="Bold"
+                                            FontSize="16"
+                                            HorizontalOptions="End"
+                                            Text="{Binding TimeA.Nome}"
+                                            TextColor="White" />
                                         <Label
                                             Grid.Row="2"
                                             Grid.Column="2"

@@ -1,15 +1,9 @@
-﻿// Em ArenaVirtual/ViewModels/Atleta/ProcurarCampeonatosViewModel.cs
-
-using ArenaVirtual.Models;
+﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Threading.Tasks;
-using System;
-using System.Linq;
-using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.ViewModels.Atleta {
     public partial class CampeonatoItemViewModel : ObservableObject {
@@ -99,11 +93,23 @@ namespace ArenaVirtual.ViewModels.Atleta {
                         bool isEnabled = true;
                         Color buttonColor = Color.FromArgb("#FF9800");
 
-                        if (solicitacaoExistente?.Status == StatusConvite.Pendente) {
-                            buttonText = "Pendente";
-                            isEnabled = false;
-                            buttonColor = Color.FromArgb("#9E9E9E");
+                        // ⚠️ CORREÇÃO DA LÓGICA DE STATUS:
+                        if (solicitacaoExistente != null) {
+                            if (solicitacaoExistente.Status == StatusConvite.Pendente) {
+                                buttonText = "Pendente";
+                                isEnabled = false;
+                                buttonColor = Color.FromArgb("#9E9E9E");
+                            }
+                            // Se o status for Aceito, o time já está inscrito, o botão deve sumir ou indicar "Inscrito"
+                            else if (solicitacaoExistente.Status == StatusConvite.Aceito) {
+                                buttonText = "Inscrito";
+                                isEnabled = false;
+                                buttonColor = Color.FromArgb("#4CAF50"); // Verde
+                            }
+                            // Se o status for Recusado, liberamos o botão para uma nova solicitação (se permitido pelas regras do campeonato)
+                            // A lógica padrão (buttonText = "Solicitar Inscrição") já faz isso.
                         }
+                        // ------------------------------------
 
                         CampeonatosDisponiveis.Add(new CampeonatoItemViewModel(campeonato, buttonText, isEnabled, buttonColor));
                     }

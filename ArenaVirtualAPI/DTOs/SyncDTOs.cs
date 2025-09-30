@@ -97,4 +97,25 @@ namespace ArenaVirtualAPI.DTOs {
         public DateTime UpdatedAt { get; set; }
         public bool IsSynced { get; set; }
     }
+
+    public class SolicitacaoCampeonatoSyncDto : ISyncableDto {
+        public Guid ClientAppId { get; set; }
+        public int Id { get; set; }
+
+        // FK para o time que fez a solicitação
+        public Guid TimeClientAppId { get; set; }
+
+        // FK para o campeonato que o time quer entrar
+        public Guid CampeonatoClientAppId { get; set; }
+
+        // FK do usuário que fez a solicitação
+        public Guid UsuarioClientAppId { get; set; }
+
+        public StatusInscricao Status { get; set; }
+        public DateTime DataSolicitacao { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
+        public bool IsSynced { get; set; }
+    }
+
 }

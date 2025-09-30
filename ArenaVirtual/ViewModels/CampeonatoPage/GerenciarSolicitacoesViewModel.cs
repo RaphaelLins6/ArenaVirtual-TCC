@@ -1,12 +1,10 @@
-﻿using ArenaVirtual.Models;
+﻿// EM: ArenaVirtual.ViewModels.CampeonatoPage/GerenciarSolicitacoesViewModel.cs
+using ArenaVirtual.Models;
 using ArenaVirtual.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.ViewModels.CampeonatoPage {
     [QueryProperty(nameof(Campeonato), "Campeonato")]
@@ -22,6 +20,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         [ObservableProperty]
         private bool isBusy;
 
+        // Propriedade calculada para o CanExecute
         private bool IsNotBusy => !IsBusy;
 
         [ObservableProperty]
@@ -34,12 +33,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         private bool isListEmpty;
 
         public GerenciarSolicitacoesViewModel(
-          DatabaseService databaseService,
-          CampeonatoService campeonatoService,
-          SessaoService sessaoService,
-          TimeService timeService,
-          IAlertService alertService,
-          UsuarioService usuarioService) {
+           DatabaseService databaseService,
+           CampeonatoService campeonatoService,
+           SessaoService sessaoService,
+           TimeService timeService,
+           IAlertService alertService,
+           UsuarioService usuarioService) {
             _databaseService = databaseService;
             _campeonatoService = campeonatoService;
             _sessaoService = sessaoService;
@@ -51,10 +50,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         partial void OnCampeonatoChanged(Campeonato value) {
             if (value != null) {
+                // Dispara o carregamento dos dados quando o Campeonato é setado
                 _ = LoadSolicitacoesAsync();
             }
         }
 
+        // A) Método LoadSolicitacoesAsync
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
         public async Task LoadSolicitacoesAsync() {
             Debug.WriteLine("Iniciando LoadSolicitacoesAsync...");
@@ -67,22 +68,27 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             IsBusy = true;
             IEnumerable<Convite> convites = null;
             try {
-                convites = await _databaseService.ObterSolicitacoesPendentesPorCampeonatoAsync(Campeonato.ClientAppId);
+                // CHAMADA AO MÉTODO DO DATABASE SERVICE (como definido nas correções anteriores)
+                convites = await _databaseService.ObterConvitesPendentesAsync(Campeonato.ClientAppId);
 
-                Debug.WriteLine($"Encontrados {convites?.Count() ?? 0} convites pendentes.");
+                Debug.WriteLine($"Encontradas {convites?.Count() ?? 0} solicitações pendentes.");
 
                 var tarefas = convites.Select(c => _timeService.ObterPorClientAppIdAsync(c.TimeClientAppId)).ToList();
                 var times = await Task.WhenAll(tarefas);
 
                 MainThread.BeginInvokeOnMainThread(() => {
                     SolicitacoesPendentes.Clear();
-                    for (int i = 0; i < convites.Count(); i++) {
-                        var convite = convites.ElementAt(i);
+
+                    var convitesList = convites.ToList();
+
+                    for (int i = 0; i < convitesList.Count; i++) {
+                        var convite = convitesList[i];
                         var timeInscrito = times[i];
                         if (timeInscrito != null) {
+                            // CORRIGIDO: Construtor SolicitacaoTimeItemViewModel agora aceita Convite. (Resolve CS1503)
                             SolicitacoesPendentes.Add(new SolicitacaoTimeItemViewModel(convite, timeInscrito));
                         } else {
-                            Debug.WriteLine($"Aviso: Time com o ClientAppId '{convite.TimeClientAppId}' não foi encontrado. Ignorando o convite.");
+                            Debug.WriteLine($"Aviso: Time com o ClientAppId '{convite.TimeClientAppId}' não foi encontrado. Ignorando a solicitação.");
                         }
                     }
                     IsListEmpty = !SolicitacoesPendentes.Any();
@@ -97,45 +103,83 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             }
         }
 
+        // B) Método AceitarSolicitacaoAsync
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
         public async Task AceitarSolicitacaoAsync(SolicitacaoTimeItemViewModel solicitacaoItem) {
+            if (solicitacaoItem is null) return;
+
             IsBusy = true;
+            Debug.WriteLine($"[AceitarSolicitacao] Iniciando aceitação para o Time ID: {solicitacaoItem.TimeSolicitante.ClientAppId}");
+
             try {
-                solicitacaoItem.ConviteOriginal.Status = StatusConvite.Aceito;
-                solicitacaoItem.ConviteOriginal.IsSynced = false;
-                solicitacaoItem.ConviteOriginal.UpdatedAt = DateTime.UtcNow;
-                await _databaseService.AtualizarConviteAsync(solicitacaoItem.ConviteOriginal);
+                // CORREÇÃO: SolicitacaoOriginal agora é do tipo Convite. Removido 'as Convite' e o null check de cast.
+                var solicitacaoOriginal = solicitacaoItem.SolicitacaoOriginal;
 
-                // Remova o item da coleção para atualizar a UI
-                SolicitacoesPendentes.Remove(solicitacaoItem);
+                if (solicitacaoOriginal == null) {
+                    Debug.WriteLine("[AceitarSolicitacao] Erro: SolicitacaoOriginal é nula.");
+                    await _alertService.DisplayAlert("Erro", "Objeto de solicitação inválido.", "OK");
+                    return;
+                }
 
-                // Atualiza a visibilidade do texto "Nenhuma solicitação pendente."
-                IsListEmpty = !SolicitacoesPendentes.Any();
+                // 1. Atualizar status da solicitação no banco
+                solicitacaoOriginal.Status = StatusConvite.Aceito;
+                solicitacaoOriginal.IsSynced = false;
+                solicitacaoOriginal.UpdatedAt = DateTime.UtcNow;
+
+                // Usar o método AtualizarConviteAsync
+                await _databaseService.AtualizarConviteAsync(solicitacaoOriginal);
+                Debug.WriteLine("[AceitarSolicitacao] Status do Convite atualizado para Aceito.");
+
+                // *************** AÇÃO DO PASSO C DEVE ENTRAR AQUI ***************
+                // A INSCRIÇÃO REAL DO TIME NO CAMPEONATO ESTÁ FALTANDO (Próximo passo de correção)
+                // *******************************************************************
+
+                // 2. NOTIFICAÇÃO (manter)
+                MessagingCenter.Send(this, "TimeAceito", solicitacaoItem.TimeSolicitante);
+                Debug.WriteLine($"[AceitarSolicitacao] Time {solicitacaoItem.TimeSolicitante.Nome} aceito. Notificando Detail VM.");
+
+                // 3. Atualizar a UI (manter)
+                MainThread.BeginInvokeOnMainThread(() => {
+                    SolicitacoesPendentes.Remove(solicitacaoItem);
+                    IsListEmpty = !SolicitacoesPendentes.Any();
+                });
 
                 await _alertService.DisplayAlert("Sucesso", "Solicitação aceita com sucesso!", "OK");
 
             } catch (Exception ex) {
-                Debug.WriteLine($"Erro ao aceitar solicitação: {ex.Message}");
+                Debug.WriteLine($"[AceitarSolicitacao] ERRO ao aceitar solicitação: {ex.Message}");
                 await _alertService.DisplayAlert("Erro", "Ocorreu um erro ao aceitar a solicitação.", "OK");
             } finally {
                 IsBusy = false;
+                Debug.WriteLine("[AceitarSolicitacao] Finalizado.");
             }
         }
 
+        // C) Método RecusarSolicitacaoAsync
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
         public async Task RecusarSolicitacaoAsync(SolicitacaoTimeItemViewModel solicitacaoItem) {
+            if (solicitacaoItem is null) return;
+
             IsBusy = true;
             try {
-                solicitacaoItem.ConviteOriginal.Status = StatusConvite.Recusado;
-                solicitacaoItem.ConviteOriginal.IsSynced = false;
-                solicitacaoItem.ConviteOriginal.UpdatedAt = DateTime.UtcNow;
-                await _databaseService.AtualizarConviteAsync(solicitacaoItem.ConviteOriginal);
+                // CORREÇÃO: SolicitacaoOriginal agora é do tipo Convite. Removido 'as Convite'.
+                var solicitacaoOriginal = solicitacaoItem.SolicitacaoOriginal;
+
+                if (solicitacaoOriginal == null) return;
+
+                // MUDANÇA: Usar StatusConvite.Recusado
+                solicitacaoOriginal.Status = StatusConvite.Recusado;
+                solicitacaoOriginal.IsSynced = false;
+                solicitacaoOriginal.UpdatedAt = DateTime.UtcNow;
+
+                // Usar o método AtualizarConviteAsync
+                await _databaseService.AtualizarConviteAsync(solicitacaoOriginal);
 
                 // Remova o item da coleção para atualizar a UI
-                SolicitacoesPendentes.Remove(solicitacaoItem);
-
-                // Atualiza a visibilidade do texto "Nenhuma solicitação pendente."
-                IsListEmpty = !SolicitacoesPendentes.Any();
+                MainThread.BeginInvokeOnMainThread(() => {
+                    SolicitacoesPendentes.Remove(solicitacaoItem);
+                    IsListEmpty = !SolicitacoesPendentes.Any();
+                });
 
                 await _alertService.DisplayAlert("Sucesso", "Solicitação recusada com sucesso!", "OK");
 

@@ -60,8 +60,16 @@ namespace ArenaVirtualAPI.Services {
                 var existingItem = await _context.Convites
                     .FirstOrDefaultAsync(c => c.ClientAppId == dto.ClientAppId);
 
+                // ✅ CORREÇÃO: VERIFICAR SE O ITEM FOI ENCONTRADO ANTES DE ATRIBUIR AS FKs
+                if (existingItem == null) {
+                    // Este caso não deveria ocorrer se ProcessAndMapItemsAsync funcionou corretamente,
+                    // mas garante que não haverá NRE. Apenas pule este DTO.
+                    continue;
+                }
+
                 if (dto.IdSolicitanteClientAppId.HasValue &&
                     usuarioMapping.TryGetValue(dto.IdSolicitanteClientAppId.Value, out var solicitanteId)) {
+                    // Linha 70 Original: existingItem.IdSolicitanteServidor = solicitanteId;
                     existingItem.IdSolicitanteServidor = solicitanteId;
                 }
 
