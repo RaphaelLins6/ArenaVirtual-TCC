@@ -38,13 +38,17 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         private readonly IAlertService _alertService;
         private readonly DatabaseService _databaseService;
         private readonly SyncService _syncService;
+        // 🆕 Adição do JogoService
+        private readonly IJogoService _jogoService;
 
-        public CampeonatoDetailViewModel(IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
+        // 🆕 Construtor injetando o novo serviço
+        public CampeonatoDetailViewModel(IAlertService alertService, DatabaseService databaseService, SyncService syncService, IJogoService jogoService) {
             TabelaClassificacao = new ObservableCollection<Time>();
             TabelaJogos = new ObservableCollection<Jogo>();
             _alertService = alertService;
             _databaseService = databaseService;
             _syncService = syncService;
+            _jogoService = jogoService; // Armazenando o serviço
 
             // Verifica o idioma do dispositivo para definir IsDesktop
             IsDesktop = DeviceInfo.Idiom == DeviceIdiom.Desktop || DeviceInfo.Idiom == DeviceIdiom.Tablet;
@@ -78,7 +82,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             // 🚀 CHAMADA DE DADOS REAIS E POPULAÇÃO DAS TABELAS
             await LoadTabelaClassificacaoAsync();
 
-            // 🆕 Chama a Geração de Jogos após carregar a classificação para usar a lista de times.
+            // 🆕 Chama a Geração de Jogos usando o Service
             await GerarTabelaJogosAsync(campeonato);
 
             // 🆕 Inicia a Rodada Atual.
@@ -87,7 +91,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 LoadRodada(RodadaAtual);
             }
 
-            // Carregamento de Banner e Logo (mantido inalterado)
+            // ... (Lógica de Carregamento de Banner e Logo permanece inalterada)
             if (!string.IsNullOrEmpty(Campeonato.BannerUrl)) {
                 if (File.Exists(Campeonato.BannerUrl)) {
                     BannerSource = ImageSource.FromFile(Campeonato.BannerUrl);
@@ -143,8 +147,8 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             // 2. Lógica de Classificação (ordenar e calcular estatísticas)
             var timesOrdenados = timesInscritos
-                        .OrderByDescending(t => t.PontuacaoTotal)
-                        .ToList();
+                                .OrderByDescending(t => t.PontuacaoTotal)
+                                .ToList();
 
             TabelaClassificacao.Clear();
 
@@ -167,104 +171,21 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             }
         }
 
-        // NOVO MÉTODO: Geração da Tabela de Jogos usando Round-Robin com distribuição de datas por rodada
         private async Task GerarTabelaJogosAsync(Campeonato campeonato) {
             _jogosPorRodada.Clear();
+
             var times = TabelaClassificacao.ToList();
-            int n = times.Count;
 
-            if (n < 2) return; // Mínimo de 2 times para jogos
+            // 🚀 Chama o JogoService para gerar os jogos (Certifique-se que o tipo é List<Time>)
+            // Isso resolve a ambiguidade (CS0121) causada pela duplicação de interfaces no JogoService.cs
+            var jogosGerados = await _jogoService.GerarTabelaJogosAsync(campeonato, times);
 
-            // Trata número ímpar: adiciona um "time dummy" (Folga)
-            if (n % 2 != 0) {
-                // Adiciona um time temporário para facilitar o Round-Robin
-                times.Add(new Time { Id = -1, Nome = "Folga", LogoUrl = "" });
-                n++; // O número de elementos para o algoritmo se torna par
-            }
-
-            int numRodadas = n - 1; // Para turno único (ex: 4 times -> 3 rodadas)
-            int numJogosPorRodada = n / 2; // (ex: 4 times -> 2 jogos por rodada)
-
-            // --- LÓGICA DE DISTRIBUIÇÃO DE DATAS POR RODADA ---
-
-            // Data/Hora base do jogo (ex: 18:00h no dia de início)
-            DateTime dataHoraBase = campeonato.DataInicio.Date.AddHours(18);
-
-            // Calcula a duração total do campeonato (dias)
-            TimeSpan duracaoCampeonato = campeonato.DataFim.Date - campeonato.DataInicio.Date;
-            int totalDias = (int)duracaoCampeonato.TotalDays;
-
-            // Se o campeonato tiver mais de um dia e mais de uma rodada, calcula o espaçamento médio.
-            double intervaloDiasPorRodada = 0;
-            if (totalDias > 0 && numRodadas > 1) {
-                // Divide a duração total pelos intervalos de rodada (numRodadas - 1)
-                intervaloDiasPorRodada = (double)totalDias / (numRodadas - 1);
-            }
-            // ----------------------------------------------------
-
-            // Implementação do Algoritmo Cíclico (Round-Robin)
-            // O primeiro time (times[0]) fica fixo.
-            var timesRotativos = times.Skip(1).ToList();
-
-            for (int r = 1; r <= numRodadas; r++) {
-                var rodadaJogos = new ObservableCollection<Jogo>();
-
-                // 1. Definição da Data/Hora para toda a Rodada
-                // A data avança a cada rodada, baseada no intervalo calculado.
-                DateTime dataHoraRodada = dataHoraBase.AddDays((r - 1) * intervaloDiasPorRodada);
-
-                // Garante que a data não ultrapasse o final do campeonato
-                if (dataHoraRodada.Date > campeonato.DataFim.Date) {
-                    dataHoraRodada = campeonato.DataFim.Date.AddHours(dataHoraBase.Hour);
-                }
-
-                // 2. Jogo Fixo (Times[0] vs Times Rotativos[0])
-                Time timeA = times[0];
-                Time timeB = timesRotativos[0];
-
-                if (timeB.Id != -1) { // Verifica se não é a Folga
-                    rodadaJogos.Add(CriarNovoJogo(timeA, timeB, r, campeonato.Local, dataHoraRodada));
-                } else {
-                    Debug.WriteLine($"Rodada {r}: {timeA.Nome} Folga.");
-                }
-
-                // 3. Outros Jogos (Times Rotativos emparelhados de fora para dentro)
-                for (int i = 1; i < numJogosPorRodada; i++) {
-                    Time timeX = timesRotativos[i];
-                    Time timeY = timesRotativos[numRodadas - i];
-
-                    if (timeX.Id != -1 && timeY.Id != -1) { // Garante que nenhum é a Folga
-                        // Todos os jogos na rodada usam a mesma DataHora e Local
-                        rodadaJogos.Add(CriarNovoJogo(timeX, timeY, r, campeonato.Local, dataHoraRodada));
-                    }
-                }
-
-                // Adiciona a rodada ao dicionário
-                if (rodadaJogos.Any()) {
-                    _jogosPorRodada.Add(r, rodadaJogos);
-                }
-
-                // 4. Rotaciona os times rotativos (mecanismo do Round-Robin)
-                // O último time rotativo vai para a primeira posição (logo após o fixo)
-                var ultimoTime = timesRotativos.Last();
-                timesRotativos.RemoveAt(timesRotativos.Count - 1);
-                timesRotativos.Insert(0, ultimoTime);
+            // Atualiza o dicionário interno do ViewModel
+            _jogosPorRodada.Clear();
+            foreach (var key in jogosGerados.Keys) {
+                _jogosPorRodada.Add(key, jogosGerados[key]);
             }
         }
-
-        // Método auxiliar para criar um novo Jogo
-        private Jogo CriarNovoJogo(Time timeA, Time timeB, int rodada, string localCampeonato, DateTime dataHora) {
-            return new Jogo {
-                TimeA = timeA,
-                TimeB = timeB,
-                PlacarA = "X", // Placeholder
-                PlacarB = "Y", // Placeholder
-                Rodada = rodada,
-                DataHora = dataHora,
-                Local = localCampeonato
-            };
-        }
-
 
         [RelayCommand]
         private void MudarRodadaAnterior() {

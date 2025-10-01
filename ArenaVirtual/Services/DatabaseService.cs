@@ -1,6 +1,7 @@
 ﻿using ArenaVirtual.Models;
 using SQLite;
 using System.Diagnostics;
+using System.Linq; // Adicionar para o .Select()
 
 namespace ArenaVirtual.Services {
 
@@ -9,6 +10,11 @@ namespace ArenaVirtual.Services {
 
         private class TimeClientAppIdProjection {
             public Guid TimeClientAppId { get; set; }
+        }
+
+        // NOVO: Classe auxiliar para obter apenas o ID do campeonato
+        private class CampeonatoIdProjection {
+            public int CampeonatoId { get; set; }
         }
 
         // --- Inicialização ---
@@ -84,6 +90,41 @@ namespace ArenaVirtual.Services {
 
         public Task<Campeonato?> ObterCampeonatoPorCapitaoClientAppIdAsync(Guid capitaoClientAppId) =>
             _database.Table<Campeonato>().Where(c => c.CapitaoClientAppId == capitaoClientAppId).FirstOrDefaultAsync();
+        public async Task<HashSet<int>> ObterIdsCampeonatosDoTimeAceitoAsync(Guid timeClientAppId) {
+            try {
+                // 1. Busca todos os convites/inscrições onde o time está aceito
+                var convitesAceitos = await _database.Table<Convite>()
+                    .Where(c => c.TimeClientAppId == timeClientAppId
+                             && c.Status == StatusConvite.Aceito
+                             && c.Tipo == TipoConvite.InscricaoCampeonato)
+                    .ToListAsync();
+
+                if (!convitesAceitos.Any()) {
+                    return new HashSet<int>();
+                }
+
+                // 2. Extrai os ClientAppIds dos Campeonatos
+                var campeonatoClientAppIds = convitesAceitos
+                    .Select(c => c.CampeonatoClientAppId)
+                    .ToHashSet();
+
+                // 3. Busca os objetos Campeonato usando os ClientAppIds
+                var campeonatos = await _database.Table<Campeonato>()
+                    .Where(c => campeonatoClientAppIds.Contains(c.ClientAppId))
+                    .ToListAsync(); // <--- Executa a query aqui
+
+                // 4. Projeta para extrair apenas o ID (AGORA SEM ERRO CS1061)
+                var campeonatoIds = campeonatos
+                    .Select(c => c.Id)
+                    .ToList();
+
+                return campeonatoIds.ToHashSet();
+
+            } catch (Exception ex) {
+                Debug.WriteLine($"[DatabaseService] ERRO ao obter IDs de campeonatos do time aceito: {ex.Message}");
+                return new HashSet<int>();
+            }
+        }
 
         // --- Métodos de Time ---
 
@@ -117,13 +158,12 @@ namespace ArenaVirtual.Services {
 
         // ***********************************************
         // ObterTimesAceitosAsync para usar a tabela Convite
-        // AJUSTADO PARA USAR (int) PARA OS ENUMS
         // ***********************************************
         public async Task<List<Time>> ObterTimesAceitosAsync(int campeonatoId) {
             try {
                 var campeonato = await _database.Table<Campeonato>()
-                                        .Where(c => c.Id == campeonatoId)
-                                        .FirstOrDefaultAsync();
+                                                 .Where(c => c.Id == campeonatoId)
+                                                 .FirstOrDefaultAsync();
 
                 if (campeonato == null) {
                     return new List<Time>();
@@ -168,8 +208,8 @@ namespace ArenaVirtual.Services {
             try {
                 var solicitacoesPendentes = await _database.Table<Convite>()
                     .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId
-                            && c.Status == StatusConvite.Pendente
-                            && c.Tipo == TipoConvite.InscricaoCampeonato)
+                             && c.Status == StatusConvite.Pendente
+                             && c.Tipo == TipoConvite.InscricaoCampeonato)
                     .ToListAsync();
 
                 Debug.WriteLine($"[DatabaseService] Encontradas {solicitacoesPendentes.Count} solicitações de campeonato pendentes.");
@@ -212,7 +252,7 @@ namespace ArenaVirtual.Services {
             var solicitacao = await _database.Table<Convite>()
                 .Where(s => s.TimeClientAppId == timeGuid &&
                              s.CampeonatoClientAppId == campeonatoGuid &&
-                             s.Tipo == TipoConvite.InscricaoCampeonato) 
+                             s.Tipo == TipoConvite.InscricaoCampeonato)
                 .FirstOrDefaultAsync();
             return solicitacao;
         }

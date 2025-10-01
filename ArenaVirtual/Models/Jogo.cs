@@ -23,6 +23,7 @@ namespace ArenaVirtual.Models {
         private string local = string.Empty;
         private string placarA = string.Empty;
         private string placarB = string.Empty;
+        public string NomeCampeonato { get; set; }
 
         // Adicione este construtor público sem parâmetros
         public Jogo() {

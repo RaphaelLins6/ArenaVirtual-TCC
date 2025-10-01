@@ -1,10 +1,25 @@
-﻿
+﻿using Microsoft.Maui.Controls;
+using ArenaVirtual.ViewModels.Atleta;
+using System.Diagnostics;
+
 namespace ArenaVirtual.Views.Atleta {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
+
     public partial class PartidasPage : ContentPage {
-        public PartidasPage() {
+
+        private readonly PartidasViewModel _viewModel;
+
+        public PartidasPage(PartidasViewModel viewModel) {
             InitializeComponent();
-            Title = "Partidas"; // Ensure the Title property is set in the code-behind
+            Title = "Jogos";
+            // Usa a instância Singleton injetada
+            BindingContext = _viewModel = viewModel;
+        }
+
+        protected override void OnAppearing() {
+            base.OnAppearing();
+
+            // Com o Singleton, o Count deve ser 2 aqui.
+            Debug.WriteLine($"[PartidasPage.xaml.cs] OnAppearing: PartidasDoTime Count: {_viewModel.PartidasDoTime.Count}");
         }
     }
 }

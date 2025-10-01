@@ -42,6 +42,7 @@ public static class MauiProgram {
         builder.Services.AddSingleton<CampeonatoService>();
         builder.Services.AddSingleton<ConnectivityService>();
         builder.Services.AddSingleton(SessaoService.Instancia);
+        builder.Services.AddSingleton<IJogoService, JogoService>();
 
         // Registre os serviços de domínio como Transients
         builder.Services.AddTransient<UsuarioService>();
@@ -64,6 +65,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<CampeonatoDetailViewModel>();
         builder.Services.AddTransient<DashboardOrganizadorViewModel>();
         builder.Services.AddTransient<TimesCadastradosViewModel>();
+        builder.Services.AddSingleton<PartidasViewModel>();
 
         // Registre as Páginas e Popups como Transient
         builder.Services.AddTransient<LoginPage>();
@@ -83,6 +85,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<CampeonatoDetailPage>();
         builder.Services.AddTransient<DashboardOrganizadorPage>();
         builder.Services.AddTransient<TimesCadastradosPage>();
+        builder.Services.AddTransient<Views.Atleta.PartidasPage>();
 
         // Registre os popups que agora recebem injeção de dependência
         builder.Services.AddTransient<AlterarImagemPopup>();
