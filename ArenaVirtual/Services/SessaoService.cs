@@ -54,11 +54,24 @@ namespace ArenaVirtual.Services {
                 return null;
             }
 
+            // O DatabaseService é instanciado aqui, mantendo o padrão Singleton/anti-DI
             var databaseService = new DatabaseService(App.DatabasePath);
             if (_usuarioAtual.TimeClientAppId.HasValue) {
                 return await databaseService.GetTimeByClientAppIdAsync(_usuarioAtual.TimeClientAppId.Value);
             }
             return null;
         }
+
+        public async Task<Usuario?> GetArbitroAtualAsync() {
+            if (_usuarioAtual == null)
+                return null;
+
+            // Verifica se o usuário logado é árbitro
+            if (_usuarioAtual.Perfil == TipoPerfil.Arbitro)
+                return _usuarioAtual;
+
+            return null;
+        }
+
     }
 }

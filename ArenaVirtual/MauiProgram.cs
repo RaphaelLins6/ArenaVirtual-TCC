@@ -1,15 +1,17 @@
-﻿using Microsoft.Extensions.Logging;
-using CommunityToolkit.Maui;
+﻿using ArenaVirtual.Popups; 
 using ArenaVirtual.Services;
-using ArenaVirtual.Views;
 using ArenaVirtual.ViewModels;
+using ArenaVirtual.ViewModels.Arbitro;
 using ArenaVirtual.ViewModels.Atleta;
+using ArenaVirtual.ViewModels.CampeonatoPage; 
+using ArenaVirtual.ViewModels.Organizador; 
+using ArenaVirtual.Views;
+using ArenaVirtual.Views.Arbitro;
 using ArenaVirtual.Views.Atleta;
-using ArenaVirtual.Popups; // Adicionado para registrar os popups
-using ArenaVirtual.ViewModels.Organizador; // Adicionado para registrar os ViewModels do organizador
-using ArenaVirtual.Views.Organizador; // Adicionado para registrar as Páginas do organizador
-using ArenaVirtual.ViewModels.CampeonatoPage; // Adicionado para registrar a ViewModel do campeonato
-using ArenaVirtual.Views.CampeonatoPage; // Adicionado para registrar a página do campeonato
+using ArenaVirtual.Views.CampeonatoPage; 
+using ArenaVirtual.Views.Organizador; 
+using CommunityToolkit.Maui;
+using Microsoft.Extensions.Logging;
 
 namespace ArenaVirtual;
 
@@ -66,6 +68,10 @@ public static class MauiProgram {
         builder.Services.AddTransient<DashboardOrganizadorViewModel>();
         builder.Services.AddTransient<TimesCadastradosViewModel>();
         builder.Services.AddSingleton<PartidasViewModel>();
+        builder.Services.AddTransient<LancamentoEstatisticaViewModel>();
+        builder.Services.AddTransient<DashboardArbitroViewModel>();
+        builder.Services.AddTransient<CampeonatoInscricaoViewModel>();
+
 
         // Registre as Páginas e Popups como Transient
         builder.Services.AddTransient<LoginPage>();
@@ -86,6 +92,9 @@ public static class MauiProgram {
         builder.Services.AddTransient<DashboardOrganizadorPage>();
         builder.Services.AddTransient<TimesCadastradosPage>();
         builder.Services.AddTransient<Views.Atleta.PartidasPage>();
+        builder.Services.AddTransient<DashboardArbitroPage>();
+        //builder.Services.AddTransient<LancamentoEstatisticaPage>();
+        builder.Services.AddTransient<CampeonatoInscricao>();
 
         // Registre os popups que agora recebem injeção de dependência
         builder.Services.AddTransient<AlterarImagemPopup>();

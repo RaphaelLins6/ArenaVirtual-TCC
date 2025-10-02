@@ -4,8 +4,116 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:ArenaVirtual.Views.Arbitro"
-    Title="Dashboard">
-    <StackLayout Padding="20">
-        <Label FontSize="20" Text="Página inicial do Árbitro" />
-    </StackLayout>
+    xmlns:models="clr-namespace:ArenaVirtual.Models.ViewModels.Shared"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.Arbitro"
+    Title="Dashboard"
+    x:DataType="vm:DashboardArbitroViewModel">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding LoadPartidasCommand}" EventName="Appearing" />
+    </ContentPage.Behaviors>
+
+    <ContentPage.Content>
+        <StackLayout Padding="10">
+
+            <Button
+                Margin="0,5,0,15"
+                BackgroundColor="#007ACC"
+                Command="{Binding NavigateToInscricoesCommand}"
+                Text="Inscrição"
+                TextColor="White" />
+
+            <Label
+                Margin="0,0,0,5"
+                FontAttributes="Bold"
+                FontSize="Large"
+                Text="Minhas Partidas Designadas"
+                TextColor="#FFA500" />
+
+            <RefreshView Command="{Binding LoadPartidasCommand}" IsRefreshing="{Binding EstaOcupado}">
+                <CollectionView ItemsSource="{Binding MinhasPartidas}" SelectionMode="None">
+
+                    <CollectionView.EmptyView>
+                        <StackLayout Padding="20">
+                            <Label
+                                HorizontalOptions="Center"
+                                Text="Você não tem partidas designadas."
+                                VerticalOptions="Center" />
+                        </StackLayout>
+                    </CollectionView.EmptyView>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:JogoDetalheViewModel">
+                            <Frame
+                                Margin="10"
+                                Padding="15"
+                                BackgroundColor="#2A2A2A"
+                                CornerRadius="5">
+                                <Grid ColumnDefinitions="*, Auto, *" RowDefinitions="Auto, Auto, Auto, Auto">
+
+                                    <Label
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        FontAttributes="Bold"
+                                        FontSize="Medium"
+                                        Text="{Binding NomeCampeonato}"
+                                        TextColor="Orange" />
+                                    <Label
+                                        Grid.Row="0"
+                                        Grid.Column="2"
+                                        HorizontalOptions="End"
+                                        Text="{Binding StatusJogo}"
+                                        TextColor="LightGray" />
+                                    <StackLayout
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Margin="0,5,0,5"
+                                        Orientation="Horizontal"
+                                        Spacing="10">
+                                        <Label Text="{Binding DataHoraFormatada}" />
+                                        <Label Text="|" />
+                                        <Label Text="{Binding Jogo.Local}" />
+                                    </StackLayout>
+
+                                    <Label
+                                        Grid.Row="2"
+                                        Grid.Column="0"
+                                        FontAttributes="Bold"
+                                        HorizontalOptions="Start"
+                                        Text="{Binding NomeTimeA}" />
+                                    <Label
+                                        Grid.Row="2"
+                                        Grid.Column="1"
+                                        FontAttributes="Bold"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding PlacarFormatado}" />
+                                    <Label
+                                        Grid.Row="2"
+                                        Grid.Column="2"
+                                        FontAttributes="Bold"
+                                        HorizontalOptions="End"
+                                        Text="{Binding NomeTimeB}" />
+
+                                    <Button
+                                        Grid.Row="3"
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Margin="0,10,0,0"
+                                        BackgroundColor="#FFA500"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardArbitroViewModel}}, Path=PartidaSelecionadaCommand}"
+                                        CommandParameter="{Binding .}"
+                                        IsVisible="{Binding PodeLancarEstatisticas}"
+                                        Text="Lançar Estatísticas"
+                                        TextColor="Black" />
+
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
+        </StackLayout>
+    </ContentPage.Content>
 </ContentPage>

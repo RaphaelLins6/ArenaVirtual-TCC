@@ -19,7 +19,7 @@ public class SyncService {
         typeof(Partida),
         typeof(AvaliacaoArbitro),
         typeof(CampanhaPatrocinio),
-        typeof(Estatistica),
+        typeof(EstatisticaPartida),
         typeof(Jogo),
         typeof(PropostaPatrocinio),
         typeof(UsuarioCampeonatoFavorito),

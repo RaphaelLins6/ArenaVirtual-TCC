@@ -33,6 +33,9 @@ namespace ArenaVirtual {
             Routing.RegisterRoute(nameof(DashboardOrganizadorPage), typeof(DashboardOrganizadorPage));
             Routing.RegisterRoute(nameof(TimesCadastradosPage), typeof(TimesCadastradosPage));
             Routing.RegisterRoute(nameof(Views.Atleta.PartidasPage), typeof(Views.Atleta.PartidasPage));
+            Routing.RegisterRoute(nameof(DashboardArbitroPage), typeof(DashboardArbitroPage));
+            //Routing.RegisterRoute(nameof(LancamentoEstatisticaPage), typeof(LancamentoEstatisticaPage));
+            Routing.RegisterRoute(nameof(CampeonatoInscricao), typeof(CampeonatoInscricao));
 
             CriarMenuPorPerfil(usuarioLogado);
         }
@@ -82,7 +85,7 @@ namespace ArenaVirtual {
                 this.Items.Add(new FlyoutItem {
                     Title = "Meus Jogos",
                     Items = {
-                        new ShellContent { Title = "Ver Jogos Atribuidos", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<MinhasPartidasPage>()) }
+                        new ShellContent { Title = "Ver Jogos Atribuidos", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<DashboardArbitroPage>()) }
                     }
                 });
             } else if (usuario.Perfil == TipoPerfil.Patrocinador) {

@@ -83,6 +83,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Update="Views\Arbitro\LancamentoEstatisticaPage.xaml.cs">
+		  <DependentUpon>LancamentoEstatisticaPage.xaml</DependentUpon>
+		</Compile>
 		<Compile Update="Views\Atleta\EditarTimePage.xaml.cs">
 			<DependentUpon>EditarTimePage.xaml</DependentUpon>
 		</Compile>
@@ -112,6 +115,9 @@
 		</MauiXaml>
 		<MauiXaml Update="Popups\EditarPerfilPopup.xaml">
 			<Generator></Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\Arbitro\CampeonatoInscricao.xaml">
+		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\Atleta\CriarTimePage.xaml">
 			<Generator></Generator>

@@ -27,7 +27,7 @@ namespace ArenaVirtual.Services {
             await _database.CreateTableAsync<Partida>();
             await _database.CreateTableAsync<AvaliacaoArbitro>();
             await _database.CreateTableAsync<CampanhaPatrocinio>();
-            await _database.CreateTableAsync<Estatistica>();
+            await _database.CreateTableAsync<EstatisticaPartida>();
             await _database.CreateTableAsync<Jogo>();
             await _database.CreateTableAsync<PropostaPatrocinio>();
             await _database.CreateTableAsync<UsuarioCampeonatoFavorito>();
@@ -95,8 +95,8 @@ namespace ArenaVirtual.Services {
                 // 1. Busca todos os convites/inscrições onde o time está aceito
                 var convitesAceitos = await _database.Table<Convite>()
                     .Where(c => c.TimeClientAppId == timeClientAppId
-                             && c.Status == StatusConvite.Aceito
-                             && c.Tipo == TipoConvite.InscricaoCampeonato)
+                               && c.Status == StatusConvite.Aceito
+                               && c.Tipo == TipoConvite.InscricaoCampeonato)
                     .ToListAsync();
 
                 if (!convitesAceitos.Any()) {
@@ -162,8 +162,8 @@ namespace ArenaVirtual.Services {
         public async Task<List<Time>> ObterTimesAceitosAsync(int campeonatoId) {
             try {
                 var campeonato = await _database.Table<Campeonato>()
-                                                 .Where(c => c.Id == campeonatoId)
-                                                 .FirstOrDefaultAsync();
+                                                    .Where(c => c.Id == campeonatoId)
+                                                    .FirstOrDefaultAsync();
 
                 if (campeonato == null) {
                     return new List<Time>();
@@ -201,23 +201,34 @@ namespace ArenaVirtual.Services {
             }
         }
 
+        // --- Métodos de Árbitro (Novos) ---
+
+
+
         // --- Métodos de Convite ---
 
-        // MÉTODO DE LISTAGEM DE PENDENTES (Corrigido na etapa anterior)
-        public async Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId) {
+        public async Task<List<Convite>> ObterConvitesPendentesCampeonatoAsync(Guid campeonatoClientAppId) {
             try {
-                var solicitacoesPendentes = await _database.Table<Convite>()
+                return await _database.Table<Convite>()
                     .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId
-                             && c.Status == StatusConvite.Pendente
-                             && c.Tipo == TipoConvite.InscricaoCampeonato)
+                                && c.Status == StatusConvite.Pendente
+                                && c.Tipo == TipoConvite.InscricaoCampeonato)
                     .ToListAsync();
-
-                Debug.WriteLine($"[DatabaseService] Encontradas {solicitacoesPendentes.Count} solicitações de campeonato pendentes.");
-
-                return solicitacoesPendentes;
-
             } catch (Exception ex) {
                 Debug.WriteLine($"[DatabaseService] ERRO ao obter convites pendentes de campeonato: {ex.Message}");
+                return new List<Convite>();
+            }
+        }
+
+        public async Task<List<Convite>> ObterConvitesPendentesArbitroAsync(Guid campeonatoClientAppId) {
+            try {
+                return await _database.Table<Convite>()
+                    .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId
+                                && c.Status == StatusConvite.Pendente
+                                && c.Tipo == TipoConvite.InscricaoArbitro)
+                    .ToListAsync();
+            } catch (Exception ex) {
+                Debug.WriteLine($"[DatabaseService] ERRO ao obter convites pendentes de árbitro: {ex.Message}");
                 return new List<Convite>();
             }
         }
@@ -257,6 +268,21 @@ namespace ArenaVirtual.Services {
             return solicitacao;
         }
 
+        public async Task<Convite?> ObterSolicitacaoPorArbitroECampeonatoAsync(string arbitroId, string campeonatoId, TipoConvite tipo) {
+
+            if (!Guid.TryParse(arbitroId, out var arbitroGuid) || !Guid.TryParse(campeonatoId, out var campeonatoGuid)) {
+                return null;
+            }
+
+            var solicitacao = await _database.Table<Convite>()
+                .Where(s => s.ArbitroClientAppId == arbitroGuid &&
+                            s.CampeonatoClientAppId == campeonatoGuid &&
+                            s.Tipo == tipo)
+                .FirstOrDefaultAsync();
+
+            return solicitacao;
+        }
+
         public AsyncTableQuery<Convite> GetConviteTable() => _database.Table<Convite>();
 
         // --- Métodos de Inscricao ---
@@ -285,10 +311,10 @@ namespace ArenaVirtual.Services {
         public Task<int> AtualizarCampanhaPatrocinioAsync(CampanhaPatrocinio item) => _database.UpdateAsync(item);
         public Task<int> DeletarCampanhaPatrocinioAsync(CampanhaPatrocinio item) => _database.DeleteAsync(item);
 
-        public Task<int> InserirEstatisticaAsync(Estatistica item) => _database.InsertAsync(item);
-        public Task<List<Estatistica>> ListarEstatisticasAsync() => _database.Table<Estatistica>().ToListAsync();
-        public Task<int> AtualizarEstatisticaAsync(Estatistica item) => _database.UpdateAsync(item);
-        public Task<int> DeletarEstatisticaAsync(Estatistica item) => _database.DeleteAsync(item);
+        public Task<int> InserirEstatisticaAsync(EstatisticaPartida item) => _database.InsertAsync(item);
+        public Task<List<EstatisticaPartida>> ListarEstatisticasAsync() => _database.Table<EstatisticaPartida>().ToListAsync();
+        public Task<int> AtualizarEstatisticaAsync(EstatisticaPartida item) => _database.UpdateAsync(item);
+        public Task<int> DeletarEstatisticaAsync(EstatisticaPartida item) => _database.DeleteAsync(item);
 
         public Task<int> InserirJogoAsync(Jogo item) => _database.InsertAsync(item);
         public Task<List<Jogo>> ListarJogosAsync() => _database.Table<Jogo>().ToListAsync();
@@ -344,5 +370,24 @@ namespace ArenaVirtual.Services {
                 await _database.UpdateAsync(existingItem);
             }
         }
-    }
+
+        public Task<List<EstatisticaPartida>> ObterEstatisticasPorJogoAsync(int jogoId) =>
+            _database.Table<EstatisticaPartida>()
+                .Where(e => e.JogoId == jogoId)
+                .ToListAsync();
+
+        public Task<List<EstatisticaPartida>> ObterEstatisticasPorAtletaAsync(int usuarioId) =>
+            _database.Table<EstatisticaPartida>()
+                .Where(e => e.UsuarioId == usuarioId)
+                .ToListAsync();
+
+        public async Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId) {
+            // Implementação para buscar convites pendentes no banco de dados
+            // Exemplo (usando SQLite-net-pcl ou similar):
+            return await _database.Table<Convite>()
+                                  .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
+                                               c.Status == StatusConvite.Pendente)
+                                  .ToListAsync();
+        }
+    } 
 }

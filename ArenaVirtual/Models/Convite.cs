@@ -8,7 +8,8 @@ namespace ArenaVirtual.Models {
 
     public enum TipoConvite {
         InscricaoCampeonato = 0,
-        ConviteTime = 1
+        ConviteTime = 1,
+        InscricaoArbitro = 2
     }
 
     public enum StatusConvite {
@@ -33,6 +34,10 @@ namespace ArenaVirtual.Models {
 
         [Indexed]
         public Guid UsuarioClientAppId { get; set; }
+
+        // 🛑 CORREÇÃO: Adicionada a nova propriedade para o ID do Árbitro
+        [Indexed]
+        public Guid? ArbitroClientAppId { get; set; } // Guid? para permitir nulo
 
         public Guid CampeonatoClientAppId { get; set; }
 
