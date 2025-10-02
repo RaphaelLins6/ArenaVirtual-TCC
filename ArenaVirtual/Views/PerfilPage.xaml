@@ -19,6 +19,23 @@
             <Setter Property="Padding" Value="15" />
             <Setter Property="Margin" Value="0,5" />
         </Style>
+
+        <Style x:Key="LabelTituloCard" TargetType="Label">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="TextColor" Value="{StaticResource Gray500}" />
+        </Style>
+
+        <Style x:Key="LabelValorCard" TargetType="Label">
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="TextColor" Value="{AppThemeBinding Light=Black, Dark=White}" />
+        </Style>
+
+        <Style x:Key="IconeCard" TargetType="Image">
+            <Setter Property="HeightRequest" Value="24" />
+            <Setter Property="WidthRequest" Value="24" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
     </ContentPage.Resources>
 
     <Grid
@@ -53,33 +70,22 @@
             <Label
                 FontSize="18"
                 HorizontalOptions="Center"
-                Text="{Binding NomeUsuario}"
-                TextColor="{AppThemeBinding Light=Black,
-                                            Dark=White}" />
+                Style="{StaticResource LabelValorCard}"
+                Text="{Binding NomeUsuario}" />
         </VerticalStackLayout>
 
         <ScrollView Grid.Row="2">
             <VerticalStackLayout Margin="0,20,0,0" Spacing="15">
 
-                <!--  Cards comuns  -->
                 <Border Style="{StaticResource CardFrameStyle}">
                     <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                         <Image
-                            HeightRequest="24"
+                            Grid.Column="0"
                             Source="email_icon.png"
-                            VerticalOptions="Center"
-                            WidthRequest="24" />
+                            Style="{StaticResource IconeCard}" />
                         <VerticalStackLayout Grid.Column="1">
-                            <Label
-                                FontSize="14"
-                                Text="E-mail"
-                                TextColor="{StaticResource Gray500}" />
-                            <Label
-                                FontAttributes="Bold"
-                                FontSize="16"
-                                Text="{Binding EmailUsuario}"
-                                TextColor="{AppThemeBinding Light=Black,
-                                                            Dark=White}" />
+                            <Label Style="{StaticResource LabelTituloCard}" Text="E-mail" />
+                            <Label Style="{StaticResource LabelValorCard}" Text="{Binding EmailUsuario}" />
                         </VerticalStackLayout>
                     </Grid>
                 </Border>
@@ -87,21 +93,12 @@
                 <Border Style="{StaticResource CardFrameStyle}">
                     <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                         <Image
-                            HeightRequest="24"
+                            Grid.Column="0"
                             Source="profile_type_icon.png"
-                            VerticalOptions="Center"
-                            WidthRequest="24" />
+                            Style="{StaticResource IconeCard}" />
                         <VerticalStackLayout Grid.Column="1">
-                            <Label
-                                FontSize="14"
-                                Text="Tipo de Perfil"
-                                TextColor="{StaticResource Gray500}" />
-                            <Label
-                                FontAttributes="Bold"
-                                FontSize="16"
-                                Text="{Binding TipoPerfilUsuario}"
-                                TextColor="{AppThemeBinding Light=Black,
-                                                            Dark=White}" />
+                            <Label Style="{StaticResource LabelTituloCard}" Text="Tipo de Perfil" />
+                            <Label Style="{StaticResource LabelValorCard}" Text="{Binding TipoPerfilUsuario}" />
                         </VerticalStackLayout>
                     </Grid>
                 </Border>
@@ -109,414 +106,152 @@
                 <Border Style="{StaticResource CardFrameStyle}">
                     <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                         <Image
-                            HeightRequest="24"
+                            Grid.Column="0"
                             Source="location_icon.png"
-                            VerticalOptions="Center"
-                            WidthRequest="24" />
+                            Style="{StaticResource IconeCard}" />
                         <VerticalStackLayout Grid.Column="1">
-                            <Label
-                                FontSize="14"
-                                Text="Localização"
-                                TextColor="{StaticResource Gray500}" />
-                            <Label
-                                FontAttributes="Bold"
-                                FontSize="16"
-                                Text="{Binding LocalizacaoUsuario}"
-                                TextColor="{AppThemeBinding Light=Black,
-                                                            Dark=White}" />
+                            <Label Style="{StaticResource LabelTituloCard}" Text="Localização" />
+                            <Label Style="{StaticResource LabelValorCard}" Text="{Binding LocalizacaoUsuario}" />
                         </VerticalStackLayout>
                     </Grid>
                 </Border>
 
-                <!--  Seção Atleta  -->
                 <VerticalStackLayout IsVisible="{Binding IsAtleta}" Spacing="15">
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="icon_birthday.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
+                            <Image Source="icon_birthday.png" Style="{StaticResource IconeCard}" />
                             <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Data de Nascimento"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding UsuarioLogado.DataNascimento, StringFormat='{0:dd/MM/yyyy}'}"
-                                    TextColor="{AppThemeBinding Light=Black,
-                                                                Dark=White}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="icon_gender.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Gênero"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding GeneroUsuario}"
-                                    TextColor="{AppThemeBinding Light=Black,
-                                                                Dark=White}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="icon_weight.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Peso"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding PesoUsuario}"
-                                    TextColor="{AppThemeBinding Light=Black,
-                                                                Dark=White}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="icon_height.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Altura"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding AlturaUsuario}"
-                                    TextColor="{AppThemeBinding Light=Black,
-                                                                Dark=White}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="phone_icon.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Número de Telefone"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding TelefoneUsuario}"
-                                    TextColor="{AppThemeBinding Light=Black,
-                                                                Dark=White}" />
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Data de Nascimento" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding UsuarioLogado.DataNascimento, StringFormat='{0:dd/MM/yyyy}'}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="social_icon.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
+                            <Image Source="icon_gender.png" Style="{StaticResource IconeCard}" />
                             <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Rede Social"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding LinkRedeSocialUsuario}"
-                                    TextColor="{AppThemeBinding Light=Black,
-                                                                Dark=White}" />
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Gênero" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding GeneroUsuario}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                    <Border Style="{StaticResource CardFrameStyle}">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                            <Image Source="icon_weight.png" Style="{StaticResource IconeCard}" />
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Peso" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding PesoUsuario}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                    <Border Style="{StaticResource CardFrameStyle}">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                            <Image Source="icon_height.png" Style="{StaticResource IconeCard}" />
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Altura" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding AlturaUsuario}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                    <Border Style="{StaticResource CardFrameStyle}">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                            <Image Source="phone_icon.png" Style="{StaticResource IconeCard}" />
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Número de Telefone" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding TelefoneUsuario}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                    <Border Style="{StaticResource CardFrameStyle}">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                            <Image Source="social_icon.png" Style="{StaticResource IconeCard}" />
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Rede Social" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding LinkRedeSocialUsuario}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>
                 </VerticalStackLayout>
 
-                <!--  Seção Organizador  -->
                 <VerticalStackLayout IsVisible="{Binding IsOrganizador}" Spacing="15">
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="icon_company.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
+                            <Image Source="icon_company.png" Style="{StaticResource IconeCard}" />
                             <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Nome da Empresa"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding NomeEmpresaUsuario}"
-                                    TextColor="White" />
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Nome da Empresa" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding NomeEmpresaUsuario}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>
 
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="icon_cnpj.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
+                            <Image Source="icon_cnpj.png" Style="{StaticResource IconeCard}" />
                             <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="CNPJ"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding CnpjUsuario}"
-                                    TextColor="White" />
+                                <Label Style="{StaticResource LabelTituloCard}" Text="CNPJ" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding CnpjUsuario}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>
 
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="phone_icon.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
+                            <Image Source="phone_icon.png" Style="{StaticResource IconeCard}" />
                             <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Número de Telefone"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding TelefoneUsuario}"
-                                    TextColor="{AppThemeBinding Light=Black,
-                                                                Dark=White}" />
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Número de Telefone" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding TelefoneUsuario}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>
+
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="social_icon.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
+                            <Image Source="social_icon.png" Style="{StaticResource IconeCard}" />
                             <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Rede Social"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding LinkRedeSocialUsuario}"
-                                    TextColor="{AppThemeBinding Light=Black,
-                                                                Dark=White}" />
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Rede Social" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding LinkRedeSocialUsuario}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>
                 </VerticalStackLayout>
 
-                <!--  Seção Árbitro  -->
                 <VerticalStackLayout IsVisible="{Binding IsArbitro}" Spacing="15">
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="icon_birthday.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
+                            <Image Source="icon_birthday.png" Style="{StaticResource IconeCard}" />
                             <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Data de Nascimento"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding DataNascimentoUsuarioFormatado}"
-                                    TextColor="White" />
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Data de Nascimento" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding UsuarioLogado.DataNascimento, StringFormat='{0:dd/MM/yyyy}'}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>
 
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="icon_gender.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
+                            <Image Source="icon_gender.png" Style="{StaticResource IconeCard}" />
                             <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Gênero"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding GeneroUsuario}"
-                                    TextColor="White" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="phone_icon.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Número de Telefone"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding TelefoneUsuario}"
-                                    TextColor="White" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="social_icon.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Rede Social"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding LinkRedeSocialUsuario}"
-                                    TextColor="White" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                </VerticalStackLayout>
-
-                <!--  Seção Patrocinador  -->
-                <VerticalStackLayout IsVisible="{Binding IsPatrocinador}" Spacing="15">
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="icon_company.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Nome da Empresa"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding NomeEmpresaUsuario}"
-                                    TextColor="White" />
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Gênero" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding GeneroUsuario}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>
 
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="icon_cnpj.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
+                            <Image Source="phone_icon.png" Style="{StaticResource IconeCard}" />
                             <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="CNPJ"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding CnpjUsuario}"
-                                    TextColor="White" />
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Número de Telefone" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding TelefoneUsuario}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>
 
                     <Border Style="{StaticResource CardFrameStyle}">
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="phone_icon.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
+                            <Image Source="social_icon.png" Style="{StaticResource IconeCard}" />
                             <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Número de Telefone"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding TelefoneUsuario}"
-                                    TextColor="{AppThemeBinding Light=Black,
-                                                                Dark=White}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image
-                                HeightRequest="24"
-                                Source="social_icon.png"
-                                VerticalOptions="Center"
-                                WidthRequest="24" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label
-                                    FontSize="14"
-                                    Text="Rede Social"
-                                    TextColor="{StaticResource Gray500}" />
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    Text="{Binding LinkRedeSocialUsuario}"
-                                    TextColor="White" />
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Rede Social" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding LinkRedeSocialUsuario}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>

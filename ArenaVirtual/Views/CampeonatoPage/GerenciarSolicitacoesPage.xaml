@@ -6,7 +6,9 @@
     xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.CampeonatoPage"
+    xmlns:vmarbitros="clr-namespace:ArenaVirtual.ViewModels.Arbitro"
     Title="Gerenciar Solicitações"
+    x:DataType="vm:GerenciarSolicitacoesViewModel"
     BackgroundColor="{AppThemeBinding Light=#f0f0f0,
                                       Dark=Black}"
     Shell.NavBarIsVisible="True">
@@ -14,85 +16,193 @@
     <ContentPage.Resources>
         <converters:NotZeroToTrueConverter x:Key="NotZeroToTrueConverter" />
         <converters:InverterBooleanConverter x:Key="InverterBooleanConverter" />
+        <converters:EmptyListInvertConverter x:Key="EmptyListInvertConverter" />
     </ContentPage.Resources>
 
     <ContentPage.Behaviors>
         <toolkit:EventToCommandBehavior Command="{Binding LoadSolicitacoesCommand}" EventName="Loaded" />
+        <toolkit:EventToCommandBehavior Command="{Binding LoadSolicitacoesArbitrosCommand}" EventName="Loaded" />
     </ContentPage.Behaviors>
 
     <Grid>
-        <VerticalStackLayout Padding="15" Spacing="10">
-            <Label
-                Margin="0,10,0,0"
-                FontAttributes="Bold"
-                FontSize="22"
-                HorizontalOptions="Center"
-                Text="Solicitações de Inscrição"
-                TextColor="{AppThemeBinding Light=Black,
-                                            Dark=White}" />
+        <ActivityIndicator
+            HorizontalOptions="Center"
+            IsRunning="{Binding IsBusy}"
+            IsVisible="{Binding IsBusy}"
+            VerticalOptions="Center"
+            ZIndex="10"
+            Color="#1976D2" />
 
-            <Label
-                FontSize="16"
-                HorizontalOptions="Center"
-                IsVisible="{Binding IsListEmpty}"
-                Text="Nenhuma solicitação pendente."
-                TextColor="Gray"
-                VerticalOptions="Center" />
+        <ScrollView IsEnabled="{Binding IsBusy, Converter={StaticResource InverterBooleanConverter}}">
+            <VerticalStackLayout Padding="15" Spacing="25">
+                <Label
+                    Margin="0,10,0,0"
+                    FontAttributes="Bold"
+                    FontSize="22"
+                    HorizontalOptions="Center"
+                    Text="Gerenciamento de Solicitações"
+                    TextColor="{AppThemeBinding Light=Black,
+                                                Dark=White}" />
 
-            <CollectionView IsVisible="{Binding IsListEmpty, Converter={StaticResource InverterBooleanConverter}}" ItemsSource="{Binding SolicitacoesPendentes}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame
-                            Margin="0,5"
-                            Padding="10"
-                            Background="{AppThemeBinding Light=White,
-                                                         Dark=#1e1e1e}"
-                            CornerRadius="10"
-                            HasShadow="True">
-                            <VerticalStackLayout Spacing="5">
-                                <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
-                                    <Image
-                                        Aspect="AspectFit"
-                                        HeightRequest="50"
-                                        Source="{Binding ImagemTime}"
-                                        VerticalOptions="Center"
-                                        WidthRequest="50" />
-                                    <VerticalStackLayout Spacing="2">
-                                        <Label
-                                            FontAttributes="Bold"
-                                            FontSize="18"
-                                            Text="{Binding NomeTime}"
-                                            TextColor="{AppThemeBinding Light=Black,
-                                                                        Dark=White}" />
-                                        <Label
-                                            FontSize="14"
-                                            Text="{Binding DescricaoTime}"
-                                            TextColor="Gray" />
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="18"
+                        Text="Solicitações de Times"
+                        TextColor="{AppThemeBinding Light=#1976D2,
+                                                    Dark=#90CAF9}" />
+
+                    <Label
+                        FontSize="14"
+                        HorizontalOptions="Center"
+                        IsVisible="{Binding SolicitacoesPendentes, Converter={StaticResource EmptyListInvertConverter}}"
+                        Text="Nenhuma solicitação de time pendente."
+                        TextColor="Gray" />
+
+                    <CollectionView IsVisible="{Binding SolicitacoesPendentes.Count, Converter={StaticResource NotZeroToTrueConverter}}" ItemsSource="{Binding SolicitacoesPendentes}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:SolicitacaoTimeItemViewModel">
+                                <Frame
+                                    Margin="0,5"
+                                    Padding="10"
+                                    BackgroundColor="{AppThemeBinding Light=White,
+                                                                      Dark=#1e1e1e}"
+                                    CornerRadius="10"
+                                    HasShadow="True">
+                                    <VerticalStackLayout Spacing="5">
+                                        <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                                            <Image
+                                                Aspect="AspectFit"
+                                                HeightRequest="50"
+                                                Source="{Binding ImagemTime}"
+                                                VerticalOptions="Center"
+                                                WidthRequest="50" />
+                                            <VerticalStackLayout Spacing="2">
+                                                <Label
+                                                    FontAttributes="Bold"
+                                                    FontSize="18"
+                                                    Text="{Binding NomeTime}"
+                                                    TextColor="{AppThemeBinding Light=Black,
+                                                                                Dark=White}" />
+                                                <Label
+                                                    FontSize="14"
+                                                    Text="{Binding DescricaoTime}"
+                                                    TextColor="Gray" />
+                                            </VerticalStackLayout>
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
+                                            <Button
+                                                BackgroundColor="#4CAF50"
+                                                Clicked="AceitarSolicitacao_Clicked"
+                                                CornerRadius="20"
+                                                Text="Aceitar"
+                                                TextColor="White"
+                                                WidthRequest="100" />
+                                            <Button
+                                                BackgroundColor="#F44336"
+                                                Clicked="RecusarSolicitacao_Clicked"
+                                                CornerRadius="20"
+                                                Text="Recusar"
+                                                TextColor="White"
+                                                WidthRequest="100" />
+                                        </HorizontalStackLayout>
                                     </VerticalStackLayout>
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
-                                    <Button
-                                        BackgroundColor="#4CAF50"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GerenciarSolicitacoesViewModel}}, Path=AceitarSolicitacaoCommand}"
-                                        CommandParameter="{Binding .}"
-                                        CornerRadius="20"
-                                        Text="Aceitar"
-                                        TextColor="White"
-                                        WidthRequest="100" />
-                                    <Button
-                                        BackgroundColor="#F44336"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GerenciarSolicitacoesViewModel}}, Path=RecusarSolicitacaoCommand}"
-                                        CommandParameter="{Binding .}"
-                                        CornerRadius="20"
-                                        Text="Recusar"
-                                        TextColor="White"
-                                        WidthRequest="100" />
-                                </HorizontalStackLayout>
-                            </VerticalStackLayout>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <BoxView BackgroundColor="#E0E0E0" HeightRequest="1" />
+
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="18"
+                        Text="Solicitações de Árbitros"
+                        TextColor="{AppThemeBinding Light=#1976D2,
+                                                    Dark=#90CAF9}" />
+
+                    <Label
+                        FontSize="14"
+                        HorizontalOptions="Center"
+                        IsVisible="{Binding SolicitacoesArbitrosPendentes, Converter={StaticResource EmptyListInvertConverter}}"
+                        Text="Nenhuma solicitação de árbitro pendente."
+                        TextColor="Gray" />
+
+                    <CollectionView IsVisible="{Binding SolicitacoesArbitrosPendentes.Count, Converter={StaticResource NotZeroToTrueConverter}}" ItemsSource="{Binding SolicitacoesArbitrosPendentes}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="vmarbitros:SolicitacaoArbitroItemViewModel">
+                                <Frame
+                                    Margin="0,5"
+                                    Padding="10"
+                                    BackgroundColor="{AppThemeBinding Light=White,
+                                                                      Dark=#1e1e1e}"
+                                    CornerRadius="10"
+                                    HasShadow="True">
+                                    <VerticalStackLayout Spacing="5">
+                                        <Grid ColumnDefinitions="Auto, *">
+                                            <Image
+                                                Grid.Column="0"
+                                                Margin="0,0,15,0"
+                                                Aspect="AspectFill"
+                                                HeightRequest="50"
+                                                Source="{Binding FotoArbitroUrl}"
+                                                VerticalOptions="Center"
+                                                WidthRequest="50">
+                                                <Image.Clip>
+                                                    <EllipseGeometry
+                                                        Center="25,25"
+                                                        RadiusX="25"
+                                                        RadiusY="25" />
+                                                </Image.Clip>
+                                            </Image>
+                                            <VerticalStackLayout
+                                                Grid.Column="1"
+                                                Spacing="2"
+                                                VerticalOptions="Center">
+                                                <Label
+                                                    FontAttributes="Bold"
+                                                    FontSize="18"
+                                                    Text="{Binding NomeArbitro}"
+                                                    TextColor="{AppThemeBinding Light=Black,
+                                                                                Dark=White}" />
+                                                <Label
+                                                    FontSize="14"
+                                                    Text="{Binding EmailArbitro}"
+                                                    TextColor="Gray" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+
+                                        <HorizontalStackLayout
+                                            Margin="0,10,0,0"
+                                            HorizontalOptions="End"
+                                            Spacing="10">
+                                            <Button
+                                                BackgroundColor="#4CAF50"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GerenciarSolicitacoesViewModel}}, Path=AceitarArbitroCommand}"
+                                                CommandParameter="{Binding .}"
+                                                CornerRadius="20"
+                                                Text="Aceitar"
+                                                TextColor="White"
+                                                WidthRequest="100" />
+                                            <Button
+                                                BackgroundColor="#F44336"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GerenciarSolicitacoesViewModel}}, Path=RecusarArbitroCommand}"
+                                                CommandParameter="{Binding .}"
+                                                CornerRadius="20"
+                                                Text="Recusar"
+                                                TextColor="White"
+                                                WidthRequest="100" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
     </Grid>
 </ContentPage>

@@ -94,5 +94,10 @@ namespace ArenaVirtual.Services {
         public async Task<Usuario> ObterUsuarioPorIdAsync(int usuarioId) {
             return await _databaseService.GetUsuarioTable().FirstOrDefaultAsync(u => u.Id == usuarioId);
         }
+
+        public Task<Usuario?> ObterUsuarioPorClientAppIdAsync(Guid clientAppId) {
+            // Repassa a chamada para o DatabaseService
+            return _databaseService.ObterUsuarioPorClientAppIdAsync(clientAppId);
+        }
     }
 }

@@ -1,5 +1,4 @@
 using ArenaVirtual.ViewModels.Arbitro;
-using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.Views.Arbitro {
 
@@ -15,14 +14,19 @@ namespace ArenaVirtual.Views.Arbitro {
             this.BindingContext = _viewModel;
         }
 
-        // NOVO: Sobrescreve o método OnAppearing padrão
-        protected override async void OnAppearing() {
+        protected override async void OnAppearing() {
             base.OnAppearing();
 
-            // Chama a lógica de carregamento do ViewModel
-            // O CarregarCampeonatosAsync é quem cuida do IsBusy
-            if (_viewModel.CarregarCampeonatosCommand.CanExecute(null)) {
+            if (_viewModel.CarregarCampeonatosCommand.CanExecute(null)) {
                 await _viewModel.CarregarCampeonatosCommand.ExecuteAsync(string.Empty);
+            }
+        }
+
+        private async void OnSolicitarArbitragemClicked(object sender, EventArgs e) {
+            if (sender is Button button) {
+                if (button.BindingContext is CampeonatoItemViewModel itemViewModel) {
+                    await _viewModel.SolicitarArbitragemAsync(itemViewModel);
+                }
             }
         }
     }

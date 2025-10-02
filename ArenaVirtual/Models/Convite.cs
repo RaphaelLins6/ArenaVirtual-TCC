@@ -35,17 +35,12 @@ namespace ArenaVirtual.Models {
         [Indexed]
         public Guid UsuarioClientAppId { get; set; }
 
-        // 🛑 CORREÇÃO: Adicionada a nova propriedade para o ID do Árbitro
-        [Indexed]
-        public Guid? ArbitroClientAppId { get; set; } // Guid? para permitir nulo
-
         public Guid CampeonatoClientAppId { get; set; }
 
         public TipoConvite Tipo { get; set; }
 
         public string? ConvidadoEmail { get; set; }
 
-        // ⚡️ Propriedade renomeada para DataEnvio, para resolver o erro de compilação
         public DateTime DataEnvio { get; set; }
         public DateTime DataCriacao { get; set; }
 

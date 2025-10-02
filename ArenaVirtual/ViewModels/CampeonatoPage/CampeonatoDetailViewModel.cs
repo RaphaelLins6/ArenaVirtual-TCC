@@ -61,7 +61,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             if (query.ContainsKey("Campeonato")) {
                 var campeonatoRecebido = query["Campeonato"] as Campeonato;
                 // Chamada LoadCampeonato com await para garantir que a UI não trave e que os dados sejam carregados
-                await LoadCampeonato(campeonatoRecebido);
+                await LoadCampeonato(campeonato);
             }
         }
 
@@ -147,8 +147,8 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             // 2. Lógica de Classificação (ordenar e calcular estatísticas)
             var timesOrdenados = timesInscritos
-                                .OrderByDescending(t => t.PontuacaoTotal)
-                                .ToList();
+                                 .OrderByDescending(t => t.PontuacaoTotal)
+                                 .ToList();
 
             TabelaClassificacao.Clear();
 
@@ -221,8 +221,8 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             var navigationParameters = new ShellNavigationQueryParameters
             {
-        { "Campeonato", Campeonato }
-      };
+                { "Campeonato", Campeonato }
+            };
 
             await Shell.Current.GoToAsync(nameof(GerenciarSolicitacoesPage), navigationParameters);
         }
@@ -240,6 +240,24 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             };
 
             await Shell.Current.GoToAsync(nameof(TimesCadastradosPage), navigationParameters);
+        }
+
+        // 🆕 NOVO COMANDO: Listar Árbitros Inscritos
+        [RelayCommand]
+        public async Task ListarArbitrosInscritos() {
+            if (Campeonato is null) {
+                Debug.WriteLine("Erro: Campeonato é nulo.");
+                return;
+            }
+
+            var navigationParameters = new ShellNavigationQueryParameters
+            {
+                { "CampeonatoId", Campeonato.Id }
+            };
+
+            // ⚠️ NOTA: Assumindo que a nova tela para listar árbitros se chama 'ArbitrosCadastradosPage'.
+            // Você precisará criar essa página e mapear a rota no AppShell.
+            await Shell.Current.GoToAsync(nameof(ArbitrosInscritosPage), navigationParameters);
         }
     }
 }

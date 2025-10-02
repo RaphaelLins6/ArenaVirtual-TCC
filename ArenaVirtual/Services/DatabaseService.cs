@@ -1,7 +1,10 @@
 ﻿using ArenaVirtual.Models;
 using SQLite;
 using System.Diagnostics;
-using System.Linq; // Adicionar para o .Select()
+using System.Linq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
 
 namespace ArenaVirtual.Services {
 
@@ -111,9 +114,9 @@ namespace ArenaVirtual.Services {
                 // 3. Busca os objetos Campeonato usando os ClientAppIds
                 var campeonatos = await _database.Table<Campeonato>()
                     .Where(c => campeonatoClientAppIds.Contains(c.ClientAppId))
-                    .ToListAsync(); // <--- Executa a query aqui
+                    .ToListAsync();
 
-                // 4. Projeta para extrair apenas o ID (AGORA SEM ERRO CS1061)
+                // 4. Projeta para extrair apenas o ID
                 var campeonatoIds = campeonatos
                     .Select(c => c.Id)
                     .ToList();
@@ -156,14 +159,12 @@ namespace ArenaVirtual.Services {
             }
         }
 
-        // ***********************************************
         // ObterTimesAceitosAsync para usar a tabela Convite
-        // ***********************************************
         public async Task<List<Time>> ObterTimesAceitosAsync(int campeonatoId) {
             try {
                 var campeonato = await _database.Table<Campeonato>()
-                                                    .Where(c => c.Id == campeonatoId)
-                                                    .FirstOrDefaultAsync();
+                                                     .Where(c => c.Id == campeonatoId)
+                                                     .FirstOrDefaultAsync();
 
                 if (campeonato == null) {
                     return new List<Time>();
@@ -201,37 +202,69 @@ namespace ArenaVirtual.Services {
             }
         }
 
-        // --- Métodos de Árbitro (Novos) ---
-
-
-
         // --- Métodos de Convite ---
 
-        public async Task<List<Convite>> ObterConvitesPendentesCampeonatoAsync(Guid campeonatoClientAppId) {
+        // *******************************************************************
+        // MÉTODOS CORRIGIDOS E UNIFICADOS: A sobrecarga de 2 argumentos.
+        // *******************************************************************
+
+        // 1. Sobrecarga com 1 argumento (o método que já existia)
+        public async Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId) {
+            // Este método puxa TODOS os tipos de convite (Time e Arbitro) pendentes para o campeonato
+            return await _database.Table<Convite>()
+                                  .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
+                                              c.Status == StatusConvite.Pendente)
+                                  .ToListAsync();
+        }
+
+        // 2. Sobrecarga com 2 argumentos (ADICIONADO para resolver o erro CS1501)
+        public async Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId, TipoConvite tipo) {
+            Debug.WriteLine($"[DatabaseService] ObterConvitesPendentesAsync - Tipo: {tipo}");
+            return await _database.Table<Convite>()
+                                  .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
+                                              c.Status == StatusConvite.Pendente &&
+                                              c.Tipo == tipo)
+                                  .ToListAsync();
+        }
+
+        // REMOVIDOS E UNIFICADOS:
+        // ObterConvitesPendentesCampeonatoAsync
+        // ObterConvitesPendentesArbitroAsync
+        // Eles foram substituídos pelo novo método sobrecarregado (2)
+
+        public async Task<List<Convite>> ObterConvitesAceitosPorCampeonatoAsync(Guid campeonatoClientAppId) {
             try {
+                // Busca convites ACEITOS para ÁRBITROS em um CAMPEONATO específico.
                 return await _database.Table<Convite>()
                     .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId
-                                && c.Status == StatusConvite.Pendente
-                                && c.Tipo == TipoConvite.InscricaoCampeonato)
+                                 && c.Status == StatusConvite.Aceito
+                                 && c.Tipo == TipoConvite.InscricaoArbitro)
                     .ToListAsync();
             } catch (Exception ex) {
-                Debug.WriteLine($"[DatabaseService] ERRO ao obter convites pendentes de campeonato: {ex.Message}");
+                Debug.WriteLine($"[DatabaseService] ERRO ao obter convites aceitos por campeonato (Árbitros): {ex.Message}");
                 return new List<Convite>();
             }
         }
 
-        public async Task<List<Convite>> ObterConvitesPendentesArbitroAsync(Guid campeonatoClientAppId) {
-            try {
-                return await _database.Table<Convite>()
-                    .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId
-                                && c.Status == StatusConvite.Pendente
-                                && c.Tipo == TipoConvite.InscricaoArbitro)
-                    .ToListAsync();
-            } catch (Exception ex) {
-                Debug.WriteLine($"[DatabaseService] ERRO ao obter convites pendentes de árbitro: {ex.Message}");
-                return new List<Convite>();
+        // *******************************************************************
+        // CORREÇÃO: Usando UsuarioClientAppId ao invés de ArbitroClientAppId
+        // *******************************************************************
+        public async Task<Convite?> ObterSolicitacaoPorArbitroECampeonatoAsync(string arbitroId, string campeonatoId, TipoConvite tipo) {
+
+            if (!Guid.TryParse(arbitroId, out var arbitroGuid) || !Guid.TryParse(campeonatoId, out var campeonatoGuid)) {
+                return null;
             }
+
+            var solicitacao = await _database.Table<Convite>()
+                .Where(s => s.UsuarioClientAppId == arbitroGuid && // <-- CORRIGIDO AQUI
+                             s.CampeonatoClientAppId == campeonatoGuid &&
+                             s.Tipo == tipo)
+                .FirstOrDefaultAsync();
+
+            return solicitacao;
         }
+
+        // Os métodos a seguir continuam iguais:
 
         // Substitui o antigo AtualizarSolicitacaoCampeonatoAsync
         public Task<int> AtualizarSolicitacaoCampeonatoAsync_Convite(Convite solicitacao) =>
@@ -265,21 +298,6 @@ namespace ArenaVirtual.Services {
                              s.CampeonatoClientAppId == campeonatoGuid &&
                              s.Tipo == TipoConvite.InscricaoCampeonato)
                 .FirstOrDefaultAsync();
-            return solicitacao;
-        }
-
-        public async Task<Convite?> ObterSolicitacaoPorArbitroECampeonatoAsync(string arbitroId, string campeonatoId, TipoConvite tipo) {
-
-            if (!Guid.TryParse(arbitroId, out var arbitroGuid) || !Guid.TryParse(campeonatoId, out var campeonatoGuid)) {
-                return null;
-            }
-
-            var solicitacao = await _database.Table<Convite>()
-                .Where(s => s.ArbitroClientAppId == arbitroGuid &&
-                            s.CampeonatoClientAppId == campeonatoGuid &&
-                            s.Tipo == tipo)
-                .FirstOrDefaultAsync();
-
             return solicitacao;
         }
 
@@ -380,14 +398,5 @@ namespace ArenaVirtual.Services {
             _database.Table<EstatisticaPartida>()
                 .Where(e => e.UsuarioId == usuarioId)
                 .ToListAsync();
-
-        public async Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId) {
-            // Implementação para buscar convites pendentes no banco de dados
-            // Exemplo (usando SQLite-net-pcl ou similar):
-            return await _database.Table<Convite>()
-                                  .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
-                                               c.Status == StatusConvite.Pendente)
-                                  .ToListAsync();
-        }
-    } 
+    }
 }

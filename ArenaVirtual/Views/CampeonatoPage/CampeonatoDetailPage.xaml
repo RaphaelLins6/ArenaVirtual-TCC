@@ -77,7 +77,17 @@
                         BackgroundColor="DarkOrange"
                         Command="{Binding ListarTimesInscritosCommand}"
                         CornerRadius="10"
+                        IsVisible="{Binding IsOrganizador}"
                         Text="Ver Times Inscritos"
+                        TextColor="White" />
+
+                    <Button
+                        Margin="0,5,0,0"
+                        BackgroundColor="Orange"
+                        Command="{Binding ListarArbitrosInscritosCommand}"
+                        CornerRadius="10"
+                        IsVisible="{Binding IsOrganizador}"
+                        Text="Ver Árbitros Inscritos"
                         TextColor="White" />
                 </VerticalStackLayout>
 
