@@ -242,7 +242,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             await Shell.Current.GoToAsync(nameof(TimesCadastradosPage), navigationParameters);
         }
 
-        // 🆕 NOVO COMANDO: Listar Árbitros Inscritos
         [RelayCommand]
         public async Task ListarArbitrosInscritos() {
             if (Campeonato is null) {
@@ -252,11 +251,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             var navigationParameters = new ShellNavigationQueryParameters
             {
-                { "CampeonatoId", Campeonato.Id }
+                { "CampeonatoClientAppId", Campeonato.ClientAppId }
             };
 
-            // ⚠️ NOTA: Assumindo que a nova tela para listar árbitros se chama 'ArbitrosCadastradosPage'.
-            // Você precisará criar essa página e mapear a rota no AppShell.
             await Shell.Current.GoToAsync(nameof(ArbitrosInscritosPage), navigationParameters);
         }
     }

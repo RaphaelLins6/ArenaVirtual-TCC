@@ -27,7 +27,6 @@
                         WidthRequest="40" />
 
                     <VerticalStackLayout
-                        Margin="15"
                         HorizontalOptions="Center"
                         Spacing="5"
                         VerticalOptions="Center">
