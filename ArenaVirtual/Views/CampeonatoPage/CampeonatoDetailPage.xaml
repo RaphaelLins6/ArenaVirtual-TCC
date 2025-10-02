@@ -27,11 +27,12 @@
                         WidthRequest="40" />
 
                     <VerticalStackLayout
+                        Margin="0,30,0,0"
                         HorizontalOptions="Center"
                         Spacing="5"
-                        VerticalOptions="Center">
+                        VerticalOptions="CenterAndExpand">
                         <Frame
-                            Padding="5"
+                            Padding="0"
                             BackgroundColor="#282828"
                             CornerRadius="50"
                             HasShadow="False"
@@ -39,7 +40,7 @@
                             IsClippedToBounds="True"
                             WidthRequest="80">
                             <Image
-                                Aspect="AspectFit"
+                                Aspect="AspectFill"
                                 HeightRequest="80"
                                 HorizontalOptions="Center"
                                 Source="{Binding LogoSource}"
@@ -50,7 +51,7 @@
                             FontSize="24"
                             HorizontalOptions="Center"
                             Text="{Binding Campeonato.Nome}"
-                            TextColor="OrangeRed" />
+                            TextColor="White" />
                     </VerticalStackLayout>
                 </Grid>
 
