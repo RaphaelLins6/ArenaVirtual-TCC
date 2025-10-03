@@ -7,7 +7,6 @@
     BackgroundColor="#80000000">
 
     <Grid>
-        <!--  Conteúdo do Popup  -->
         <Border
             Padding="20"
             BackgroundColor="White"
@@ -22,7 +21,6 @@
                     HorizontalOptions="Center"
                     Text="Editar Perfil" />
 
-                <!--  Campos comuns  -->
                 <Entry
                     x:Name="NomeEntry"
                     Placeholder="Nome"
@@ -50,7 +48,6 @@
                     PlaceholderColor="Black"
                     TextColor="Black" />
 
-                <!--  Atleta  -->
                 <VerticalStackLayout
                     x:Name="AtletaSection"
                     IsVisible="False"
@@ -79,7 +76,6 @@
                         TextColor="Black" />
                 </VerticalStackLayout>
 
-                <!--  Organizador  -->
                 <VerticalStackLayout
                     x:Name="OrganizadorSection"
                     IsVisible="False"
@@ -96,7 +92,6 @@
                         TextColor="Black" />
                 </VerticalStackLayout>
 
-                <!--  Patrocinador  -->
                 <VerticalStackLayout
                     x:Name="PatrocinadorSection"
                     IsVisible="False"
@@ -118,7 +113,6 @@
                         TextColor="Black" />
                 </VerticalStackLayout>
 
-                <!--  Árbitro  -->
                 <VerticalStackLayout
                     x:Name="ArbitroSection"
                     IsVisible="False"
@@ -135,32 +129,35 @@
                         TitleColor="Black" />
                 </VerticalStackLayout>
 
-                <HorizontalStackLayout
-                    Margin="0,10,0,30"
-                    HorizontalOptions="Center"
-                    Spacing="15">
+                <VerticalStackLayout
+                    Margin="0,10,0,10"
+                    HorizontalOptions="FillAndExpand"
+                    Spacing="10">
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="15">
+                        <Button
+                            Clicked="Cancelar_Clicked"
+                            Style="{StaticResource BotaoPrincipal}"
+                            Text="Cancelar"
+                            WidthRequest="120" />
+                        <Button
+                            Clicked="Salvar_Clicked"
+                            Style="{StaticResource BotaoPrincipal}"
+                            Text="Salvar"
+                            WidthRequest="120" />
+                    </HorizontalStackLayout>
+
                     <Button
                         BackgroundColor="#C0392B"
                         Clicked="ExcluirConta_Clicked"
+                        HorizontalOptions="Center"
                         Style="{StaticResource BotaoPrincipal}"
                         Text="Excluir Conta"
-                        TextColor="White" />
-
-                    <Button
-                        Clicked="Cancelar_Clicked"
-                        Style="{StaticResource BotaoPrincipal}"
-                        Text="Cancelar" />
-
-                    <Button
-                        Clicked="Salvar_Clicked"
-                        Style="{StaticResource BotaoPrincipal}"
-                        Text="Salvar" />
-
-                </HorizontalStackLayout>
+                        TextColor="White"
+                        WidthRequest="255" />
+                </VerticalStackLayout>
             </VerticalStackLayout>
         </Border>
 
-        <!--  Indicador de Carregamento  -->
         <Grid
             Grid.RowSpan="2"
             BackgroundColor="#000000"
