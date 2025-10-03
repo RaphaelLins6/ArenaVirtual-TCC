@@ -135,15 +135,27 @@
                         TitleColor="Black" />
                 </VerticalStackLayout>
 
-                <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
+                <HorizontalStackLayout
+                    Margin="0,10,0,30"
+                    HorizontalOptions="Center"
+                    Spacing="15">
+                    <Button
+                        BackgroundColor="#C0392B"
+                        Clicked="ExcluirConta_Clicked"
+                        Style="{StaticResource BotaoPrincipal}"
+                        Text="Excluir Conta"
+                        TextColor="White" />
+
                     <Button
                         Clicked="Cancelar_Clicked"
                         Style="{StaticResource BotaoPrincipal}"
                         Text="Cancelar" />
+
                     <Button
                         Clicked="Salvar_Clicked"
                         Style="{StaticResource BotaoPrincipal}"
                         Text="Salvar" />
+
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </Border>

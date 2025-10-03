@@ -132,4 +132,46 @@ public partial class EditarPerfilPopup : ContentPage, INotifyPropertyChanged {
             IsBusy = false; // Desativa o indicador de carregamento, mesmo em caso de erro.
         }
     }
+
+    private async void ExcluirConta_Clicked(object sender, EventArgs e) {
+        if (IsBusy) return;
+
+        // 1. Confirmação do Usuário. Agora funciona com a sobrecarga de 4 argumentos no IAlertService.
+        bool confirmacao = await _alertService.DisplayAlert(
+            "Confirmação de Exclusão",
+            "Tem certeza que deseja EXCLUIR sua conta? Esta ação é irreversível e você perderá todos os seus dados locais.",
+            "Sim, Excluir", // Botão de aceitar
+            "Cancelar"); // Botão de cancelar
+
+        if (!confirmacao) {
+            return;
+        }
+
+        IsBusy = true; // Ativa o indicador de carregamento.
+
+        try {
+            // 2. Exclusão Local
+            int linhasDeletadas = await _databaseService.DeletarUsuarioAsync(_usuario);
+
+            if (linhasDeletadas > 0) {
+                Debug.WriteLine($"[EditarPerfilPopup] Usuário ID {_usuario.Id} excluído localmente.");
+
+                // Notificar sobre o logout e exclusão.
+                MessagingCenter.Send(this, "Conta Excluída");
+
+                await _alertService.DisplayAlert("Conta Excluída", "Sua conta foi excluída localmente. Você será desconectado e precisará entrar novamente para finalizar a sincronização.", "OK");
+
+                // 3. Redirecionar para a tela inicial (Login/Abertura)
+                await Navigation.PopModalAsync(); // Fecha o Popup.
+
+            } else {
+                await _alertService.DisplayAlert("Erro", "Não foi possível excluir o usuário. O registro não foi encontrado no banco de dados local.", "OK");
+            }
+
+        } catch (Exception ex) {
+            await _alertService.DisplayAlert("Erro", $"Ocorreu um erro ao excluir a conta: {ex.Message}", "OK");
+        } finally {
+            IsBusy = false; // Desativa o indicador de carregamento.
+        }
+    }
 }

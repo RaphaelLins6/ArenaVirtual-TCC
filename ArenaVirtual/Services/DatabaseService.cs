@@ -42,6 +42,91 @@ namespace ArenaVirtual.Services {
             return _database.Table<T>();
         }
 
+        // --- MÉTODOS DE EXCLUSÃO EM CASCATA (NOVOS) ---
+
+        public async Task DeletarTimeComCascataAsync(Time time) {
+            Debug.WriteLine($"[DeletarTimeComCascataAsync] Excluindo time ClientAppId: {time.ClientAppId}");
+
+            // 1. Remover Convites (solicitações para este time)
+            await _database.Table<Convite>()
+                .Where(c => c.TimeClientAppId == time.ClientAppId)
+                .DeleteAsync();
+
+            // 2. Remover Jogadores (setar TimeClientAppId para null nos Usuários)
+            // Assumimos que o campo TimeClientAppId em Usuario é nullable (Guid?)
+            // Buscamos os usuários que estão neste time
+            var membros = await _database.Table<Usuario>()
+                .Where(u => u.TimeClientAppId == time.ClientAppId)
+                .ToListAsync();
+
+            foreach (var membro in membros) {
+                membro.TimeClientAppId = null;
+                // Não precisa de await aqui, usaremos o UpdateAllAsync ou transação
+            }
+
+            // Atualiza os usuários (remove eles do time)
+            await _database.UpdateAllAsync(membros);
+
+            // 3. Deletar o Time
+            await _database.DeleteAsync(time);
+        }
+
+        public async Task DeletarCampeonatoComCascataAsync(Campeonato campeonato) {
+            Debug.WriteLine($"[DeletarCampeonatoComCascataAsync] Excluindo campeonato ClientAppId: {campeonato.ClientAppId}");
+
+            // 1. Deletar Entidades de Partida/Jogo (e Estatísticas/Avaliações relacionadas)
+            // Partida usa CampeonatoId (int)
+            var partidas = await _database.Table<Partida>()
+                .Where(p => p.CampeonatoId == campeonato.Id)
+                .ToListAsync();
+
+            foreach (var partida in partidas) {
+                // CORREÇÃO DEFINITIVA: 
+                // EstatisticaPartida, AvaliacaoArbitro e Jogo se ligam à Partida através do JogoId, 
+                // e não PartidaId. Vamos assumir que o JogoId é o link principal.
+
+                // Localiza o Jogo correspondente a esta Partida (Partida contém o CampeonatoId e Data/Local, Jogo é o evento com Arbitro/Placar)
+                var jogo = await _database.Table<Jogo>()
+                    .Where(j => j.Id == partida.Id) // Assumindo que Partida.Id é o Jogo.Id (ou Partida.Id é a FK em Jogo).
+                    .FirstOrDefaultAsync();
+
+                if (jogo != null) {
+                    // Estatística e Avaliação se ligam pelo JogoId (int)
+                    await _database.Table<EstatisticaPartida>()
+                        .Where(e => e.JogoId == jogo.Id)
+                        .DeleteAsync();
+
+                    await _database.Table<AvaliacaoArbitro>()
+                        .Where(a => a.JogoId == jogo.Id)
+                        .DeleteAsync();
+
+                    // Deleta o registro de Jogo
+                    await _database.DeleteAsync(jogo);
+                }
+            }
+
+            // Deleta os registros de Partida
+            await _database.DeleteAsync(partidas);
+
+            // 2. Deletar Convites e Inscrições relacionados
+            await _database.Table<Convite>()
+                .Where(c => c.CampeonatoClientAppId == campeonato.ClientAppId)
+                .DeleteAsync();
+
+            await _database.Table<Inscricao>()
+                .Where(i => i.CampeonatoClientAppId == campeonato.ClientAppId)
+                .DeleteAsync();
+
+            // 3. Deletar Favoritos relacionados
+            await _database.Table<UsuarioCampeonatoFavorito>()
+                .Where(f => f.CampeonatoClientAppId == campeonato.ClientAppId)
+                .DeleteAsync();
+
+            // 4. Deletar o próprio Campeonato
+            await _database.DeleteAsync(campeonato);
+        }
+
+
         // --- Métodos de Usuário ---
 
         public Task<int> InserirUsuarioAsync(Usuario usuario) => _database.InsertAsync(usuario);
@@ -65,7 +150,62 @@ namespace ArenaVirtual.Services {
             Debug.WriteLine($"[DatabaseService] UpdateAsync retornou: {rowsAffected} linhas afetadas.");
             return rowsAffected;
         }
-        public Task<int> DeletarUsuarioAsync(Usuario usuario) => _database.DeleteAsync(usuario);
+
+        /// MÉTODO DELETAR USUÁRIO REFATORADO COM EXCLUSÃO EM CASCATA
+        public async Task<int> DeletarUsuarioAsync(Usuario usuario) {
+            if (usuario == null || usuario.Id <= 0) {
+                Debug.WriteLine("[DeletarUsuarioAsync] Tentativa de deletar usuário nulo ou sem ID.");
+                return 0;
+            }
+
+            int totalExcluido = 0;
+
+            // 1. Lógica de Exclusão em Cascata para Organizador
+            if (usuario.Perfil == TipoPerfil.Organizador) {
+                Debug.WriteLine($"[DeletarUsuarioAsync] Iniciando exclusão em cascata para Organizador ID: {usuario.Id}");
+
+                // A. Deletar Times criados por este organizador
+                // CORREÇÃO: Time usa AdminClientAppId para rastrear o criador.
+                var times = await _database.Table<Time>()
+                    .Where(t => t.AdminClientAppId == usuario.ClientAppId)
+                    .ToListAsync();
+
+                foreach (var time in times) {
+                    await DeletarTimeComCascataAsync(time);
+                }
+                Debug.WriteLine($"[DeletarUsuarioAsync] {times.Count} times excluídos em cascata.");
+
+                // B. Deletar Campeonatos criados por este organizador
+                // CORREÇÃO: Campeonato usa OrganizadorId.
+                var campeonatos = await _database.Table<Campeonato>()
+                    .Where(c => c.OrganizadorId == usuario.Id)
+                    .ToListAsync();
+
+                foreach (var campeonato in campeonatos) {
+                    await DeletarCampeonatoComCascataAsync(campeonato);
+                }
+                Debug.WriteLine($"[DeletarUsuarioAsync] {campeonatos.Count} campeonatos excluídos em cascata.");
+            }
+
+            // 2. Lógica de Limpeza de Referências para todos os perfis
+
+            // A. Remover de times (Se for atleta, árbitro ou patrocinador que estava em um time)
+            if (usuario.TimeClientAppId.HasValue) {
+                // A remoção de TimeClientAppId é feita antes de deletar o usuário.
+                usuario.TimeClientAppId = null;
+            }
+
+            // B. Deletar Convites/Solicitações em que o usuário estava envolvido (como solicitante ou alvo de convite)
+            await _database.Table<Convite>()
+                .Where(c => c.SolicitanteClientAppId == usuario.ClientAppId || c.UsuarioClientAppId == usuario.ClientAppId)
+                .DeleteAsync();
+
+            // 3. Deletar o registro principal do Usuário
+            totalExcluido = await _database.DeleteAsync(usuario);
+            Debug.WriteLine($"[DeletarUsuarioAsync] Registro do Usuário ID {usuario.Id} excluído: {totalExcluido} linha(s).");
+
+            return totalExcluido;
+        }
 
         public Task<Usuario?> ObterUsuarioPorClientAppIdAsync(Guid clientAppId) =>
             _database.Table<Usuario>().Where(u => u.ClientAppId == clientAppId).FirstOrDefaultAsync();
@@ -89,6 +229,8 @@ namespace ArenaVirtual.Services {
         }
         public Task<List<Campeonato>> ListarCampeonatosAsync() => _database.Table<Campeonato>().ToListAsync();
         public Task<int> AtualizarCampeonatoAsync(Campeonato item) => _database.UpdateAsync(item);
+        // O antigo DeletarCampeonatoAsync pode ser mantido ou substituído pelo cascata,
+        // mas para uso geral, o simples delete pode ser necessário.
         public Task<int> DeletarCampeonatoAsync(Campeonato item) => _database.DeleteAsync(item);
 
         public Task<Campeonato?> ObterCampeonatoPorCapitaoClientAppIdAsync(Guid capitaoClientAppId) =>
@@ -134,6 +276,7 @@ namespace ArenaVirtual.Services {
         public Task<int> InserirTimeAsync(Time item) => _database.InsertAsync(item);
         public Task<List<Time>> ListarTimesAsync() => _database.Table<Time>().ToListAsync();
         public Task<int> AtualizarTimeAsync(Time item) => _database.UpdateAsync(item);
+        // Os dois métodos abaixo fazem o mesmo, pode-se manter um, mas seguindo o original:
         public Task<int> DeletarTimeAsync(Time item) => _database.DeleteAsync(item);
         public Task<int> ExcluirTimeAsync(Time time) => _database.DeleteAsync(time);
 
@@ -212,25 +355,20 @@ namespace ArenaVirtual.Services {
         public async Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId) {
             // Este método puxa TODOS os tipos de convite (Time e Arbitro) pendentes para o campeonato
             return await _database.Table<Convite>()
-                                  .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
-                                              c.Status == StatusConvite.Pendente)
-                                  .ToListAsync();
+                                     .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
+                                                 c.Status == StatusConvite.Pendente)
+                                     .ToListAsync();
         }
 
         // 2. Sobrecarga com 2 argumentos (ADICIONADO para resolver o erro CS1501)
         public async Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId, TipoConvite tipo) {
             Debug.WriteLine($"[DatabaseService] ObterConvitesPendentesAsync - Tipo: {tipo}");
             return await _database.Table<Convite>()
-                                  .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
-                                              c.Status == StatusConvite.Pendente &&
-                                              c.Tipo == tipo)
-                                  .ToListAsync();
+                                     .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
+                                                 c.Status == StatusConvite.Pendente &&
+                                                 c.Tipo == tipo)
+                                     .ToListAsync();
         }
-
-        // REMOVIDOS E UNIFICADOS:
-        // ObterConvitesPendentesCampeonatoAsync
-        // ObterConvitesPendentesArbitroAsync
-        // Eles foram substituídos pelo novo método sobrecarregado (2)
 
         public async Task<List<Convite>> ObterConvitesAceitosPorCampeonatoAsync(Guid campeonatoClientAppId) {
             try {
@@ -263,8 +401,6 @@ namespace ArenaVirtual.Services {
 
             return solicitacao;
         }
-
-        // Os métodos a seguir continuam iguais:
 
         // Substitui o antigo AtualizarSolicitacaoCampeonatoAsync
         public Task<int> AtualizarSolicitacaoCampeonatoAsync_Convite(Convite solicitacao) =>
