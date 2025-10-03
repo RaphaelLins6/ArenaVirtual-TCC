@@ -27,11 +27,10 @@ namespace ArenaVirtual.Services {
             await _database.CreateTableAsync<Usuario>();
             await _database.CreateTableAsync<Campeonato>();
             await _database.CreateTableAsync<Time>();
-            await _database.CreateTableAsync<Partida>();
+            await _database.CreateTableAsync<Jogo>();
             await _database.CreateTableAsync<AvaliacaoArbitro>();
             await _database.CreateTableAsync<CampanhaPatrocinio>();
             await _database.CreateTableAsync<EstatisticaPartida>();
-            await _database.CreateTableAsync<Jogo>();
             await _database.CreateTableAsync<PropostaPatrocinio>();
             await _database.CreateTableAsync<UsuarioCampeonatoFavorito>();
             await _database.CreateTableAsync<Convite>();
@@ -76,7 +75,7 @@ namespace ArenaVirtual.Services {
 
             // 1. Deletar Entidades de Partida/Jogo (e Estatísticas/Avaliações relacionadas)
             // Partida usa CampeonatoId (int)
-            var partidas = await _database.Table<Partida>()
+            var partidas = await _database.Table<Jogo>()
                 .Where(p => p.CampeonatoId == campeonato.Id)
                 .ToListAsync();
 
@@ -450,10 +449,10 @@ namespace ArenaVirtual.Services {
 
         // --- Outros Métodos (Partida, AvaliacaoArbitro, etc) - Mantidos ---
 
-        public Task<int> InserirPartidaAsync(Partida item) => _database.InsertAsync(item);
-        public Task<List<Partida>> ListarPartidasAsync() => _database.Table<Partida>().ToListAsync();
-        public Task<int> AtualizarPartidaAsync(Partida item) => _database.UpdateAsync(item);
-        public Task<int> DeletarPartidaAsync(Partida item) => _database.DeleteAsync(item);
+        public Task<int> InserirPartidaAsync(Jogo item) => _database.InsertAsync(item);
+        public Task<List<Jogo>> ListarPartidasAsync() => _database.Table<Jogo>().ToListAsync();
+        public Task<int> AtualizarPartidaAsync(Jogo item) => _database.UpdateAsync(item);
+        public Task<int> DeletarPartidaAsync(Jogo item) => _database.DeleteAsync(item);
 
         public Task<int> InserirAvaliacaoArbitroAsync(AvaliacaoArbitro item) => _database.InsertAsync(item);
         public Task<List<AvaliacaoArbitro>> ListarAvaliacoesArbitroAsync() => _database.Table<AvaliacaoArbitro>().ToListAsync();

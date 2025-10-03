@@ -1,41 +1,46 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using SQLite;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace ArenaVirtual.Models {
 
     public partial class Jogo : ObservableObject, ISyncable {
 
-        private int id;
+        // --- Backing Fields (Campos Privados) ---
+        private int id;
         private Guid clientAppId;
         private int timeAId;
         private int timeBId;
-        private Time timeA;
-        private Time timeB;
+        private Time? timeA;
+        private Time? timeB;
         private DateTime dataHora;
         private int campeonatoId;
         private int arbitroId;
-        public int Rodada { get; set; }
         private string local = string.Empty;
         private string placarA = string.Empty;
         private string placarB = string.Empty;
-        public string NomeCampeonato { get; set; }
-
-        // NOVOS CAMPOS PARA STATUS E PLACAR FINAL
         private JogoStatus status;
         private int placarTimeAInt;
         private int placarTimeBInt;
+        private bool isOrganizador;
 
+        // Campos que não usam SetProperty (POCO)
+        public int Rodada { get; set; }
+        public string NomeCampeonato { get; set; } = string.Empty;
+        public bool IsSynced { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
-        // Adicione este construtor público sem parâmetros
-        public Jogo() {
-            // Inicialização padrão das propriedades, se necessário
-            this.Status = JogoStatus.Agendado; // Status inicial
-            this.IsSynced = false;
+        // --- Construtor ---
+
+        public Jogo() {
+            this.Status = JogoStatus.Agendado;
+            this.IsSynced = false;
             this.UpdatedAt = DateTime.UtcNow;
+            this.isOrganizador = false;
         }
 
+        // --- Propriedades Públicas (Mapeamento SQLite e MVVM) ---
+
+        // ATRIBUTOS DO SQLITE APLICADOS AQUI
         [PrimaryKey, AutoIncrement]
         public int Id {
             get => id;
@@ -55,18 +60,6 @@ namespace ArenaVirtual.Models {
         public int TimeBId {
             get => timeBId;
             set => SetProperty(ref timeBId, value);
-        }
-
-        [Ignore]
-        public Time TimeA {
-            get => timeA;
-            set => SetProperty(ref timeA, value);
-        }
-
-        [Ignore]
-        public Time TimeB {
-            get => timeB;
-            set => SetProperty(ref timeB, value);
         }
 
         public DateTime DataHora {
@@ -89,27 +82,22 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref local, value);
         }
 
-        // Propriedade de Status do Jogo
         public JogoStatus Status {
             get => status;
             set => SetProperty(ref status, value);
         }
 
-        // Placar Final do Time A (Numérico, para cálculos)
         public int PlacarTimeAInt {
             get => placarTimeAInt;
             set => SetProperty(ref placarTimeAInt, value);
         }
 
-        // Placar Final do Time B (Numérico, para cálculos)
         public int PlacarTimeBInt {
             get => placarTimeBInt;
             set => SetProperty(ref placarTimeBInt, value);
         }
 
-
-        // Suas propriedades de Placar em String (se mantidas)
-        public string PlacarA {
+        public string PlacarA {
             get => placarA;
             set => SetProperty(ref placarA, value);
         }
@@ -119,18 +107,25 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref placarB, value);
         }
 
-        public bool IsSynced { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        // --- Propriedades de Contexto/Relacionamento (Ignoradas pelo SQLite) ---
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        // ATRIBUTOS DO SQLITE APLICADOS AQUI
+        [Ignore]
+        public bool IsOrganizador {
+            get => isOrganizador;
+            set => SetProperty(ref isOrganizador, value);
+        }
 
-        protected bool SetProperty<T>(ref T backingField, T value, [CallerMemberName] string? propertyName = null) {
-            if (EqualityComparer<T>.Default.Equals(backingField, value))
-                return false;
+        [Ignore]
+        public Time? TimeA {
+            get => timeA;
+            set => SetProperty(ref timeA, value);
+        }
 
-            backingField = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            return true;
+        [Ignore]
+        public Time? TimeB {
+            get => timeB;
+            set => SetProperty(ref timeB, value);
         }
     }
 }

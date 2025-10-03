@@ -16,7 +16,6 @@ public class SyncService {
         typeof(Usuario),
         typeof(Campeonato),
         typeof(Time),
-        typeof(Partida),
         typeof(AvaliacaoArbitro),
         typeof(CampanhaPatrocinio),
         typeof(EstatisticaPartida),

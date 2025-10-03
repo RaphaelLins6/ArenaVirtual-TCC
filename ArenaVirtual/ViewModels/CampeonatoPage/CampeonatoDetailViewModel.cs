@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using ArenaVirtual.Popups;
 using ArenaVirtual.Views.CampeonatoPage;
 
+
 namespace ArenaVirtual.ViewModels.CampeonatoPage {
     public partial class CampeonatoDetailViewModel : ObservableObject, IQueryAttributable {
         [ObservableProperty]
@@ -61,7 +62,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             if (query.ContainsKey("Campeonato")) {
                 var campeonatoRecebido = query["Campeonato"] as Campeonato;
                 // Chamada LoadCampeonato com await para garantir que a UI não trave e que os dados sejam carregados
-                await LoadCampeonato(campeonato);
+                await LoadCampeonato(campeonatoRecebido);
             }
         }
 
@@ -76,6 +77,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
             IsOrganizador = (campeonato.OrganizadorId == usuarioAtual?.Id);
+
+            Debug.WriteLine($"[DEBUG-VM] IsOrganizador SET TO: {IsOrganizador}");
+            Debug.WriteLine($"[DEBUG-VM] -> Campeonato.OrganizadorId: {campeonato.OrganizadorId}");
+            Debug.WriteLine($"[DEBUG-VM] -> UsuarioAtual.Id: {usuarioAtual?.Id}");
 
             Debug.WriteLine($"[CampeonatoDetailViewModel] É organizador? {IsOrganizador}");
 
@@ -205,8 +210,18 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         private void LoadRodada(int rodada) {
             if (_jogosPorRodada.ContainsKey(rodada)) {
-                // ATUALIZA A PROPRIEDADE OBSERVÁVEL
-                TabelaJogos = _jogosPorRodada[rodada];
+                var jogosDaRodada = _jogosPorRodada[rodada];
+                foreach (var jogo in jogosDaRodada) {
+                    jogo.IsOrganizador = this.IsOrganizador; // Atribui a propriedade reativa
+                }
+
+                // Força a reavaliação do CollectionView:
+                // 1. Limpa a coleção existente
+                TabelaJogos.Clear();
+                // 2. Adiciona todos os jogos da rodada novamente
+                foreach (var jogo in jogosDaRodada) {
+                    TabelaJogos.Add(jogo);
+                }
             } else {
                 TabelaJogos.Clear();
             }
@@ -255,6 +270,52 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             };
 
             await Shell.Current.GoToAsync(nameof(ArbitrosInscritosPage), navigationParameters);
+        }
+
+        [RelayCommand]
+        public async Task AnexarArbitros(Jogo jogo) {
+            Debug.WriteLine("========================================================================");
+            Debug.WriteLine("[DEBUG-CLIQUE] INÍCIO: O comando AnexarArbitros foi acionado.");
+            Debug.WriteLine($"[DEBUG-CLIQUE] PARAM: O objeto 'jogo' recebido é: {(jogo == null ? "NULO" : "NÃO NULO")}");
+
+            if (!IsOrganizador) {
+                Debug.WriteLine("[DEBUG-CLIQUE] VERIFICAÇÃO: Usuário não é o Organizador. Acesso negado.");
+                await _alertService.DisplayAlert("Acesso Negado", "Somente o organizador pode anexar árbitros a um jogo.", "OK");
+                return;
+            }
+
+            Debug.WriteLine("[DEBUG-CLIQUE] VERIFICAÇÃO: Usuário é o Organizador. Prosseguindo...");
+
+            if (jogo is null) {
+                Debug.WriteLine("[DEBUG-CLIQUE] ERRO LÓGICO: O objeto Jogo recebido é NULO.");
+                await _alertService.DisplayAlert("Erro de Dados", "O jogo selecionado não pôde ser carregado.", "OK");
+                return;
+            }
+
+            Debug.WriteLine($"[DEBUG-CLIQUE] DADOS RECEBIDOS: Jogo ID: {jogo.Id} | Times: {jogo.TimeA?.Nome ?? "N/A"} vs {jogo.TimeB?.Nome ?? "N/A"}.");
+
+            try {
+                Debug.WriteLine("[DEBUG-CLIQUE] NAVEGAÇÃO: Criando a instância do AtribuirArbitrosPopup...");
+
+                var popup = new AtribuirArbitrosPopup(
+              Campeonato,
+              jogo,
+              _alertService,
+              _databaseService,
+              _syncService
+            );
+
+                Debug.WriteLine("[DEBUG-CLIQUE] NAVEGAÇÃO: Chamando Application.Current.MainPage.Navigation.PushModalAsync...");
+
+                await Application.Current.MainPage.Navigation.PushModalAsync(popup);
+
+                Debug.WriteLine("[DEBUG-CLIQUE] FIM: PushModalAsync acionado com sucesso. Pop-up deve estar visível.");
+            } catch (Exception ex) {
+                Debug.WriteLine($"[DEBUG-CLIQUE] ERRO CRÍTICO: Falha ao abrir o Pop-up. Detalhes: {ex.Message}");
+                await _alertService.DisplayAlert("Erro de Navegação", $"Não foi possível abrir a tela de árbitros: {ex.Message}", "OK");
+            }
+
+            Debug.WriteLine("========================================================================");
         }
     }
 }

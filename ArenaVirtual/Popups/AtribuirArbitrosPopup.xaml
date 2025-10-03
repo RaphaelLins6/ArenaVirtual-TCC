@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ArenaVirtual.Popups.AtribuirArbitrosPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:ArenaVirtual.Models"
+    Title="Atribuição de Árbitros"
+    Padding="30"
+    BackgroundColor="#80000000">
+
+    <ContentPage.Resources />
+
+    <Grid>
+        <Border
+            Padding="20"
+            BackgroundColor="White"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            WidthRequest="400">
+
+            <VerticalStackLayout Spacing="15">
+
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="22"
+                    HorizontalOptions="Center"
+                    Text="Atribuir Árbitros"
+                    TextColor="Black" />
+
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
+                    <Label
+                        FontAttributes="Bold"
+                        Text="{Binding JogoAtual.TimeA.Nome}"
+                        TextColor="#282828" />
+                    <Label Text="vs" TextColor="Gray" />
+                    <Label
+                        FontAttributes="Bold"
+                        Text="{Binding JogoAtual.TimeB.Nome}"
+                        TextColor="#282828" />
+                    <Label Text="{Binding JogoAtual.DataHora, StringFormat=' ({0:dd/MM HH:mm})'}" TextColor="Gray" />
+                </HorizontalStackLayout>
+
+                <BoxView HeightRequest="1" Color="LightGray" />
+
+                <CollectionView
+                    EmptyView="Nenhum árbitro inscrito encontrado para o campeonato."
+                    HeightRequest="200"
+                    ItemsSource="{Binding ArbitrosDisponiveis}"
+                    SelectedItem="{Binding ArbitroSelecionado}"
+                    SelectionMode="Single">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Usuario">
+                            <Grid Padding="10" ColumnDefinitions="*, Auto">
+                                <Label Text="{Binding Nome}" TextColor="Black" />
+                                <Label
+                                    Grid.Column="1"
+                                    FontSize="10"
+                                    HorizontalOptions="End"
+                                    Text="{Binding Localizacao}"
+                                    TextColor="Gray"
+                                    VerticalOptions="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <VerticalStackLayout
+                    Margin="0,10,0,0"
+                    HorizontalOptions="FillAndExpand"
+                    Spacing="10">
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="15">
+                        <Button
+                            BackgroundColor="Gray"
+                            Clicked="Cancelar_Clicked"
+                            Style="{StaticResource BotaoPrincipal}"
+                            Text="Cancelar"
+                            WidthRequest="150" />
+                        <Button
+                            BackgroundColor="#5cb85c"
+                            Clicked="ConfirmarAtribuicao_Clicked"
+                            Style="{StaticResource BotaoPrincipal}"
+                            Text="Confirmar"
+                            WidthRequest="150" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
+        <Grid
+            Grid.RowSpan="2"
+            BackgroundColor="#000000"
+            IsVisible="{Binding IsBusy}"
+            Opacity="0.5">
+            <ActivityIndicator
+                HorizontalOptions="Center"
+                IsRunning="{Binding IsBusy}"
+                VerticalOptions="Center"
+                Color="OrangeRed" />
+        </Grid>
+    </Grid>
+</ContentPage>

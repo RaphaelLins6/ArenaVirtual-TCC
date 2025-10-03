@@ -6,8 +6,8 @@
     xmlns:local="clr-namespace:ArenaVirtual.Views.CampeonatoPage"
     xmlns:models="clr-namespace:ArenaVirtual.Models"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.CampeonatoPage"
-    x:DataType="vm:CampeonatoDetailViewModel"
-    Shell.FlyoutBehavior="Disabled">
+    x:Name="PageRoot"
+    x:DataType="vm:CampeonatoDetailViewModel">
 
     <ContentPage.Content>
         <ScrollView>
@@ -19,12 +19,12 @@
                         Margin="10"
                         BackgroundColor="Transparent"
                         Command="{Binding AlterarBannerCommand}"
-                        HeightRequest="40"
+                        HeightRequest="15"
                         HorizontalOptions="End"
                         IsVisible="{Binding IsOrganizador}"
                         Source="icone_editar.png"
                         VerticalOptions="Start"
-                        WidthRequest="40" />
+                        WidthRequest="15" />
 
                     <VerticalStackLayout
                         Margin="0,30,0,0"
@@ -69,6 +69,7 @@
                         Command="{Binding GerenciarSolicitacoesCommand}"
                         CornerRadius="10"
                         IsVisible="{Binding IsOrganizador}"
+                        Style="{StaticResource BotaoPrincipal}"
                         Text="Gerenciar Solicitações"
                         TextColor="White" />
 
@@ -78,6 +79,7 @@
                         Command="{Binding ListarTimesInscritosCommand}"
                         CornerRadius="10"
                         IsVisible="{Binding IsOrganizador}"
+                        Style="{StaticResource BotaoPrincipal}"
                         Text="Ver Times Inscritos"
                         TextColor="White" />
 
@@ -87,6 +89,7 @@
                         Command="{Binding ListarArbitrosInscritosCommand}"
                         CornerRadius="10"
                         IsVisible="{Binding IsOrganizador}"
+                        Style="{StaticResource BotaoPrincipal}"
                         Text="Ver Árbitros Inscritos"
                         TextColor="White" />
                 </VerticalStackLayout>
@@ -273,6 +276,7 @@
                     </Grid>
 
                     <CollectionView
+                        x:Name="ListaJogos"
                         HorizontalOptions="Start"
                         ItemsSource="{Binding TabelaJogos}"
                         VerticalOptions="Start">
@@ -297,6 +301,7 @@
                                             Text="{Binding Local}"
                                             TextColor="OrangeRed"
                                             VerticalOptions="Center" />
+
                                         <Grid
                                             Margin="0,5,0,0"
                                             ColumnDefinitions="*, Auto, *"
@@ -382,6 +387,20 @@
                                                 Text="{Binding TimeB.Nome}"
                                                 TextColor="White" />
                                         </Grid>
+
+                                        <Button
+                                            Margin="0,10,0,0"
+                                            BackgroundColor="#5cb85c"
+                                            Clicked="OnAnexarArbitrosClicked"
+                                            CommandParameter="{Binding .}"
+                                            CornerRadius="5"
+                                            FontSize="14"
+                                            IsVisible="{Binding IsOrganizador}"
+                                            Style="{StaticResource BotaoPrincipal}"
+                                            Text="Anexar Árbitros"
+                                            TextColor="White"
+                                            VerticalOptions="End" />
+
                                     </VerticalStackLayout>
                                 </Frame>
                             </DataTemplate>
