@@ -303,7 +303,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
               _alertService,
               _databaseService,
               _syncService
-            );
+                );
 
                 Debug.WriteLine("[DEBUG-CLIQUE] NAVEGAÇÃO: Chamando Application.Current.MainPage.Navigation.PushModalAsync...");
 
