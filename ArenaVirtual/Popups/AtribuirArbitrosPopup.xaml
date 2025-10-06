@@ -3,12 +3,14 @@
     x:Class="ArenaVirtual.Popups.AtribuirArbitrosPopup"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     xmlns:models="clr-namespace:ArenaVirtual.Models"
     Title="Atribuição de Árbitros"
-    Padding="30"
     BackgroundColor="#80000000">
 
-    <ContentPage.Resources />
+    <ContentPage.Resources>
+        <converters:IsEqualToConverter x:Key="IsEqualConverter" />
+    </ContentPage.Resources>
 
     <Grid>
         <Border
@@ -19,7 +21,6 @@
             WidthRequest="400">
 
             <VerticalStackLayout Spacing="15">
-
                 <Label
                     FontAttributes="Bold"
                     FontSize="22"
@@ -43,22 +44,46 @@
                 <BoxView HeightRequest="1" Color="LightGray" />
 
                 <CollectionView
+                    x:Name="ListaArbitros"
                     EmptyView="Nenhum árbitro inscrito encontrado para o campeonato."
                     HeightRequest="200"
                     ItemsSource="{Binding ArbitrosDisponiveis}"
-                    SelectedItem="{Binding ArbitroSelecionado}"
+                    SelectedItem="{Binding ArbitroSelecionado, Mode=TwoWay}"
                     SelectionMode="Single">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:Usuario">
-                            <Grid Padding="10" ColumnDefinitions="*, Auto">
-                                <Label Text="{Binding Nome}" TextColor="Black" />
-                                <Label
+                            <Grid
+                                Padding="10"
+                                ColumnDefinitions="*, Auto"
+                                HeightRequest="50">
+
+                                <StackLayout Grid.Column="0" VerticalOptions="Center">
+                                    <Label
+                                        FontSize="Medium"
+                                        Text="{Binding Nome}"
+                                        TextColor="Black" />
+                                    <Label
+                                        FontSize="Small"
+                                        Text="{Binding Localizacao}"
+                                        TextColor="Gray" />
+                                </StackLayout>
+
+                                <RadioButton
                                     Grid.Column="1"
-                                    FontSize="10"
+                                    CheckedChanged="RadioButton_CheckedChanged"
+                                    GroupName="Arbitros"
                                     HorizontalOptions="End"
-                                    Text="{Binding Localizacao}"
-                                    TextColor="Gray"
-                                    VerticalOptions="Center" />
+                                    VerticalOptions="Center"
+                                    Value="{Binding .}">
+                                    <RadioButton.IsChecked>
+                                        <Binding
+                                            Converter="{StaticResource IsEqualConverter}"
+                                            ConverterParameter="{Binding .}"
+                                            Mode="OneWay"
+                                            Path="ArbitroSelecionado"
+                                            Source="{RelativeSource AncestorType={x:Type ContentPage}}" />
+                                    </RadioButton.IsChecked>
+                                </RadioButton>
                             </Grid>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
@@ -83,14 +108,16 @@
                             WidthRequest="150" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
+
             </VerticalStackLayout>
         </Border>
 
         <Grid
-            Grid.RowSpan="2"
-            BackgroundColor="#000000"
+            BackgroundColor="#D9000000"
+            HorizontalOptions="FillAndExpand"
             IsVisible="{Binding IsBusy}"
-            Opacity="0.5">
+            VerticalOptions="FillAndExpand">
+
             <ActivityIndicator
                 HorizontalOptions="Center"
                 IsRunning="{Binding IsBusy}"

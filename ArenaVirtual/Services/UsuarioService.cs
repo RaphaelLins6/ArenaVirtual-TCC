@@ -8,6 +8,7 @@ using System.Linq;
 using SQLite;
 
 namespace ArenaVirtual.Services {
+    // Usando a sintaxe de construtor primário do C# 12 para UsuarioService
     public class UsuarioService(DatabaseService databaseService, SyncService syncService) {
         private readonly DatabaseService _databaseService = databaseService;
         private readonly SyncService _syncService = syncService;
@@ -98,6 +99,27 @@ namespace ArenaVirtual.Services {
         public Task<Usuario?> ObterUsuarioPorClientAppIdAsync(Guid clientAppId) {
             // Repassa a chamada para o DatabaseService
             return _databaseService.ObterUsuarioPorClientAppIdAsync(clientAppId);
+        }
+
+        // --- NOVO MÉTODO ADICIONADO ---
+        /// <summary>
+        /// Obtém um dicionário de mapeamento ClientAppId do Usuário -> Nome do Usuário para uma lista de IDs.
+        /// Este método é chamado a partir da ViewModel.
+        /// </summary>
+        /// <param name="userIds">Lista de ClientAppIds (Guid) dos usuários a serem buscados.</param>
+        /// <returns>Dicionário onde a chave é o ClientAppId (Guid) e o valor é o Nome (string).</returns>
+        public async Task<Dictionary<Guid, string>> ObterNomesUsuariosPorIdsAsync(List<Guid> userIds) {
+            if (userIds == null || !userIds.Any()) {
+                return new Dictionary<Guid, string>();
+            }
+
+            // Chama o método de busca em lote no DatabaseService
+            var usuarios = await _databaseService.ObterUsuariosPorIdsAsync(userIds);
+
+            // Converte a lista de usuários para um Dicionário (ClientAppId -> Nome)
+            var arbitrosMap = usuarios.ToDictionary(u => u.ClientAppId, u => u.Nome);
+
+            return arbitrosMap;
         }
     }
 }

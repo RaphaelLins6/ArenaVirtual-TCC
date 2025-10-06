@@ -219,7 +219,33 @@ namespace ArenaVirtual.Services {
 
         public AsyncTableQuery<Usuario> GetUsuarioTable() => _database.Table<Usuario>();
 
+        // 🟢 NOVO MÉTODO PARA O UsuarioService (para buscar nomes de árbitros em massa)
+        /// <summary>
+        /// Busca uma lista de usuários pelos seus ClientAppIds no banco de dados.
+        /// </summary>
+        /// <param name="userIds">Lista de ClientAppIds (Guid) dos usuários a serem buscados.</param>
+        public async Task<List<Usuario>> ObterUsuariosPorIdsAsync(List<Guid> userIds) {
+            if (userIds == null || !userIds.Any()) {
+                return new List<Usuario>();
+            }
+
+            // Converte a lista de GUIDs para uma lista de strings para uso na query SQL
+            var stringIds = userIds.Select(id => id.ToString()).ToList();
+
+            // Constrói a string de placeholders (@0, @1, ...) para evitar injeção de SQL
+            // Nota: SQLite.NET não suporta Where(ids.Contains(u.ClientAppId)) diretamente para GUIDs,
+            // então usamos a QueryAsync com placeholders para otimizar.
+            var placeholders = string.Join(",", stringIds.Select((_, i) => $"@{i}"));
+
+            string query = $"SELECT * FROM Usuario WHERE ClientAppId IN ({placeholders})";
+
+            // Executa a consulta, passando os IDs como parâmetros.
+            return await _database.QueryAsync<Usuario>(query, stringIds.ToArray());
+        }
+
         // --- Métodos de Campeonato ---
+
+        // ... (o restante dos seus métodos de Campeonato, Time, Convite, etc., que mantive intactos)
 
         public async Task<int> InserirCampeonatoAsync(Campeonato campeonato) {
             var existente = await _database.Table<Campeonato>().Where(c => c.Nome == campeonato.Nome && c.DataInicio == campeonato.DataInicio).FirstOrDefaultAsync();
@@ -305,8 +331,8 @@ namespace ArenaVirtual.Services {
         public async Task<List<Time>> ObterTimesAceitosAsync(int campeonatoId) {
             try {
                 var campeonato = await _database.Table<Campeonato>()
-                                                     .Where(c => c.Id == campeonatoId)
-                                                     .FirstOrDefaultAsync();
+                                                    .Where(c => c.Id == campeonatoId)
+                                                    .FirstOrDefaultAsync();
 
                 if (campeonato == null) {
                     return new List<Time>();
@@ -354,19 +380,19 @@ namespace ArenaVirtual.Services {
         public async Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId) {
             // Este método puxa TODOS os tipos de convite (Time e Arbitro) pendentes para o campeonato
             return await _database.Table<Convite>()
-                                     .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
-                                                 c.Status == StatusConvite.Pendente)
-                                     .ToListAsync();
+                                         .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
+                                                     c.Status == StatusConvite.Pendente)
+                                         .ToListAsync();
         }
 
         // 2. Sobrecarga com 2 argumentos (ADICIONADO para resolver o erro CS1501)
         public async Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId, TipoConvite tipo) {
             Debug.WriteLine($"[DatabaseService] ObterConvitesPendentesAsync - Tipo: {tipo}");
             return await _database.Table<Convite>()
-                                     .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
-                                                 c.Status == StatusConvite.Pendente &&
-                                                 c.Tipo == tipo)
-                                     .ToListAsync();
+                                         .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
+                                                     c.Status == StatusConvite.Pendente &&
+                                                     c.Tipo == tipo)
+                                         .ToListAsync();
         }
 
         public async Task<List<Convite>> ObterConvitesAceitosPorCampeonatoAsync(Guid campeonatoClientAppId) {

@@ -235,4 +235,9 @@ public class SyncService {
         await unsyncedItemsTask;
         return (IList)((dynamic)unsyncedItemsTask).Result;
     }
+
+    public async Task SyncData() {
+        // Chamada imediata para o método principal de sincronização com um IProgress vazio
+        await SyncAsync(new Progress<string>());
+    }
 }

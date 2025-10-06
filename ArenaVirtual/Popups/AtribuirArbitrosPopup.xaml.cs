@@ -5,111 +5,194 @@ using ArenaVirtual.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Threading.Tasks;
+using System;
+using Microsoft.Maui.Controls;
+using System.Diagnostics;
 
-// 1. A classe precisa implementar INotifyPropertyChanged para que o Binding do XAML funcione
 public partial class AtribuirArbitrosPopup : ContentPage, INotifyPropertyChanged {
 
-    // 2. Implementação da interface
+    public event EventHandler<Usuario> ArbitroAnexado;
+
     public event PropertyChangedEventHandler PropertyChanged;
 
-    // Campos privados originais (mantidos por segurança)
+    // Campos privados
     private readonly Campeonato _campeonato;
     private readonly Jogo _jogo;
     private readonly IAlertService _alertService;
     private readonly DatabaseService _databaseService;
     private readonly SyncService _syncService;
+    private readonly UsuarioService _usuarioService;
 
-    // 3. Propriedades públicas para o Data Binding no XAML
-
-    // A propriedade JogoAtual será usada para exibir TimeA e TimeB
+    // Propriedade para o jogo atual (usada no construtor e binding)
     public Jogo JogoAtual { get; private set; }
 
-    // A lista precisa ser ObservableCollection para atualizar automaticamente o CollectionView
+    // Propriedades para Binding
     public ObservableCollection<Usuario> ArbitrosDisponiveis { get; set; }
 
-    // Propriedade para controlar o item selecionado na CollectionView
-    public Usuario ArbitroSelecionado { get; set; } // Ajuste o tipo se for diferente de Usuario
+    private Usuario _arbitroSelecionado;
+    public Usuario ArbitroSelecionado {
+        get => _arbitroSelecionado;
+        set {
+            if (_arbitroSelecionado != value) {
+                _arbitroSelecionado = value;
+                OnPropertyChanged();
+                // Log de debug para verificar quando a propriedade é setada
+                Debug.WriteLine($"[DEBUG-SELEÇÃO] Arbitro Selecionado ATUALIZADO para: {value?.Nome ?? "NULL"}");
+            }
+        }
+    }
 
-    // Propriedade para controlar o ActivityIndicator (IsBusy)
     private bool _isBusy;
     public bool IsBusy {
         get => _isBusy;
         set {
             _isBusy = value;
-            OnPropertyChanged(); // Notifica a UI sobre a mudança
+            OnPropertyChanged();
         }
     }
 
+    // Construtor com injeção de dependência
     public AtribuirArbitrosPopup(Campeonato campeonato, Jogo jogo,
-                                 IAlertService alertService, DatabaseService databaseService,
-                                 SyncService syncService) {
+                IAlertService alertService, DatabaseService databaseService,
+                SyncService syncService,
+                UsuarioService usuarioService) {
         InitializeComponent();
 
-        // Atribuições originais (mantidas por segurança)
         _campeonato = campeonato;
         _jogo = jogo;
         _alertService = alertService;
         _databaseService = databaseService;
         _syncService = syncService;
+        _usuarioService = usuarioService;
 
-        // ----------------------------------------------
-        // CORREÇÃO: Inicializa os dados e define o BindingContext para 'this'
-        // ----------------------------------------------
         JogoAtual = jogo;
         ArbitrosDisponiveis = new ObservableCollection<Usuario>();
 
-        // O próprio Code-Behind é o contexto de ligação
         this.BindingContext = this;
 
         // Inicia o carregamento dos árbitros
-        CarregarArbitrosAsync(campeonato.Id);
+        CarregarArbitrosAsync(_campeonato.ClientAppId);
     }
 
-    // Método para carregar os árbitros (substitua pela sua lógica real)
-    private async void CarregarArbitrosAsync(int campeonatoId) {
-        IsBusy = true;
+    // --- Lógica de Seleção via evento do RadioButton ---
+    private void RadioButton_CheckedChanged(object sender, CheckedChangedEventArgs e) {
+        if (e.Value) {
+            if (sender is RadioButton rb && rb.BindingContext is Usuario usuario) {
+                Debug.WriteLine($"[DEBUG-RADIO] RadioButton marcado para: {usuario.Nome}");
 
-        // --- COLAR SUA LÓGICA DE ACESSO AO BANCO DE DADOS AQUI ---
-        // Exemplo: var arbitros = await _databaseService.GetArbitrosParaCampeonato(campeonatoId);
-
-        // Simulação de carregamento de dados (remova isto na sua implementação final)
-        await Task.Delay(1000); // Simula um atraso de rede/banco
-        var arbitros = new List<Usuario>
-        {
-            new Usuario { Nome = "João Árbitro", Localizacao = "Quadra Central" },
-            new Usuario { Nome = "Maria Juíza", Localizacao = "Ginásio Lateral" },
-            new Usuario { Nome = "Pedro Bandeirinha", Localizacao = "Campo B" }
-        };
-
-        foreach (var a in arbitros) {
-            ArbitrosDisponiveis.Add(a);
+                MainThread.BeginInvokeOnMainThread(() => {
+                    // Garante que o ArbitroSelecionado seja atualizado corretamente.
+                    ArbitroSelecionado = usuario;
+                });
+            }
         }
-        // ---------------------------------------------------------
-
-        IsBusy = false;
     }
+    // --------------------------------------------------------------------------
+
+    // --- Lógica de Dados ---
+
+    // Método para carregar os árbitros inscritos 
+    private async void CarregarArbitrosAsync(Guid campeonatoClientAppId) {
+        MainThread.BeginInvokeOnMainThread(() => IsBusy = true);
+        ArbitrosDisponiveis.Clear();
+
+        try {
+            var convitesAceitos = await _databaseService
+                        .ObterConvitesAceitosPorCampeonatoAsync(campeonatoClientAppId);
+
+            if (convitesAceitos == null || !convitesAceitos.Any()) {
+                return;
+            }
+
+            var arbitroClientAppIds = convitesAceitos
+              .Where(c => c.Tipo == TipoConvite.InscricaoArbitro)
+              .Select(c => c.UsuarioClientAppId).ToList();
+
+
+            if (arbitroClientAppIds.Any()) {
+                var tarefas = arbitroClientAppIds
+                  .Select(id => _usuarioService.ObterUsuarioPorClientAppIdAsync(id))
+                  .ToList();
+
+                var arbitros = await Task.WhenAll(tarefas);
+
+                MainThread.BeginInvokeOnMainThread(() => {
+                    foreach (var arbitro in arbitros.Where(a => a != null)) {
+                        ArbitrosDisponiveis.Add(arbitro);
+                    }
+
+                    // =======================================================
+                    // PRÉ-SELEÇÃO: Usa HasValue e Value (Correto para Guid?)
+                    // =======================================================
+                    if (JogoAtual.ArbitroId.HasValue && JogoAtual.ArbitroId.Value != Guid.Empty) {
+
+                        // Compara JogoAtual.ArbitroId.Value (Guid) com ArbitrosDisponiveis.ClientAppId (Guid)
+                        var arbitroAtual = ArbitrosDisponiveis.FirstOrDefault(a => a.ClientAppId == JogoAtual.ArbitroId.Value);
+
+                        if (arbitroAtual != null) {
+                            ArbitroSelecionado = arbitroAtual;
+                            Debug.WriteLine($"[DEBUG-PRESELECAO] Árbitro '{arbitroAtual.Nome}' pré-selecionado no Pop-up.");
+                        }
+                    }
+                    // =======================================================
+                });
+            }
+
+        } catch (Exception ex) {
+            Debug.WriteLine($"ERRO ao carregar árbitros: {ex.Message}");
+            await _alertService.DisplayAlert("Erro", "Ocorreu um erro ao carregar a lista de árbitros.", "OK");
+        } finally {
+            MainThread.BeginInvokeOnMainThread(() => IsBusy = false);
+        }
+    }
+
+    // --- Métodos de Botão ---
 
     private async void Cancelar_Clicked(object sender, EventArgs e) {
-        await Application.Current.MainPage.Navigation.PopModalAsync();
+        await Navigation.PopModalAsync();
     }
 
     private async void ConfirmarAtribuicao_Clicked(object sender, EventArgs e) {
+        Debug.WriteLine($"[DEBUG-CONFIRM] CONFIRMAR CLICADO. ArbitroSelecionado FINAL: {ArbitroSelecionado?.Nome ?? "NULL"}");
+
         if (ArbitroSelecionado == null) {
-            // Exemplo de uso do serviço injetado
             await _alertService.DisplayAlert("Atenção", "Selecione um árbitro antes de confirmar.", "OK");
             return;
         }
 
-        // Lógica de atribuição do árbitro ao jogo
-        // _jogo.ArbitroId = ArbitroSelecionado.Id;
-        // await _databaseService.SaveJogo(_jogo);
-        // await _syncService.SyncData();
+        try {
+            // 1. Persistência Local (Atualiza o objeto 'Jogo' que está na lista principal)
 
-        await _alertService.DisplayAlert("Sucesso", $"Árbitro {ArbitroSelecionado.Nome} atribuído com sucesso.", "OK");
-        await Application.Current.MainPage.Navigation.PopModalAsync();
+            // ATRIBUIÇÃO: Atribui ClientAppId (Guid) a ArbitroId (Guid?)
+            _jogo.ArbitroId = ArbitroSelecionado.ClientAppId;
+            _jogo.NomeArbitro = ArbitroSelecionado.Nome;
+
+            _jogo.UpdatedAt = DateTime.UtcNow;
+            _jogo.IsSynced = false;
+            await _databaseService.AtualizarJogoAsync(_jogo);
+
+            // 2. Sincronização com o Servidor
+            await _syncService.SyncData();
+
+            // 3. Notificação da Tela Anterior e Fechamento
+            ArbitroAnexado?.Invoke(this, ArbitroSelecionado);
+            Debug.WriteLine($"[DEBUG-CONFIRM] Evento ArbitroAnexado disparado para: {ArbitroSelecionado.Nome}");
+
+            await Navigation.PopModalAsync();
+
+            // 4. Alerta de Sucesso
+            await _alertService.DisplayAlert("Sucesso", $"Árbitro {ArbitroSelecionado.Nome} atribuído com sucesso.", "OK");
+
+        } catch (Exception ex) {
+            Debug.WriteLine($"ERRO ao atribuir árbitro: {ex.Message}");
+            await _alertService.DisplayAlert("Erro", "Ocorreu um erro ao salvar a atribuição do árbitro.", "OK");
+        }
     }
 
-    // Método auxiliar para notificar a mudança de propriedade
+    // --- Implementação INotifyPropertyChanged ---
+
     protected void OnPropertyChanged([CallerMemberName] string propertyName = null) {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

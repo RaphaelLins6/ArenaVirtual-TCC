@@ -135,12 +135,36 @@ namespace ArenaVirtual.Models {
             set => _updatedAt = value;
         }
 
-        // **A propriedade SenhaHash não deve ser sincronizada,
-        // então ela deve ser gerenciada fora da lógica de SetProperty para evitar que a flag de sincronização seja alterada.**
+        // A propriedade SenhaHash não deve ser sincronizada,
+        // então ela é gerenciada fora da lógica de SetProperty.
         public string SenhaHash {
             get => _senhaHash;
             set => _senhaHash = value;
         }
+
+        // --- CORREÇÃO DE LÓGICA: SOBRECARGA PARA COMPARAÇÃO POR ID (CRUCIAL) ---
+
+        /// <summary>
+        /// Compara dois objetos Usuario com base no seu identificador único ClientAppId.
+        /// Essencial para que CollectionView.SelectedItem, o RadioButton e o Converter funcionem.
+        /// </summary>
+        public override bool Equals(object obj) {
+            if (obj is Usuario other) {
+                // A comparação é feita pela chave única
+                return this.ClientAppId.Equals(other.ClientAppId);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Retorna o código hash baseado no ClientAppId, necessário para a correta comparação de objetos.
+        /// </summary>
+        public override int GetHashCode() {
+            // Usa o hash da ID única
+            return ClientAppId.GetHashCode();
+        }
+
+        // ----------------------------------------------------------------
 
         public Usuario() { }
 

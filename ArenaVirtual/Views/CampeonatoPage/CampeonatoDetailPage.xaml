@@ -390,22 +390,24 @@
 
                                         <Button
                                             Margin="0,10,0,0"
-                                            BackgroundColor="#5cb85c"
+                                            BackgroundColor="Green"
                                             Clicked="OnAnexarArbitrosClicked"
                                             CommandParameter="{Binding .}"
                                             CornerRadius="5"
                                             FontSize="14"
+                                            IsEnabled="{Binding BotaoArbitroHabilitado}"
                                             IsVisible="{Binding IsOrganizador}"
+                                            MaximumWidthRequest="250"
                                             Style="{StaticResource BotaoPrincipal}"
-                                            Text="Anexar Árbitros"
+                                            Text="{Binding TextoBotaoArbitro}"
                                             TextColor="White"
                                             VerticalOptions="End" />
-
                                     </VerticalStackLayout>
                                 </Frame>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
+
                 </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>

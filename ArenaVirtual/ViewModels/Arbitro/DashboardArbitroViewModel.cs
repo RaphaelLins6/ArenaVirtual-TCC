@@ -16,7 +16,7 @@ namespace ArenaVirtual.ViewModels.Arbitro {
 
         // 🛑 REMOVER: O ID será obtido dinamicamente.
         // private readonly int _arbitroIdLogado = 1; 
-        private int _arbitroIdLogado; // O ID real do Árbitro no banco local
+        private Guid _arbitroIdLogado; // O ID real do Árbitro no banco local
 
         [ObservableProperty]
         private bool _estaOcupado;
@@ -34,15 +34,18 @@ namespace ArenaVirtual.ViewModels.Arbitro {
 
         // 🛑 NOVO: Método auxiliar para obter o ID do árbitro logado
         private async Task<bool> ObterArbitroIdLogadoAsync() {
-            // Usa o método GetArbitroAtualAsync que adicionamos ao SessaoService
             var arbitro = await _sessaoService.GetArbitroAtualAsync();
 
             if (arbitro != null) {
-                _arbitroIdLogado = arbitro.Id;
+                // ✅ CORREÇÃO: Use o ID de sincronização (Guid)
+                // Você deve ter uma propriedade ClientAppId ou similar no seu modelo Arbitro.
+                _arbitroIdLogado = arbitro.ClientAppId; // <<< MUDANÇA AQUI (DE arbitro.Id para arbitro.ClientAppId)
+
                 Debug.WriteLine($"[DashboardArbitroViewModel] Árbitro logado ID: {_arbitroIdLogado}");
                 return true;
             } else {
-                _arbitroIdLogado = 0; // Garante que o ID é 0 se não estiver logado
+                // ✅ CORREÇÃO: Use Guid.Empty como valor padrão para Guid
+                _arbitroIdLogado = Guid.Empty;
                 Debug.WriteLine("[DashboardArbitroViewModel] Nenhum árbitro logado encontrado.");
                 return false;
             }
@@ -55,7 +58,7 @@ namespace ArenaVirtual.ViewModels.Arbitro {
 
             try {
                 // 🛑 CORREÇÃO: Obter o ID dinamicamente
-                if (!await ObterArbitroIdLogadoAsync() || _arbitroIdLogado == 0) {
+                if (!await ObterArbitroIdLogadoAsync() || _arbitroIdLogado == Guid.Empty) {
                     Debug.WriteLine("[DashboardArbitroViewModel] Não foi possível carregar as partidas: Árbitro não logado.");
                     return;
                 }
