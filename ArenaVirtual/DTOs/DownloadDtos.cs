@@ -5,6 +5,21 @@ namespace ArenaVirtual.DTOs {
     // DTOs de download, com o Id sendo do tipo int
     // pois é o que a API envia.
 
+    public class JogoDownloadDto {
+        public int Id { get; set; }
+        public Guid ClientAppId { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public DateTime DataHora { get; set; }
+        public string Local { get; set; }
+        public int PlacarA { get; set; }
+        public int PlacarB { get; set; }
+        public int? TimeAId { get; set; }
+        public int? TimeBId { get; set; }
+        public int? CampeonatoId { get; set; }
+        public int? ArbitroId { get; set; }
+        public int Rodada { get; set; }
+        public JogoStatus Status { get; set; }
+    }
     public class CampeonatoDownloadDto {
         public int Id { get; set; }
         public Guid ClientAppId { get; set; }
@@ -32,11 +47,11 @@ namespace ArenaVirtual.DTOs {
     }
 
     public class UsuarioDownloadDto {
-        public int Id { get; set; }
-        public Guid ClientAppId { get; set; }
+        public int? Id { get; set; }
+        public Guid? ClientAppId { get; set; }
         public string? Nome { get; set; }
         public string? Email { get; set; }
-        public TipoPerfil Perfil { get; set; }
+        public TipoPerfil? Perfil { get; set; }
         public string? ImagemPath { get; set; }
         public string? Localizacao { get; set; }
         public string? Telefone { get; set; }
@@ -48,8 +63,8 @@ namespace ArenaVirtual.DTOs {
         public double? Peso { get; set; }
         public double? Altura { get; set; }
         public string? FaixaOrcamentoPatrocinio { get; set; }
-        public int? TimeId { get; set; } // O Id do time no servidor
-        public DateTime UpdatedAt { get; set; }
+        public int? TimeId { get; set; } 
+        public DateTime? UpdatedAt { get; set; }
         public bool IsSynced { get; set; }
     }
 

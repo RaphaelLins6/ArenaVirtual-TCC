@@ -1,5 +1,4 @@
-﻿// Arquivo: ArenaVirtualAPI/Models/Jogo.cs
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,7 +12,11 @@ namespace ArenaVirtualAPI.Models {
         public int TimeAId { get; set; }
         public int TimeBId { get; set; }
         public int CampeonatoId { get; set; }
-        public int ArbitroId { get; set; }
+
+        // --- Correções/Adições para Arbitro ---
+        public int? ArbitroId { get; set; } // Permitindo nulo se o árbitro for opcional no BD
+        public Guid? ArbitroClientAppId { get; set; } // Chave universal para sincronização
+        // ---------------------------------------
 
         [Required, MaxLength(255)]
         public string Local { get; set; } = string.Empty;
@@ -31,6 +34,9 @@ namespace ArenaVirtualAPI.Models {
 
         [ForeignKey("CampeonatoId")]
         public Campeonato? Campeonato { get; set; }
+
+        [ForeignKey("ArbitroId")]
+        public Usuario? Arbitro { get; set; }
 
         public DateTime UpdatedAt { get; set; }
         public bool IsSynced { get; set; }

@@ -18,6 +18,7 @@ namespace ArenaVirtual.Models {
         private int derrotas;
         private int empates;
         private int posicao;
+        public int? IdServidor { get; set; }
 
         private int? capitaoId;
         private Guid? capitaoClientAppId;

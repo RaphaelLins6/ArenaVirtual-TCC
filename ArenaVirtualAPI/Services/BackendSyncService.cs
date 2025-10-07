@@ -1,13 +1,6 @@
 ﻿using ArenaVirtualAPI.Data;
 using ArenaVirtualAPI.DTOs;
-using ArenaVirtualAPI.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using System;
 
 namespace ArenaVirtualAPI.Services {
     public class BackendSyncService {
@@ -32,72 +25,71 @@ namespace ArenaVirtualAPI.Services {
             _logger.LogInformation("[BackendSyncService] Iniciando processamento de uploads em etapas sequenciais.");
             var idMappings = new Dictionary<string, Dictionary<Guid, int>>();
 
-            // Fase 1: Processa e mapeia IDs para entidades primárias ou independentes
-            // As entidades de `Campeonatos` e `Times` agora são processadas aqui.
-            if (data.Usuarios != null) {
-                idMappings["Usuario"] = await _syncServiceFactory.ProcessAndMapItemsAsync(data.Usuarios, "Usuario");
-                _logger.LogInformation("[BackendSyncService] Concluído o mapeamento de IDs para Usuario.");
-            }
-            if (data.Times != null) {
-                idMappings["Time"] = await _syncServiceFactory.ProcessAndMapItemsAsync(data.Times, "Time");
-                _logger.LogInformation("[BackendSyncService] Concluído o mapeamento de IDs para Time.");
-            }
-            if (data.Campeonatos != null) {
-                idMappings["Campeonato"] = await _syncServiceFactory.ProcessAndMapItemsAsync(data.Campeonatos, "Campeonato");
-                _logger.LogInformation("[BackendSyncService] Concluído o mapeamento de IDs para Campeonato.");
-            }
+            // NOVO: Define a ordem de processamento para garantir que as entidades principais existam antes das de relacionamento.
+            var mainEntitiesOrder = new List<string>
+            {
+                "Usuario",
+                "Campeonato",
+                "Time",
+                "Jogo",
+                "Convite"
+            };
 
-            // As entidades `Convites` e `UsuarioCampeonatoFavoritos` também precisam ter seu ID mapeado.
-            if (data.Convites != null) {
-                idMappings["Convite"] = await _syncServiceFactory.ProcessAndMapItemsAsync(data.Convites, "Convite");
-                _logger.LogInformation("[BackendSyncService] Concluído o mapeamento de IDs para Convite.");
-            }
-            if (data.UsuarioCampeonatoFavoritos != null) {
-                idMappings["UsuarioCampeonatoFavorito"] = await _syncServiceFactory.ProcessAndMapItemsAsync(data.UsuarioCampeonatoFavoritos, "UsuarioCampeonatoFavorito");
-                _logger.LogInformation("[BackendSyncService] Concluído o mapeamento de IDs para UsuarioCampeonatoFavorito.");
-            }
+            var relationshipEntitiesOrder = new List<string>
+            {
+                "UsuarioCampeonatoFavorito"
+            };
 
-            // A chamada para `_context.SaveChangesAsync()` é removida daqui.
+            // --- FASE 1: Processa e mapeia IDs para entidades principais ---
+            foreach (var entityName in mainEntitiesOrder) {
+                // Usando reflexão para obter a lista de DTOs correspondente (ex: data.Usuarios)
+                if (data.GetType().GetProperty($"{entityName}s")?.GetValue(data) is IEnumerable<ISyncableDto> dtoList && dtoList.Any()) {
+                    idMappings[entityName] = await _syncServiceFactory.ProcessAndMapItemsAsync(dtoList, entityName);
+                    _logger.LogInformation($"[BackendSyncService] Concluído o mapeamento de IDs para {entityName}.");
+                }
+            }
 
             _logger.LogInformation("[BackendSyncService] Entidades primárias adicionadas ao contexto. Iniciando a resolução de chaves estrangeiras.");
 
-            // Fase 2: Atualiza as chaves estrangeiras
-            if (data.Usuarios != null) {
-                await _syncServiceFactory.UpdateForeignKeysAsync(data.Usuarios, "Usuario", idMappings);
+            // --- FASE 2: Atualiza as chaves estrangeiras das entidades principais ---
+            foreach (var entityName in mainEntitiesOrder) {
+                if (data.GetType().GetProperty($"{entityName}s")?.GetValue(data) is IEnumerable<ISyncableDto> dtoList && dtoList.Any()) {
+                    await _syncServiceFactory.UpdateForeignKeysAsync(dtoList, entityName, idMappings);
+                }
             }
-            if (data.Times != null) {
-                await _syncServiceFactory.UpdateForeignKeysAsync(data.Times, "Time", idMappings);
-            }
-            if (data.Campeonatos != null) {
-                await _syncServiceFactory.UpdateForeignKeysAsync(data.Campeonatos, "Campeonato", idMappings);
-            }
-            if (data.Convites != null) {
-                await _syncServiceFactory.UpdateForeignKeysAsync(data.Convites, "Convite", idMappings);
-            }
-            if (data.UsuarioCampeonatoFavoritos != null) {
-                await _syncServiceFactory.UpdateForeignKeysAsync(data.UsuarioCampeonatoFavoritos, "UsuarioCampeonatoFavorito", idMappings);
+
+            // --- FASE 3: Processamento especial para entidades de relacionamento ---
+            // Agora que todos os IDs principais estão mapeados, processamos as entidades de relacionamento.
+            foreach (var entityName in relationshipEntitiesOrder) {
+                if (data.GetType().GetProperty($"{entityName}s")?.GetValue(data) is IEnumerable<ISyncableDto> dtoList && dtoList.Any()) {
+                    _logger.LogInformation($"[BackendSyncService] Processando entidade de relacionamento: {entityName}.");
+                    // Este método agora deve CRIAR a entidade e resolver suas FKs de uma só vez.
+                    await _syncServiceFactory.UpdateForeignKeysAsync(dtoList, entityName, idMappings);
+                }
             }
 
             _logger.LogInformation("[BackendSyncService] Chaves estrangeiras resolvidas. Salvando todas as alterações.");
 
-            // Fase 3: Salva todas as alterações pendentes no banco de dados.
+            // --- FASE 4: Salva todas as alterações pendentes no banco de dados. ---
             await _context.SaveChangesAsync();
             _logger.LogInformation("[BackendSyncService] Todas as alterações salvas no banco de dados.");
         }
 
         private async Task GetUpdatesFromAllEntitiesAsync(AllUpdatesDto allUpdates, DateTime lastSyncTime) {
             _logger.LogInformation("[BackendSyncService] Iniciando busca por atualizações.");
+
             var entityOrder = new List<string> {
-                "Usuario", "Campeonato", "Time", "Convite", "UsuarioCampeonatoFavorito"
+                "Usuario", "Campeonato", "Time", "Jogo", "Convite", "UsuarioCampeonatoFavorito"
             };
 
             foreach (var entityName in entityOrder) {
                 try {
                     var updates = await _syncServiceFactory.GetUpdatesAsync<ISyncableDto>(entityName, lastSyncTime);
                     if (updates != null && updates.Any()) {
-                        var jsonUpdates = updates.Select(u => JsonSerializer.SerializeToElement(u)).ToArray();
-                        var jsonArray = JsonDocument.Parse($"[{string.Join(",", jsonUpdates.Select(e => e.ToString()))}]").RootElement;
-                        allUpdates.UpdatedItems[entityName] = jsonArray;
+                        // Serializa a lista de DTOs para um JsonElement que representa um array JSON.
+                        var jsonElement = JsonSerializer.SerializeToElement(updates);
+                        allUpdates.UpdatedItems[entityName] = jsonElement;
+
                         _logger.LogInformation($"[BackendSyncService] Encontradas {updates.Count()} atualizações para {entityName}.");
                     } else {
                         _logger.LogInformation($"[BackendSyncService] Nenhuma atualização encontrada para {entityName}.");

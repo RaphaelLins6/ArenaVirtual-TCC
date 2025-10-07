@@ -10,6 +10,7 @@ namespace ArenaVirtualAPI.Data {
         public DbSet<Campeonato> Campeonatos { get; set; }
         public DbSet<Time> Times { get; set; }
         public DbSet<Convite> Convites { get; set; }
+        public DbSet<Jogo> Jogos { get; set; }
         public DbSet<UsuarioCampeonatoFavorito> UsuarioCampeonatoFavoritos { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             modelBuilder.Entity<Campeonato>()
@@ -35,6 +36,10 @@ namespace ArenaVirtualAPI.Data {
                 .WithMany(c => c.Times)
                 .HasForeignKey(t => t.CampeonatoId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UsuarioCampeonatoFavorito>()
+                .HasIndex(ucf => new { ucf.UsuarioId, ucf.CampeonatoId })
+                .IsUnique();
 
             base.OnModelCreating(modelBuilder);
         }

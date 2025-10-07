@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Adiciona serviços ao contêiner
 builder.Services.AddControllers();
 
-// Adiciona o DbContext com SQL Server, usando a string de conexão correta
+// Adiciona o DbContext com SQL Server
 builder.Services.AddDbContext<ApiDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -18,14 +18,10 @@ builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 
-// Este é o código para registrar o gerador de Swagger com a documentação da API.
 builder.Services.AddSwaggerGen(c => {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "ArenaVirtualAPI", Version = "v1" });
 });
 
-// ==========================================================
-// CONFIGURAÇÃO DO KESTREL PARA HABILITAR HTTP E HTTPS
-// ==========================================================
 builder.WebHost.ConfigureKestrel(options => {
     options.ListenAnyIP(5067);
     options.ListenAnyIP(7117, listenOptions => {
@@ -40,16 +36,21 @@ builder.Services.AddScoped<IBackendService<Usuario, UsuarioSyncDto>, UsuarioServ
 builder.Services.AddScoped<IBackendService<Campeonato, CampeonatoSyncDto>, CampeonatoService>();
 builder.Services.AddScoped<IBackendService<Time, TimeSyncDto>, TimeService>();
 builder.Services.AddScoped<IBackendService<Convite, ConviteSyncDto>, ConviteService>();
-builder.Services.AddScoped<IBackendService<UsuarioCampeonatoFavorito, UsuarioCampeonatoFavoritoSyncDto>, UsuarioCampeonatoFavoritoService>();
-builder.Services.AddScoped<IBackendSyncServiceFactory, BackendSyncServiceFactory>();
+builder.Services.AddScoped<IBackendService<Jogo, JogoSyncDto>, JogoService>();
 
+// Registro corrigido para UsuarioCampeonatoFavoritoService
+builder.Services.AddScoped<UsuarioCampeonatoFavoritoService>();
+builder.Services.AddScoped<IBackendService<UsuarioCampeonatoFavorito, UsuarioCampeonatoFavoritoSyncDto>>(sp =>
+    sp.GetRequiredService<UsuarioCampeonatoFavoritoService>());
+
+// Registro da Factory e do Serviço principal
+builder.Services.AddScoped<IBackendSyncServiceFactory, BackendSyncServiceFactory>();
 builder.Services.AddScoped<BackendSyncService>();
 
 var app = builder.Build();
 
 // Configura o pipeline HTTP
 if (app.Environment.IsDevelopment()) {
-    // Habilita a página de exceção detalhada em ambiente de desenvolvimento
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI(c => {

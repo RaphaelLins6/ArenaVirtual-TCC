@@ -34,7 +34,8 @@ namespace ArenaVirtual.Services {
             Console.WriteLine($"[ApiService] Base URL configurada: {_httpClient.BaseAddress}");
         }
 
-        public async Task<Dictionary<string, Dictionary<Guid, int>>> PostDataAsync<T>(string typeName, T data) {
+        // CORRIGIDO: Altera o tipo de retorno da chave GUID para string para evitar erros de desserialização.
+        public async Task<Dictionary<string, Dictionary<string, int>>> PostDataAsync<T>(string typeName, T data) {
             try {
                 // A URL agora é fixa e aponta para o endpoint geral de sincronização,
                 // que recebe o AllUploadsDto.
@@ -44,9 +45,8 @@ namespace ArenaVirtual.Services {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 Debug.WriteLine($"[ApiService] JSON recebido de {typeName}: {responseContent}");
 
-                // O retorno agora é um dicionário aninhado que mapeia
-                // o nome da entidade para o seu próprio mapeamento de IDs.
-                return JsonSerializer.Deserialize<Dictionary<string, Dictionary<Guid, int>>>(responseContent);
+                // CORRIGIDO: Desserializa para Dictionary<string, Dictionary<string, int>>
+                return JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, int>>>(responseContent);
             } catch (HttpRequestException ex) {
                 Console.WriteLine($"[ApiService] Falha na requisição (UPLOAD {typeName}): {ex.Message}");
                 // A exceção deve ser tratada pelo SyncService.

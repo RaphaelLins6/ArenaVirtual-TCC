@@ -6,16 +6,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 namespace ArenaVirtualAPI.Services {
     public class BackendSyncServiceFactory : IBackendSyncServiceFactory {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<BackendSyncServiceFactory> _logger;
 
-        private readonly Dictionary<string, (Type DtoType, Type EntityType)> _typeMappings = new() {
+        private readonly Dictionary<string, (Type DtoType, Type EntityType)> _typeMappings = new()
+        {
             { "Usuario", (typeof(UsuarioSyncDto), typeof(Usuario)) },
             { "Campeonato", (typeof(CampeonatoSyncDto), typeof(Campeonato)) },
             { "Time", (typeof(TimeSyncDto), typeof(Time)) },
+            { "Jogo", (typeof(JogoSyncDto), typeof(Jogo)) },
             { "Convite", (typeof(ConviteSyncDto), typeof(Convite)) },
             { "UsuarioCampeonatoFavorito", (typeof(UsuarioCampeonatoFavoritoSyncDto), typeof(UsuarioCampeonatoFavorito)) }
         };
@@ -25,6 +28,7 @@ namespace ArenaVirtualAPI.Services {
             _logger = logger;
         }
 
+        // CORREÇÃO: O método implementa a interface com <T>, mas usa reflexão para chamar o método correto.
         public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync<T>(IEnumerable<T> items, string entityType) where T : ISyncableDto {
             if (items == null || !items.Any()) {
                 return new Dictionary<Guid, int>();
@@ -34,12 +38,21 @@ namespace ArenaVirtualAPI.Services {
                 throw new ArgumentException($"Tipo de entidade '{entityType}' não suportado.");
             }
 
-            var serviceType = typeof(IBackendService<,>).MakeGenericType(types.EntityType, types.DtoType);
-            dynamic service = _serviceProvider.GetRequiredService(serviceType);
+            // Obtém o serviço específico (ex: UsuarioService)
+            object service = _serviceProvider.GetRequiredService(typeof(IBackendService<,>).MakeGenericType(types.EntityType, types.DtoType));
 
-            return await service.ProcessAndMapItemsAsync(items);
+            // Encontra o método "ProcessAndMapItemsAsync" no serviço
+            var method = service.GetType().GetMethod("ProcessAndMapItemsAsync");
+            if (method == null) {
+                throw new InvalidOperationException($"Método 'ProcessAndMapItemsAsync' não encontrado no serviço para a entidade '{entityType}'.");
+            }
+
+            // Invoca o método usando reflexão. O binder da reflexão consegue lidar com a conversão de tipos da lista.
+            var task = (Task<Dictionary<Guid, int>>)method.Invoke(service, new object[] { items });
+            return await task;
         }
 
+        // CORREÇÃO: Mesma lógica de reflexão aplicada aqui.
         public async Task UpdateForeignKeysAsync<T>(IEnumerable<T> items, string entityType, Dictionary<string, Dictionary<Guid, int>> idMappings) where T : ISyncableDto {
             if (items == null || !items.Any()) {
                 return;
@@ -50,10 +63,14 @@ namespace ArenaVirtualAPI.Services {
                 return;
             }
 
-            var serviceType = typeof(IBackendService<,>).MakeGenericType(types.EntityType, types.DtoType);
-            dynamic service = _serviceProvider.GetRequiredService(serviceType);
+            object service = _serviceProvider.GetRequiredService(typeof(IBackendService<,>).MakeGenericType(types.EntityType, types.DtoType));
+            var method = service.GetType().GetMethod("UpdateForeignKeysAsync");
+            if (method == null) {
+                throw new InvalidOperationException($"Método 'UpdateForeignKeysAsync' não encontrado no serviço para a entidade '{entityType}'.");
+            }
 
-            await service.UpdateForeignKeysAsync(items, idMappings);
+            var task = (Task)method.Invoke(service, new object[] { items, idMappings });
+            await task;
         }
 
         public async Task<IEnumerable<T>> GetUpdatesAsync<T>(string entityType, DateTime lastSyncTime) where T : ISyncableDto {
@@ -64,7 +81,11 @@ namespace ArenaVirtualAPI.Services {
             var serviceType = typeof(IBackendService<,>).MakeGenericType(types.EntityType, types.DtoType);
             dynamic service = _serviceProvider.GetRequiredService(serviceType);
 
-            return await service.GetUpdatedSinceAsync(lastSyncTime);
+            // A chamada com 'dynamic' funciona aqui porque o tipo de retorno já é genérico e não há ambiguidade.
+            var result = await service.GetUpdatedSinceAsync(lastSyncTime);
+
+            // O resultado já é do tipo correto (IEnumerable<TDto>), que pode ser convertido para IEnumerable<T>
+            return (IEnumerable<T>)result;
         }
     }
 }

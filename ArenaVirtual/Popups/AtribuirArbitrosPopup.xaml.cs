@@ -163,30 +163,45 @@ public partial class AtribuirArbitrosPopup : ContentPage, INotifyPropertyChanged
         }
 
         try {
-            // 1. Persistência Local (Atualiza o objeto 'Jogo' que está na lista principal)
+            // --- PONTO DE DEBUG A: VALORES ANTES DE ATRIBUIR ---
+            Debug.WriteLine($"[A] POPUP (Antes Atrib.): Jogo.Id: {_jogo.Id} | ArbitroId anterior: {_jogo.ArbitroId} | IsSynced: {_jogo.IsSynced}");
 
-            // ATRIBUIÇÃO: Atribui ClientAppId (Guid) a ArbitroId (Guid?)
+            // 1. ATRIBUIÇÃO DOS DADOS NO MODELO
             _jogo.ArbitroId = ArbitroSelecionado.ClientAppId;
             _jogo.NomeArbitro = ArbitroSelecionado.Nome;
 
+            // 2. MARCAÇÃO PARA SINCRONIZAÇÃO E ATUALIZAÇÃO DA UI
             _jogo.UpdatedAt = DateTime.UtcNow;
             _jogo.IsSynced = false;
-            await _databaseService.AtualizarJogoAsync(_jogo);
+            _jogo.NotifyArbitroStatusChanged(); // Notifica as mudanças (texto do botão/nome)
 
-            // 2. Sincronização com o Servidor
-            await _syncService.SyncData();
+            // --- PONTO DE DEBUG B: VALORES ANTES DE CHAMAR O SALVAMENTO ---
+            Debug.WriteLine($"[B] POPUP (Antes Salvar): Jogo.Id: {_jogo.Id} | ArbitroId NOVO: {_jogo.ArbitroId} | IsSynced NOVO: {_jogo.IsSynced}");
 
-            // 3. Notificação da Tela Anterior e Fechamento
-            ArbitroAnexado?.Invoke(this, ArbitroSelecionado);
-            Debug.WriteLine($"[DEBUG-CONFIRM] Evento ArbitroAnexado disparado para: {ArbitroSelecionado.Nome}");
+            // 3. PERSISTÊNCIA LOCAL
+            int resultadoUpdate = await _databaseService.SalvarJogoAsync(_jogo);
 
-            await Navigation.PopModalAsync();
+            // --- PONTO DE DEBUG C: RESULTADO DO SALVAMENTO LOCAL ---
+            Debug.WriteLine($"[C] POPUP (Após Salvar): Resultado Salvar (InsertOrReplace): {resultadoUpdate}.");
 
-            // 4. Alerta de Sucesso
+            // 4. Feedback Visual (ANTES DE FECHAR A POP-UP)
             await _alertService.DisplayAlert("Sucesso", $"Árbitro {ArbitroSelecionado.Nome} atribuído com sucesso.", "OK");
 
+            // 5. Fechamento da Pop-up (Usando GoToAsync com parâmetro)
+            // Isso notifica o CampeonatoDetailViewModel para recarregar a tabela.
+            await Shell.Current.GoToAsync("..", new Dictionary<string, object> {
+                { "jogoAtualizado", true }
+            });
+
+            // 6. SINCRONIZAÇÃO REMOTA (Disparado em segundo plano)
+            Task.Run(async () => {
+                Debug.WriteLine($"[D] POPUP (Sync): Iniciando SyncData em background.");
+                await _syncService.SyncData();
+                Debug.WriteLine($"[D] POPUP (Sync): SyncData finalizado.");
+            });
+
         } catch (Exception ex) {
-            Debug.WriteLine($"ERRO ao atribuir árbitro: {ex.Message}");
+            Debug.WriteLine($"[!!! ERRO EXCEPTION !!!] ERRO ao atribuir árbitro: {ex.Message}");
             await _alertService.DisplayAlert("Erro", "Ocorreu um erro ao salvar a atribuição do árbitro.", "OK");
         }
     }

@@ -11,6 +11,25 @@ namespace ArenaVirtualAPI.DTOs {
         public bool IsSynced { get; set; }
     }
 
+    public class JogoSyncDto : ISyncableDto {
+        public Guid ClientAppId { get; set; }
+        public int Id { get; set; }
+
+        // As FKs devem ser Guid ClientAppIds
+        public Guid TimeAClientAppId { get; set; }
+        public Guid TimeBClientAppId { get; set; }
+        public Guid CampeonatoClientAppId { get; set; }
+        public Guid? ArbitroClientAppId { get; set; } // O foco da correção
+
+        public string? Local { get; set; }
+        public DateTime DataHora { get; set; }
+        public int PlacarA { get; set; }
+        public int PlacarB { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
+        public bool IsSynced { get; set; }
+    }
+
     public class ConviteSyncDto : ISyncableDto {
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }

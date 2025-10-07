@@ -13,6 +13,7 @@ namespace ArenaVirtual.Models {
         public int Id { get; set; }
         [NotNull, Unique]
         public Guid ClientAppId { get; set; }
+        public int? IdServidor { get; set; }
 
         private string? _nome;
         private string? _local;

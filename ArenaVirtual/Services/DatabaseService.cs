@@ -1,4 +1,5 @@
-﻿using ArenaVirtual.Models;
+using ArenaVirtual.Models;
+using ArenaVirtual.DTOs;
 using SQLite;
 using System.Diagnostics;
 using System.Linq;
@@ -7,23 +8,17 @@ using System.Threading.Tasks;
 using System;
 
 namespace ArenaVirtual.Services {
+    public class DatabaseService {
+        private readonly SQLiteAsyncConnection _database;
 
-    public class DatabaseService(string dbPath) {
-        private readonly SQLiteAsyncConnection _database = new(dbPath);
-
-        private class TimeClientAppIdProjection {
-            public Guid TimeClientAppId { get; set; }
+        public DatabaseService(string dbPath) {
+            _database = new SQLiteAsyncConnection(dbPath);
         }
 
-        // NOVO: Classe auxiliar para obter apenas o ID do campeonato
-        private class CampeonatoIdProjection {
-            public int CampeonatoId { get; set; }
-        }
-
-        // --- Inicialização ---
+        private class TimeClientAppIdProjection { public Guid TimeClientAppId { get; set; } }
+        private class CampeonatoIdProjection { public int CampeonatoId { get; set; } }
 
         public async Task InitializeAsync() {
-            // Criação de todas as tabelas
             await _database.CreateTableAsync<Usuario>();
             await _database.CreateTableAsync<Campeonato>();
             await _database.CreateTableAsync<Time>();
@@ -37,527 +32,436 @@ namespace ArenaVirtual.Services {
             await _database.CreateTableAsync<Inscricao>();
         }
 
-        public AsyncTableQuery<T> GetTable<T>() where T : new() {
-            return _database.Table<T>();
-        }
+        public AsyncTableQuery<T> GetTable<T>() where T : new() => _database.Table<T>();
 
-        // --- MÉTODOS DE EXCLUSÃO EM CASCATA (NOVOS) ---
-
+        // --- MÉTODOS DE EXCLUSÃO ---
         public async Task DeletarTimeComCascataAsync(Time time) {
             Debug.WriteLine($"[DeletarTimeComCascataAsync] Excluindo time ClientAppId: {time.ClientAppId}");
-
-            // 1. Remover Convites (solicitações para este time)
-            await _database.Table<Convite>()
-                .Where(c => c.TimeClientAppId == time.ClientAppId)
-                .DeleteAsync();
-
-            // 2. Remover Jogadores (setar TimeClientAppId para null nos Usuários)
-            // Assumimos que o campo TimeClientAppId em Usuario é nullable (Guid?)
-            // Buscamos os usuários que estão neste time
-            var membros = await _database.Table<Usuario>()
-                .Where(u => u.TimeClientAppId == time.ClientAppId)
-                .ToListAsync();
-
-            foreach (var membro in membros) {
-                membro.TimeClientAppId = null;
-                // Não precisa de await aqui, usaremos o UpdateAllAsync ou transação
-            }
-
-            // Atualiza os usuários (remove eles do time)
+            await _database.Table<Convite>().Where(c => c.TimeClientAppId == time.ClientAppId).DeleteAsync();
+            var membros = await _database.Table<Usuario>().Where(u => u.TimeClientAppId == time.ClientAppId).ToListAsync();
+            foreach (var membro in membros) { membro.TimeClientAppId = null; }
             await _database.UpdateAllAsync(membros);
-
-            // 3. Deletar o Time
             await _database.DeleteAsync(time);
         }
 
         public async Task DeletarCampeonatoComCascataAsync(Campeonato campeonato) {
             Debug.WriteLine($"[DeletarCampeonatoComCascataAsync] Excluindo campeonato ClientAppId: {campeonato.ClientAppId}");
-
-            // 1. Deletar Entidades de Partida/Jogo (e Estatísticas/Avaliações relacionadas)
-            // Partida usa CampeonatoId (int)
-            var partidas = await _database.Table<Jogo>()
-                .Where(p => p.CampeonatoId == campeonato.Id)
-                .ToListAsync();
-
+            var partidas = await _database.Table<Jogo>().Where(p => p.CampeonatoId == campeonato.Id).ToListAsync();
             foreach (var partida in partidas) {
-                // CORREÇÃO DEFINITIVA: 
-                // EstatisticaPartida, AvaliacaoArbitro e Jogo se ligam à Partida através do JogoId, 
-                // e não PartidaId. Vamos assumir que o JogoId é o link principal.
-
-                // Localiza o Jogo correspondente a esta Partida (Partida contém o CampeonatoId e Data/Local, Jogo é o evento com Arbitro/Placar)
-                var jogo = await _database.Table<Jogo>()
-                    .Where(j => j.Id == partida.Id) // Assumindo que Partida.Id é o Jogo.Id (ou Partida.Id é a FK em Jogo).
-                    .FirstOrDefaultAsync();
-
+                var jogo = await _database.Table<Jogo>().Where(j => j.Id == partida.Id).FirstOrDefaultAsync();
                 if (jogo != null) {
-                    // Estatística e Avaliação se ligam pelo JogoId (int)
-                    await _database.Table<EstatisticaPartida>()
-                        .Where(e => e.JogoId == jogo.Id)
-                        .DeleteAsync();
-
-                    await _database.Table<AvaliacaoArbitro>()
-                        .Where(a => a.JogoId == jogo.Id)
-                        .DeleteAsync();
-
-                    // Deleta o registro de Jogo
+                    await _database.Table<EstatisticaPartida>().Where(e => e.JogoId == jogo.Id).DeleteAsync();
+                    await _database.Table<AvaliacaoArbitro>().Where(a => a.JogoId == jogo.Id).DeleteAsync();
                     await _database.DeleteAsync(jogo);
                 }
             }
-
-            // Deleta os registros de Partida
             await _database.DeleteAsync(partidas);
-
-            // 2. Deletar Convites e Inscrições relacionados
-            await _database.Table<Convite>()
-                .Where(c => c.CampeonatoClientAppId == campeonato.ClientAppId)
-                .DeleteAsync();
-
-            await _database.Table<Inscricao>()
-                .Where(i => i.CampeonatoClientAppId == campeonato.ClientAppId)
-                .DeleteAsync();
-
-            // 3. Deletar Favoritos relacionados
-            await _database.Table<UsuarioCampeonatoFavorito>()
-                .Where(f => f.CampeonatoClientAppId == campeonato.ClientAppId)
-                .DeleteAsync();
-
-            // 4. Deletar o próprio Campeonato
+            await _database.Table<Convite>().Where(c => c.CampeonatoClientAppId == campeonato.ClientAppId).DeleteAsync();
+            await _database.Table<Inscricao>().Where(i => i.CampeonatoClientAppId == campeonato.ClientAppId).DeleteAsync();
+            await _database.Table<UsuarioCampeonatoFavorito>().Where(f => f.CampeonatoClientAppId == campeonato.ClientAppId).DeleteAsync();
             await _database.DeleteAsync(campeonato);
         }
 
-
-        // --- Métodos de Usuário ---
-
+        // --- MÉTODOS DE USUÁRIO ---
         public Task<int> InserirUsuarioAsync(Usuario usuario) => _database.InsertAsync(usuario);
-        public Task<Usuario?> ObterUsuarioPorEmailAsync(string email) =>
-            _database.Table<Usuario>().Where(u => u.Email == email).FirstOrDefaultAsync();
+        public Task<Usuario?> ObterUsuarioPorEmailAsync(string email) => _database.Table<Usuario>().Where(u => u.Email == email).FirstOrDefaultAsync();
         public Task<List<Usuario>> ListarUsuariosAsync() => _database.Table<Usuario>().ToListAsync();
-        public async Task<bool> EmailExisteAsync(string email) {
-            var usuario = await _database.Table<Usuario>().Where(u => u.Email == email).FirstOrDefaultAsync();
-            return usuario != null;
-        }
-        public async Task<int> AtualizarUsuarioAsync(Usuario usuario) {
-            Debug.WriteLine($"[DatabaseService] Atualizando usuário ID: {usuario.Id}, ImagemPath: {usuario.ImagemPath}");
-            var existingUser = await _database.FindAsync<Usuario>(usuario.Id);
-            if (existingUser != null) {
-                Debug.WriteLine($"[DatabaseService] Usuário existente no DB (ID={existingUser.Id}): ImagemPath={existingUser.ImagemPath}");
-            } else {
-                Debug.WriteLine($"[DatabaseService] Usuário com ID {usuario.Id} NÃO encontrado no DB para atualização.");
-                return 0;
-            }
-            int rowsAffected = await _database.UpdateAsync(usuario);
-            Debug.WriteLine($"[DatabaseService] UpdateAsync retornou: {rowsAffected} linhas afetadas.");
-            return rowsAffected;
-        }
-
-        /// MÉTODO DELETAR USUÁRIO REFATORADO COM EXCLUSÃO EM CASCATA
+        public async Task<bool> EmailExisteAsync(string email) => await _database.Table<Usuario>().Where(u => u.Email == email).CountAsync() > 0;
+        public Task<int> AtualizarUsuarioAsync(Usuario usuario) => _database.UpdateAsync(usuario);
         public async Task<int> DeletarUsuarioAsync(Usuario usuario) {
-            if (usuario == null || usuario.Id <= 0) {
-                Debug.WriteLine("[DeletarUsuarioAsync] Tentativa de deletar usuário nulo ou sem ID.");
-                return 0;
-            }
-
-            int totalExcluido = 0;
-
-            // 1. Lógica de Exclusão em Cascata para Organizador
+            if (usuario == null || usuario.Id == 0) return 0;
             if (usuario.Perfil == TipoPerfil.Organizador) {
-                Debug.WriteLine($"[DeletarUsuarioAsync] Iniciando exclusão em cascata para Organizador ID: {usuario.Id}");
-
-                // A. Deletar Times criados por este organizador
-                // CORREÇÃO: Time usa AdminClientAppId para rastrear o criador.
-                var times = await _database.Table<Time>()
-                    .Where(t => t.AdminClientAppId == usuario.ClientAppId)
-                    .ToListAsync();
-
-                foreach (var time in times) {
-                    await DeletarTimeComCascataAsync(time);
-                }
-                Debug.WriteLine($"[DeletarUsuarioAsync] {times.Count} times excluídos em cascata.");
-
-                // B. Deletar Campeonatos criados por este organizador
-                // CORREÇÃO: Campeonato usa OrganizadorId.
-                var campeonatos = await _database.Table<Campeonato>()
-                    .Where(c => c.OrganizadorId == usuario.Id)
-                    .ToListAsync();
-
-                foreach (var campeonato in campeonatos) {
-                    await DeletarCampeonatoComCascataAsync(campeonato);
-                }
-                Debug.WriteLine($"[DeletarUsuarioAsync] {campeonatos.Count} campeonatos excluídos em cascata.");
+                var times = await _database.Table<Time>().Where(t => t.AdminClientAppId == usuario.ClientAppId).ToListAsync();
+                foreach (var time in times) await DeletarTimeComCascataAsync(time);
+                var campeonatos = await _database.Table<Campeonato>().Where(c => c.OrganizadorId == usuario.Id).ToListAsync();
+                foreach (var campeonato in campeonatos) await DeletarCampeonatoComCascataAsync(campeonato);
             }
-
-            // 2. Lógica de Limpeza de Referências para todos os perfis
-
-            // A. Remover de times (Se for atleta, árbitro ou patrocinador que estava em um time)
-            if (usuario.TimeClientAppId.HasValue) {
-                // A remoção de TimeClientAppId é feita antes de deletar o usuário.
-                usuario.TimeClientAppId = null;
-            }
-
-            // B. Deletar Convites/Solicitações em que o usuário estava envolvido (como solicitante ou alvo de convite)
-            await _database.Table<Convite>()
-                .Where(c => c.SolicitanteClientAppId == usuario.ClientAppId || c.UsuarioClientAppId == usuario.ClientAppId)
-                .DeleteAsync();
-
-            // 3. Deletar o registro principal do Usuário
-            totalExcluido = await _database.DeleteAsync(usuario);
-            Debug.WriteLine($"[DeletarUsuarioAsync] Registro do Usuário ID {usuario.Id} excluído: {totalExcluido} linha(s).");
-
-            return totalExcluido;
+            if (usuario.TimeClientAppId.HasValue) usuario.TimeClientAppId = null;
+            await _database.Table<Convite>().Where(c => c.SolicitanteClientAppId == usuario.ClientAppId || c.UsuarioClientAppId == usuario.ClientAppId).DeleteAsync();
+            return await _database.DeleteAsync(usuario);
         }
-
-        public Task<Usuario?> ObterUsuarioPorClientAppIdAsync(Guid clientAppId) =>
-            _database.Table<Usuario>().Where(u => u.ClientAppId == clientAppId).FirstOrDefaultAsync();
-
-        public Task<List<Usuario>> GetMembrosByTimeClientAppIdAsync(Guid timeClientAppId) =>
-            _database.Table<Usuario>().Where(u => u.TimeClientAppId == timeClientAppId).ToListAsync();
-
-        public async Task<Guid?> GetUsuarioClientAppIdById(int id) {
-            var usuario = await _database.Table<Usuario>().Where(u => u.Id == id).FirstOrDefaultAsync();
-            return usuario?.ClientAppId;
-        }
-
+        public Task<Usuario?> ObterUsuarioPorClientAppIdAsync(Guid clientAppId) => _database.Table<Usuario>().Where(u => u.ClientAppId == clientAppId).FirstOrDefaultAsync();
+        public Task<List<Usuario>> GetMembrosByTimeClientAppIdAsync(Guid timeClientAppId) => _database.Table<Usuario>().Where(u => u.TimeClientAppId == timeClientAppId).ToListAsync();
+        public async Task<Guid?> GetUsuarioClientAppIdById(int id) => (await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.Id == id))?.ClientAppId;
         public AsyncTableQuery<Usuario> GetUsuarioTable() => _database.Table<Usuario>();
-
-        // 🟢 NOVO MÉTODO PARA O UsuarioService (para buscar nomes de árbitros em massa)
-        /// <summary>
-        /// Busca uma lista de usuários pelos seus ClientAppIds no banco de dados.
-        /// </summary>
-        /// <param name="userIds">Lista de ClientAppIds (Guid) dos usuários a serem buscados.</param>
         public async Task<List<Usuario>> ObterUsuariosPorIdsAsync(List<Guid> userIds) {
-            if (userIds == null || !userIds.Any()) {
-                return new List<Usuario>();
-            }
-
-            // Converte a lista de GUIDs para uma lista de strings para uso na query SQL
-            var stringIds = userIds.Select(id => id.ToString()).ToList();
-
-            // Constrói a string de placeholders (@0, @1, ...) para evitar injeção de SQL
-            // Nota: SQLite.NET não suporta Where(ids.Contains(u.ClientAppId)) diretamente para GUIDs,
-            // então usamos a QueryAsync com placeholders para otimizar.
-            var placeholders = string.Join(",", stringIds.Select((_, i) => $"@{i}"));
-
-            string query = $"SELECT * FROM Usuario WHERE ClientAppId IN ({placeholders})";
-
-            // Executa a consulta, passando os IDs como parâmetros.
-            return await _database.QueryAsync<Usuario>(query, stringIds.ToArray());
+            if (userIds == null || !userIds.Any()) return new List<Usuario>();
+            return await _database.Table<Usuario>().Where(u => userIds.Contains(u.ClientAppId)).ToListAsync();
         }
 
-        // --- Métodos de Campeonato ---
-
-        // ... (o restante dos seus métodos de Campeonato, Time, Convite, etc., que mantive intactos)
-
-        public async Task<int> InserirCampeonatoAsync(Campeonato campeonato) {
-            var existente = await _database.Table<Campeonato>().Where(c => c.Nome == campeonato.Nome && c.DataInicio == campeonato.DataInicio).FirstOrDefaultAsync();
-            if (existente != null) return 0;
-            return await _database.InsertAsync(campeonato);
-        }
+        // --- MÉTODOS DE CAMPEONATO ---
+        public async Task<int> InserirCampeonatoAsync(Campeonato campeonato) => await _database.Table<Campeonato>().Where(c => c.Nome == campeonato.Nome && c.DataInicio == campeonato.DataInicio).CountAsync() > 0 ? 0 : await _database.InsertAsync(campeonato);
         public Task<List<Campeonato>> ListarCampeonatosAsync() => _database.Table<Campeonato>().ToListAsync();
         public Task<int> AtualizarCampeonatoAsync(Campeonato item) => _database.UpdateAsync(item);
-        // O antigo DeletarCampeonatoAsync pode ser mantido ou substituído pelo cascata,
-        // mas para uso geral, o simples delete pode ser necessário.
         public Task<int> DeletarCampeonatoAsync(Campeonato item) => _database.DeleteAsync(item);
-
-        public Task<Campeonato?> ObterCampeonatoPorCapitaoClientAppIdAsync(Guid capitaoClientAppId) =>
-            _database.Table<Campeonato>().Where(c => c.CapitaoClientAppId == capitaoClientAppId).FirstOrDefaultAsync();
+        public Task<Campeonato?> ObterCampeonatoPorCapitaoClientAppIdAsync(Guid capitaoClientAppId) => _database.Table<Campeonato>().Where(c => c.CapitaoClientAppId == capitaoClientAppId).FirstOrDefaultAsync();
         public async Task<HashSet<int>> ObterIdsCampeonatosDoTimeAceitoAsync(Guid timeClientAppId) {
-            try {
-                // 1. Busca todos os convites/inscrições onde o time está aceito
-                var convitesAceitos = await _database.Table<Convite>()
-                    .Where(c => c.TimeClientAppId == timeClientAppId
-                               && c.Status == StatusConvite.Aceito
-                               && c.Tipo == TipoConvite.InscricaoCampeonato)
-                    .ToListAsync();
-
-                if (!convitesAceitos.Any()) {
-                    return new HashSet<int>();
-                }
-
-                // 2. Extrai os ClientAppIds dos Campeonatos
-                var campeonatoClientAppIds = convitesAceitos
-                    .Select(c => c.CampeonatoClientAppId)
-                    .ToHashSet();
-
-                // 3. Busca os objetos Campeonato usando os ClientAppIds
-                var campeonatos = await _database.Table<Campeonato>()
-                    .Where(c => campeonatoClientAppIds.Contains(c.ClientAppId))
-                    .ToListAsync();
-
-                // 4. Projeta para extrair apenas o ID
-                var campeonatoIds = campeonatos
-                    .Select(c => c.Id)
-                    .ToList();
-
-                return campeonatoIds.ToHashSet();
-
-            } catch (Exception ex) {
-                Debug.WriteLine($"[DatabaseService] ERRO ao obter IDs de campeonatos do time aceito: {ex.Message}");
-                return new HashSet<int>();
-            }
+            var convitesAceitos = await _database.Table<Convite>().Where(c => c.TimeClientAppId == timeClientAppId && c.Status == StatusConvite.Aceito && c.Tipo == TipoConvite.InscricaoCampeonato).ToListAsync();
+            if (!convitesAceitos.Any()) return new HashSet<int>();
+            var campClientAppIds = convitesAceitos.Select(c => c.CampeonatoClientAppId).ToHashSet();
+            var campeonatos = await _database.Table<Campeonato>().Where(c => campClientAppIds.Contains(c.ClientAppId)).ToListAsync();
+            return campeonatos.Select(c => c.Id).ToHashSet();
         }
 
-        // --- Métodos de Time ---
-
+        // --- MÉTODOS DE TIME ---
         public Task<int> InserirTimeAsync(Time item) => _database.InsertAsync(item);
         public Task<List<Time>> ListarTimesAsync() => _database.Table<Time>().ToListAsync();
         public Task<int> AtualizarTimeAsync(Time item) => _database.UpdateAsync(item);
-        // Os dois métodos abaixo fazem o mesmo, pode-se manter um, mas seguindo o original:
         public Task<int> DeletarTimeAsync(Time item) => _database.DeleteAsync(item);
         public Task<int> ExcluirTimeAsync(Time time) => _database.DeleteAsync(time);
-
-        public async Task<Time?> GetTimeByClientAppIdAsync(Guid clientAppId) {
-            try {
-                return await _database.Table<Time>().FirstOrDefaultAsync(t => t.ClientAppId == clientAppId);
-            } catch (Exception ex) {
-                Debug.WriteLine($"[DatabaseService] Erro ao obter Time por ClientAppId: {ex.Message}");
-                return null;
-            }
-        }
-        public Task<Time?> GetTimeByIdAsync(int id) => _database.Table<Time>().Where(t => t.Id == id).FirstOrDefaultAsync();
-
-        public async Task<List<Time>> GetTimesPorCampeonatoAsync(Guid campeonatoClientAppId) {
-            try {
-                var times = await _database.Table<Time>()
-                                             .Where(t => t.CampeonatoClientAppId == campeonatoClientAppId)
-                                             .ToListAsync();
-                return times;
-            } catch (Exception ex) {
-                Debug.WriteLine($"[DatabaseService] Erro ao buscar times por campeonato: {ex.Message}");
-                return new List<Time>();
-            }
-        }
-
-        // ObterTimesAceitosAsync para usar a tabela Convite
+        public Task<Time?> GetTimeByClientAppIdAsync(Guid clientAppId) => _database.Table<Time>().FirstOrDefaultAsync(t => t.ClientAppId == clientAppId);
+        public Task<Time?> GetTimeByIdAsync(int id) => _database.Table<Time>().FirstOrDefaultAsync(t => t.Id == id);
+        public Task<List<Time>> GetTimesPorCampeonatoAsync(Guid campeonatoClientAppId) => _database.Table<Time>().Where(t => t.CampeonatoClientAppId == campeonatoClientAppId).ToListAsync();
         public async Task<List<Time>> ObterTimesAceitosAsync(int campeonatoId) {
-            try {
-                var campeonato = await _database.Table<Campeonato>()
-                                                    .Where(c => c.Id == campeonatoId)
-                                                    .FirstOrDefaultAsync();
-
-                if (campeonato == null) {
-                    return new List<Time>();
-                }
-
-                // CORREÇÃO: Usar os valores inteiros (int) das Enums
-                var idsAceitos = await _database.QueryAsync<TimeClientAppIdProjection>(
-                    "SELECT TimeClientAppId FROM Convite WHERE CampeonatoClientAppId = ? AND Status = ? AND Tipo = ?",
-                    campeonato.ClientAppId,
-                    (int)StatusConvite.Aceito,
-                    (int)TipoConvite.InscricaoCampeonato
-                );
-
-                var solicitacoesAceitas = idsAceitos
-                    .Select(p => p.TimeClientAppId)
-                    .ToHashSet();
-
-                if (solicitacoesAceitas.Count == 0) {
-                    Debug.WriteLine("[DatabaseService] Nenhuma solicitação 'Aceita' encontrada para este campeonato.");
-                    return new List<Time>();
-                }
-
-                // 3. Buscar os objetos Time usando os IDs encontrados
-                var timesAceitos = await _database.Table<Time>()
-                    .Where(t => solicitacoesAceitas.Contains(t.ClientAppId))
-                    .ToListAsync();
-
-                Debug.WriteLine($"[DatabaseService] Encontrados {timesAceitos.Count} times aceitos (via ObterTimesAceitosAsync).");
-
-                return timesAceitos;
-
-            } catch (Exception ex) {
-                Debug.WriteLine($"[DatabaseService] ERRO ao obter times aceitos: {ex.Message}");
-                return new List<Time>();
-            }
+            var campeonato = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.Id == campeonatoId);
+            if (campeonato == null) return new List<Time>();
+            var idsAceitos = await _database.QueryAsync<TimeClientAppIdProjection>("SELECT TimeClientAppId FROM Convite WHERE CampeonatoClientAppId = ? AND Status = ? AND Tipo = ?", campeonato.ClientAppId, (int)StatusConvite.Aceito, (int)TipoConvite.InscricaoCampeonato);
+            var solicitacoesAceitas = idsAceitos.Select(p => p.TimeClientAppId).ToHashSet();
+            if (!solicitacoesAceitas.Any()) return new List<Time>();
+            return await _database.Table<Time>().Where(t => solicitacoesAceitas.Contains(t.ClientAppId)).ToListAsync();
         }
 
-        // --- Métodos de Convite ---
-
-        // *******************************************************************
-        // MÉTODOS CORRIGIDOS E UNIFICADOS: A sobrecarga de 2 argumentos.
-        // *******************************************************************
-
-        // 1. Sobrecarga com 1 argumento (o método que já existia)
-        public async Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId) {
-            // Este método puxa TODOS os tipos de convite (Time e Arbitro) pendentes para o campeonato
-            return await _database.Table<Convite>()
-                                         .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
-                                                     c.Status == StatusConvite.Pendente)
-                                         .ToListAsync();
-        }
-
-        // 2. Sobrecarga com 2 argumentos (ADICIONADO para resolver o erro CS1501)
-        public async Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId, TipoConvite tipo) {
-            Debug.WriteLine($"[DatabaseService] ObterConvitesPendentesAsync - Tipo: {tipo}");
-            return await _database.Table<Convite>()
-                                         .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId &&
-                                                     c.Status == StatusConvite.Pendente &&
-                                                     c.Tipo == tipo)
-                                         .ToListAsync();
-        }
-
-        public async Task<List<Convite>> ObterConvitesAceitosPorCampeonatoAsync(Guid campeonatoClientAppId) {
-            try {
-                // Busca convites ACEITOS para ÁRBITROS em um CAMPEONATO específico.
-                return await _database.Table<Convite>()
-                    .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId
-                                 && c.Status == StatusConvite.Aceito
-                                 && c.Tipo == TipoConvite.InscricaoArbitro)
-                    .ToListAsync();
-            } catch (Exception ex) {
-                Debug.WriteLine($"[DatabaseService] ERRO ao obter convites aceitos por campeonato (Árbitros): {ex.Message}");
-                return new List<Convite>();
-            }
-        }
-
-        // *******************************************************************
-        // CORREÇÃO: Usando UsuarioClientAppId ao invés de ArbitroClientAppId
-        // *******************************************************************
-        public async Task<Convite?> ObterSolicitacaoPorArbitroECampeonatoAsync(string arbitroId, string campeonatoId, TipoConvite tipo) {
-
-            if (!Guid.TryParse(arbitroId, out var arbitroGuid) || !Guid.TryParse(campeonatoId, out var campeonatoGuid)) {
-                return null;
-            }
-
-            var solicitacao = await _database.Table<Convite>()
-                .Where(s => s.UsuarioClientAppId == arbitroGuid && // <-- CORRIGIDO AQUI
-                             s.CampeonatoClientAppId == campeonatoGuid &&
-                             s.Tipo == tipo)
-                .FirstOrDefaultAsync();
-
-            return solicitacao;
-        }
-
-        // Substitui o antigo AtualizarSolicitacaoCampeonatoAsync
-        public Task<int> AtualizarSolicitacaoCampeonatoAsync_Convite(Convite solicitacao) =>
-            _database.UpdateAsync(solicitacao);
-
+        // --- MÉTODOS DE CONVITE ---
+        public Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId) => _database.Table<Convite>().Where(c => c.CampeonatoClientAppId == campeonatoClientAppId && c.Status == StatusConvite.Pendente).ToListAsync();
+        public Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId, TipoConvite tipo) => _database.Table<Convite>().Where(c => c.CampeonatoClientAppId == campeonatoClientAppId && c.Status == StatusConvite.Pendente && c.Tipo == tipo).ToListAsync();
+        public Task<List<Convite>> ObterConvitesAceitosPorCampeonatoAsync(Guid campeonatoClientAppId) => _database.Table<Convite>().Where(c => c.CampeonatoClientAppId == campeonatoClientAppId && c.Status == StatusConvite.Aceito && c.Tipo == TipoConvite.InscricaoArbitro).ToListAsync();
+        public async Task<Convite?> ObterSolicitacaoPorArbitroECampeonatoAsync(string arbitroId, string campeonatoId, TipoConvite tipo) { if (!Guid.TryParse(arbitroId, out var arbitroGuid) || !Guid.TryParse(campeonatoId, out var campeonatoGuid)) return null; return await _database.Table<Convite>().FirstOrDefaultAsync(s => s.UsuarioClientAppId == arbitroGuid && s.CampeonatoClientAppId == campeonatoGuid && s.Tipo == tipo); }
+        public Task<int> AtualizarSolicitacaoCampeonatoAsync_Convite(Convite solicitacao) => _database.UpdateAsync(solicitacao);
         public Task<int> InserirConviteAsync(Convite convite) => _database.InsertAsync(convite);
         public Task<int> AtualizarConviteAsync(Convite convite) => _database.UpdateAsync(convite);
-
-        public Task<List<Convite>> ListarConvitesPendentesAsync(Guid timeClientAppId) =>
-            _database.Table<Convite>().Where(c => c.TimeClientAppId == timeClientAppId && c.Status == StatusConvite.Pendente).ToListAsync();
-
-        public Task<Convite?> ObterConvitePorUsuarioETimeAsync(Guid solicitanteClientAppId, Guid timeClientAppId) =>
-            _database.Table<Convite>().FirstOrDefaultAsync(c => c.SolicitanteClientAppId == solicitanteClientAppId && c.TimeClientAppId == timeClientAppId);
-
-        public Task<Convite?> ObterConvitePendenteDoUsuarioAsync(Guid solicitanteClientAppId) =>
-            _database.Table<Convite>()
-                .Where(c => c.SolicitanteClientAppId == solicitanteClientAppId && c.Status == StatusConvite.Pendente)
-                .FirstOrDefaultAsync();
-
-        public Task<int> DeletarConvitePendenteDoUsuarioAsync(Guid usuarioClientAppId) =>
-            _database.Table<Convite>()
-                .Where(c => c.SolicitanteClientAppId == usuarioClientAppId && c.Status == StatusConvite.Pendente)
-                .DeleteAsync();
-
-        public async Task<Convite?> ObterSolicitacaoPorTimeECampeonatoAsync(string timeId, string campeonatoId) {
-            if (!Guid.TryParse(timeId, out var timeGuid) || !Guid.TryParse(campeonatoId, out var campeonatoGuid)) {
-                return null;
-            }
-            var solicitacao = await _database.Table<Convite>()
-                .Where(s => s.TimeClientAppId == timeGuid &&
-                             s.CampeonatoClientAppId == campeonatoGuid &&
-                             s.Tipo == TipoConvite.InscricaoCampeonato)
-                .FirstOrDefaultAsync();
-            return solicitacao;
-        }
-
+        public Task<List<Convite>> ListarConvitesPendentesAsync(Guid timeClientAppId) => _database.Table<Convite>().Where(c => c.TimeClientAppId == timeClientAppId && c.Status == StatusConvite.Pendente).ToListAsync();
+        public Task<Convite?> ObterConvitePorUsuarioETimeAsync(Guid solicitanteClientAppId, Guid timeClientAppId) => _database.Table<Convite>().FirstOrDefaultAsync(c => c.SolicitanteClientAppId == solicitanteClientAppId && c.TimeClientAppId == timeClientAppId);
+        public Task<Convite?> ObterConvitePendenteDoUsuarioAsync(Guid solicitanteClientAppId) => _database.Table<Convite>().FirstOrDefaultAsync(c => c.SolicitanteClientAppId == solicitanteClientAppId && c.Status == StatusConvite.Pendente);
+        public Task<int> DeletarConvitePendenteDoUsuarioAsync(Guid usuarioClientAppId) => _database.Table<Convite>().Where(c => c.SolicitanteClientAppId == usuarioClientAppId && c.Status == StatusConvite.Pendente).DeleteAsync();
+        public async Task<Convite?> ObterSolicitacaoPorTimeECampeonatoAsync(string timeId, string campeonatoId) { if (!Guid.TryParse(timeId, out var timeGuid) || !Guid.TryParse(campeonatoId, out var campeonatoGuid)) return null; return await _database.Table<Convite>().FirstOrDefaultAsync(s => s.TimeClientAppId == timeGuid && s.CampeonatoClientAppId == campeonatoGuid && s.Tipo == TipoConvite.InscricaoCampeonato); }
         public AsyncTableQuery<Convite> GetConviteTable() => _database.Table<Convite>();
 
-        // --- Métodos de Inscricao ---
-
-        public Task<List<Inscricao>> ObterInscricoesPendentesPorCampeonatoAsync(Guid campeonatoClientAppId) =>
-        _database.Table<Inscricao>()
-            .Where(i => i.CampeonatoClientAppId == campeonatoClientAppId && i.Status == StatusConvite.Pendente.ToString())
-            .ToListAsync();
-
+        // --- MÉTODOS DE INSCRICAO ---
+        public Task<List<Inscricao>> ObterInscricoesPendentesPorCampeonatoAsync(Guid campeonatoClientAppId) => _database.Table<Inscricao>().Where(i => i.CampeonatoClientAppId == campeonatoClientAppId && i.Status == StatusConvite.Pendente.ToString()).ToListAsync();
         public Task<int> AtualizarInscricaoAsync(Inscricao inscricao) => _database.UpdateAsync(inscricao);
 
-        // --- Outros Métodos (Partida, AvaliacaoArbitro, etc) - Mantidos ---
-
-        public Task<int> InserirPartidaAsync(Jogo item) => _database.InsertAsync(item);
-        public Task<List<Jogo>> ListarPartidasAsync() => _database.Table<Jogo>().ToListAsync();
-        public Task<int> AtualizarPartidaAsync(Jogo item) => _database.UpdateAsync(item);
-        public Task<int> DeletarPartidaAsync(Jogo item) => _database.DeleteAsync(item);
-
+        // --- MÉTODOS DE ÁRBITROS ---
         public Task<int> InserirAvaliacaoArbitroAsync(AvaliacaoArbitro item) => _database.InsertAsync(item);
         public Task<List<AvaliacaoArbitro>> ListarAvaliacoesArbitroAsync() => _database.Table<AvaliacaoArbitro>().ToListAsync();
         public Task<int> AtualizarAvaliacaoArbitroAsync(AvaliacaoArbitro item) => _database.UpdateAsync(item);
         public Task<int> DeletarAvaliacaoArbitroAsync(AvaliacaoArbitro item) => _database.DeleteAsync(item);
 
+        // --- MÉTODOS DE PATROCÍNIOS ---
+        public Task<int> InserirPropostaPatrocinioAsync(PropostaPatrocinio item) => _database.InsertAsync(item);
+        public Task<List<PropostaPatrocinio>> ListarPropostasPatrocinioAsync() => _database.Table<PropostaPatrocinio>().ToListAsync();
+        public Task<int> AtualizarPropostaPatrocinioAsync(PropostaPatrocinio item) => _database.UpdateAsync(item);
+        public Task<int> DeletarPropostaPatrocinioAsync(PropostaPatrocinio item) => _database.DeleteAsync(item);
         public Task<int> InserirCampanhaPatrocinioAsync(CampanhaPatrocinio item) => _database.InsertAsync(item);
         public Task<List<CampanhaPatrocinio>> ListarCampanhasPatrocinioAsync() => _database.Table<CampanhaPatrocinio>().ToListAsync();
         public Task<int> AtualizarCampanhaPatrocinioAsync(CampanhaPatrocinio item) => _database.UpdateAsync(item);
         public Task<int> DeletarCampanhaPatrocinioAsync(CampanhaPatrocinio item) => _database.DeleteAsync(item);
 
+        // --- MÉTODOS DE Estatísticas ---
         public Task<int> InserirEstatisticaAsync(EstatisticaPartida item) => _database.InsertAsync(item);
         public Task<List<EstatisticaPartida>> ListarEstatisticasAsync() => _database.Table<EstatisticaPartida>().ToListAsync();
         public Task<int> AtualizarEstatisticaAsync(EstatisticaPartida item) => _database.UpdateAsync(item);
         public Task<int> DeletarEstatisticaAsync(EstatisticaPartida item) => _database.DeleteAsync(item);
+        public Task<List<EstatisticaPartida>> ObterEstatisticasPorJogoAsync(int jogoId) => _database.Table<EstatisticaPartida>().Where(e => e.JogoId == jogoId).ToListAsync();
+        public Task<List<EstatisticaPartida>> ObterEstatisticasPorAtletaAsync(int usuarioId) => _database.Table<EstatisticaPartida>().Where(e => e.UsuarioId == usuarioId).ToListAsync();
 
+        // --- MÉTODOS DE JOGOS ---
+        public async Task<int> AtualizarJogoAsync(Jogo item) {
+            // --- PONTO DE DEBUG E: DENTRO DO DATABASE SERVICE ---
+            Debug.WriteLine($"[E] DB SERVICE (Atualizar Jogo): Jogo.Id: {item.Id} | ArbitroId: {item.ArbitroId} | IsSynced: {item.IsSynced}");
+
+            if (item.Id <= 0) {
+                Debug.WriteLine("[E] DB SERVICE (Falha): Jogo.Id é inválido (<= 0). UpdateAsync retornará 0 (nenhuma linha atualizada).");
+                return 0;
+            }
+
+            // Executa a atualização no SQLite
+            int resultado = await _database.UpdateAsync(item);
+
+            // --- PONTO DE DEBUG F: FIM DO DATABASE SERVICE ---
+            Debug.WriteLine($"[F] DB SERVICE (Fim Atualizar): UpdateAsync retornou: {resultado}");
+            return resultado;
+        }
         public Task<int> InserirJogoAsync(Jogo item) => _database.InsertAsync(item);
         public Task<List<Jogo>> ListarJogosAsync() => _database.Table<Jogo>().ToListAsync();
-        public Task<int> AtualizarJogoAsync(Jogo item) => _database.UpdateAsync(item);
         public Task<int> DeletarJogoAsync(Jogo item) => _database.DeleteAsync(item);
+        public async Task<List<Jogo>> ObterJogosPorCampeonatoAsync(Guid campeonatoClientAppId) {
+            // Assumindo que o seu modelo Jogo tem a propriedade CampeonatoClientAppId
+            return await _database.Table<Jogo>()
+                .Where(j => j.CampeonatoClientAppId == campeonatoClientAppId)
+                .ToListAsync();
+        }
+        public async Task<int> SalvarJogoAsync(Jogo item) {
+            // --- PONTO DE DEBUG E: DENTRO DO DATABASE SERVICE ---
+            Debug.WriteLine($"[E] DB SERVICE (Salvar Jogo): Jogo.Id: {item.Id} | ClientAppId: {item.ClientAppId} | ArbitroId: {item.ArbitroId} | IsSynced: {item.IsSynced}");
 
-        public Task<int> InserirPropostaPatrocinioAsync(PropostaPatrocinio item) => _database.InsertAsync(item);
-        public Task<List<PropostaPatrocinio>> ListarPropostasPatrocinioAsync() => _database.Table<PropostaPatrocinio>().ToListAsync();
-        public Task<int> AtualizarPropostaPatrocinioAsync(PropostaPatrocinio item) => _database.UpdateAsync(item);
-        public Task<int> DeletarPropostaPatrocinioAsync(PropostaPatrocinio item) => _database.DeleteAsync(item);
+            // Use InsertOrReplaceAsync para garantir que a atualização funcione
+            // mesmo que o Id (PK int) esteja em 0, contanto que o ClientAppId (GUID) seja único.
+            int resultado = await _database.InsertOrReplaceAsync(item);
 
+            // --- PONTO DE DEBUG F: FIM DO DATABASE SERVICE ---
+            Debug.WriteLine($"[F] DB SERVICE (Fim Salvar): InsertOrReplaceAsync retornou: {resultado}");
+
+            // Se o resultado for 1, a operação foi um sucesso (inseriu ou substituiu 1 linha).
+            return resultado;
+        }
+
+        // --- MÉTODOS DE FAVORITOS ---
         public Task<int> InserirFavoritoAsync(UsuarioCampeonatoFavorito favorito) => _database.InsertAsync(favorito);
         public Task<int> DeletarFavoritoAsync(UsuarioCampeonatoFavorito favorito) => _database.DeleteAsync(favorito);
-        public Task<List<UsuarioCampeonatoFavorito>> ListarFavoritosPorUsuarioAsync(Guid usuarioClientAppId) =>
-            _database.Table<UsuarioCampeonatoFavorito>().Where(f => f.UsuarioClientAppId == usuarioClientAppId).ToListAsync();
-
-        // --- Métodos de Sincronização (ISyncable) - Mantidos ---
-
-        public Task<List<T>> GetUnsyncedItemsAsync<T>() where T : ISyncable, new() =>
-            _database.Table<T>().Where(i => !i.IsSynced).ToListAsync();
-
-        public async Task<List<T>> GetItemsByClientAppIdsAsync<T>(HashSet<Guid> clientAppIds) where T : ISyncable, new() {
-            return await _database.Table<T>().Where(i => clientAppIds.Contains(i.ClientAppId)).ToListAsync();
-        }
-
-        public async Task MarkAsSyncedAsync<T>(List<T> items) where T : ISyncable {
-            await _database.RunInTransactionAsync(conn => {
-                foreach (var item in items) {
-                    item.IsSynced = true;
-                    conn.Update(item);
-                }
-            });
-        }
-
-        public async Task SaveDownloadedItemsAsync<T>(List<T> items) where T : ISyncable, new() {
-            foreach (var item in items) {
-                var existingItem = await _database.Table<T>().Where(i => i.Id == item.Id).FirstOrDefaultAsync();
-                if (existingItem != null) {
-                    item.IsSynced = true;
-                    await _database.UpdateAsync(item);
-                } else {
-                    item.IsSynced = true;
-                    await _database.InsertAsync(item);
-                }
-            }
-        }
-
+        public Task<List<UsuarioCampeonatoFavorito>> ListarFavoritosPorUsuarioAsync(Guid usuarioClientAppId) => _database.Table<UsuarioCampeonatoFavorito>().Where(f => f.UsuarioClientAppId == usuarioClientAppId).ToListAsync();
+        
+        // --- MÉTODOS DE SINCRONIZAÇÃO ---
+        public Task<List<T>> GetUnsyncedItemsAsync<T>() where T : ISyncable, new() => _database.Table<T>().Where(i => !i.IsSynced).ToListAsync();
+        public Task<List<T>> GetItemsByClientAppIdsAsync<T>(HashSet<Guid> clientAppIds) where T : ISyncable, new() => _database.Table<T>().Where(i => clientAppIds.Contains(i.ClientAppId)).ToListAsync();
         public async Task UpdateIdAndMarkAsSyncedAsync<T>(T item, int serverId) where T : ISyncable, new() {
             var existingItem = await _database.Table<T>().Where(i => i.ClientAppId == item.ClientAppId).FirstOrDefaultAsync();
             if (existingItem != null) {
-                existingItem.Id = serverId;
+                var idServidorProperty = typeof(T).GetProperty("IdServidor");
+                if (idServidorProperty != null && idServidorProperty.CanWrite) {
+                    idServidorProperty.SetValue(existingItem, serverId);
+                }
                 existingItem.IsSynced = true;
                 await _database.UpdateAsync(existingItem);
             }
         }
 
-        public Task<List<EstatisticaPartida>> ObterEstatisticasPorJogoAsync(int jogoId) =>
-            _database.Table<EstatisticaPartida>()
-                .Where(e => e.JogoId == jogoId)
-                .ToListAsync();
+        #region Métodos de Sincronização de Download
 
-        public Task<List<EstatisticaPartida>> ObterEstatisticasPorAtletaAsync(int usuarioId) =>
-            _database.Table<EstatisticaPartida>()
-                .Where(e => e.UsuarioId == usuarioId)
-                .ToListAsync();
+        public async Task SaveDownloadedUsuariosAsync(IEnumerable<UsuarioDownloadDto> dtos) {
+            // Definindo valores padrão seguros
+            TipoPerfil perfilPadrao = TipoPerfil.Atleta;
+            GeneroEnum generoPadrao = GeneroEnum.Outro;
+    
+            // Valores padrão para numéricos double (se o modelo Usuario.cs for double não-anulável)
+            double pesoPadrao = 0.0;
+            double alturaPadrao = 0.0;
+
+            foreach (var dto in dtos) {
+                var existing = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.ClientAppId == dto.ClientAppId);
+                bool isNew = existing == null;
+                if (isNew) {
+                    existing = new Usuario { ClientAppId = dto.ClientAppId ?? Guid.Empty };
+                }
+
+                existing.IdServidor = dto.Id ?? 0; 
+        
+                existing.Nome = dto.Nome;
+                existing.Email = dto.Email;
+
+                existing.Perfil = dto.Perfil ?? perfilPadrao;
+
+                existing.ImagemPath = dto.ImagemPath;
+                existing.Localizacao = dto.Localizacao;
+                existing.Telefone = dto.Telefone;
+                existing.LinkRedeSocial = dto.LinkRedeSocial;
+                existing.DataNascimento = dto.DataNascimento;
+        
+                existing.Genero = dto.Genero ?? generoPadrao;
+        
+                existing.NomeEmpresa = dto.NomeEmpresa;
+                existing.CNPJ = dto.CNPJ;
+        
+                existing.Peso = dto.Peso ?? pesoPadrao; 
+                existing.Altura = dto.Altura ?? alturaPadrao;
+        
+                existing.FaixaOrcamentoPatrocinio = dto.FaixaOrcamentoPatrocinio;
+
+                if (dto.TimeId.HasValue && dto.TimeId > 0) {
+                    var time = await _database.Table<Time>().FirstOrDefaultAsync(t => t.IdServidor == dto.TimeId.Value);
+                    if (time != null) existing.TimeClientAppId = time.ClientAppId;
+                } else {
+                    existing.TimeClientAppId = null;
+                }
+
+                existing.IsSynced = true;
+                existing.UpdatedAt = dto.UpdatedAt ?? DateTime.UtcNow;
+
+                if (isNew) await _database.InsertAsync(existing);
+                else await _database.UpdateAsync(existing);
+            }
+        }
+
+        public async Task SaveDownloadedCampeonatosAsync(IEnumerable<CampeonatoDownloadDto> dtos) {
+            foreach (var dto in dtos) {
+                var existing = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.ClientAppId == dto.ClientAppId);
+                bool isNew = existing == null;
+                if (isNew) {
+                    existing = new Campeonato { ClientAppId = dto.ClientAppId };
+                }
+
+                existing.IdServidor = dto.Id;
+                existing.Nome = dto.Nome;
+                existing.Local = dto.Local;
+                existing.DataInicio = dto.DataInicio;
+                existing.DataFim = dto.DataFim;
+                existing.LogoUrl = dto.LogoUrl;
+                existing.NomeOrganizador = dto.NomeOrganizador;
+                existing.EmailOrganizador = dto.EmailOrganizador;
+                existing.TelefoneOrganizador = dto.TelefoneOrganizador;
+                existing.NumeroMaximoEquipes = dto.NumeroMaximoEquipes;
+                existing.ValorTaxaInscricao = dto.ValorTaxaInscricao;
+                existing.FormatoCampeonato = dto.FormatoCampeonato;
+                existing.LocaisDosJogos = dto.LocaisDosJogos;
+                existing.HaveraPremiacao = dto.HaveraPremiacao;
+                existing.Descricao = dto.Descricao;
+                existing.Modalidade = dto.Modalidade;
+                existing.Regras = dto.Regras;
+                existing.DataTermino = dto.DataTermino;
+                existing.NumeroEquipes = dto.NumeroEquipes ?? 0;
+
+                var organizador = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.IdServidor == dto.OrganizadorId);
+                if (organizador != null) existing.OrganizadorClientAppId = organizador.ClientAppId;
+
+                existing.IsSynced = true;
+                existing.UpdatedAt = dto.UpdatedAt;
+
+                if (isNew) await _database.InsertAsync(existing);
+                else await _database.UpdateAsync(existing);
+            }
+        }
+
+        public async Task SaveDownloadedTimesAsync(IEnumerable<TimeDownloadDto> dtos) {
+            foreach (var dto in dtos) {
+                var existing = await _database.Table<Time>().FirstOrDefaultAsync(t => t.ClientAppId == dto.ClientAppId);
+                bool isNew = existing == null;
+                if (isNew) {
+                    existing = new Time { ClientAppId = dto.ClientAppId };
+                }
+
+                existing.IdServidor = dto.Id;
+                existing.Nome = dto.Nome;
+                existing.LogoUrl = dto.LogoUrl;
+                existing.Descricao = dto.Descricao;
+                existing.DataCriacao = dto.DataCriacao;
+                existing.Regiao = dto.Regiao;
+                existing.PontuacaoTotal = dto.PontuacaoTotal;
+                existing.Vitorias = dto.Vitorias;
+                existing.Derrotas = dto.Derrotas;
+                existing.Empates = dto.Empates;
+
+                if (dto.CampeonatoId.HasValue && dto.CampeonatoId > 0) {
+                    var camp = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.IdServidor == dto.CampeonatoId.Value);
+                    if (camp != null) existing.CampeonatoClientAppId = camp.ClientAppId;
+                }
+                if (dto.CapitaoId.HasValue && dto.CapitaoId > 0) {
+                    var capitao = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.IdServidor == dto.CapitaoId.Value);
+                    if (capitao != null) existing.CapitaoClientAppId = capitao.ClientAppId;
+                }
+
+                existing.IsSynced = true;
+                existing.UpdatedAt = dto.UpdatedAt;
+
+                if (isNew) await _database.InsertAsync(existing);
+                else await _database.UpdateAsync(existing);
+            }
+        }
+
+        public async Task SaveDownloadedConvitesAsync(IEnumerable<ConviteDownloadDto> dtos) {
+            foreach (var dto in dtos) {
+                var existing = await _database.Table<Convite>().FirstOrDefaultAsync(c => c.ClientAppId == dto.ClientAppId);
+                bool isNew = existing == null;
+                if (isNew) {
+                    existing = new Convite { ClientAppId = dto.ClientAppId };
+                }
+
+                existing.IdServidor = dto.Id;
+                existing.ConvidadoEmail = dto.ConvidadoEmail;
+                existing.DataEnvio = dto.DataEnvio;
+                existing.Status = dto.Status;
+
+                var solicitante = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.IdServidor == dto.IdSolicitanteId);
+                if (solicitante != null) existing.SolicitanteClientAppId = solicitante.ClientAppId;
+
+                var time = await _database.Table<Time>().FirstOrDefaultAsync(t => t.IdServidor == dto.TimeId);
+                if (time != null) existing.TimeClientAppId = time.ClientAppId;
+
+                existing.IsSynced = true;
+                existing.UpdatedAt = dto.UpdatedAt;
+
+                if (isNew) await _database.InsertAsync(existing);
+                else await _database.UpdateAsync(existing);
+            }
+        }
+
+        public async Task SaveDownloadedUsuarioCampeonatoFavoritosAsync(IEnumerable<UsuarioCampeonatoFavoritoDownloadDto> dtos) {
+            foreach (var dto in dtos) {
+                var user = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.IdServidor == dto.UsuarioId);
+                var camp = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.IdServidor == dto.CampeonatoId);
+
+                if (user != null && camp != null) {
+                    var existing = await _database.Table<UsuarioCampeonatoFavorito>().FirstOrDefaultAsync(f => f.UsuarioClientAppId == user.ClientAppId && f.CampeonatoClientAppId == camp.ClientAppId);
+                    bool isNew = existing == null;
+                    if (isNew) {
+                        existing = new UsuarioCampeonatoFavorito {
+                            ClientAppId = dto.ClientAppId,
+                            UsuarioClientAppId = user.ClientAppId,
+                            CampeonatoClientAppId = camp.ClientAppId
+                        };
+                    }
+
+                    existing.IdServidor = dto.Id;
+                    existing.IsSynced = true;
+                    existing.UpdatedAt = dto.UpdatedAt;
+
+                    if (isNew) await _database.InsertAsync(existing);
+                    else await _database.UpdateAsync(existing);
+                }
+            }
+        }
+
+        public async Task SaveDownloadedJogosAsync(IEnumerable<JogoDownloadDto> dtos) {
+            foreach (var dto in dtos) {
+                var existing = await _database.Table<Jogo>().FirstOrDefaultAsync(j => j.ClientAppId == dto.ClientAppId);
+                bool isNew = existing == null;
+                if (isNew) {
+                    existing = new Jogo { ClientAppId = dto.ClientAppId };
+                }
+
+                if (!isNew && !existing.IsSynced) {
+                    Debug.WriteLine($"[Sync Download Jogo] Ignorando download para Jogo ClientAppId: {dto.ClientAppId}. Alteração local pendente (IsSynced=false).");
+                    continue;
+                }
+
+                existing.IdServidor = dto.Id;
+                existing.DataHora = dto.DataHora;
+                existing.Local = dto.Local ?? string.Empty;
+
+                existing.PlacarA = dto.PlacarA.ToString();
+                existing.PlacarB = dto.PlacarB.ToString();
+
+                existing.Rodada = dto.Rodada;
+                existing.Status = dto.Status;
+
+
+                var camp = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.IdServidor == dto.CampeonatoId);
+                if (camp != null) {
+                    existing.CampeonatoClientAppId = camp.ClientAppId;
+                    existing.CampeonatoId = camp.Id; // ID local (int)
+                } else {
+                    existing.CampeonatoClientAppId = Guid.Empty;
+                }
+
+                if (dto.ArbitroId.HasValue && dto.ArbitroId.Value > 0) {
+                    var arbitro = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.IdServidor == dto.ArbitroId.Value);
+                    existing.ArbitroId = arbitro?.ClientAppId;
+                } else {
+                    existing.ArbitroId = null;
+                }
+
+                var timeA = await _database.Table<Time>().FirstOrDefaultAsync(t => t.IdServidor == dto.TimeAId);
+                existing.TimeAId = timeA?.Id ?? 0;
+
+                var timeB = await _database.Table<Time>().FirstOrDefaultAsync(t => t.IdServidor == dto.TimeBId);
+                existing.TimeBId = timeB?.Id ?? 0;
+
+                existing.IsSynced = true;
+                existing.UpdatedAt = dto.UpdatedAt;
+
+                if (isNew) await _database.InsertAsync(existing);
+                else await _database.UpdateAsync(existing);
+            }
+        }
+
+        #endregion
     }
 }

@@ -1,9 +1,8 @@
-﻿using ArenaVirtual.DTOs;
+using ArenaVirtual.DTOs;
 using ArenaVirtual.Models;
 using ArenaVirtual.Services;
 using System.Collections;
 using System.Diagnostics;
-using System.Reflection;
 using System.Text.Json;
 
 public class SyncService {
@@ -16,13 +15,19 @@ public class SyncService {
         typeof(Usuario),
         typeof(Campeonato),
         typeof(Time),
-        typeof(AvaliacaoArbitro),
-        typeof(CampanhaPatrocinio),
-        typeof(EstatisticaPartida),
         typeof(Jogo),
-        typeof(PropostaPatrocinio),
-        typeof(UsuarioCampeonatoFavorito),
-        typeof(Convite)
+        typeof(Convite),
+        typeof(UsuarioCampeonatoFavorito)
+    };
+
+    private readonly Dictionary<string, Type> _downloadDtoMap = new Dictionary<string, Type>
+    {
+        { "Usuario", typeof(UsuarioDownloadDto) },
+        { "Campeonato", typeof(CampeonatoDownloadDto) },
+        { "Time", typeof(TimeDownloadDto) },
+        { "Convite", typeof(ConviteDownloadDto) },
+        { "UsuarioCampeonatoFavorito", typeof(UsuarioCampeonatoFavoritoDownloadDto) },
+        { "Jogo", typeof(JogoDownloadDto) }
     };
 
     public SyncService(DatabaseService databaseService, ApiService apiService) {
@@ -43,13 +48,14 @@ public class SyncService {
         _isSyncing = true;
         try {
             progress?.Report("Iniciando sincronização...");
-            progress?.Report("Enviando dados para o servidor...");
             await UploadChangesAsync(progress);
-            progress?.Report("Recebendo dados do servidor...");
             await DownloadChangesAsync(progress);
             progress?.Report("Sincronização concluída.");
         } catch (Exception ex) {
+            // O erro de GUID do JSON será capturado aqui, se persistir,
+            // mas agora é tratado pelo ApiService e UploadChangesAsync.
             Debug.WriteLine($"[SyncService] Erro na sincronização: {ex.Message}");
+            Debug.WriteLine($"[SyncService] StackTrace: {ex.StackTrace}");
             progress?.Report($"Erro: {ex.Message}");
         } finally {
             _isSyncing = false;
@@ -57,46 +63,14 @@ public class SyncService {
     }
 
     private async Task UploadChangesAsync(IProgress<string> progress) {
+        progress?.Report("Enviando dados para o servidor...");
         var allUploads = new AllUploadsDto();
         var allItems = new Dictionary<Type, IList>();
-        var requiredDependencies = new HashSet<Guid>();
 
-        // 1. Coletar todos os itens não sincronizados e suas dependências
         foreach (var type in _uploadOrder) {
             var unsyncedItems = await GetUnsyncedItemsWithTypeAsync(type);
-
             if (unsyncedItems.Count > 0) {
                 allItems[type] = unsyncedItems;
-
-                // Lógica para adicionar dependências de usuário
-                if (type == typeof(Campeonato)) {
-                    foreach (dynamic item in unsyncedItems) {
-                        requiredDependencies.Add(item.OrganizadorClientAppId);
-                    }
-                }
-                if (type == typeof(Time)) {
-                    foreach (dynamic item in unsyncedItems) {
-                        if (item.CapitaoClientAppId != null) {
-                            requiredDependencies.Add(item.CapitaoClientAppId);
-                        }
-                    }
-                }
-            }
-        }
-
-        // 2. Coletar as dependências que não foram incluídas
-        if (requiredDependencies.Count > 0) {
-            var userItems = await _databaseService.GetItemsByClientAppIdsAsync<Usuario>(requiredDependencies);
-            if (userItems.Any()) {
-                if (allItems.ContainsKey(typeof(Usuario))) {
-                    foreach (var user in userItems) {
-                        if (!((List<Usuario>)allItems[typeof(Usuario)]).Any(u => u.ClientAppId == user.ClientAppId)) {
-                            allItems[typeof(Usuario)].Add(user);
-                        }
-                    }
-                } else {
-                    allItems[typeof(Usuario)] = userItems;
-                }
             }
         }
 
@@ -105,50 +79,35 @@ public class SyncService {
             return;
         }
 
-        // 3. Criar e popular os DTOs para envio, respeitando a ordem de upload
         foreach (var type in _uploadOrder) {
             if (allItems.TryGetValue(type, out var itemsToUpload)) {
                 var syncDtos = CreateSyncDtos(itemsToUpload, type);
                 var prop = typeof(AllUploadsDto).GetProperty($"{type.Name}s");
-                prop?.SetValue(allUploads, syncDtos);
+                if (prop != null) {
+                    prop.SetValue(allUploads, syncDtos);
+                }
             }
         }
 
-        // 4. Enviar a requisição para o servidor
         progress?.Report("Enviando todos os dados para o servidor...");
+        // O tipo de retorno de PostDataAsync foi alterado para Dictionary<string, Dictionary<string, int>>
         var idMappings = await _apiService.PostDataAsync("AllUploads", allUploads);
 
-        // 5. Atualizar os IDs locais (agora com validação e tratamento de erros)
+        if (idMappings == null) return;
+
         foreach (var type in _uploadOrder) {
             if (idMappings.TryGetValue(type.Name, out var mappingRaw)) {
-                // AQUI: Usando 'as' para uma conversão segura para o tipo que esperamos
-                var mapping = mappingRaw as IDictionary<Guid, object>;
-
-                if (mapping != null && allItems.TryGetValue(type, out var itemsToUpdate)) {
+                // CORRIGIDO: Verifica se o tipo é o novo Dictionary<string, int>
+                if (mappingRaw is IDictionary<string, int> mapping && allItems.TryGetValue(type, out var itemsToUpdate)) {
                     foreach (var item in itemsToUpdate.Cast<ISyncable>()) {
-                        if (mapping.TryGetValue(item.ClientAppId, out object rawValue)) {
-                            int serverId = 0;
-
-                            // A lógica de verificação foi reescrita para evitar o erro de compilação
-                            if (rawValue is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.Number) {
-                                serverId = jsonElement.GetInt32();
-                            } else if (rawValue is int intValue) {
-                                serverId = intValue;
-                            } else {
-                                Debug.WriteLine($"[SyncService] Valor inesperado no mapeamento da entidade {type.Name}, ClientAppId={item.ClientAppId}: {rawValue}");
-                                continue;
+                        // CORRIGIDO: Usa a string do GUID como chave para buscar o ServerId
+                        if (mapping.TryGetValue(item.ClientAppId.ToString(), out int serverId)) {
+                            // A lógica de conversão complexa foi removida, pois 'serverId' já é um int.
+                            if (serverId > 0) {
+                                await _databaseService.UpdateIdAndMarkAsSyncedAsync((dynamic)item, serverId);
                             }
-
-                            if (serverId == 0) {
-                                Debug.WriteLine($"[SyncService] Ignorando mapeamento inválido (ID=0) para {type.Name}, ClientAppId={item.ClientAppId}");
-                                continue;
-                            }
-
-                            await _databaseService.UpdateIdAndMarkAsSyncedAsync((dynamic)item, serverId);
                         }
                     }
-                } else {
-                    Debug.WriteLine($"[SyncService] Mapeamento para {type.Name} não é um IDictionary<Guid, object>. Tipo recebido: {mappingRaw?.GetType().Name ?? "null"}");
                 }
             }
         }
@@ -157,7 +116,7 @@ public class SyncService {
     private IList CreateSyncDtos(IList items, Type itemType) {
         var dtoType = Type.GetType($"ArenaVirtual.DTOs.{itemType.Name}SyncDto");
         if (dtoType == null) {
-            Debug.WriteLine($"[SyncService] DTO não encontrado para o tipo {itemType.Name}.");
+            Debug.WriteLine($"[SyncService] DTO de Sincronização não encontrado para o tipo {itemType.Name}.");
             return new List<object>();
         }
 
@@ -165,25 +124,60 @@ public class SyncService {
         var syncDtos = (IList)Activator.CreateInstance(listType);
 
         foreach (var item in items) {
+            if (item is UsuarioCampeonatoFavorito favorito && (favorito.UsuarioClientAppId == Guid.Empty || favorito.CampeonatoClientAppId == Guid.Empty)) {
+                continue;
+            }
+
             var dto = Activator.CreateInstance(dtoType);
 
-            // Apenas copia as propriedades do modelo para o DTO.
-            // O mapeamento de FKs agora é responsabilidade do backend.
             foreach (var prop in itemType.GetProperties()) {
                 var dtoProp = dtoType.GetProperty(prop.Name);
+
                 if (dtoProp != null && dtoProp.CanWrite) {
-                    var value = prop.GetValue(item);
-                    dtoProp.SetValue(dto, value);
+                    var originalValue = prop.GetValue(item);
+                    var targetType = dtoProp.PropertyType;
+                    var nonNullableTargetType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+
+                    if (originalValue == null) {
+                        // Atribui null diretamente.
+                        dtoProp.SetValue(dto, null);
+                        continue;
+                    }
+
+                    // --- INÍCIO DA CORREÇÃO PARA PLACARES 'X' e 'Y' ---
+                    if (prop.PropertyType == typeof(string) && (nonNullableTargetType == typeof(int) || nonNullableTargetType == typeof(double))) {
+
+                        // Se o valor de origem é String e o destino é numérico, tentamos a conversão.
+                        // Se falhar (e.g., por ser 'X' ou 'Y'), garantimos o valor '0'.
+                        if (!double.TryParse(originalValue.ToString(), out double placarNumerico)) {
+                            // Se não for um número válido (como 'X' ou 'Y'), assume 0 para sincronizar.
+                            originalValue = 0;
+                        } else {
+                            originalValue = placarNumerico;
+                        }
+                    }
+                    // --- FIM DA CORREÇÃO ---
+
+
+                    try {
+                        // 1. Se os tipos são idênticos ou compatíveis, copia diretamente.
+                        if (prop.PropertyType == targetType || (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))) {
+                            dtoProp.SetValue(dto, originalValue);
+                        }
+                        // 2. Tenta usar Convert.ChangeType para forçar a conversão (agora com PlacarA/B já corrigidos para 0 ou o número real).
+                        else {
+                            var convertedValue = Convert.ChangeType(originalValue, nonNullableTargetType);
+                            dtoProp.SetValue(dto, convertedValue);
+                        }
+                    } catch (Exception ex) {
+                        // Logamos o erro exato de conversão.
+                        Debug.WriteLine($"[!!! ERRO REFLECTION !!!] Falha ao copiar propriedade '{prop.Name}' de '{itemType.Name}' para DTO '{dtoType.Name}'.");
+                        Debug.WriteLine($" -> Tipos: Origem: {prop.PropertyType.Name} | Destino: {targetType.Name}. Valor: '{originalValue}'");
+                        Debug.WriteLine($" -> Erro: {ex.Message}");
+                        // Continuamos o loop para tentar a próxima propriedade
+                    }
                 }
             }
-
-            // Tratamento especial para o 'CapitaoClientAppId' no 'Time'
-            if (itemType == typeof(Time)) {
-                var timeItem = (Time)item;
-                dtoType.GetProperty("CapitaoClientAppId")?.SetValue(dto, timeItem.CapitaoClientAppId);
-            }
-
-            dtoType.GetProperty("IsSynced")?.SetValue(dto, true);
             syncDtos.Add(dto);
         }
         return syncDtos;
@@ -199,45 +193,47 @@ public class SyncService {
             return;
         }
 
-        foreach (var type in _uploadOrder) {
-            var typeName = type.Name;
+        foreach (var entry in _downloadDtoMap) {
+            var typeName = entry.Key;
+            var dtoType = entry.Value;
+
             if (updates.UpdatedItems.TryGetValue(typeName, out var jsonElement)) {
-                var rawJson = jsonElement.GetRawText();
-                var listType = typeof(List<>).MakeGenericType(type);
-                var items = JsonSerializer.Deserialize(rawJson, listType, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                try {
+                    var listType = typeof(List<>).MakeGenericType(dtoType);
+                    var dtoList = (IList)JsonSerializer.Deserialize(jsonElement.GetRawText(), listType, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                if (items is IList collection && collection.Count > 0) {
-                    progress?.Report($"Atualizando {typeName}...");
-                    var saveMethod = typeof(DatabaseService).GetMethod("SaveDownloadedItemsAsync", BindingFlags.Public | BindingFlags.Instance);
-                    if (saveMethod == null) {
-                        Debug.WriteLine($"[SyncService] Método SaveDownloadedItemsAsync não encontrado para o tipo {type.Name}.");
-                        continue;
+                    if (dtoList != null && dtoList.Count > 0) {
+                        progress?.Report($"Processando {dtoList.Count} atualizações para {typeName}...");
+
+                        var saveMethodName = $"SaveDownloaded{typeName}sAsync";
+                        var saveMethod = typeof(DatabaseService).GetMethod(saveMethodName);
+
+                        if (saveMethod != null) {
+                            await (Task)saveMethod.Invoke(_databaseService, new object[] { dtoList });
+                        } else {
+                            Debug.WriteLine($"[SyncService] Método de salvamento '{saveMethodName}' não encontrado no DatabaseService.");
+                        }
                     }
-
-                    var genericSaveMethod = saveMethod.MakeGenericMethod(type);
-                    await (Task)genericSaveMethod.Invoke(_databaseService, new object[] { items });
+                } catch (JsonException jsonEx) {
+                    // Este é o bloco que captura erros de Guid no download (se houver)
+                    Debug.WriteLine($"[SyncService] Erro de JSON ao processar {typeName}: {jsonEx.Message}");
+                    Debug.WriteLine($"[SyncService] JSON para {typeName}: {jsonElement.GetRawText()}");
                 }
             }
         }
+
         Preferences.Set("LastSyncTime", DateTime.UtcNow);
         progress?.Report("Sincronização de download concluída.");
     }
 
     private async Task<IList> GetUnsyncedItemsWithTypeAsync(Type type) {
-        var getMethod = typeof(DatabaseService).GetMethod("GetUnsyncedItemsAsync", BindingFlags.Public | BindingFlags.Instance);
-        if (getMethod == null) {
-            Debug.WriteLine($"[SyncService] Método GetUnsyncedItemsAsync não encontrado para o tipo {type.Name}.");
-            return new List<object>();
-        }
-
-        var genericGetMethod = getMethod.MakeGenericMethod(type);
-        var unsyncedItemsTask = (Task)genericGetMethod.Invoke(_databaseService, null);
-        await unsyncedItemsTask;
-        return (IList)((dynamic)unsyncedItemsTask).Result;
+        var getMethod = typeof(DatabaseService).GetMethod("GetUnsyncedItemsAsync").MakeGenericMethod(type);
+        var task = (Task)getMethod.Invoke(_databaseService, null);
+        await task;
+        return (IList)((dynamic)task).Result;
     }
 
     public async Task SyncData() {
-        // Chamada imediata para o método principal de sincronização com um IProgress vazio
         await SyncAsync(new Progress<string>());
     }
 }

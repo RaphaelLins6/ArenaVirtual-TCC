@@ -1,13 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using SQLite;
-using System;
 using System.Diagnostics;
 
-// Assumindo que você tem uma interface ISyncable e um enum JogoStatus definidos no mesmo namespace.
-// O namespace deve corresponder ao seu projeto
 namespace ArenaVirtual.Models {
 
-    // A classe Jogo precisa ser parcial para que o CommunityToolkit.Mvvm gere os métodos e propriedades
     public partial class Jogo : ObservableObject, ISyncable {
 
         // --- Propriedades Reativas Geradas (MVVM Toolkit) ---
@@ -21,8 +17,7 @@ namespace ArenaVirtual.Models {
         [ObservableProperty]
         private Guid clientAppId;
 
-        // ArbitroId
-        [ObservableProperty]
+        [ObservableProperty]
         private Guid? arbitroId;
 
         [ObservableProperty]
@@ -36,6 +31,9 @@ namespace ArenaVirtual.Models {
 
         [ObservableProperty]
         private int campeonatoId;
+
+        [ObservableProperty]
+        private Guid campeonatoClientAppId;
 
         [ObservableProperty]
         private string local = string.Empty;
@@ -73,9 +71,9 @@ namespace ArenaVirtual.Models {
         [property: Ignore]
         private bool isOrganizador;
 
-        // --- Propriedades POCO/Interfaces ---
-        // Estas não são reativas (não usam ObservableProperty)
-        public int Rodada { get; set; }
+        // --- Propriedades POCO/Interfaces ---
+        public int IdServidor { get; set; }
+        public int Rodada { get; set; }
         public string NomeCampeonato { get; set; } = string.Empty;
         public bool IsSynced { get; set; } // Propriedade da interface ISyncable
         public DateTime UpdatedAt { get; set; } // Propriedade da interface ISyncable
@@ -84,8 +82,7 @@ namespace ArenaVirtual.Models {
         // --- Construtor ---
 
         public Jogo() {
-            // Inicialização de valores padrão
-            this.ClientAppId = Guid.NewGuid(); // Sempre defina um ID de app cliente
+            this.ClientAppId = Guid.NewGuid(); 
             this.IsSynced = false;
             this.UpdatedAt = DateTime.UtcNow;
 
@@ -96,30 +93,21 @@ namespace ArenaVirtual.Models {
 
         // --- PROPRIEDADES CALCULADAS E CALLBACKS ---
 
-        // CRÍTICA: Se ArbitroId é nulo OU é Guid.Empty, o árbitro não está atribuído.
         private bool ArbitroAtribuido => ArbitroId.HasValue && ArbitroId.Value != Guid.Empty;
 
         [Ignore]
-        // NOVA LÓGICA: O botão está habilitado APENAS se for o Organizador.
         public bool BotaoArbitroHabilitado => IsOrganizador;
 
 
         [Ignore]
-        // TEXTO DO BOTÃO: Depende do IsOrganizador e ArbitroAtribuido.
         public string TextoBotaoArbitro => !IsOrganizador
-    // 1. Não-Organizador: Exibe o árbitro ou só 'Detalhes'
                 ? (ArbitroAtribuido && !string.IsNullOrEmpty(NomeArbitro) ? $"Árbitro: {NomeArbitro}" : "Detalhes")
-    // 2. Organizador: Exibe o árbitro ou 'Anexar'
                 : (ArbitroAtribuido
             ? $"Árbitro: {(!string.IsNullOrEmpty(NomeArbitro) ? NomeArbitro : "Anexado")}"
             : "Anexar Árbitros");
 
 
         [Ignore]
-        // PROPRIEDADE DE COMPATIBILIDADE: A desabilitação é o oposto de BotaoArbitroHabilitado.
-        // Se não for Organizador (BotaoArbitroHabilitado é false), o botão fica desabilitado
-        // (Isso não impede que o usuário veja a página de detalhes, mas impede o clique para atribuir/trocar).
-        // CORREÇÃO: Usar a negação direta é mais seguro:
         public bool BotaoArbitroDesabilitado => !BotaoArbitroHabilitado;
 
 
@@ -141,11 +129,6 @@ namespace ArenaVirtual.Models {
         }
 
         // --- MÉTODO DE NOTIFICAÇÃO PÚBLICO ---
-
-        /// <summary>
-        /// Força a UI a reavaliar as propriedades dependentes do status do árbitro (texto e estado do botão).
-        /// Deve ser chamado sempre que uma mudança externa impactar o estado do árbitro (ex: após salvar o árbitro no DB).
-        /// </summary>
         public void NotifyArbitroStatusChanged() {
             // Notificar as propriedades calculadas.
             OnPropertyChanged(nameof(TextoBotaoArbitro));

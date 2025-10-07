@@ -144,10 +144,6 @@ namespace ArenaVirtual.Models {
 
         // --- CORREÇÃO DE LÓGICA: SOBRECARGA PARA COMPARAÇÃO POR ID (CRUCIAL) ---
 
-        /// <summary>
-        /// Compara dois objetos Usuario com base no seu identificador único ClientAppId.
-        /// Essencial para que CollectionView.SelectedItem, o RadioButton e o Converter funcionem.
-        /// </summary>
         public override bool Equals(object obj) {
             if (obj is Usuario other) {
                 // A comparação é feita pela chave única
@@ -156,15 +152,10 @@ namespace ArenaVirtual.Models {
             return false;
         }
 
-        /// <summary>
-        /// Retorna o código hash baseado no ClientAppId, necessário para a correta comparação de objetos.
-        /// </summary>
         public override int GetHashCode() {
             // Usa o hash da ID única
             return ClientAppId.GetHashCode();
         }
-
-        // ----------------------------------------------------------------
 
         public Usuario() { }
 
