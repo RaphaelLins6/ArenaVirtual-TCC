@@ -6,7 +6,8 @@
     xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     xmlns:models="clr-namespace:ArenaVirtual.Models"
     Title="Atribuição de Árbitros"
-    BackgroundColor="#80000000">
+    BackgroundColor="#80000000"
+    Shell.PresentationMode="ModalAnimated">
 
     <ContentPage.Resources>
         <converters:IsEqualToConverter x:Key="IsEqualConverter" />

@@ -12,13 +12,13 @@ public class SyncService {
     private Timer? _syncTimer;
 
     private readonly Type[] _uploadOrder = new Type[] {
-        typeof(Usuario),
-        typeof(Campeonato),
-        typeof(Time),
-        typeof(Jogo),
-        typeof(Convite),
-        typeof(UsuarioCampeonatoFavorito)
-    };
+    typeof(Time), 
+    typeof(Usuario), 
+    typeof(Campeonato),
+    typeof(Jogo),
+    typeof(Convite),
+    typeof(UsuarioCampeonatoFavorito)
+};
 
     private readonly Dictionary<string, Type> _downloadDtoMap = new Dictionary<string, Type>
     {

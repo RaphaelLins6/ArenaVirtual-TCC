@@ -231,8 +231,8 @@ namespace ArenaVirtual.Services {
             // Definindo valores padrão seguros
             TipoPerfil perfilPadrao = TipoPerfil.Atleta;
             GeneroEnum generoPadrao = GeneroEnum.Outro;
-    
-            // Valores padrão para numéricos double (se o modelo Usuario.cs for double não-anulável)
+
+            // Usando 0.0m para garantir double correto, embora 0.0 também funcione
             double pesoPadrao = 0.0;
             double alturaPadrao = 0.0;
 
@@ -240,32 +240,33 @@ namespace ArenaVirtual.Services {
                 var existing = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.ClientAppId == dto.ClientAppId);
                 bool isNew = existing == null;
                 if (isNew) {
+                    // Garante que ClientAppId é sempre um GUID
                     existing = new Usuario { ClientAppId = dto.ClientAppId ?? Guid.Empty };
                 }
 
-                existing.IdServidor = dto.Id ?? 0; 
-        
-                existing.Nome = dto.Nome;
-                existing.Email = dto.Email;
+                existing.IdServidor = dto.Id ?? 0; // Garantindo que IdServidor é 0 se null
 
+                // Se Nome, Email, ImagemPath, etc. não são anuláveis no modelo Usuario,
+                // use o operador de coalescência nula (??) aqui também:
+                existing.Nome = dto.Nome ?? string.Empty;
+                existing.Email = dto.Email ?? string.Empty;
+
+                // O restante das propriedades de valor já estão corretas:
                 existing.Perfil = dto.Perfil ?? perfilPadrao;
-
-                existing.ImagemPath = dto.ImagemPath;
-                existing.Localizacao = dto.Localizacao;
-                existing.Telefone = dto.Telefone;
-                existing.LinkRedeSocial = dto.LinkRedeSocial;
-                existing.DataNascimento = dto.DataNascimento;
-        
+                existing.ImagemPath = dto.ImagemPath ?? string.Empty;
+                existing.Localizacao = dto.Localizacao ?? string.Empty;
+                existing.Telefone = dto.Telefone ?? string.Empty;
+                existing.LinkRedeSocial = dto.LinkRedeSocial ?? string.Empty;
+                existing.DataNascimento = dto.DataNascimento; // DateTime?
                 existing.Genero = dto.Genero ?? generoPadrao;
-        
-                existing.NomeEmpresa = dto.NomeEmpresa;
-                existing.CNPJ = dto.CNPJ;
-        
-                existing.Peso = dto.Peso ?? pesoPadrao; 
-                existing.Altura = dto.Altura ?? alturaPadrao;
-        
-                existing.FaixaOrcamentoPatrocinio = dto.FaixaOrcamentoPatrocinio;
+                existing.NomeEmpresa = dto.NomeEmpresa ?? string.Empty;
+                existing.CNPJ = dto.CNPJ ?? string.Empty;
 
+                existing.Peso = dto.Peso ?? pesoPadrao; // double? para double?
+                existing.Altura = dto.Altura ?? alturaPadrao; // double? para double?
+                existing.FaixaOrcamentoPatrocinio = dto.FaixaOrcamentoPatrocinio ?? string.Empty;
+
+                // Lógica de FK (TimeId)
                 if (dto.TimeId.HasValue && dto.TimeId > 0) {
                     var time = await _database.Table<Time>().FirstOrDefaultAsync(t => t.IdServidor == dto.TimeId.Value);
                     if (time != null) existing.TimeClientAppId = time.ClientAppId;
@@ -290,7 +291,7 @@ namespace ArenaVirtual.Services {
                 }
 
                 existing.IdServidor = dto.Id;
-                existing.Nome = dto.Nome;
+                existing.Nome = dto.Nome ?? string.Empty;
                 existing.Local = dto.Local;
                 existing.DataInicio = dto.DataInicio;
                 existing.DataFim = dto.DataFim;
@@ -329,7 +330,7 @@ namespace ArenaVirtual.Services {
                 }
 
                 existing.IdServidor = dto.Id;
-                existing.Nome = dto.Nome;
+                existing.Nome = dto.Nome ?? string.Empty;
                 existing.LogoUrl = dto.LogoUrl;
                 existing.Descricao = dto.Descricao;
                 existing.DataCriacao = dto.DataCriacao;

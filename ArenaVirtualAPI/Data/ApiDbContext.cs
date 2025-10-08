@@ -8,7 +8,7 @@ namespace ArenaVirtualAPI.Data {
 
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Campeonato> Campeonatos { get; set; }
-        public DbSet<Time> Times { get; set; }
+        public DbSet<Time> Time { get; set; }
         public DbSet<Convite> Convites { get; set; }
         public DbSet<Jogo> Jogos { get; set; }
         public DbSet<UsuarioCampeonatoFavorito> UsuarioCampeonatoFavoritos { get; set; }

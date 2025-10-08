@@ -13,18 +13,18 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
     }
 
     public async Task<Time?> GetByIdAsync(int id) {
-        return await _context.Times.FindAsync(id);
+        return await _context.Time.FindAsync(id);
     }
 
     public async Task AddAsync(Time time) {
         time.IsSynced = true;
         time.UpdatedAt = DateTime.UtcNow;
-        _context.Times.Add(time);
+        _context.Time.Add(time);
         await _context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(Time time) {
-        var existingTime = await _context.Times.FindAsync(time.Id);
+        var existingTime = await _context.Time.FindAsync(time.Id);
         if (existingTime != null) {
             _context.Entry(existingTime).CurrentValues.SetValues(time);
             existingTime.IsSynced = true;
@@ -37,7 +37,7 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
     public async Task<Dictionary<Guid, int>> ProcessAndMapItemsAsync(IEnumerable<TimeSyncDto> items) {
         var idMapping = new Dictionary<Guid, int>();
         foreach (var dto in items) {
-            var existingItem = await _context.Times.FirstOrDefaultAsync(t => t.ClientAppId == dto.ClientAppId);
+            var existingItem = await _context.Time.FirstOrDefaultAsync(t => t.ClientAppId == dto.ClientAppId);
 
             if (existingItem == null) {
                 var newItem = new Time {
@@ -54,7 +54,7 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
                     UpdatedAt = DateTime.UtcNow,
                     IsSynced = true
                 };
-                _context.Times.Add(newItem);
+                _context.Time.Add(newItem);
                 idMapping[newItem.ClientAppId] = newItem.Id;
             } else {
                 if (dto.UpdatedAt > existingItem.UpdatedAt) {
@@ -88,7 +88,7 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
         }
 
         foreach (var dto in dtos) {
-            var existingItem = await _context.Times.FirstOrDefaultAsync(t => t.ClientAppId == dto.ClientAppId);
+            var existingItem = await _context.Time.FirstOrDefaultAsync(t => t.ClientAppId == dto.ClientAppId);
             if (existingItem != null) {
                 if (dto.CapitaoClientAppId.HasValue && userMappings.TryGetValue(dto.CapitaoClientAppId.Value, out int newCapitaoId)) {
                     existingItem.CapitaoId = newCapitaoId;
@@ -108,7 +108,7 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
 
     // GetUpdatedSinceAsync está correto e não precisa de alterações.
     public async Task<IEnumerable<TimeSyncDto>> GetUpdatedSinceAsync(DateTime lastSyncTime) {
-        return await _context.Times
+        return await _context.Time
             .Include(t => t.Capitao)
             .Include(t => t.Campeonato)
             .Where(t => t.UpdatedAt > lastSyncTime)

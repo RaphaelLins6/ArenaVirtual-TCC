@@ -6,9 +6,15 @@ using ArenaVirtual.Services;
 using System.Collections.ObjectModel;
 using ArenaVirtual.Popups;
 using ArenaVirtual.Views.CampeonatoPage;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
+using System.Linq;
+using Microsoft.Maui.Controls;
+using System.IO;
 
 namespace ArenaVirtual.ViewModels.CampeonatoPage {
-    // A interface IQueryAttributable é síncrona, mas permite iniciar um processo assíncrono.
+
     public partial class CampeonatoDetailViewModel : ObservableObject, IQueryAttributable {
 
         [ObservableProperty]
@@ -26,7 +32,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         [ObservableProperty]
         private bool isOrganizador = false;
 
-        // Propriedade para controle de carregamento/UI
         [ObservableProperty]
         private bool isBusy;
 
@@ -58,49 +63,85 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             _jogoService = jogoService;
             _usuarioService = usuarioService;
 
-            // Verifica o idioma do dispositivo para definir IsDesktop
             IsDesktop = DeviceInfo.Idiom == DeviceIdiom.Desktop || DeviceInfo.Idiom == DeviceIdiom.Tablet;
 
             Debug.WriteLine($"[CampeonatoDetailViewModel] Device Idiom: {DeviceInfo.Idiom}. IsDesktop: {IsDesktop}");
         }
 
-        // --- Implementação IQueryAttributable CORRIGIDA ---
+        // --- Implementação IQueryAttributable (Lógica de Recarga) ---
 
-        // A interface IQueryAttributable deve ser void e é chamada pelo MAUI/Shell
         public void ApplyQueryAttributes(IDictionary<string, object> query) {
-            Debug.WriteLine("[CampeonatoDetailViewModel] ApplyQueryAttributes chamado.");
+            Debug.WriteLine("[DEBUG-ATTRIBUTES] ApplyQueryAttributes chamado.");
 
-            // 1. **VERIFICAÇÃO DE ATUALIZAÇÃO PELA POP-UP**
-            // Usa a flag "jogoAtualizado" que vem da navegação de volta do pop-up.
-            if (query.ContainsKey("jogoAtualizado")) {
-                Debug.WriteLine("[CampeonatoDetailViewModel] Jogo foi atualizado. Forçando recarregamento dos jogos.");
-                query.Remove("jogoAtualizado"); // Limpa a chave após o uso
+            // 1. **VERIFICAÇÃO DE ATUALIZAÇÃO DE JOGOS (Pop-up de Árbitro)**
+            if (query.TryGetValue("jogoAtualizado", out object jogoObj) && jogoObj is Jogo jogoAtualizado) {
+                Debug.WriteLine($"[DEBUG-ATTRIBUTES] Jogo ID {jogoAtualizado.Id} foi atualizado.");
+                query.Remove("jogoAtualizado");
 
-                // Chama a função assíncrona para recarregar os jogos (do DB local).
-                if (Campeonato != null) {
-                    // Garante a recarga dos jogos (Retorna Task -> precisa do _)
-                    _ = GerarTabelaJogosAsync(Campeonato);
-
-                    // Recarrega a rodada atual. (Retorna void -> CHAMADA DIRETA)
-                    if (RodadaAtual > 0) {
-                        LoadRodada(RodadaAtual); // ⬅️ CORRIGIDO
-                    }
+                // Encontra o jogo na lista da UI e atualiza suas propriedades
+                var jogoNaLista = TabelaJogos.FirstOrDefault(j => j.Id == jogoAtualizado.Id);
+                if (jogoNaLista != null) {
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        jogoNaLista.ArbitroId = jogoAtualizado.ArbitroId;
+                        jogoNaLista.NomeArbitro = jogoAtualizado.NomeArbitro;
+                        // Notifica a UI que as propriedades que afetam o botão mudaram
+                        jogoNaLista.NotifyArbitroStatusChanged();
+                        Debug.WriteLine($"[DEBUG-ATTRIBUTES] UI do Jogo ID {jogoAtualizado.Id} atualizada diretamente na lista.");
+                    });
+                } else {
+                    // Se não encontrar (ex: mudou de rodada), recarrega como fallback
+                    _ = RecarregarJogosESelecaoAsync();
                 }
-                return; // Retorna para ignorar o restante da lógica de navegação.
+                return;
             }
 
-            // 2. **LÓGICA DE NAVEGAÇÃO NORMAL (NAVEGANDO PARA A PÁGINA)**
+            // 2. **VERIFICAÇÃO DE ATUALIZAÇÃO DE TIMES (Gerenciamento de Times)**
+            if (query.ContainsKey("TimesAtualizados")) {
+                Debug.WriteLine("[DEBUG-ATTRIBUTES] Lista de Times foi atualizada. Recarregando Classificação e Jogos.");
+                query.Remove("TimesAtualizados");
+
+                if (Campeonato != null) {
+                    // Recarrega a classificação, jogos e depois a rodada
+                    _ = LoadTabelaClassificacaoAsync()
+                        .ContinueWith(t => RecarregarJogosESelecaoAsync(), TaskScheduler.FromCurrentSynchronizationContext());
+                }
+                return;
+            }
+
+            // 3. LÓGICA DE NAVEGAÇÃO NORMAL
             if (query.ContainsKey("Campeonato")) {
                 var campeonatoRecebido = query["Campeonato"] as Campeonato;
 
                 if (Campeonato == null || Campeonato.Id != campeonatoRecebido.Id) {
-                    // Inicia o carregamento assíncrono (primeira vez ou campeonato diferente)
                     _ = LoadCampeonato(campeonatoRecebido);
                 } else {
                     Campeonato = campeonatoRecebido;
-                    Debug.WriteLine("[CampeonatoDetailViewModel] ApplyQueryAttributes ignorou LoadCampeonato (Campeonato já carregado).");
+                    Debug.WriteLine("[DEBUG-ATTRIBUTES] ApplyQueryAttributes ignorou LoadCampeonato (Campeonato já carregado).");
                 }
             }
+        }
+
+        // 💡 Método para garantir que a recarga da rodada só ocorra APÓS a tabela de jogos ser atualizada
+        private async Task RecarregarJogosESelecaoAsync() {
+            if (Campeonato == null) return;
+
+            Debug.WriteLine("[DEBUG-RELOAD] Iniciando RecarregarJogosESelecaoAsync.");
+
+            // 1. **Aguardamos** a recarga de TODOS os jogos e a atualização do dicionário _jogosPorRodada
+            await GerarTabelaJogosAsync(Campeonato);
+
+            Debug.WriteLine($"[DEBUG-RELOAD] GerarTabelaJogosAsync concluído. RodadaAtual: {RodadaAtual}");
+
+            // 2. Recarrega a rodada atual na MainThread com os NOVOS dados
+            if (RodadaAtual > 0) {
+                // Executa na MainThread para garantir que o UI reaja
+                MainThread.BeginInvokeOnMainThread(() => {
+                    Debug.WriteLine($"[DEBUG-RELOAD] Chamando LoadRodada({RodadaAtual}) na MainThread.");
+                    LoadRodada(RodadaAtual);
+                });
+            }
+            Debug.WriteLine("[DEBUG-RELOAD] Finalizando RecarregarJogosESelecaoAsync.");
         }
 
         // --- Lógica de Carregamento Principal ---
@@ -108,10 +149,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         public async Task LoadCampeonato(Campeonato campeonato) {
             Debug.WriteLine("[CampeonatoDetailViewModel] LoadCampeonato chamado.");
 
-            if (IsBusy) return; // Impede chamadas múltiplas
+            if (IsBusy) return;
 
             try {
-                IsBusy = true; // 🚦 Inicia o carregamento
+                IsBusy = true;
 
                 if (campeonato == null) {
                     Debug.WriteLine("[CampeonatoDetailViewModel] Campeonato é nulo, retornando.");
@@ -120,7 +161,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
                 Campeonato = campeonato;
 
-                // ** IMPORTANTE: Lógica para checar se é Organizador **
                 var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
                 IsOrganizador = (campeonato.OrganizadorId == usuarioAtual?.Id);
 
@@ -128,51 +168,60 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
                 await LoadTabelaClassificacaoAsync();
 
+                // 💡 Aqui o await é mantido porque é a primeira carga
                 await GerarTabelaJogosAsync(campeonato);
 
-                // Inicia a Rodada Atual.
                 RodadaAtual = _jogosPorRodada.Keys.Any() ? _jogosPorRodada.Keys.Min() : 0;
                 if (RodadaAtual > 0) {
                     LoadRodada(RodadaAtual);
                 }
 
-                // Lógica de Carregamento de Banner/Logo (MANTIDA)
+                // 💡 Manter a chamada. O tratamento de erro foi movido para dentro do método.
                 LoadImageSources();
 
             } catch (Exception ex) {
+                // Este catch deve pegar apenas erros não tratados pelos try/catch internos
                 Debug.WriteLine($"[ERRO CRÍTICO] LoadCampeonato falhou: {ex.Message}");
                 await _alertService.DisplayAlert("Erro de Carregamento", "Ocorreu um erro ao carregar os detalhes do campeonato. Tente novamente.", "OK");
             } finally {
-                IsBusy = false; // ✅ Finaliza o carregamento, garantindo que a UI seja liberada
+                IsBusy = false;
             }
         }
 
         // --- Métodos Auxiliares de Carregamento ---
 
         private void LoadImageSources() {
-            // Lógica de Carregamento de Banner
-            if (!string.IsNullOrEmpty(Campeonato.BannerUrl)) {
-                if (File.Exists(Campeonato.BannerUrl)) {
-                    BannerSource = ImageSource.FromFile(Campeonato.BannerUrl);
-                } else if (Uri.IsWellFormedUriString(Campeonato.BannerUrl, UriKind.Absolute)) {
-                    BannerSource = ImageSource.FromUri(new Uri(Campeonato.BannerUrl));
+            // 💡 CORREÇÃO: Bloco try/catch para evitar o erro "Index and length" se a string da URL/Path estiver malformada.
+            try {
+                // --- Lógica de Banner ---
+                if (!string.IsNullOrEmpty(Campeonato.BannerUrl)) {
+                    if (File.Exists(Campeonato.BannerUrl)) {
+                        BannerSource = ImageSource.FromFile(Campeonato.BannerUrl);
+                    } else if (Uri.IsWellFormedUriString(Campeonato.BannerUrl, UriKind.Absolute)) {
+                        BannerSource = ImageSource.FromUri(new Uri(Campeonato.BannerUrl));
+                    } else {
+                        BannerSource = ImageSource.FromFile("default_banner.png");
+                    }
                 } else {
                     BannerSource = ImageSource.FromFile("default_banner.png");
                 }
-            } else {
-                BannerSource = ImageSource.FromFile("default_banner.png");
-            }
 
-            // Lógica de Carregamento de Logo
-            if (!string.IsNullOrEmpty(Campeonato.LogoUrl)) {
-                if (File.Exists(Campeonato.LogoUrl)) {
-                    LogoSource = ImageSource.FromFile(Campeonato.LogoUrl);
-                } else if (Uri.IsWellFormedUriString(Campeonato.LogoUrl, UriKind.Absolute)) {
-                    LogoSource = ImageSource.FromUri(new Uri(Campeonato.LogoUrl));
+                // --- Lógica de Logo ---
+                if (!string.IsNullOrEmpty(Campeonato.LogoUrl)) {
+                    if (File.Exists(Campeonato.LogoUrl)) {
+                        LogoSource = ImageSource.FromFile(Campeonato.LogoUrl);
+                    } else if (Uri.IsWellFormedUriString(Campeonato.LogoUrl, UriKind.Absolute)) {
+                        LogoSource = ImageSource.FromUri(new Uri(Campeonato.LogoUrl));
+                    } else {
+                        LogoSource = ImageSource.FromFile("default_logo.png");
+                    }
                 } else {
                     LogoSource = ImageSource.FromFile("default_logo.png");
                 }
-            } else {
+            } catch (Exception ex) {
+                Debug.WriteLine($"[ERRO-IMAGEM-ISOLADO] Falha ao carregar imagens: {ex.Message}");
+                // Garante que o aplicativo não quebre e exiba algo padrão
+                BannerSource = ImageSource.FromFile("default_banner.png");
                 LogoSource = ImageSource.FromFile("default_logo.png");
             }
         }
@@ -180,95 +229,104 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         private async Task LoadTabelaClassificacaoAsync() {
             if (Campeonato is null) return;
 
-            // 1. Busca os times reais inscritos
             var timesInscritos = await _databaseService.ObterTimesAceitosAsync(Campeonato.Id);
 
-            // 2. Lógica de Classificação (ordenar e calcular estatísticas)
             var timesOrdenados = timesInscritos
-                           .OrderByDescending(t => t.PontuacaoTotal)
-                           .ToList();
+                                 .OrderByDescending(t => t.PontuacaoTotal)
+                                 .ToList();
 
-            // 3. Popula a Tabela de Classificação
-            TabelaClassificacao.Clear();
+            // 💡 Garante que a manipulação da ObservableCollection seja na MainThread
+            MainThread.BeginInvokeOnMainThread(() => {
+                TabelaClassificacao.Clear();
 
-            for (int i = 0; i < timesOrdenados.Count; i++) {
-                var time = timesOrdenados[i];
+                for (int i = 0; i < timesOrdenados.Count; i++) {
+                    var time = timesOrdenados[i];
 
-                // 3.1. Atribui a posição e calcula as colunas.
-                time.Posicao = i + 1;
+                    time.Posicao = i + 1;
+                    int totalJogosDecididos = time.Vitorias + time.Derrotas;
+                    time.PorcentagemVitoria = (totalJogosDecididos > 0) ? (double)time.Vitorias / totalJogosDecididos : 0.0;
+                    time.JogosAtras = 0;
+                    time.Sequencia = time.Vitorias > 0 ? "V" : (time.Derrotas > 0 ? "D" : "N/A");
 
-                int totalJogosDecididos = time.Vitorias + time.Derrotas;
-                time.PorcentagemVitoria = (totalJogosDecididos > 0) ? (double)time.Vitorias / totalJogosDecididos : 0.0;
-
-                time.JogosAtras = 0; // Temporário
-                time.Sequencia = time.Vitorias > 0 ? "V" : (time.Derrotas > 0 ? "D" : "N/A"); // Temporário
-
-                TabelaClassificacao.Add(time);
-            }
+                    TabelaClassificacao.Add(time);
+                }
+                Debug.WriteLine($"[DEBUG-LOAD] Tabela de Classificação recarregada. Total: {TabelaClassificacao.Count}");
+            });
         }
 
         private async Task GerarTabelaJogosAsync(Campeonato campeonato) {
+            Debug.WriteLine("[DEBUG-JOGOS] Iniciando GerarTabelaJogosAsync.");
             _jogosPorRodada.Clear();
 
             var times = TabelaClassificacao.ToList();
 
-            // 1. Chama o JogoService para gerar/buscar os jogos (BUSCA NO DB LOCAL!)
+            // ASSUMIMOS que esta função busca no DB e retorna JOGOS ATUALIZADOS
             var jogosGeradosPorRodada = await _jogoService.GerarTabelaJogosAsync(campeonato, times);
 
-            // 2. Coleta IDs de árbitros únicos de TODOS os jogos
             var todosOsArbitrosIds = jogosGeradosPorRodada.Values
-                                 .SelectMany(col => col.Select(j => j.ArbitroId))
-                                 .Where(id => id.HasValue && id.Value != Guid.Empty)
-                                 .Select(id => id.Value)
-                                 .Distinct()
-                                 .ToList();
+                                           .SelectMany(col => col.Select(j => j.ArbitroId))
+                                           .Where(id => id.HasValue && id.Value != Guid.Empty)
+                                           .Select(id => id.Value)
+                                           .Distinct()
+                                           .ToList();
 
-            // 3. Carrega os nomes dos árbitros em massa (otimização de acesso ao BD)
             var arbitrosMap = await _usuarioService.ObterNomesUsuariosPorIdsAsync(todosOsArbitrosIds);
 
             bool isOrganizador = this.IsOrganizador;
 
-            // 4. Processa cada jogo para popular IsOrganizador e NomeArbitro
             foreach (var rodadaEntry in jogosGeradosPorRodada) {
                 var rodadaJogos = rodadaEntry.Value;
 
                 foreach (var jogo in rodadaJogos) {
-                    // Define IsOrganizador: Prepara o estado do botão
                     jogo.IsOrganizador = isOrganizador;
 
-                    // Popula o NomeArbitro (Hidratação)
+                    // 💡 CORREÇÃO CRÍTICA: Torna a operação Substring segura para o debug
+                    string debugId = jogo.Id.ToString().Length > 4 ? jogo.Id.ToString().Substring(0, 4) : jogo.Id.ToString();
+
                     if (jogo.ArbitroId.HasValue && jogo.ArbitroId.Value != Guid.Empty && arbitrosMap.TryGetValue(jogo.ArbitroId.Value, out var nome)) {
                         jogo.NomeArbitro = nome;
+                        Debug.WriteLine($"[DEBUG-JOGOS] Jogo ID {debugId}: Arbitro NOVO '{nome}'");
                     } else {
                         jogo.NomeArbitro = string.Empty;
+                        Debug.WriteLine($"[DEBUG-JOGOS] Jogo ID {debugId}: Arbitro NÃO ATRIBUÍDO");
                     }
 
-                    // Garante que o estado do botão (TextoBotaoArbitro) seja atualizado
+                    // Garante que a propriedade ligada ao texto do botão seja notificada (se o objeto Jogo for diferente)
                     jogo.NotifyArbitroStatusChanged();
                 }
 
-                // 5. Atualiza o dicionário interno
                 _jogosPorRodada.Add(rodadaEntry.Key, rodadaJogos);
             }
+            Debug.WriteLine($"[DEBUG-JOGOS] Tabela de Jogos recarregada. Total de Rodadas: {_jogosPorRodada.Count}");
         }
 
         private void LoadRodada(int rodada) {
+            Debug.WriteLine($"[DEBUG-LOADRODADA] Iniciando LoadRodada({rodada}).");
             if (_jogosPorRodada.ContainsKey(rodada)) {
                 var jogosDaRodada = _jogosPorRodada[rodada];
 
-                // Força a reavaliação do CollectionView/ListView
+                // CRÍTICO: Limpar e Adicionar NOVOS objetos força o redesenho da CollectionView
                 MainThread.BeginInvokeOnMainThread(() => {
                     TabelaJogos.Clear();
                     foreach (var jogo in jogosDaRodada) {
                         TabelaJogos.Add(jogo);
                     }
+                    Debug.WriteLine($"[DEBUG-LOADRODADA] Rodada {rodada} carregada com {TabelaJogos.Count} jogos.");
+
+                    // DEBUG: Verifica o status do primeiro jogo após a recarga
+                    if (TabelaJogos.Any()) {
+                        Debug.WriteLine($"[DEBUG-LOADRODADA] Jogo 1 status: NomeArbitro='{TabelaJogos.First().NomeArbitro}'");
+                    }
                 });
             } else {
-                TabelaJogos.Clear();
+                MainThread.BeginInvokeOnMainThread(() => {
+                    TabelaJogos.Clear();
+                });
+                Debug.WriteLine($"[DEBUG-LOADRODADA] Rodada {rodada} não encontrada. TabelaJogos limpa.");
             }
         }
 
-        // --- Comandos de Ação (RelayCommands) ---
+        // --- Comandos de Ação e Navegação (Funcionalidades Mantidas) ---
 
         [RelayCommand]
         private async Task AlterarBanner() {
@@ -311,81 +369,57 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             }
         }
 
-        // --- Comando de Atribuição de Árbitro CORRIGIDO (Remoção do Evento) ---
-
         [RelayCommand]
         public async Task AnexarArbitros(Jogo jogo) {
-            Debug.WriteLine("[DEBUG-CLIQUE] INÍCIO: O comando AnexarArbitros foi acionado.");
-
             if (!IsOrganizador) {
-                Debug.WriteLine("[DEBUG-CLIQUE] VERIFICAÇÃO: Usuário não é o Organizador. Acesso negado.");
                 await _alertService.DisplayAlert("Acesso Negado", "Somente o organizador pode anexar árbitros a um jogo.", "OK");
                 return;
             }
-
             if (jogo is null) {
-                Debug.WriteLine("[DEBUG-CLIQUE] ERRO LÓGICO: O objeto Jogo recebido é NULO.");
                 await _alertService.DisplayAlert("Erro de Dados", "O jogo selecionado não pôde ser carregado.", "OK");
                 return;
             }
-
-            Debug.WriteLine($"[DEBUG-CLIQUE] DADOS RECEBIDOS: Jogo ID: {jogo.Id} | Times: {jogo.TimeA?.Nome ?? "N/A"} vs {jogo.TimeB?.Nome ?? "N/A"}.");
-            Debug.WriteLine($"[DEBUG-CLIQUE] STATUS INICIAL: ArbitroId: {jogo.ArbitroId} | NomeArbitro: '{jogo.NomeArbitro}' | Botão: '{jogo.TextoBotaoArbitro}' | Desabilitado: {jogo.BotaoArbitroDesabilitado}");
-
-
             try {
-                var popup = new AtribuirArbitrosPopup(
-                    Campeonato,
-                    jogo,
-                    _alertService,
-                    _databaseService,
-                    _syncService,
-                    _usuarioService
-                );
-
-                // IMPORTANTE: Removemos a lógica de evento pop-up.
-                // O pop-up (AtribuirArbitrosPopup) agora usará Shell.Current.GoToAsync com o parâmetro 
-                // "jogoAtualizado" para notificar este ViewModel.
-
-                await Application.Current.MainPage.Navigation.PushModalAsync(popup);
-                Debug.WriteLine("[DEBUG-CLIQUE] FIM: PushModalAsync acionado com sucesso. Pop-up deve estar visível.");
-
+                var navigationParameters = new ShellNavigationQueryParameters
+                {
+                    { "Campeonato", Campeonato },
+                    { "Jogo", jogo }
+                };
+                await Shell.Current.GoToAsync("AtribuirArbitros", navigationParameters);
             } catch (Exception ex) {
-                Debug.WriteLine($"[DEBUG-CLIQUE] ERRO CRÍTICO: Falha ao abrir o Pop-up. Detalhes: {ex.Message}");
+                Debug.WriteLine($"[DEBUG-CLIQUE] ERRO CRÍTICO: {ex.Message}");
                 await _alertService.DisplayAlert("Erro de Navegação", $"Não foi possível abrir a tela de árbitros: {ex.Message}", "OK");
             }
         }
 
-        // --- Métodos de Navegação ---
-
         [RelayCommand]
         private async Task GerenciarSolicitacoes() {
-            if (Campeonato is null) {
-                Debug.WriteLine("Erro: Campeonato é nulo.");
-                return;
-            }
-
+            if (Campeonato is null) return;
             var navigationParameters = new ShellNavigationQueryParameters
-            {
+           {
                 { "Campeonato", Campeonato }
             };
-
             await Shell.Current.GoToAsync(nameof(GerenciarSolicitacoesPage), navigationParameters);
         }
 
         [RelayCommand]
         private async Task ListarTimesInscritos() {
-            if (Campeonato is null) {
-                Debug.WriteLine("Erro: Campeonato é nulo.");
-                return;
-            }
-
+            if (Campeonato is null) return;
             var navigationParameters = new ShellNavigationQueryParameters
-            {
+           {
                 { "CampeonatoId", Campeonato.Id }
             };
-
             await Shell.Current.GoToAsync(nameof(TimesCadastradosPage), navigationParameters);
+        }
+
+        [RelayCommand]
+        private async Task ListarArbitrosInscritos() {
+            if (Campeonato is null) return;
+            var navigationParameters = new ShellNavigationQueryParameters
+            {
+                { "CampeonatoId", Campeonato.ClientAppId }
+            };
+            await Shell.Current.GoToAsync(nameof(ArbitrosInscritosPage), navigationParameters);
         }
     }
 }

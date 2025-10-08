@@ -1,5 +1,6 @@
 ﻿using ArenaVirtualAPI.Data;
 using ArenaVirtualAPI.DTOs;
+using Microsoft.EntityFrameworkCore; // Necessário para DbUpdateException
 using System.Text.Json;
 
 namespace ArenaVirtualAPI.Services {
@@ -25,14 +26,15 @@ namespace ArenaVirtualAPI.Services {
             _logger.LogInformation("[BackendSyncService] Iniciando processamento de uploads em etapas sequenciais.");
             var idMappings = new Dictionary<string, Dictionary<Guid, int>>();
 
-            // NOVO: Define a ordem de processamento para garantir que as entidades principais existam antes das de relacionamento.
             var mainEntitiesOrder = new List<string>
             {
-                "Usuario",
+                // Nível 0: Entidades que não dependem de outras do seu modelo.
                 "Campeonato",
-                "Time",
-                "Jogo",
-                "Convite"
+                "Usuario",
+                // Nível 1: Entidades que dependem das anteriores.
+                "Time",      // Time pode depender de Campeonato e é referenciado por Usuario e Convite.
+                "Jogo",      // Jogo depende de Time e Campeonato.
+                "Convite"    // Convite depende de Time e/ou Usuario.
             };
 
             var relationshipEntitiesOrder = new List<string>
@@ -42,7 +44,6 @@ namespace ArenaVirtualAPI.Services {
 
             // --- FASE 1: Processa e mapeia IDs para entidades principais ---
             foreach (var entityName in mainEntitiesOrder) {
-                // Usando reflexão para obter a lista de DTOs correspondente (ex: data.Usuarios)
                 if (data.GetType().GetProperty($"{entityName}s")?.GetValue(data) is IEnumerable<ISyncableDto> dtoList && dtoList.Any()) {
                     idMappings[entityName] = await _syncServiceFactory.ProcessAndMapItemsAsync(dtoList, entityName);
                     _logger.LogInformation($"[BackendSyncService] Concluído o mapeamento de IDs para {entityName}.");
@@ -59,20 +60,28 @@ namespace ArenaVirtualAPI.Services {
             }
 
             // --- FASE 3: Processamento especial para entidades de relacionamento ---
-            // Agora que todos os IDs principais estão mapeados, processamos as entidades de relacionamento.
             foreach (var entityName in relationshipEntitiesOrder) {
                 if (data.GetType().GetProperty($"{entityName}s")?.GetValue(data) is IEnumerable<ISyncableDto> dtoList && dtoList.Any()) {
                     _logger.LogInformation($"[BackendSyncService] Processando entidade de relacionamento: {entityName}.");
-                    // Este método agora deve CRIAR a entidade e resolver suas FKs de uma só vez.
                     await _syncServiceFactory.UpdateForeignKeysAsync(dtoList, entityName, idMappings);
                 }
             }
 
             _logger.LogInformation("[BackendSyncService] Chaves estrangeiras resolvidas. Salvando todas as alterações.");
 
-            // --- FASE 4: Salva todas as alterações pendentes no banco de dados. ---
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("[BackendSyncService] Todas as alterações salvas no banco de dados.");
+            // --- FASE 4: Salva todas as alterações pendentes no banco de dados EM ETAPAS. ---
+            try {
+                // ETAPA 4.1: Salva as entidades "pai"
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("[BackendSyncService] ETAPA 1/2: Entidades primárias salvas com sucesso.");
+
+                // ETAPA 4.2: Salva as entidades "filho" e atualizações de FK.
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("[BackendSyncService] ETAPA 2/2: Entidades dependentes e atualizações de FK salvas. Sincronização concluída.");
+            } catch (DbUpdateException ex) {
+                _logger.LogError(ex, "[BackendSyncService] ERRO FATAL ao salvar alterações em etapas: {ErrorMessage}", ex.InnerException?.Message ?? ex.Message);
+                throw;
+            }
         }
 
         private async Task GetUpdatesFromAllEntitiesAsync(AllUpdatesDto allUpdates, DateTime lastSyncTime) {
@@ -86,7 +95,6 @@ namespace ArenaVirtualAPI.Services {
                 try {
                     var updates = await _syncServiceFactory.GetUpdatesAsync<ISyncableDto>(entityName, lastSyncTime);
                     if (updates != null && updates.Any()) {
-                        // Serializa a lista de DTOs para um JsonElement que representa um array JSON.
                         var jsonElement = JsonSerializer.SerializeToElement(updates);
                         allUpdates.UpdatedItems[entityName] = jsonElement;
 

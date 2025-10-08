@@ -95,8 +95,8 @@ namespace ArenaVirtualAPI.Services {
                     PlacarA = j.PlacarA,
                     PlacarB = j.PlacarB,
                     // CORREÇÃO FINAL: A consulta agora retorna Guid, usando Guid.Empty como padrão se a FK for nula.
-                    TimeAClientAppId = _context.Times.Where(t => t.Id == j.TimeAId).Select(t => t.ClientAppId).FirstOrDefault(),
-                    TimeBClientAppId = _context.Times.Where(t => t.Id == j.TimeBId).Select(t => t.ClientAppId).FirstOrDefault(),
+                    TimeAClientAppId = _context.Time.Where(t => t.Id == j.TimeAId).Select(t => t.ClientAppId).FirstOrDefault(),
+                    TimeBClientAppId = _context.Time.Where(t => t.Id == j.TimeBId).Select(t => t.ClientAppId).FirstOrDefault(),
                     CampeonatoClientAppId = _context.Campeonatos.Where(c => c.Id == j.CampeonatoId).Select(c => c.ClientAppId).FirstOrDefault(),
                     ArbitroClientAppId = _context.Usuarios.Where(u => u.Id == j.ArbitroId).Select(u => u.ClientAppId).FirstOrDefault(),
                     UpdatedAt = j.UpdatedAt,
