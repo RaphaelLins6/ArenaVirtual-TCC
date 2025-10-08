@@ -185,10 +185,32 @@ namespace ArenaVirtual.Services {
         public Task<List<Jogo>> ListarJogosAsync() => _database.Table<Jogo>().ToListAsync();
         public Task<int> DeletarJogoAsync(Jogo item) => _database.DeleteAsync(item);
         public async Task<List<Jogo>> ObterJogosPorCampeonatoAsync(Guid campeonatoClientAppId) {
-            // Assumindo que o seu modelo Jogo tem a propriedade CampeonatoClientAppId
-            return await _database.Table<Jogo>()
+            // 1. Carrega todos os jogos para o campeonato (incluindo duplicatas).
+            var todosOsJogos = await _database.Table<Jogo>()
                 .Where(j => j.CampeonatoClientAppId == campeonatoClientAppId)
                 .ToListAsync();
+
+            // Logging para rastreio:
+            System.Diagnostics.Debug.WriteLine($"[DB SERVICE - Jogo] Encontrados {todosOsJogos.Count} jogos totais no DB para o campeonato.");
+
+            // 2. FILTRAGEM DE DUPLICATAS:
+            // Agrupa os jogos por sua identidade única (Rodada e combinação de times).
+            // Para garantir que TimeA vs TimeB seja igual a TimeB vs TimeA, usamos Math.Min/Math.Max.
+            var jogosUnicos = todosOsJogos
+                .GroupBy(j => new {
+                    j.Rodada,
+                    TimeId1 = Math.Min(j.TimeAId, j.TimeBId),
+                    TimeId2 = Math.Max(j.TimeAId, j.TimeBId)
+                })
+                .Select(g => g.OrderByDescending(j => j.ArbitroId.HasValue).ThenBy(j => j.Id).First())
+                // Dentro de cada grupo de duplicatas:
+                // - Prioriza (OrderByDescending) o registro que tem ArbitroId preenchido (se houver).
+                // - Se o ArbitroId for nulo em todos (ou em caso de empate), pega o registro com o menor Id (o mais antigo).
+                .ToList();
+
+            System.Diagnostics.Debug.WriteLine($"[DB SERVICE - Jogo] Retornando {jogosUnicos.Count} jogos únicos após a remoção de duplicatas.");
+
+            return jogosUnicos;
         }
         public async Task<int> SalvarJogoAsync(Jogo item) {
             // --- PONTO DE DEBUG E: DENTRO DO DATABASE SERVICE ---
@@ -203,6 +225,13 @@ namespace ArenaVirtual.Services {
 
             // Se o resultado for 1, a operação foi um sucesso (inseriu ou substituiu 1 linha).
             return resultado;
+        }
+        public Task<int> InsertAllAsync<T>(IEnumerable<T> items) {
+            // _database é a sua instância de SQLiteAsyncConnection
+            return _database.InsertAllAsync(items);
+        }
+        public Task<Time> ObterTimePorIdAsync(int id) {
+            return _database.Table<Time>().Where(t => t.Id == id).FirstOrDefaultAsync();
         }
 
         // --- MÉTODOS DE FAVORITOS ---

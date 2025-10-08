@@ -4,17 +4,15 @@ using System.Diagnostics;
 
 namespace ArenaVirtual.Models {
 
-    public partial class Jogo : ObservableObject, ISyncable {
+    public partial class Jogo : ObservableObject, ISyncable {
 
-        // --- Propriedades Reativas Geradas (MVVM Toolkit) ---
+        // --- Propriedades Persistentes (salvas no SQLite) ---
 
-        // Chave Primária Local
-        [ObservableProperty]
+        [ObservableProperty]
         [property: PrimaryKey, AutoIncrement]
         private int id;
 
-        // ID de sincronização (deve ser a implementação de ISyncable.ClientAppId)
-        [ObservableProperty]
+        [ObservableProperty]
         private Guid clientAppId;
 
         [ObservableProperty]
@@ -44,8 +42,7 @@ namespace ArenaVirtual.Models {
         [ObservableProperty]
         private string placarB = string.Empty;
 
-        // O tipo JogoStatus deve estar definido em outro arquivo no namespace ArenaVirtual.Models
-        [ObservableProperty]
+        [ObservableProperty]
         private JogoStatus status;
 
         [ObservableProperty]
@@ -54,8 +51,9 @@ namespace ArenaVirtual.Models {
         [ObservableProperty]
         private int placarTimeBInt;
 
-        // Propriedades Ignoradas pelo SQLite (apenas para exibição/lógica)
-        [ObservableProperty]
+        // --- Propriedades Ignoradas pelo SQLite (usadas apenas na UI) ---
+
+        [ObservableProperty]
         [property: Ignore]
         private Time? timeA;
 
@@ -64,82 +62,77 @@ namespace ArenaVirtual.Models {
         private Time? timeB;
 
         [ObservableProperty]
-        [property: Ignore] // Nome do árbitro é carregado do usuário, não armazenado aqui.
-        private string nomeArbitro = string.Empty;
+        [property: Ignore]
+        private string nomeArbitro = string.Empty;
 
         [ObservableProperty]
         [property: Ignore]
         private bool isOrganizador;
 
-        // --- Propriedades POCO/Interfaces ---
+        // --- Outras Propriedades (não persistidas automaticamente) ---
         public int IdServidor { get; set; }
         public int Rodada { get; set; }
         public string NomeCampeonato { get; set; } = string.Empty;
-        public bool IsSynced { get; set; } // Propriedade da interface ISyncable
-        public DateTime UpdatedAt { get; set; } // Propriedade da interface ISyncable
+        public bool IsSynced { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
-
-        // --- Construtor ---
-
-        public Jogo() {
-            this.ClientAppId = Guid.NewGuid(); 
-            this.IsSynced = false;
-            this.UpdatedAt = DateTime.UtcNow;
-
-            this.Status = JogoStatus.Agendado;
-            this.IsOrganizador = false;
+        // --- Construtor ---
+        public Jogo() {
+            ClientAppId = Guid.NewGuid();
+            IsSynced = false;
+            UpdatedAt = DateTime.UtcNow;
+            Status = JogoStatus.Agendado;
+            IsOrganizador = false;
         }
 
-
-        // --- PROPRIEDADES CALCULADAS E CALLBACKS ---
-
-        private bool ArbitroAtribuido => ArbitroId.HasValue && ArbitroId.Value != Guid.Empty;
+        // --- Propriedades Calculadas (para a UI) ---
 
         [Ignore]
-        public bool BotaoArbitroHabilitado => IsOrganizador;
-
+        public bool ArbitroAtribuido => ArbitroId.HasValue && ArbitroId != Guid.Empty;
 
         [Ignore]
-        public string TextoBotaoArbitro => !IsOrganizador
-                ? (ArbitroAtribuido && !string.IsNullOrEmpty(NomeArbitro) ? $"Árbitro: {NomeArbitro}" : "Detalhes")
+        public bool BotaoArbitroHabilitado => IsOrganizador && Status == JogoStatus.Agendado;
+
+        [Ignore]
+        public string TextoBotaoArbitro =>
+            (BotaoArbitroHabilitado && ArbitroAtribuido)
+                ? $"Árbitro: {(string.IsNullOrEmpty(NomeArbitro) ? "Anexado" : NomeArbitro)}"
                 : (ArbitroAtribuido
-            ? $"Árbitro: {(!string.IsNullOrEmpty(NomeArbitro) ? NomeArbitro : "Anexado")}"
-            : "Anexar Árbitros");
-
+                    ? $"Árbitro: {(string.IsNullOrEmpty(NomeArbitro) ? "Anexado" : NomeArbitro)}"
+                    : "Anexar Árbitros");
 
         [Ignore]
-        public bool BotaoArbitroDesabilitado => !BotaoArbitroHabilitado;
+        public bool BotaoArbitroDesabilitado => !BotaoArbitroHabilitado;
 
+        // --- Callbacks automáticos do MVVM Toolkit (CRÍTICO para a persistência) ---
 
-        // --- CALLBACKS DO MVVM TOOLKIT ---
-
-        partial void OnArbitroIdChanged(Guid? value) {
-            Debug.WriteLine($"[JOGO MODEL] ArbitroId alterado para: {value}. Chamando Notificação.");
+        partial void OnArbitroIdChanged(Guid? value) {
+            Debug.WriteLine($"[JOGO MODEL] ArbitroId alterado -> {value}");
+            UpdatedAt = DateTime.UtcNow;
+            IsSynced = false;
             NotifyArbitroStatusChanged();
         }
 
         partial void OnNomeArbitroChanged(string value) {
-            Debug.WriteLine($"[JOGO MODEL] NomeArbitro alterado para: {value}. Chamando Notificação.");
+            Debug.WriteLine($"[JOGO MODEL] NomeArbitro alterado -> {value}");
             NotifyArbitroStatusChanged();
         }
 
         partial void OnIsOrganizadorChanged(bool value) {
-            Debug.WriteLine($"[JOGO MODEL] IsOrganizador alterado para: {value}. Chamando Notificação.");
+            Debug.WriteLine($"[JOGO MODEL] IsOrganizador alterado -> {value}");
             NotifyArbitroStatusChanged();
         }
 
-        // --- MÉTODO DE NOTIFICAÇÃO PÚBLICO ---
-        public void NotifyArbitroStatusChanged() {
-            // Notificar as propriedades calculadas.
-            OnPropertyChanged(nameof(TextoBotaoArbitro));
+        // --- Notificação manual para a UI ---
+
+        public void NotifyArbitroStatusChanged() {
+            OnPropertyChanged(nameof(TextoBotaoArbitro));
             OnPropertyChanged(nameof(BotaoArbitroHabilitado));
             OnPropertyChanged(nameof(BotaoArbitroDesabilitado));
-
-            // Notificar as propriedades base (útil para debug ou caso algum binding direto exista).
             OnPropertyChanged(nameof(ArbitroId));
             OnPropertyChanged(nameof(NomeArbitro));
 
-            Debug.WriteLine($"[JOGO MODEL] Notificações de Status de Árbitro disparadas. Texto Botão: {TextoBotaoArbitro}");
+            Debug.WriteLine($"[JOGO MODEL] UI atualizada → Árbitro: {NomeArbitro}, Habilitado: {BotaoArbitroHabilitado}");
         }
     }
 }

@@ -232,8 +232,8 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             var timesInscritos = await _databaseService.ObterTimesAceitosAsync(Campeonato.Id);
 
             var timesOrdenados = timesInscritos
-                                 .OrderByDescending(t => t.PontuacaoTotal)
-                                 .ToList();
+                                     .OrderByDescending(t => t.PontuacaoTotal)
+                                     .ToList();
 
             // 💡 Garante que a manipulação da ObservableCollection seja na MainThread
             MainThread.BeginInvokeOnMainThread(() => {
@@ -264,11 +264,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             var jogosGeradosPorRodada = await _jogoService.GerarTabelaJogosAsync(campeonato, times);
 
             var todosOsArbitrosIds = jogosGeradosPorRodada.Values
-                                           .SelectMany(col => col.Select(j => j.ArbitroId))
-                                           .Where(id => id.HasValue && id.Value != Guid.Empty)
-                                           .Select(id => id.Value)
-                                           .Distinct()
-                                           .ToList();
+                                             .SelectMany(col => col.Select(j => j.ArbitroId))
+                                             .Where(id => id.HasValue && id.Value != Guid.Empty)
+                                             .Select(id => id.Value)
+                                             .Distinct()
+                                             .ToList();
 
             var arbitrosMap = await _usuarioService.ObterNomesUsuariosPorIdsAsync(todosOsArbitrosIds);
 
@@ -285,11 +285,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
                     if (jogo.ArbitroId.HasValue && jogo.ArbitroId.Value != Guid.Empty && arbitrosMap.TryGetValue(jogo.ArbitroId.Value, out var nome)) {
                         jogo.NomeArbitro = nome;
-                        Debug.WriteLine($"[DEBUG-JOGOS] Jogo ID {debugId}: Arbitro NOVO '{nome}'");
                     } else {
                         jogo.NomeArbitro = string.Empty;
-                        Debug.WriteLine($"[DEBUG-JOGOS] Jogo ID {debugId}: Arbitro NÃO ATRIBUÍDO");
                     }
+
+                    // NOVO LOG: Mostra os IDs dos times e o status do árbitro para diagnóstico
+                    Debug.WriteLine($"[TRACE-JOGOS] Jogo ID {debugId} (Rodada {rodadaEntry.Key}) -> TimeAId: {jogo.TimeAId}, TimeBId: {jogo.TimeBId}. Árbitro: '{jogo.NomeArbitro}'");
 
                     // Garante que a propriedade ligada ao texto do botão seja notificada (se o objeto Jogo for diferente)
                     jogo.NotifyArbitroStatusChanged();
@@ -313,9 +314,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     }
                     Debug.WriteLine($"[DEBUG-LOADRODADA] Rodada {rodada} carregada com {TabelaJogos.Count} jogos.");
 
-                    // DEBUG: Verifica o status do primeiro jogo após a recarga
+                    // DEBUG APRIMORADO: Verifica o status do primeiro jogo após a recarga
                     if (TabelaJogos.Any()) {
-                        Debug.WriteLine($"[DEBUG-LOADRODADA] Jogo 1 status: NomeArbitro='{TabelaJogos.First().NomeArbitro}'");
+                        var firstGame = TabelaJogos.First();
+                        Debug.WriteLine($"[DEBUG-LOADRODADA] Jogo 1 ({firstGame.Id}): TimeAId={firstGame.TimeAId}, TimeBId={firstGame.TimeBId}, Árbitro='{firstGame.NomeArbitro}'");
                     }
                 });
             } else {
