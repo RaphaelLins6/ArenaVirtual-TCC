@@ -148,12 +148,14 @@ namespace ArenaVirtual.Services {
         public Task<List<Inscricao>> ObterInscricoesPendentesPorCampeonatoAsync(Guid campeonatoClientAppId) => _database.Table<Inscricao>().Where(i => i.CampeonatoClientAppId == campeonatoClientAppId && i.Status == StatusConvite.Pendente.ToString()).ToListAsync();
         public Task<int> AtualizarInscricaoAsync(Inscricao inscricao) => _database.UpdateAsync(inscricao);
 
+
         // --- MÉTODOS DE ÁRBITROS ---
         public Task<int> InserirAvaliacaoArbitroAsync(AvaliacaoArbitro item) => _database.InsertAsync(item);
         public Task<List<AvaliacaoArbitro>> ListarAvaliacoesArbitroAsync() => _database.Table<AvaliacaoArbitro>().ToListAsync();
         public Task<int> AtualizarAvaliacaoArbitroAsync(AvaliacaoArbitro item) => _database.UpdateAsync(item);
         public Task<int> DeletarAvaliacaoArbitroAsync(AvaliacaoArbitro item) => _database.DeleteAsync(item);
 
+        
         // --- MÉTODOS DE PATROCÍNIOS ---
         public Task<int> InserirPropostaPatrocinioAsync(PropostaPatrocinio item) => _database.InsertAsync(item);
         public Task<List<PropostaPatrocinio>> ListarPropostasPatrocinioAsync() => _database.Table<PropostaPatrocinio>().ToListAsync();
@@ -164,6 +166,7 @@ namespace ArenaVirtual.Services {
         public Task<int> AtualizarCampanhaPatrocinioAsync(CampanhaPatrocinio item) => _database.UpdateAsync(item);
         public Task<int> DeletarCampanhaPatrocinioAsync(CampanhaPatrocinio item) => _database.DeleteAsync(item);
 
+        
         // --- MÉTODOS DE Estatísticas ---
         public Task<int> InserirEstatisticaAsync(EstatisticaPartida item) => _database.InsertAsync(item);
         public Task<List<EstatisticaPartida>> ListarEstatisticasAsync() => _database.Table<EstatisticaPartida>().ToListAsync();
@@ -172,20 +175,15 @@ namespace ArenaVirtual.Services {
         public Task<List<EstatisticaPartida>> ObterEstatisticasPorJogoAsync(int jogoId) => _database.Table<EstatisticaPartida>().Where(e => e.JogoId == jogoId).ToListAsync();
         public Task<List<EstatisticaPartida>> ObterEstatisticasPorAtletaAsync(int usuarioId) => _database.Table<EstatisticaPartida>().Where(e => e.UsuarioId == usuarioId).ToListAsync();
 
+        
         // --- MÉTODOS DE JOGOS ---
         public async Task<int> AtualizarJogoAsync(Jogo item) {
-            // --- PONTO DE DEBUG E: DENTRO DO DATABASE SERVICE ---
             Debug.WriteLine($"[E] DB SERVICE (Atualizar Jogo): Jogo.Id: {item.Id} | ArbitroId: {item.ArbitroId} | IsSynced: {item.IsSynced}");
-
             if (item.Id <= 0) {
                 Debug.WriteLine("[E] DB SERVICE (Falha): Jogo.Id é inválido (<= 0). UpdateAsync retornará 0 (nenhuma linha atualizada).");
                 return 0;
             }
-
-            // Executa a atualização no SQLite
             int resultado = await _database.UpdateAsync(item);
-
-            // --- PONTO DE DEBUG F: FIM DO DATABASE SERVICE ---
             Debug.WriteLine($"[F] DB SERVICE (Fim Atualizar): UpdateAsync retornou: {resultado}");
             return resultado;
         }
@@ -193,66 +191,52 @@ namespace ArenaVirtual.Services {
         public Task<List<Jogo>> ListarJogosAsync() => _database.Table<Jogo>().ToListAsync();
         public Task<int> DeletarJogoAsync(Jogo item) => _database.DeleteAsync(item);
         public async Task<List<Jogo>> ObterJogosPorCampeonatoAsync(Guid campeonatoClientAppId) {
-            // 1. Carrega todos os jogos para o campeonato (incluindo duplicatas).
             var todosOsJogos = await _database.Table<Jogo>()
                 .Where(j => j.CampeonatoClientAppId == campeonatoClientAppId)
                 .ToListAsync();
-
-            // Logging para rastreio:
             System.Diagnostics.Debug.WriteLine($"[DB SERVICE - Jogo] Encontrados {todosOsJogos.Count} jogos totais no DB para o campeonato.");
-
-            // 2. FILTRAGEM DE DUPLICATAS:
-            // Agrupa os jogos por sua identidade única (Rodada e combinação de times).
-            // Para garantir que TimeA vs TimeB seja igual a TimeB vs TimeA, usamos Math.Min/Math.Max.
-            var jogosUnicos = todosOsJogos
+           var jogosUnicos = todosOsJogos
                 .GroupBy(j => new {
                     j.Rodada,
                     TimeId1 = Math.Min(j.TimeAId, j.TimeBId),
                     TimeId2 = Math.Max(j.TimeAId, j.TimeBId)
                 })
                 .Select(g => g.OrderByDescending(j => j.ArbitroId.HasValue).ThenBy(j => j.Id).First())
-                // Dentro de cada grupo de duplicatas:
-                // - Prioriza (OrderByDescending) o registro que tem ArbitroId preenchido (se houver).
-                // - Se o ArbitroId for nulo em todos (ou em caso de empate), pega o registro com o menor Id (o mais antigo).
                 .ToList();
-
             System.Diagnostics.Debug.WriteLine($"[DB SERVICE - Jogo] Retornando {jogosUnicos.Count} jogos únicos após a remoção de duplicatas.");
-
             return jogosUnicos;
         }
         public async Task<int> SalvarJogoAsync(Jogo item) {
-            // --- PONTO DE DEBUG E: DENTRO DO DATABASE SERVICE ---
             Debug.WriteLine($"[E] DB SERVICE (Salvar Jogo): Jogo.Id: {item.Id} | ClientAppId: {item.ClientAppId} | ArbitroId: {item.ArbitroId} | IsSynced: {item.IsSynced}");
-
-            // Use InsertOrReplaceAsync para garantir que a atualização funcione
-            // mesmo que o Id (PK int) esteja em 0, contanto que o ClientAppId (GUID) seja único.
             int resultado = await _database.InsertOrReplaceAsync(item);
-
-            // --- PONTO DE DEBUG F: FIM DO DATABASE SERVICE ---
             Debug.WriteLine($"[F] DB SERVICE (Fim Salvar): InsertOrReplaceAsync retornou: {resultado}");
-
-            // Se o resultado for 1, a operação foi um sucesso (inseriu ou substituiu 1 linha).
             return resultado;
         }
         public Task<int> InsertAllAsync<T>(IEnumerable<T> items) {
-            // _database é a sua instância de SQLiteAsyncConnection
             return _database.InsertAllAsync(items);
         }
         public Task<Time> ObterTimePorIdAsync(int id) {
             return _database.Table<Time>().Where(t => t.Id == id).FirstOrDefaultAsync();
         }
         public Task<List<Jogo>> ObterJogosPorArbitroAsync(Guid arbitroClientAppId) {
-            // O Jogo.ArbitroId deve ser o ClientAppId (GUID) do Árbitro, como você já utiliza
             return _database.Table<Jogo>()
                             .Where(j => j.ArbitroId == arbitroClientAppId)
-                            .OrderBy(j => j.DataHora) // Ordena por data/hora para ter as próximas partidas no topo
+                            .OrderBy(j => j.DataHora) 
                             .ToListAsync();
+        }
+        public Task<int> DesvincularArbitroDosJogosAsync(Guid campeonatoClientAppId, Guid arbitroClientAppId) {
+           string sql = @"
+                UPDATE Jogo 
+                SET ArbitroId = NULL 
+                WHERE CampeonatoClientAppId = ? AND ArbitroId = ?";
+            return _database.ExecuteAsync(sql, campeonatoClientAppId, arbitroClientAppId);
         }
 
         // --- MÉTODOS DE FAVORITOS ---
         public Task<int> InserirFavoritoAsync(UsuarioCampeonatoFavorito favorito) => _database.InsertAsync(favorito);
         public Task<int> DeletarFavoritoAsync(UsuarioCampeonatoFavorito favorito) => _database.DeleteAsync(favorito);
         public Task<List<UsuarioCampeonatoFavorito>> ListarFavoritosPorUsuarioAsync(Guid usuarioClientAppId) => _database.Table<UsuarioCampeonatoFavorito>().Where(f => f.UsuarioClientAppId == usuarioClientAppId).ToListAsync();
+        
         
         // --- MÉTODOS DE SINCRONIZAÇÃO ---
         public Task<List<T>> GetUnsyncedItemsAsync<T>() where T : ISyncable, new() => _database.Table<T>().Where(i => !i.IsSynced).ToListAsync();
