@@ -40,7 +40,7 @@
                             BackgroundColor="#282828"
                             CornerRadius="5"
                             HasShadow="False">
-                            <Grid ColumnDefinitions="50, *" ColumnSpacing="15">
+                            <Grid ColumnDefinitions="50, *, Auto" ColumnSpacing="15">
                                 <Image
                                     Grid.Column="0"
                                     Aspect="AspectFit"
@@ -55,6 +55,18 @@
                                         Text="{Binding Nome}"
                                         TextColor="OrangeRed" />
                                 </VerticalStackLayout>
+                                <Button
+                                    Grid.Column="2"
+                                    Padding="10,0"
+                                    BackgroundColor="#CC0000"
+                                    Clicked="RemoverTime_Clicked"
+                                    CornerRadius="5"
+                                    FontSize="Small"
+                                    MaximumWidthRequest="150"
+                                    Style="{StaticResource BotaoPrincipal}"
+                                    Text="Remover"
+                                    TextColor="White"
+                                    VerticalOptions="Center" />
                             </Grid>
                         </Frame>
                     </DataTemplate>

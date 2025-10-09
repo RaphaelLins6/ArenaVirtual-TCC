@@ -44,6 +44,7 @@
                                 CornerRadius="20"
                                 HeightRequest="40"
                                 IsVisible="{Binding UsuarioEhCapitao}"
+                                Style="{StaticResource BotaoPrincipal}"
                                 Text="Editar Time"
                                 TextColor="White" />
                         </VerticalStackLayout>
@@ -54,6 +55,7 @@
                         Command="{Binding VerSolicitacoesCommand}"
                         CornerRadius="20"
                         IsVisible="{Binding MostraBotaoVerSolicitacoes}"
+                        Style="{StaticResource BotaoPrincipal}"
                         Text="Solicitações"
                         TextColor="White" />
 
@@ -61,6 +63,7 @@
                         BackgroundColor="Green"
                         Command="{Binding ProcurarCampeonatosCommand}"
                         CornerRadius="20"
+                        Style="{StaticResource BotaoPrincipal}"
                         Text="Procurar Campeonatos"
                         TextColor="White" />
 

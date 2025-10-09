@@ -90,6 +90,7 @@
                                 BackgroundColor="{Binding ButtonColor}"
                                 Clicked="OnSolicitarArbitragemClicked"
                                 IsEnabled="{Binding IsButtonEnabled}"
+                                Style="{StaticResource BotaoPrincipal}"
                                 Text="{Binding ButtonText}" />
                         </Grid>
                     </Frame>

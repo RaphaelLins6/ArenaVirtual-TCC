@@ -120,6 +120,46 @@ namespace ArenaVirtual.Services {
             if (!solicitacoesAceitas.Any()) return new List<Time>();
             return await _database.Table<Time>().Where(t => solicitacoesAceitas.Contains(t.ClientAppId)).ToListAsync();
         }
+        public async Task RemoverTimeDoCampeonatoAsync(
+            int campeonatoId,
+            int timeId,
+            Guid timeClientAppId,
+            Guid campeonatoClientAppId) {
+            System.Diagnostics.Debug.WriteLine($"[DEBUG GUIDS PASSADOS] TimeClientAppId: {timeClientAppId}");
+            System.Diagnostics.Debug.WriteLine($"[DEBUG GUIDS PASSADOS] CampeonatoClientAppId: {campeonatoClientAppId}");
+            var linhasConviteDeletadas = await _database.Table<Convite>()
+                .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId
+                         && c.TimeClientAppId == timeClientAppId
+                         && c.Tipo == TipoConvite.InscricaoCampeonato)
+                .DeleteAsync();
+            await _database.RunInTransactionAsync(conn => {
+                var jogoIds = conn.Query<int>(
+                    "SELECT Id FROM Jogo WHERE CampeonatoClientAppId = ? AND (TimeAId = ? OR TimeBId = ?)",
+                    campeonatoClientAppId, timeId, timeId
+                );
+                System.Diagnostics.Debug.WriteLine($"[DB JOGOS] Encontrados {jogoIds.Count} jogos para deletar.");
+                foreach (var jogoId in jogoIds) {
+                    conn.Execute("DELETE FROM EstatisticaPartida WHERE JogoId = ?", jogoId);
+                    conn.Execute("DELETE FROM AvaliacaoArbitro WHERE JogoId = ?", jogoId);
+                }
+                string deleteJogosQuery =
+                    "DELETE FROM Jogo WHERE CampeonatoClientAppId = ? AND (TimeAId = ? OR TimeBId = ?)";
+                int jogosDeletados = conn.Execute(deleteJogosQuery, campeonatoClientAppId, timeId, timeId);
+                System.Diagnostics.Debug.WriteLine($"[DB JOGOS] Total de jogos deletados: {jogosDeletados}");
+                string updateTimeQuery =
+                    "UPDATE Time SET CampeonatoId = NULL WHERE Id = ? AND CampeonatoId = ?";
+                conn.Execute(updateTimeQuery, timeId, campeonatoId);
+            });
+            System.Diagnostics.Debug.WriteLine($"[DB REMOCAO] Convites de time deletados: {linhasConviteDeletadas}");
+            if (linhasConviteDeletadas == 0) {
+                System.Diagnostics.Debug.WriteLine("[DB CRITICO] Deleção inicial falhou. Tentando FORCE DELETE no Convite.");
+                var linhasForcadas = await _database.Table<Convite>()
+                     .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId
+                              && c.Tipo == TipoConvite.InscricaoCampeonato)
+                     .DeleteAsync();
+                System.Diagnostics.Debug.WriteLine($"[DB CRITICO] Convites deletados por força: {linhasForcadas}");
+            }
+        }
 
         // --- MÉTODOS DE CONVITE ---
         public Task<List<Convite>> ObterConvitesPendentesAsync(Guid campeonatoClientAppId) => _database.Table<Convite>().Where(c => c.CampeonatoClientAppId == campeonatoClientAppId && c.Status == StatusConvite.Pendente).ToListAsync();
@@ -207,9 +247,18 @@ namespace ArenaVirtual.Services {
             return jogosUnicos;
         }
         public async Task<int> SalvarJogoAsync(Jogo item) {
-            Debug.WriteLine($"[E] DB SERVICE (Salvar Jogo): Jogo.Id: {item.Id} | ClientAppId: {item.ClientAppId} | ArbitroId: {item.ArbitroId} | IsSynced: {item.IsSynced}");
+            System.Diagnostics.Debug.WriteLine($"[E] DB SERVICE (Salvar Jogo): Jogo.Id: {item.Id} | ClientAppId: {item.ClientAppId} | CampeonatoId ANTES: {item.CampeonatoId}");
+            if (item.CampeonatoId == 0 && item.CampeonatoClientAppId != Guid.Empty) {
+                var campeonato = await _database.Table<Campeonato>()
+                                                .Where(c => c.ClientAppId == item.CampeonatoClientAppId)
+                                                .FirstOrDefaultAsync();
+                if (campeonato != null) {
+                    item.CampeonatoId = campeonato.Id;
+                    System.Diagnostics.Debug.WriteLine($"[DB SERVICE - Jogo] CampeonatoId CORRIGIDO para: {item.CampeonatoId}");
+                }
+            }
             int resultado = await _database.InsertOrReplaceAsync(item);
-            Debug.WriteLine($"[F] DB SERVICE (Fim Salvar): InsertOrReplaceAsync retornou: {resultado}");
+            System.Diagnostics.Debug.WriteLine($"[F] DB SERVICE (Fim Salvar): InsertOrReplaceAsync retornou: {resultado}");
             return resultado;
         }
         public Task<int> InsertAllAsync<T>(IEnumerable<T> items) {

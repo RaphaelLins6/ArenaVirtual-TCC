@@ -22,6 +22,7 @@
                 Margin="0,0,0,15"
                 BackgroundColor="#007ACC"
                 Command="{Binding NavigateToInscricoesCommand}"
+                Style="{StaticResource BotaoPrincipal}"
                 Text="Inscrição"
                 TextColor="White" />
 
@@ -120,6 +121,7 @@
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardArbitroViewModel}}, Path=PartidaSelecionadaCommand}"
                                         CommandParameter="{Binding .}"
                                         IsVisible="{Binding PodeLancarEstatisticas}"
+                                        Style="{StaticResource BotaoPrincipal}"
                                         Text="Lançar Estatísticas"
                                         TextColor="Black" />
 

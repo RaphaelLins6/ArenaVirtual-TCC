@@ -105,5 +105,19 @@ namespace ArenaVirtual.Services {
                 return false;
             }
         }
+
+        public async Task RemoverTimeDoCampeonato(
+            int campeonatoId,
+            int timeId,
+            Guid timeClientAppId, 
+            Guid campeonatoClientAppId) 
+        {
+            await _databaseService.RemoverTimeDoCampeonatoAsync(
+                campeonatoId,
+                timeId,
+                timeClientAppId,
+                campeonatoClientAppId
+            );
+        }
     }
 }
