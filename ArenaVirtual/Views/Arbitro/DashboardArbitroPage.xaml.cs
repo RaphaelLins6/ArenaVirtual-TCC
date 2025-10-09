@@ -11,5 +11,14 @@ namespace ArenaVirtual.Views.Arbitro {
             BindingContext = viewModel;
 
         }
+
+        protected override async void OnAppearing() {
+            base.OnAppearing();
+
+            if (BindingContext is DashboardArbitroViewModel viewModel) {
+                // Esta é a linha CRUCIAL que provavelmente está faltando ou errada.
+                await viewModel.LoadPartidasCommand.ExecuteAsync(null);
+            }
+        }
     }
 }

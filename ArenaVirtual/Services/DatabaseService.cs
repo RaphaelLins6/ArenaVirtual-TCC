@@ -233,6 +233,13 @@ namespace ArenaVirtual.Services {
         public Task<Time> ObterTimePorIdAsync(int id) {
             return _database.Table<Time>().Where(t => t.Id == id).FirstOrDefaultAsync();
         }
+        public Task<List<Jogo>> ObterJogosPorArbitroAsync(Guid arbitroClientAppId) {
+            // O Jogo.ArbitroId deve ser o ClientAppId (GUID) do Árbitro, como você já utiliza
+            return _database.Table<Jogo>()
+                            .Where(j => j.ArbitroId == arbitroClientAppId)
+                            .OrderBy(j => j.DataHora) // Ordena por data/hora para ter as próximas partidas no topo
+                            .ToListAsync();
+        }
 
         // --- MÉTODOS DE FAVORITOS ---
         public Task<int> InserirFavoritoAsync(UsuarioCampeonatoFavorito favorito) => _database.InsertAsync(favorito);

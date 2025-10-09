@@ -63,6 +63,10 @@ namespace ArenaVirtual.Models {
 
         [ObservableProperty]
         [property: Ignore]
+        private Campeonato? campeonato;
+
+        [ObservableProperty]
+        [property: Ignore]
         private string nomeArbitro = string.Empty;
 
         [ObservableProperty]
