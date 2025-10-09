@@ -107,5 +107,28 @@ namespace ArenaVirtual.Services {
         public async Task<int> RemoverAsync(Campeonato campeonato) {
             return await _databaseService.DeletarCampeonatoAsync(campeonato);
         }
+
+        public async Task<bool> RemoverArbitroDoCampeonatoAsync(Guid campeonatoClientAppId, Guid arbitroClientAppId) {
+            try {
+                Debug.WriteLine($"[CampeonatoService] Tentando remover árbitro {arbitroClientAppId} do campeonato {campeonatoClientAppId}...");
+
+                // Chama o método do DatabaseService para deletar o Convite (Inscrição de Árbitro Aceita)
+                int result = await _databaseService.DeletarConviteArbitroAceitoAsync(campeonatoClientAppId, arbitroClientAppId);
+
+                if (result > 0) {
+                    Debug.WriteLine($"[CampeonatoService] Convite de árbitro deletado com sucesso. {result} registro(s) afetado(s).");
+                    _syncService.ScheduleSync(); // Agenda a sincronização para remover na nuvem
+                    return true;
+                }
+
+                Debug.WriteLine($"[CampeonatoService] Nenhum registro de convite de árbitro encontrado/deletado. Resultado: {result}");
+                return false;
+
+            } catch (Exception ex) {
+                Debug.WriteLine($"[CampeonatoService] ERRO ao remover árbitro: {ex.Message}");
+                // Pode ser útil logar o erro
+                return false;
+            }
+        }
     }
 }

@@ -18,7 +18,14 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         private bool _isBusy;
         public bool IsBusy {
             get => _isBusy;
-            set => SetProperty(ref _isBusy, value);
+            set {
+                if (SetProperty(ref _isBusy, value)) {
+
+                    (RemoverArbitroCommand as IRelayCommand)?.NotifyCanExecuteChanged();
+                    (LoadArbitrosCommand as IRelayCommand)?.NotifyCanExecuteChanged();
+
+                }
+            }
         }
         private bool IsNotBusy => !IsBusy;
 
@@ -37,6 +44,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         }
 
         public IAsyncRelayCommand LoadArbitrosCommand { get; }
+        public IAsyncRelayCommand RemoverArbitroCommand { get; }
 
         public ArbitrosInscritosViewModel(
             DatabaseService databaseService,
@@ -50,6 +58,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             ArbitrosInscritos = new ObservableCollection<SolicitacaoArbitroItemViewModel>();
             LoadArbitrosCommand = new AsyncRelayCommand(LoadArbitrosAsync, () => IsNotBusy);
+            RemoverArbitroCommand = new AsyncRelayCommand<SolicitacaoArbitroItemViewModel>(RemoverArbitroAsync, _ => true);
         }
 
         public async void ApplyQueryAttributes(IDictionary<string, object> query) {
@@ -168,6 +177,71 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         private void UpdateIsListEmpty() {
             IsListEmpty = !ArbitrosInscritos.Any();
+        }
+
+        private async Task RemoverArbitroAsync(SolicitacaoArbitroItemViewModel arbitroViewModel) {
+
+            // DEBUG 1: Confirma que o comando foi chamado
+            Debug.WriteLine($"[Arbitros VM - Comando] CLIQUE: Tentativa de remover árbitro.");
+
+            if (arbitroViewModel == null) {
+                // DEBUG 2: Verifica se o parâmetro está nulo (o que pode ser um problema de CommandParameter no XAML)
+                Debug.WriteLine($"[Arbitros VM - Comando] ERRO: arbitroViewModel é nulo. (Problema de binding)");
+                return;
+            }
+
+            Debug.WriteLine($"[Arbitros VM - Comando] Árbitro selecionado: {arbitroViewModel.NomeArbitro} ({arbitroViewModel.ArbitroSolicitante.ClientAppId})");
+
+            // 1. Confirmação do Usuário
+            var confirmou = await _alertService.DisplayAlert(
+                "Confirmar Remoção",
+                $"Tem certeza que deseja remover o árbitro {arbitroViewModel.NomeArbitro}?",
+                "Sim",
+                "Não");
+
+            // DEBUG 3: Rastreia a resposta do usuário
+            Debug.WriteLine($"[Arbitros VM - Comando] Confirmação do usuário: {confirmou}");
+
+            if (!confirmou) {
+                Debug.WriteLine($"[Arbitros VM - Comando] Remoção cancelada pelo usuário.");
+                return;
+            }
+
+            IsBusy = true; // Bloqueia a UI enquanto processa
+
+            try {
+                // DEBUG 4: Indica que a chamada de serviço será feita
+                Debug.WriteLine($"[Arbitros VM - Comando] Chamando serviço de remoção...");
+
+                // 2. Chamar o serviço para remover a inscrição/solicitação do árbitro
+                var success = await _campeonatoService.RemoverArbitroDoCampeonatoAsync(
+                    _campeonatoClientAppId,
+                    arbitroViewModel.ArbitroSolicitante.ClientAppId);
+
+                // DEBUG 5: Resultado da chamada do serviço
+                Debug.WriteLine($"[Arbitros VM - Comando] Resultado do serviço: {success}");
+
+                if (success) {
+                    // 3. Atualizar a lista na UI se a remoção foi bem-sucedida
+                    MainThread.BeginInvokeOnMainThread(() => {
+                        ArbitrosInscritos.Remove(arbitroViewModel);
+                        UpdateIsListEmpty();
+                        Debug.WriteLine($"[Arbitros VM] Árbitro {arbitroViewModel.NomeArbitro} removido com sucesso da lista local.");
+                    });
+                } else {
+                    Debug.WriteLine($"[Arbitros VM - Comando] Falha na remoção do serviço. Exibindo alerta.");
+                    await _alertService.DisplayAlert("Erro", "Falha ao remover o árbitro. Tente novamente.", "OK");
+                }
+
+            } catch (Exception ex) {
+                // DEBUG 6: Captura qualquer erro fatal
+                Debug.WriteLine($"[Arbitros VM] ERRO FATAL ao remover árbitro: {ex.Message}");
+                await _alertService.DisplayAlert("Erro", "Ocorreu um erro ao processar a remoção.", "OK");
+            } finally {
+                IsBusy = false; // Desbloqueia a UI
+                // DEBUG 7: Fim da operação
+                Debug.WriteLine($"[Arbitros VM - Comando] FIM da operação de remoção.");
+            }
         }
     }
 }

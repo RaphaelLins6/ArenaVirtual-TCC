@@ -135,6 +135,14 @@ namespace ArenaVirtual.Services {
         public Task<int> DeletarConvitePendenteDoUsuarioAsync(Guid usuarioClientAppId) => _database.Table<Convite>().Where(c => c.SolicitanteClientAppId == usuarioClientAppId && c.Status == StatusConvite.Pendente).DeleteAsync();
         public async Task<Convite?> ObterSolicitacaoPorTimeECampeonatoAsync(string timeId, string campeonatoId) { if (!Guid.TryParse(timeId, out var timeGuid) || !Guid.TryParse(campeonatoId, out var campeonatoGuid)) return null; return await _database.Table<Convite>().FirstOrDefaultAsync(s => s.TimeClientAppId == timeGuid && s.CampeonatoClientAppId == campeonatoGuid && s.Tipo == TipoConvite.InscricaoCampeonato); }
         public AsyncTableQuery<Convite> GetConviteTable() => _database.Table<Convite>();
+        public Task<int> DeletarConviteArbitroAceitoAsync(Guid campeonatoClientAppId, Guid arbitroClientAppId) {
+            return _database.Table<Convite>()
+                .Where(c => c.CampeonatoClientAppId == campeonatoClientAppId
+                         && c.UsuarioClientAppId == arbitroClientAppId
+                         && c.Status == StatusConvite.Aceito
+                         && c.Tipo == TipoConvite.InscricaoArbitro)
+                .DeleteAsync();
+        }
 
         // --- MÉTODOS DE INSCRICAO ---
         public Task<List<Inscricao>> ObterInscricoesPendentesPorCampeonatoAsync(Guid campeonatoClientAppId) => _database.Table<Inscricao>().Where(i => i.CampeonatoClientAppId == campeonatoClientAppId && i.Status == StatusConvite.Pendente.ToString()).ToListAsync();

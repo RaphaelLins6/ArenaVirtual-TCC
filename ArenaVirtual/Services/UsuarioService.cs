@@ -102,12 +102,6 @@ namespace ArenaVirtual.Services {
         }
 
         // --- NOVO MÉTODO ADICIONADO ---
-        /// <summary>
-        /// Obtém um dicionário de mapeamento ClientAppId do Usuário -> Nome do Usuário para uma lista de IDs.
-        /// Este método é chamado a partir da ViewModel.
-        /// </summary>
-        /// <param name="userIds">Lista de ClientAppIds (Guid) dos usuários a serem buscados.</param>
-        /// <returns>Dicionário onde a chave é o ClientAppId (Guid) e o valor é o Nome (string).</returns>
         public async Task<Dictionary<Guid, string>> ObterNomesUsuariosPorIdsAsync(List<Guid> userIds) {
             if (userIds == null || !userIds.Any()) {
                 return new Dictionary<Guid, string>();

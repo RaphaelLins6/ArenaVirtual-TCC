@@ -7,8 +7,7 @@ namespace ArenaVirtual.ViewModels.Arbitro {
     public partial class SolicitacaoArbitroItemViewModel : ObservableObject {
 
         public Convite SolicitacaoOriginal { get; }
-        public Usuario ArbitroSolicitante { get; } 
-
+        public Usuario ArbitroSolicitante { get; }
         public string NomeArbitro => ArbitroSolicitante?.Nome;
         public string EmailArbitro => ArbitroSolicitante?.Email;
         public string FotoArbitroUrl => ArbitroSolicitante?.ImagemPath;
