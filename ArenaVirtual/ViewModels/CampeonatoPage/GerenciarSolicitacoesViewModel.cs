@@ -250,7 +250,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         // --- MÉTODOS DE AÇÃO (TIMES) ---
 
-        // CORREÇÃO: Removido 'Command' do nome do método AceitarTime
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
         public async Task AceitarTime(SolicitacaoTimeItemViewModel solicitacaoItem) {
             if (solicitacaoItem is null) return;
@@ -261,13 +260,37 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
                 if (solicitacaoOriginal == null) return;
 
+                // Atualiza o status do Convite/Solicitação
                 solicitacaoOriginal.Status = StatusConvite.Aceito;
                 solicitacaoOriginal.IsSynced = false;
                 solicitacaoOriginal.UpdatedAt = DateTime.UtcNow;
 
                 await _databaseService.AtualizarConviteAsync(solicitacaoOriginal);
 
-                // TODO: Inserir time no campeonato (Adicione a lógica de inserção aqui)
+                // -----------------------------------------------------------------
+                // CORREÇÃO DOS ERROS DE COMPILAÇÃO E LÓGICA
+                // -----------------------------------------------------------------
+
+                // 1. Busca o objeto Time pelo ClientAppId do convite.
+                // CORREÇÃO: Utiliza o nome do método que existe no seu TimeService: ObterPorClientAppIdAsync
+                var timeAceito = await _timeService.ObterPorClientAppIdAsync(solicitacaoOriginal.TimeClientAppId);
+
+                if (timeAceito != null) {
+                    // 2. Vincula o Time ao Campeonato
+                    // Nota: 'Campeonato' deve ser uma propriedade acessível no seu ViewModel.
+                    timeAceito.CampeonatoId = Campeonato.Id;
+                    timeAceito.IsSynced = false;
+                    timeAceito.UpdatedAt = DateTime.UtcNow;
+
+                    // 3. Atualiza o Time no DB.
+                    // CORREÇÃO: Utiliza o nome do método que existe no seu TimeService: AtualizarTimeAsync
+                    await _timeService.AtualizarTimeAsync(timeAceito);
+
+                    // 4. REGENERA A TABELA DE JOGOS.
+                    // Nota: Depende da implementação dos novos métodos no CampeonatoService e DatabaseService.
+                    await _campeonatoService.RecalcularEGerarJogosAsync(Campeonato.ClientAppId);
+                }
+                // -----------------------------------------------------------------
 
                 MainThread.BeginInvokeOnMainThread(() => {
                     SolicitacoesPendentes.Remove(solicitacaoItem);
@@ -284,7 +307,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             }
         }
 
-        // CORREÇÃO: Removido 'Command' do nome do método RecusarTime
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
         public async Task RecusarTime(SolicitacaoTimeItemViewModel solicitacaoItem) {
             if (solicitacaoItem is null) return;

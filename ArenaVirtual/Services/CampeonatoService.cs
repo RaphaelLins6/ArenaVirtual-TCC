@@ -11,10 +11,12 @@ namespace ArenaVirtual.Services {
     public class CampeonatoService {
         private readonly DatabaseService _databaseService;
         private readonly SyncService _syncService;
+        private readonly JogoService _jogoService;
 
-        public CampeonatoService(DatabaseService databaseService, SyncService syncService) {
+        public CampeonatoService(DatabaseService databaseService, SyncService syncService, JogoService jogoService) {
             _databaseService = databaseService;
             _syncService = syncService;
+            _jogoService = jogoService;
         }
 
         public async Task<int> AtualizarConviteAsync(Convite convite) {
@@ -118,6 +120,32 @@ namespace ArenaVirtual.Services {
                 timeClientAppId,
                 campeonatoClientAppId
             );
+        }
+
+        public async Task RecalcularEGerarJogosAsync(Guid campeonatoClientAppId) {
+            Debug.WriteLine($"[CampeonatoService] Iniciando recalculo para o campeonato: {campeonatoClientAppId}");
+
+            // 1. Encontrar o Campeonato (Usando o novo método ObterCampeonatoPorClientAppIdAsync)
+            var campeonato = await _databaseService.ObterCampeonatoPorClientAppIdAsync(campeonatoClientAppId);
+
+            if (campeonato == null) return;
+
+            // 2. EXCLUIR TODOS OS JOGOS ANTIGOS (Usando o novo método com cascade no DatabaseService)
+            await _databaseService.DeletarJogosECascataPorCampeonatoAsync(campeonatoClientAppId);
+
+            // 3. Obter a lista ATUALIZADA de times (Usando o Campeonato.Id - int)
+            var times = await GetTimesAceitos(campeonato.Id);
+
+            // 4. Gerar e salvar os novos jogos
+            if (times.Count >= 2) {
+                // Chama o GerarTabelaJogosAsync do JogoService (que deve gerar a tabela e salvar)
+                await _jogoService.GerarTabelaJogosAsync(campeonato, times);
+                Debug.WriteLine($"[CampeonatoService] {times.Count} times encontrados. Tabela de jogos regenerada.");
+            } else {
+                Debug.WriteLine($"[CampeonatoService] Não há times suficientes ({times.Count}) para gerar jogos.");
+            }
+
+            _syncService.ScheduleSync();
         }
     }
 }

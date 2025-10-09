@@ -62,6 +62,34 @@ namespace ArenaVirtual.Services {
             await _database.DeleteAsync(campeonato);
         }
 
+        public async Task DeletarJogosECascataPorCampeonatoAsync(Guid campeonatoClientAppId) {
+            Debug.WriteLine($"[DB JOGOS - DELETE ALL] Excluindo jogos do campeonato GUID: {campeonatoClientAppId}");
+
+            await _database.RunInTransactionAsync(conn => {
+                // 1. Seleciona os IDs dos jogos a serem deletados
+                var jogoIds = conn.Query<int>(
+                    "SELECT Id FROM Jogo WHERE CampeonatoClientAppId = ?",
+                    campeonatoClientAppId
+                );
+
+                Debug.WriteLine($"[DB JOGOS - DELETE ALL] Encontrados {jogoIds.Count} jogos para deletar em cascata.");
+
+                if (jogoIds.Any()) {
+                    // 2. Deleta as tabelas filhas (EstatisticaPartida e AvaliacaoArbitro)
+                    foreach (var jogoId in jogoIds) {
+                        // Deletamos as dependências de cada jogo
+                        conn.Execute("DELETE FROM EstatisticaPartida WHERE JogoId = ?", jogoId);
+                        conn.Execute("DELETE FROM AvaliacaoArbitro WHERE JogoId = ?", jogoId);
+                    }
+
+                    // 3. Deleta os jogos
+                    string deleteJogosQuery = "DELETE FROM Jogo WHERE CampeonatoClientAppId = ?";
+                    int jogosDeletados = conn.Execute(deleteJogosQuery, campeonatoClientAppId);
+                    Debug.WriteLine($"[DB JOGOS - DELETE ALL] Total de jogos deletados: {jogosDeletados}");
+                }
+            });
+        }
+
         // --- MÉTODOS DE USUÁRIO ---
         public Task<int> InserirUsuarioAsync(Usuario usuario) => _database.InsertAsync(usuario);
         public Task<Usuario?> ObterUsuarioPorEmailAsync(string email) => _database.Table<Usuario>().Where(u => u.Email == email).FirstOrDefaultAsync();
@@ -102,6 +130,9 @@ namespace ArenaVirtual.Services {
             var campeonatos = await _database.Table<Campeonato>().Where(c => campClientAppIds.Contains(c.ClientAppId)).ToListAsync();
             return campeonatos.Select(c => c.Id).ToHashSet();
         }
+        public Task<Campeonato?> ObterCampeonatoPorClientAppIdAsync(Guid clientAppId) =>
+            _database.Table<Campeonato>().Where(c => c.ClientAppId == clientAppId).FirstOrDefaultAsync();
+
 
         // --- MÉTODOS DE TIME ---
         public Task<int> InserirTimeAsync(Time item) => _database.InsertAsync(item);

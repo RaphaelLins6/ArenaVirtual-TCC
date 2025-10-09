@@ -214,5 +214,19 @@ namespace ArenaVirtual.Services {
 
             return partidasDoTime.OrderBy(j => j.DataHora).ToList();
         }
+
+        public async Task DeletarJogosDoCampeonatoAsync(Guid campeonatoClientAppId) {
+            Debug.WriteLine($"[JOGO SERVICE] Excluindo todos os jogos e dependências para o campeonato GUID: {campeonatoClientAppId}");
+
+            // Como você já corrigiu o DatabaseService para a remoção de time, 
+            // precisaremos de um método similar que lide com a remoção de jogos 
+            // de um campeonato inteiro (sem o filtro de TimeAId/TimeBId).
+
+            // É CRÍTICO que esta função do DatabaseService lide com as tabelas filhas (EstatisticaPartida, AvaliacaoArbitro)
+            // para evitar erros de chave estrangeira, usando o CampeonatoClientAppId.
+
+            // Assumindo que você criará o método no DatabaseService:
+            await _databaseService.DeletarJogosECascataPorCampeonatoAsync(campeonatoClientAppId);
+        }
     }
 }
