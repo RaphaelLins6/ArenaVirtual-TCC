@@ -30,7 +30,7 @@
             IsVisible="{Binding IsBusy}"
             VerticalOptions="Center"
             ZIndex="10"
-            Color="#1976D2" />
+            Color="#FF4500" />
 
         <ScrollView IsEnabled="{Binding IsBusy, Converter={StaticResource InverterBooleanConverter}}">
             <VerticalStackLayout Padding="15" Spacing="25">
@@ -97,6 +97,7 @@
                                                 BackgroundColor="#4CAF50"
                                                 Clicked="AceitarTime_Clicked"
                                                 CornerRadius="20"
+                                                Style="{StaticResource BotaoPrincipal}"
                                                 Text="Aceitar"
                                                 TextColor="White"
                                                 WidthRequest="100" />
@@ -104,6 +105,7 @@
                                                 BackgroundColor="#F44336"
                                                 Clicked="RecusarTime_Clicked"
                                                 CornerRadius="20"
+                                                Style="{StaticResource BotaoPrincipal}"
                                                 Text="Recusar"
                                                 TextColor="White"
                                                 WidthRequest="100" />
@@ -182,6 +184,7 @@
                                                 BackgroundColor="#4CAF50"
                                                 Clicked="AceitarArbitro_Clicked"
                                                 CornerRadius="20"
+                                                Style="{StaticResource BotaoPrincipal}"
                                                 Text="Aceitar"
                                                 TextColor="White"
                                                 WidthRequest="100" />
@@ -189,6 +192,7 @@
                                                 BackgroundColor="#F44336"
                                                 Clicked="RecusarArbitro_Clicked"
                                                 CornerRadius="20"
+                                                Style="{StaticResource BotaoPrincipal}"
                                                 Text="Recusar"
                                                 TextColor="White"
                                                 WidthRequest="100" />

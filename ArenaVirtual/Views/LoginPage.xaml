@@ -94,7 +94,10 @@
                     ReturnType="Go"
                     Text="{Binding Senha}" />
 
-                <Button Command="{Binding LoginCommand}" Text="Entrar" />
+                <Button
+                    Command="{Binding LoginCommand}"
+                    Style="{StaticResource BotaoPrincipal}"
+                    Text="Entrar" />
 
                 <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
                     <Label Text="Não tem uma conta?" TextColor="{StaticResource CorTextoPrincipal}" />
