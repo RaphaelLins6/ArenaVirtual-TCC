@@ -95,11 +95,10 @@
                     Style="{StaticResource PickerStyle}">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
-                            <x:String>Eliminatória Simples</x:String>
-                            <x:String>Eliminatória Dupla</x:String>
                             <x:String>Pontos Corridos</x:String>
-                            <x:String>Grupos + Eliminatória</x:String>
-                            <x:String>Outro</x:String>
+                            <x:String>Mata-Mata</x:String>
+                            <x:String>Pontos + Eliminatórias</x:String>
+                            <x:String>Grupos + Eliminatórias</x:String>
                         </x:Array>
                     </Picker.ItemsSource>
                 </Picker>

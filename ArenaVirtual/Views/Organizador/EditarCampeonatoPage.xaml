@@ -46,7 +46,22 @@
                 Keyboard="Telephone"
                 Placeholder="Telefone do organizador"
                 Text="{Binding Campeonato.TelefoneOrganizador}" />
-            <Entry Placeholder="Formato do campeonato" Text="{Binding Campeonato.FormatoCampeonato}" />
+
+            <Label Style="{StaticResource LabelHeaderStyle}" Text="Formato do Campeonato" />
+            <Picker
+                Title="Selecione o Formato"
+                SelectedItem="{Binding Campeonato.FormatoCampeonato}"
+                Style="{StaticResource PickerStyle}">
+                <Picker.ItemsSource>
+                    <x:Array Type="{x:Type x:String}">
+                        <x:String>Pontos Corridos</x:String>
+                        <x:String>Mata-Mata</x:String>
+                        <x:String>Pontos + Eliminatórias</x:String>
+                        <x:String>Grupos + Eliminatórias</x:String>
+                    </x:Array>
+                </Picker.ItemsSource>
+            </Picker>
+
             <Entry Placeholder="Locais dos jogos" Text="{Binding Campeonato.LocaisDosJogos}" />
 
             <Label Text="Data de Início" />

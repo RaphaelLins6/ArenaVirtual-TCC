@@ -12,9 +12,9 @@ namespace ArenaVirtual.ViewModels.Organizador;
 public partial class EditarCampeonatoViewModel : ObservableObject {
     private readonly CampeonatoService _campeonatoService;
     private readonly SessaoService _sessaoService;
-    private readonly SyncService _syncService; // Adicione o serviço de sincronização
+    private readonly SyncService _syncService;
 
-    [ObservableProperty]
+    [ObservableProperty]
     private Campeonato campeonato;
 
     [ObservableProperty]
@@ -29,18 +29,23 @@ public partial class EditarCampeonatoViewModel : ObservableObject {
     [ObservableProperty]
     private string? validationMessage;
 
+    // A propriedade FormatoCampeonatoSelecionado foi removida!
+    // O Picker agora faz binding direto com Campeonato.FormatoCampeonato.
+
     public IRelayCommand SalvarCommand { get; }
     public IRelayCommand SelecionarLogoCommand { get; }
 
-    // Atualize o construtor para receber o SyncService via injeção de dependência
-    public EditarCampeonatoViewModel(CampeonatoService campeonatoService, SessaoService sessaoService, SyncService syncService, Campeonato campeonato) {
+    public EditarCampeonatoViewModel(CampeonatoService campeonatoService, SessaoService sessaoService, SyncService syncService, Campeonato campeonato) {
         _campeonatoService = campeonatoService;
         _sessaoService = sessaoService;
         _syncService = syncService;
         Campeonato = campeonato;
 
+        // Inicializa as propriedades de texto (Entries) com os dados existentes
         NumeroMaximoEquipesText = Campeonato.NumeroMaximoEquipes.ToString();
         ValorTaxaInscricaoText = Campeonato.ValorTaxaInscricao.ToString();
+
+        // Não precisamos inicializar o FormatoCampeonato, pois ele está no objeto Campeonato
 
         SalvarCommand = new AsyncRelayCommand(SalvarAsync);
         SelecionarLogoCommand = new AsyncRelayCommand(SelecionarLogoAsync);
@@ -63,6 +68,9 @@ public partial class EditarCampeonatoViewModel : ObservableObject {
             return;
         }
 
+        // A alteração no FormatoCampeonato é feita automaticamente pelo Picker
+        // devido ao binding direto com Campeonato.FormatoCampeonato.
+
         Campeonato.NumeroMaximoEquipes = numeroEquipes;
         Campeonato.ValorTaxaInscricao = valorTaxa;
 
@@ -74,13 +82,12 @@ public partial class EditarCampeonatoViewModel : ObservableObject {
                 return;
             }
 
-            // VERIFICAÇÃO E SINCRONIZAÇÃO DO ID DO ORGANIZADOR
-            if (!usuarioLogado.IdServidor.HasValue) {
+            // Lógica de sincronização do ID do organizador
+            if (!usuarioLogado.IdServidor.HasValue) {
                 ValidationMessage = "Sincronizando seu perfil para salvar o campeonato. Por favor, aguarde...";
                 await _syncService.SyncAsync(new Progress<string>());
 
-                // Recarrega os dados do usuário para obter o ID do servidor recém-sincronizado
-                usuarioLogado = _sessaoService.GetUsuarioAtual();
+                usuarioLogado = _sessaoService.GetUsuarioAtual();
                 if (usuarioLogado?.IdServidor.HasValue == true) {
                     Campeonato.OrganizadorId = usuarioLogado.IdServidor.Value;
                 } else {
@@ -88,8 +95,7 @@ public partial class EditarCampeonatoViewModel : ObservableObject {
                     return;
                 }
             } else {
-                // Usa o ID do servidor se já estiver disponível
-                Campeonato.OrganizadorId = usuarioLogado.IdServidor.Value;
+                Campeonato.OrganizadorId = usuarioLogado.IdServidor.Value;
             }
 
             await _campeonatoService.AtualizarAsync(Campeonato);

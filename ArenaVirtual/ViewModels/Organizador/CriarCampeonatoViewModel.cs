@@ -11,6 +11,10 @@ namespace ArenaVirtual.ViewModels {
     public partial class CriarCampeonatoViewModel : ObservableObject {
         private readonly DatabaseService _databaseService;
 
+        // Adicionamos o SessaoService como dependência, pois você o usa para obter o usuário.
+        // Se você não tiver um SessaoService que possa ser injetado, use o acesso estático como fallback.
+        // Neste exemplo, vamos usar o acesso estático que você já usa no SalvarCampeonatoAsync.
+
         [ObservableProperty]
         private string nome;
 
@@ -59,11 +63,15 @@ namespace ArenaVirtual.ViewModels {
         public IAsyncRelayCommand SalvarCampeonatoCommand { get; }
         public IAsyncRelayCommand SelecionarLogoCommand { get; }
 
+        // Construtor corrigido: adicionamos a chamada de carregamento
         public CriarCampeonatoViewModel(DatabaseService databaseService) {
             _databaseService = databaseService;
 
             SalvarCampeonatoCommand = new AsyncRelayCommand(SalvarCampeonatoAsync, CanSalvarCampeonato);
             SelecionarLogoCommand = new AsyncRelayCommand(SelecionarLogoAsync);
+
+            // CHAVE 1: Carrega os dados do organizador imediatamente ao criar o ViewModel
+            CarregarDadosOrganizador();
 
             PropertyChanged += (s, e) => {
                 if (e.PropertyName == nameof(Nome) || e.PropertyName == nameof(Local) ||
@@ -73,6 +81,26 @@ namespace ArenaVirtual.ViewModels {
                     SalvarCampeonatoCommand.NotifyCanExecuteChanged();
                 }
             };
+        }
+
+        // Novo método para carregar (ou recarregar) os dados do organizador
+        private void CarregarDadosOrganizador() {
+            var usuarioLogado = SessaoService.Instancia.GetUsuarioAtual();
+
+            if (usuarioLogado != null) {
+                // Preenche as propriedades do organizador se elas estiverem vazias
+                // O uso de string.IsNullOrWhiteSpace garante que o valor só é setado
+                // se ainda não houver nada (o que acontece na inicialização).
+                if (string.IsNullOrWhiteSpace(NomeOrganizador)) {
+                    NomeOrganizador = usuarioLogado.Nome ?? string.Empty;
+                }
+                if (string.IsNullOrWhiteSpace(EmailOrganizador)) {
+                    EmailOrganizador = usuarioLogado.Email ?? string.Empty;
+                }
+                if (string.IsNullOrWhiteSpace(TelefoneOrganizador)) {
+                    TelefoneOrganizador = usuarioLogado.Telefone ?? string.Empty;
+                }
+            }
         }
 
         private bool CanSalvarCampeonato() {
@@ -116,7 +144,6 @@ namespace ArenaVirtual.ViewModels {
                 FormatoCampeonato = FormatoCampeonato,
                 LocaisDosJogos = LocaisDosJogos,
                 HaveraPremiacao = HaveraPremiacao,
-                // CORREÇÃO: Use o objeto de sessão validado
                 OrganizadorId = usuarioLogado.Id,
                 OrganizadorClientAppId = usuarioLogado.ClientAppId
             };
@@ -125,7 +152,6 @@ namespace ArenaVirtual.ViewModels {
                 await _databaseService.InserirCampeonatoAsync(novoCampeonato);
                 MensagemValidacao = "Campeonato criado com sucesso!";
                 LimparCampos();
-                // Adicione esta linha para voltar para a página anterior, que irá atualizar a lista de campeonatos.
                 await Shell.Current.GoToAsync("..");
             } catch (Exception ex) {
                 Debug.WriteLine($"Erro ao criar campeonato: {ex.Message}");
@@ -149,15 +175,19 @@ namespace ArenaVirtual.ViewModels {
             }
         }
 
+        // Método LimparCampos() corrigido: re-preenche os dados do organizador após a limpeza
         public void LimparCampos() {
             Nome = string.Empty;
             Local = string.Empty;
             DataInicio = DateTime.Today;
             DataFim = DateTime.Today.AddDays(7);
             LogoUrl = string.Empty;
+
+            // Note que estamos limpando os campos do organizador...
             NomeOrganizador = string.Empty;
             EmailOrganizador = string.Empty;
             TelefoneOrganizador = string.Empty;
+
             NumeroMaximoEquipesTexto = string.Empty;
             ValorTaxaInscricaoTexto = string.Empty;
             FormatoCampeonato = string.Empty;
@@ -165,6 +195,11 @@ namespace ArenaVirtual.ViewModels {
             HaveraPremiacao = false;
             LogoImageSource = null;
             MensagemValidacao = string.Empty;
+
+            // ... e logo em seguida chamando a função que os preencherá automaticamente
+            // com os dados do usuário, deixando-os prontos e editáveis para a próxima criação.
+            CarregarDadosOrganizador();
+
             SalvarCampeonatoCommand.NotifyCanExecuteChanged();
         }
     }
