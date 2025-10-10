@@ -13,6 +13,7 @@ namespace ArenaVirtual.Models {
         private int? campeonatoId;
         private string? descricao;
         private string? regiao;
+        private string? grupo;
         private int pontuacaoTotal;
         private int vitorias;
         private int derrotas;
@@ -104,6 +105,12 @@ namespace ArenaVirtual.Models {
         public string? Regiao {
             get => regiao;
             set => SetProperty(ref regiao, value);
+        }
+
+        [MaxLength(10)] 
+        public string? Grupo {
+            get => grupo;
+            set => SetProperty(ref grupo, value);
         }
 
         public int PontuacaoTotal {
