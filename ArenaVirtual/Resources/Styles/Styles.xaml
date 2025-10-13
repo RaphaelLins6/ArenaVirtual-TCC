@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <?xaml-comp compile="true" ?>
-<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:ArenaVirtual.Converters">
 
     <Style TargetType="ActivityIndicator">
         <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" />
@@ -447,6 +450,80 @@
         <Setter Property="BarTextColor" Value="{AppThemeBinding Light={StaticResource Magenta}, Dark={StaticResource White}}" />
         <Setter Property="UnselectedTabColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray950}}" />
         <Setter Property="SelectedTabColor" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
+    </Style>
+
+    <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
+
+    <Style x:Key="GameCardStyle" TargetType="Frame">
+        <Setter Property="Margin" Value="0,5" />
+        <Setter Property="Padding" Value="15" />
+        <Setter Property="BackgroundColor" Value="#282828" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HasShadow" Value="True" />
+        <Setter Property="BorderColor" Value="OrangeRed" />
+    </Style>
+
+    <Style x:Key="GameTeamsGridStyle" TargetType="Grid">
+        <Setter Property="ColumnDefinitions" Value="*, Auto, *" />
+        <Setter Property="ColumnSpacing" Value="10" />
+        <Setter Property="HorizontalOptions" Value="FillAndExpand" />
+    </Style>
+
+    <Style x:Key="TeamStackLeftStyle" TargetType="HorizontalStackLayout">
+        <Setter Property="Grid.Column" Value="0" />
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="Spacing" Value="5" />
+    </Style>
+
+    <Style x:Key="TeamStackRightStyle" TargetType="HorizontalStackLayout">
+        <Setter Property="Grid.Column" Value="2" />
+        <Setter Property="HorizontalOptions" Value="Start" />
+        <Setter Property="Spacing" Value="5" />
+    </Style>
+
+    <Style x:Key="TeamNameStyle" TargetType="Label">
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style x:Key="TeamLogoStyle" TargetType="Image">
+        <Setter Property="Aspect" Value="AspectFit" />
+        <Setter Property="HeightRequest" Value="30" />
+        <Setter Property="WidthRequest" Value="30" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style x:Key="VsTextStyle" TargetType="Label">
+        <Setter Property="Grid.Column" Value="1" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="Orange" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style x:Key="GameInfoStackStyle" TargetType="HorizontalStackLayout">
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="Spacing" Value="10" />
+    </Style>
+
+    <Style x:Key="ScoreStyle" TargetType="Label">
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="OrangeRed" />
+    </Style>
+
+    <Style x:Key="DateTimeStyle" TargetType="Label">
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="Gray" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style x:Key="AnexarArbitroButtonStyle" TargetType="Button">
+        <Setter Property="Margin" Value="0,10,0,0" />
+        <Setter Property="BackgroundColor" Value="Green" />
+        <Setter Property="MaximumWidthRequest" Value="250" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="VerticalOptions" Value="End" />
     </Style>
 
 </ResourceDictionary>

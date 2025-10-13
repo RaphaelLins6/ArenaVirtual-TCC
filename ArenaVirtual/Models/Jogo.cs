@@ -25,6 +25,14 @@ namespace ArenaVirtual.Models {
         private int timeBId;
 
         [ObservableProperty]
+        [property: Ignore]
+        private string? timeANome;
+
+        [ObservableProperty]
+        [property: Ignore]
+        private string? timeBNome;
+
+        [ObservableProperty]
         private DateTime dataHora;
 
         [ObservableProperty]
@@ -90,6 +98,31 @@ namespace ArenaVirtual.Models {
         }
 
         // --- Propriedades Calculadas (para a UI) ---
+
+        [Ignore]
+        public Time? TimeCasa {
+            get => TimeA; // Retorna o objeto TimeA (Tipo Time?)
+            set => TimeA = value; // Define o objeto TimeA (Tipo Time?)
+        }
+
+        // CORREÇÃO: TimeFora deve ser alias do objeto TimeB
+        [Ignore]
+        public Time? TimeFora {
+            get => TimeB; // Retorna o objeto TimeB (Tipo Time?)
+            set => TimeB = value; // Define o objeto TimeB (Tipo Time?)
+        }
+
+        partial void OnTimeAChanged(Time? value) {
+            // Se o objeto TimeA muda, atualizamos a string do nome.
+            TimeANome = value?.Nome;
+            OnPropertyChanged(nameof(TimeCasa));
+        }
+
+        partial void OnTimeBChanged(Time? value) {
+            // Se o objeto TimeB muda, atualizamos a string do nome.
+            TimeBNome = value?.Nome;
+            OnPropertyChanged(nameof(TimeFora));
+        }
 
         [Ignore]
         public bool ArbitroAtribuido => ArbitroId.HasValue && ArbitroId != Guid.Empty;

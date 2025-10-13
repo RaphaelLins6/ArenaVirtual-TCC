@@ -19,6 +19,7 @@ namespace ArenaVirtual.Models {
         private int derrotas;
         private int empates;
         private int posicao;
+        private int posicaoNoGrupo;
         public int? IdServidor { get; set; }
 
         private int? capitaoId;
@@ -166,7 +167,12 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref posicao, value);
         }
 
-        // Adicionando a propriedade JogosDisputados, que é calculada
+        [Ignore]
+        public int PosicaoNoGrupo { // [NOVO] Posição usada para o Bracket
+            get => posicaoNoGrupo;
+            set => SetProperty(ref posicaoNoGrupo, value);
+        }
+
         [Ignore]
         public int JogosDisputados {
             get => Vitorias + Derrotas + Empates;

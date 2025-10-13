@@ -3,15 +3,22 @@
     x:Class="ArenaVirtual.Views.CampeonatoPage.CampeonatoDetailPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     xmlns:local="clr-namespace:ArenaVirtual.Views.CampeonatoPage"
     xmlns:models="clr-namespace:ArenaVirtual.Models"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.CampeonatoPage"
     x:Name="PageRoot"
     x:DataType="vm:CampeonatoDetailViewModel">
 
+    <ContentPage.Resources>
+        <converters:IntToPhaseNameConverter x:Key="PhaseNameConverter" />
+        <converters:IntToBracketMarginConverter x:Key="BracketMarginConverter" />
+    </ContentPage.Resources>
+
     <ContentPage.Content>
         <ScrollView>
             <VerticalStackLayout Spacing="25">
+
                 <Grid HeightRequest="200">
                     <Image Aspect="AspectFill" Source="{Binding BannerSource}" />
 
@@ -31,6 +38,7 @@
                         HorizontalOptions="Center"
                         Spacing="5"
                         VerticalOptions="CenterAndExpand">
+
                         <Frame
                             Padding="0"
                             BackgroundColor="#282828"
@@ -45,6 +53,7 @@
                                 HorizontalOptions="Center"
                                 Source="{Binding LogoSource}"
                                 WidthRequest="80" />
+
                         </Frame>
                         <Label
                             FontAttributes="Bold"
@@ -52,14 +61,17 @@
                             HorizontalOptions="Center"
                             Text="{Binding Campeonato.Nome}"
                             TextColor="White" />
+
                     </VerticalStackLayout>
                 </Grid>
+
 
                 <VerticalStackLayout
                     Padding="15,0"
                     HorizontalOptions="Center"
                     Spacing="5">
                     <Label Text="{Binding Campeonato.Local}" TextColor="OrangeRed" />
+
                     <Label Text="{Binding Campeonato.DataInicio, StringFormat='Início: {0:dd/MM/yyyy}'}" TextColor="OrangeRed" />
                     <Label Text="{Binding Campeonato.DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}" TextColor="OrangeRed" />
 
@@ -72,6 +84,7 @@
                         Style="{StaticResource BotaoPrincipal}"
                         Text="Gerenciar Solicitações"
                         TextColor="White" />
+
 
                     <Button
                         Margin="0,5,0,0"
@@ -92,6 +105,7 @@
                         Style="{StaticResource BotaoPrincipal}"
                         Text="Ver Árbitros Inscritos"
                         TextColor="White" />
+
                 </VerticalStackLayout>
 
                 <BoxView
@@ -99,7 +113,29 @@
                     HorizontalOptions="FillAndExpand"
                     Color="Gray" />
 
-                <VerticalStackLayout Padding="15,0" Spacing="10">
+                <VerticalStackLayout
+                    Padding="15,0"
+                    IsVisible="{Binding IsFormatoHibrido}"
+                    Spacing="10">
+
+                    <Label
+                        Margin="0,0,0,5"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Text="Fase do Campeonato:" />
+
+                    <Picker
+                        Title="Selecione a Fase"
+                        ItemsSource="{Binding FasesDisponiveis}"
+                        SelectedItem="{Binding FaseAtual}"
+                        Style="{StaticResource PickerStyle}" />
+
+                </VerticalStackLayout>
+
+                <VerticalStackLayout
+                    Padding="15,0"
+                    IsVisible="{Binding IsFaseTabelaEJogos}"
+                    Spacing="10">
                     <Label
                         FontAttributes="Bold"
                         FontSize="20"
@@ -120,6 +156,7 @@
                             HorizontalOptions="Center"
                             Text="#"
                             TextColor="Orange" />
+
                         <Label
                             Grid.Column="2"
                             FontAttributes="Bold"
@@ -131,6 +168,7 @@
                             HorizontalOptions="Center"
                             Text="V"
                             TextColor="Orange" />
+
                         <Label
                             Grid.Column="4"
                             FontAttributes="Bold"
@@ -150,6 +188,7 @@
                             IsVisible="{Binding IsDesktop}"
                             Text="JA"
                             TextColor="Orange" />
+
                         <Label
                             Grid.Column="7"
                             FontAttributes="Bold"
@@ -198,6 +237,8 @@
                                         Text="{Binding Vitorias}"
                                         TextColor="White"
                                         VerticalOptions="Center" />
+
+
                                     <Label
                                         Grid.Column="4"
                                         HorizontalOptions="Center"
@@ -210,6 +251,8 @@
                                         Text="{Binding PorcentagemVitoria, StringFormat='{0:P0}'}"
                                         TextColor="White"
                                         VerticalOptions="Center" />
+
+
                                     <Label
                                         Grid.Column="6"
                                         HorizontalOptions="Center"
@@ -234,15 +277,21 @@
                                 </Grid>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
+
+
                     </CollectionView>
                 </VerticalStackLayout>
 
                 <BoxView
                     HeightRequest="1"
                     HorizontalOptions="FillAndExpand"
+                    IsVisible="{Binding IsFaseTabelaEJogos}"
                     Color="Gray" />
 
-                <VerticalStackLayout Padding="15,0" Spacing="10">
+                <VerticalStackLayout
+                    Padding="15,0"
+                    IsVisible="{Binding IsFaseTabelaEJogos}"
+                    Spacing="10">
                     <Grid
                         ColumnDefinitions="*, Auto, *"
                         HorizontalOptions="Center"
@@ -289,11 +338,14 @@
                         VerticalOptions="Start">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:Jogo">
+
                                 <Frame
                                     Margin="0,5"
                                     Padding="15"
                                     BackgroundColor="#282828"
                                     CornerRadius="5">
+
+
                                     <VerticalStackLayout Spacing="5">
                                         <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
                                             <Label
@@ -301,6 +353,7 @@
                                                 FontSize="12"
                                                 Text="{Binding DataHora, StringFormat='{0:ddd, dd/MM - HH:mm}'}"
                                                 TextColor="Gray" />
+
                                         </HorizontalStackLayout>
                                         <Label
                                             FontSize="12"
@@ -308,6 +361,8 @@
                                             Text="{Binding Local}"
                                             TextColor="OrangeRed"
                                             VerticalOptions="Center" />
+
+
 
                                         <Grid
                                             Margin="0,5,0,0"
@@ -321,6 +376,7 @@
                                                 Grid.Column="0"
                                                 HorizontalOptions="End"
                                                 Spacing="5">
+
                                                 <Label
                                                     FontAttributes="Bold"
                                                     Text="{Binding PlacarA}"
@@ -343,6 +399,8 @@
                                                 TextColor="White"
                                                 VerticalOptions="Center" />
 
+
+
                                             <HorizontalStackLayout
                                                 Grid.Row="0"
                                                 Grid.Column="2"
@@ -353,12 +411,15 @@
                                                     Text="-"
                                                     TextColor="OrangeRed"
                                                     VerticalOptions="Center" />
+
                                                 <Label
                                                     FontAttributes="Bold"
                                                     Text="{Binding PlacarB}"
                                                     TextColor="OrangeRed"
                                                     VerticalOptions="Center" />
                                             </HorizontalStackLayout>
+
+
 
                                             <Image
                                                 Grid.Row="1"
@@ -378,6 +439,8 @@
                                                 VerticalOptions="Center" />
                                         </Grid>
 
+
+
                                         <Grid ColumnDefinitions="*, Auto, *" ColumnSpacing="10">
                                             <Label
                                                 Grid.Column="0"
@@ -393,6 +456,8 @@
                                                 HorizontalOptions="Start"
                                                 Text="{Binding TimeB.Nome}"
                                                 TextColor="White" />
+
+
                                         </Grid>
 
                                         <Button
@@ -403,19 +468,227 @@
                                             CornerRadius="5"
                                             FontSize="14"
                                             IsEnabled="{Binding BotaoArbitroHabilitado}"
-                                            IsVisible="{Binding IsOrganizador}"
+                                            IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=IsOrganizador}"
                                             MaximumWidthRequest="250"
                                             Style="{StaticResource BotaoPrincipal}"
                                             Text="{Binding TextoBotaoArbitro}"
                                             TextColor="White"
                                             VerticalOptions="End" />
                                     </VerticalStackLayout>
+
+
                                 </Frame>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
+
+
                 </VerticalStackLayout>
+
+                <VerticalStackLayout
+                    Padding="15,0"
+                    IsVisible="{Binding IsFaseMataMata}"
+                    Spacing="10">
+
+
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="20"
+                        HorizontalOptions="Center"
+                        Text="MATA-MATA"
+                        TextColor="OrangeRed" />
+
+                    <CollectionView
+                        Margin="0,10,0,0"
+                        HeightRequest="600"
+                        HorizontalScrollBarVisibility="Always"
+                        ItemsSource="{Binding JogosMataMata}"
+                        VerticalScrollBarVisibility="Never">
+
+                        <CollectionView.ItemsLayout>
+
+                            <LinearItemsLayout ItemSpacing="20" Orientation="Horizontal" />
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:RodadaGrouping">
+
+
+                                <VerticalStackLayout
+                                    Margin="{Binding Key, Converter={StaticResource BracketMarginConverter}}"
+                                    Spacing="10"
+                                    WidthRequest="250">
+
+                                    <Label
+                                        FontAttributes="Bold"
+                                        FontSize="18"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding Key, Converter={StaticResource PhaseNameConverter}}"
+                                        TextColor="Orange" />
+
+
+                                    <CollectionView Margin="0,5,0,0" ItemsSource="{Binding}">
+                                        <CollectionView.ItemsLayout>
+
+                                            <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
+                                        </CollectionView.ItemsLayout>
+
+                                        <CollectionView.ItemTemplate>
+
+                                            <DataTemplate x:DataType="models:Jogo">
+                                                <Frame Style="{StaticResource GameCardStyle}">
+
+                                                    <VerticalStackLayout Spacing="5">
+
+                                                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
+
+                                                            <Label
+                                                                FontAttributes="Bold"
+                                                                FontSize="12"
+                                                                Text="{Binding DataHora, StringFormat='{0:ddd, dd/MM - HH:mm}'}"
+                                                                TextColor="Gray" />
+                                                        </HorizontalStackLayout>
+
+                                                        <Label
+                                                            FontSize="12"
+                                                            HorizontalOptions="Center"
+                                                            Text="{Binding Local}"
+                                                            TextColor="OrangeRed"
+                                                            VerticalOptions="Center" />
+
+
+                                                        <Grid
+                                                            Margin="0,5,0,0"
+                                                            ColumnDefinitions="*, Auto, *"
+                                                            ColumnSpacing="10"
+                                                            HorizontalOptions="FillAndExpand"
+                                                            RowDefinitions="Auto, Auto">
+
+
+                                                            <HorizontalStackLayout
+                                                                Grid.Row="0"
+                                                                Grid.Column="0"
+                                                                HorizontalOptions="End"
+                                                                Spacing="5">
+                                                                <Label
+                                                                    FontAttributes="Bold"
+                                                                    Text="{Binding PlacarA}"
+                                                                    TextColor="OrangeRed"
+                                                                    VerticalOptions="Center" />
+
+                                                                <Label
+                                                                    FontAttributes="Bold"
+                                                                    Text="-"
+                                                                    TextColor="OrangeRed"
+                                                                    VerticalOptions="Center" />
+
+                                                            </HorizontalStackLayout>
+
+                                                            <Label
+                                                                Grid.Row="0"
+                                                                Grid.Column="1"
+                                                                FontAttributes="Bold"
+                                                                FontSize="14"
+                                                                HorizontalOptions="Center"
+                                                                Text="vs"
+                                                                TextColor="White"
+                                                                VerticalOptions="Center" />
+
+
+                                                            <HorizontalStackLayout
+                                                                Grid.Row="0"
+                                                                Grid.Column="2"
+                                                                HorizontalOptions="Start"
+                                                                Spacing="5">
+                                                                <Label
+                                                                    FontAttributes="Bold"
+                                                                    Text="-"
+                                                                    TextColor="OrangeRed"
+                                                                    VerticalOptions="Center" />
+
+                                                                <Label
+                                                                    FontAttributes="Bold"
+                                                                    Text="{Binding PlacarB}"
+                                                                    TextColor="OrangeRed"
+                                                                    VerticalOptions="Center" />
+                                                            </HorizontalStackLayout>
+
+
+
+                                                            <Image
+                                                                Grid.Row="1"
+                                                                Grid.Column="0"
+                                                                Aspect="AspectFit"
+                                                                HeightRequest="40"
+                                                                HorizontalOptions="End"
+                                                                Source="{Binding TimeA.LogoUrl}"
+                                                                VerticalOptions="Center" />
+
+                                                            <Image
+                                                                Grid.Row="1"
+                                                                Grid.Column="2"
+                                                                Aspect="AspectFit"
+                                                                HeightRequest="40"
+                                                                HorizontalOptions="Start"
+                                                                Source="{Binding TimeB.LogoUrl}"
+                                                                VerticalOptions="Center" />
+
+                                                        </Grid>
+
+                                                        <Grid ColumnDefinitions="*, Auto, *" ColumnSpacing="10">
+
+                                                            <Label
+                                                                Grid.Column="0"
+                                                                FontAttributes="Bold"
+                                                                FontSize="16"
+                                                                HorizontalOptions="End"
+                                                                Text="{Binding TimeA.Nome}"
+                                                                TextColor="White" />
+
+                                                            <Label
+                                                                Grid.Column="2"
+                                                                FontAttributes="Bold"
+                                                                FontSize="16"
+                                                                HorizontalOptions="Start"
+                                                                Text="{Binding TimeB.Nome}"
+                                                                TextColor="White" />
+
+
+                                                        </Grid>
+
+
+                                                        <Button
+                                                            Margin="0,10,0,0"
+                                                            BackgroundColor="Green"
+                                                            Clicked="OnAnexarArbitrosClicked"
+                                                            CommandParameter="{Binding .}"
+                                                            CornerRadius="5"
+                                                            FontSize="14"
+                                                            IsEnabled="{Binding BotaoArbitroHabilitado}"
+                                                            IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=IsOrganizador}"
+                                                            MaximumWidthRequest="250"
+                                                            Style="{StaticResource BotaoPrincipal}"
+                                                            Text="{Binding TextoBotaoArbitro}"
+                                                            TextColor="White"
+                                                            VerticalOptions="End" />
+
+
+                                                    </VerticalStackLayout>
+                                                </Frame>
+
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+
+                                    </CollectionView>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+
+                    </CollectionView>
+
+                </VerticalStackLayout>
+
             </VerticalStackLayout>
         </ScrollView>
     </ContentPage.Content>
