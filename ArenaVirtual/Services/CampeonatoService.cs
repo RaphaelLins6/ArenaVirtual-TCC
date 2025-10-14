@@ -147,5 +147,9 @@ namespace ArenaVirtual.Services {
 
             _syncService.ScheduleSync();
         }
+
+        public async Task<Campeonato?> ObterPorClientAppIdAsync(Guid clientAppId) {
+            return await _databaseService.ObterCampeonatoPorClientAppIdAsync(clientAppId);
+        }
     }
 }

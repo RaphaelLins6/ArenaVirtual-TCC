@@ -8,6 +8,7 @@
 
     <ContentPage.Resources>
         <converters:StringNotNullOrEmptyConverter x:Key="StringIsNotNullOrEmptyConverter" />
+        <converters:InverterBooleanConverter x:Key="InverterBooleanConverter" />
     </ContentPage.Resources>
 
     <ScrollView>
@@ -85,9 +86,16 @@
                 Padding="12,6"
                 Command="{Binding SalvarCommand}"
                 CornerRadius="8"
+                IsEnabled="{Binding IsBusy, Converter={StaticResource InverterBooleanConverter}}"
                 Style="{StaticResource BotaoPrincipal}"
                 Text="Salvar"
                 TextColor="White" />
+
+            <ActivityIndicator
+                IsRunning="{Binding IsBusy}"
+                IsVisible="{Binding IsBusy}"
+                Color="White" />
+
         </StackLayout>
     </ScrollView>
 </ContentPage>

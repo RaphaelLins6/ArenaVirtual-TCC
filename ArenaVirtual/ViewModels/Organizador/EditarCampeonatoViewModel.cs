@@ -7,6 +7,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
+// Adicionado para suportar ImageSource
+using Microsoft.Maui.Controls;
+
 namespace ArenaVirtual.ViewModels.Organizador;
 
 public partial class EditarCampeonatoViewModel : ObservableObject {
@@ -29,8 +32,10 @@ public partial class EditarCampeonatoViewModel : ObservableObject {
     [ObservableProperty]
     private string? validationMessage;
 
-    // A propriedade FormatoCampeonatoSelecionado foi removida!
-    // O Picker agora faz binding direto com Campeonato.FormatoCampeonato.
+    // Controle de estado para evitar cliques duplos
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SalvarCommand))]
+    private bool isBusy;
 
     public IRelayCommand SalvarCommand { get; }
     public IRelayCommand SelecionarLogoCommand { get; }
@@ -45,9 +50,8 @@ public partial class EditarCampeonatoViewModel : ObservableObject {
         NumeroMaximoEquipesText = Campeonato.NumeroMaximoEquipes.ToString();
         ValorTaxaInscricaoText = Campeonato.ValorTaxaInscricao.ToString();
 
-        // Não precisamos inicializar o FormatoCampeonato, pois ele está no objeto Campeonato
-
-        SalvarCommand = new AsyncRelayCommand(SalvarAsync);
+        // SalvarCommand agora usa CanExecuteSalvar
+        SalvarCommand = new AsyncRelayCommand(SalvarAsync, CanExecuteSalvar);
         SelecionarLogoCommand = new AsyncRelayCommand(SelecionarLogoAsync);
 
         if (!string.IsNullOrEmpty(Campeonato.LogoUrl) && File.Exists(Campeonato.LogoUrl)) {
@@ -55,55 +59,68 @@ public partial class EditarCampeonatoViewModel : ObservableObject {
         }
     }
 
+    private bool CanExecuteSalvar() => !IsBusy;
+
     private async Task SalvarAsync() {
+        IsBusy = true;
         ValidationMessage = string.Empty;
 
         if (!int.TryParse(NumeroMaximoEquipesText, out int numeroEquipes)) {
             ValidationMessage = "Número máximo de equipes deve ser um número válido.";
+            IsBusy = false;
             return;
         }
 
         if (!decimal.TryParse(ValorTaxaInscricaoText, out decimal valorTaxa)) {
             ValidationMessage = "Valor da taxa de inscrição deve ser um número válido.";
+            IsBusy = false;
             return;
         }
 
-        // A alteração no FormatoCampeonato é feita automaticamente pelo Picker
-        // devido ao binding direto com Campeonato.FormatoCampeonato.
+        Campeonato? campeonatoAAtualizar = await _campeonatoService.ObterPorClientAppIdAsync(Campeonato.ClientAppId);
 
-        Campeonato.NumeroMaximoEquipes = numeroEquipes;
-        Campeonato.ValorTaxaInscricao = valorTaxa;
+        if (campeonatoAAtualizar == null) {
+            await Application.Current.MainPage.DisplayAlert("Erro", "Falha ao encontrar o campeonato no banco de dados.", "OK");
+            IsBusy = false;
+            return;
+        }
+
+        campeonatoAAtualizar.Nome = Campeonato.Nome;
+        campeonatoAAtualizar.Local = Campeonato.Local;
+        campeonatoAAtualizar.NomeOrganizador = Campeonato.NomeOrganizador;
+        campeonatoAAtualizar.EmailOrganizador = Campeonato.EmailOrganizador;
+        campeonatoAAtualizar.TelefoneOrganizador = Campeonato.TelefoneOrganizador;
+        campeonatoAAtualizar.FormatoCampeonato = Campeonato.FormatoCampeonato;
+        campeonatoAAtualizar.LocaisDosJogos = Campeonato.LocaisDosJogos;
+        campeonatoAAtualizar.DataInicio = Campeonato.DataInicio;
+        campeonatoAAtualizar.DataFim = Campeonato.DataFim;
+        campeonatoAAtualizar.HaveraPremiacao = Campeonato.HaveraPremiacao;
+        campeonatoAAtualizar.LogoUrl = Campeonato.LogoUrl;
+        campeonatoAAtualizar.NumeroMaximoEquipes = numeroEquipes;
+        campeonatoAAtualizar.ValorTaxaInscricao = valorTaxa;
 
         try {
             var usuarioLogado = _sessaoService.GetUsuarioAtual();
-            if (usuarioLogado == null) {
-                Debug.WriteLine("[EditarCampeonatoViewModel] Nenhum usuário logado encontrado. Não foi possível salvar o campeonato.");
-                ValidationMessage = "Nenhum usuário logado. Por favor, faça login novamente.";
-                return;
+
+            if (usuarioLogado?.IdServidor.HasValue == true) {
+                campeonatoAAtualizar.OrganizadorId = usuarioLogado.IdServidor.Value;
             }
 
-            // Lógica de sincronização do ID do organizador
-            if (!usuarioLogado.IdServidor.HasValue) {
-                ValidationMessage = "Sincronizando seu perfil para salvar o campeonato. Por favor, aguarde...";
-                await _syncService.SyncAsync(new Progress<string>());
+            int result = await _campeonatoService.AtualizarAsync(campeonatoAAtualizar);
 
-                usuarioLogado = _sessaoService.GetUsuarioAtual();
-                if (usuarioLogado?.IdServidor.HasValue == true) {
-                    Campeonato.OrganizadorId = usuarioLogado.IdServidor.Value;
-                } else {
-                    ValidationMessage = "Não foi possível sincronizar o perfil. Tente novamente.";
-                    return;
-                }
+            if (result > 0) {
+                await Application.Current.MainPage.DisplayAlert("Sucesso", "Campeonato atualizado com sucesso!", "OK");
             } else {
-                Campeonato.OrganizadorId = usuarioLogado.IdServidor.Value;
+                await Application.Current.MainPage.DisplayAlert("Atenção", "O campeonato não foi atualizado. Nenhuma alteração persistiu (0 linhas afetadas).", "OK");
             }
-
-            await _campeonatoService.AtualizarAsync(Campeonato);
 
             await Shell.Current.GoToAsync("..");
+
         } catch (Exception ex) {
             Debug.WriteLine($"[EditarCampeonatoViewModel] Erro ao salvar campeonato: {ex.Message}");
             await Application.Current.MainPage.DisplayAlert("Erro", $"Falha ao salvar o campeonato: {ex.Message}", "OK");
+        } finally {
+            IsBusy = false;
         }
     }
 
