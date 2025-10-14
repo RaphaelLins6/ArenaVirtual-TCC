@@ -3,92 +3,95 @@
     x:Class="ArenaVirtual.Views.Organizador.DashboardOrganizadorPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
-    <StackLayout Padding="20" Spacing="16">
-        <Label
-            FontSize="20"
-            HorizontalOptions="Center"
-            Text="Campeonatos"
-            TextColor="White" />
-        <CollectionView ItemsSource="{Binding Campeonatos}">
-            <CollectionView.EmptyView>
-                <Label
-                    HorizontalOptions="Center"
-                    Text="Nenhum campeonato cadastrado."
-                    TextColor="White"
-                    VerticalOptions="Center" />
-            </CollectionView.EmptyView>
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Border
-                        Margin="0,0,0,24"
-                        Padding="10"
-                        Stroke="Gray"
-                        StrokeShape="RoundRectangle 8">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Image
-                                Grid.Column="0"
-                                Aspect="AspectFill"
-                                HeightRequest="60"
-                                HorizontalOptions="Center"
-                                Source="{Binding LogoUrl}"
-                                VerticalOptions="Center"
-                                WidthRequest="60" />
-                            <StackLayout
-                                Grid.Column="1"
-                                HorizontalOptions="Center"
-                                VerticalOptions="Center">
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="18"
-                                    HorizontalTextAlignment="Center"
-                                    Text="{Binding Nome}"
-                                    TextColor="White" />
-                                <Label
-                                    FontSize="14"
-                                    HorizontalTextAlignment="Center"
-                                    Text="{Binding Local}"
-                                    TextColor="White" />
-                                <Label
-                                    FontSize="12"
-                                    HorizontalTextAlignment="Center"
-                                    Text="{Binding DataInicio, StringFormat='Início: {0:dd/MM/yyyy}'}"
-                                    TextColor="White" />
-                                <Label
-                                    FontSize="12"
-                                    HorizontalTextAlignment="Center"
-                                    Text="{Binding DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}"
-                                    TextColor="White" />
-                                <!--  Botões de Editar e Excluir  -->
-                                <HorizontalStackLayout Margin="0,10,0,0" Spacing="12">
-                                    <Button
-                                        Padding="10,4"
-                                        BackgroundColor="#2196F3"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditarCampeonatoCommand}"
-                                        CommandParameter="{Binding .}"
-                                        CornerRadius="6"
-                                        Style="{StaticResource BotaoPrincipal}"
-                                        Text="Editar"
-                                        TextColor="White" />
 
-                                    <Button
-                                        Padding="10,4"
-                                        BackgroundColor="#F44336"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoverCampeonatoCommand}"
-                                        CommandParameter="{Binding .}"
-                                        CornerRadius="6"
-                                        Style="{StaticResource BotaoPrincipal}"
-                                        Text="Excluir"
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="16">
+            <Label
+                FontSize="20"
+                HorizontalOptions="Center"
+                Text="Campeonatos"
+                TextColor="White" />
+
+            <CollectionView ItemsSource="{Binding Campeonatos}">
+                <CollectionView.EmptyView>
+                    <Label
+                        HorizontalOptions="Center"
+                        Text="Nenhum campeonato cadastrado."
+                        TextColor="White"
+                        VerticalOptions="Center" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            Margin="0,0,0,24"
+                            Padding="10"
+                            Stroke="Gray"
+                            StrokeShape="RoundRectangle 8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image
+                                    Grid.Column="0"
+                                    Aspect="AspectFill"
+                                    HeightRequest="60"
+                                    HorizontalOptions="Center"
+                                    Source="{Binding LogoUrl}"
+                                    VerticalOptions="Center"
+                                    WidthRequest="60" />
+                                <StackLayout
+                                    Grid.Column="1"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center">
+                                    <Label
+                                        FontAttributes="Bold"
+                                        FontSize="18"
+                                        HorizontalTextAlignment="Center"
+                                        Text="{Binding Nome}"
                                         TextColor="White" />
-                                </HorizontalStackLayout>
-                            </StackLayout>
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </StackLayout>
+                                    <Label
+                                        FontSize="14"
+                                        HorizontalTextAlignment="Center"
+                                        Text="{Binding Local}"
+                                        TextColor="White" />
+                                    <Label
+                                        FontSize="12"
+                                        HorizontalTextAlignment="Center"
+                                        Text="{Binding DataInicio, StringFormat='Início: {0:dd/MM/yyyy}'}"
+                                        TextColor="White" />
+                                    <Label
+                                        FontSize="12"
+                                        HorizontalTextAlignment="Center"
+                                        Text="{Binding DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}"
+                                        TextColor="White" />
+                                    <HorizontalStackLayout Margin="0,10,0,0" Spacing="12">
+                                        <Button
+                                            Padding="10,4"
+                                            BackgroundColor="#2196F3"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditarCampeonatoCommand}"
+                                            CommandParameter="{Binding .}"
+                                            CornerRadius="6"
+                                            Style="{StaticResource BotaoPrincipal}"
+                                            Text="Editar"
+                                            TextColor="White" />
+
+                                        <Button
+                                            Padding="10,4"
+                                            BackgroundColor="#F44336"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoverCampeonatoCommand}"
+                                            CommandParameter="{Binding .}"
+                                            CornerRadius="6"
+                                            Style="{StaticResource BotaoPrincipal}"
+                                            Text="Excluir"
+                                            TextColor="White" />
+                                    </HorizontalStackLayout>
+                                </StackLayout>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </StackLayout>
+    </ScrollView>
 </ContentPage>
