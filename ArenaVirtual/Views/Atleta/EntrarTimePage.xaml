@@ -67,6 +67,7 @@
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:EntrarTimePageViewModel}}, Path=SolicitarEntradaCommand}"
                                 CommandParameter="{Binding .}"
                                 IsEnabled="{Binding IsButtonEnabled}"
+                                Style="{StaticResource BotaoPrincipal}"
                                 Text="{Binding ButtonText}" />
                         </Grid>
                     </Frame>

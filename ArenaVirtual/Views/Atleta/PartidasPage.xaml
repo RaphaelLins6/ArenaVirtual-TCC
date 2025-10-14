@@ -9,89 +9,91 @@
     x:DataType="vm:PartidasViewModel"
     Shell.NavBarIsVisible="True">
 
-    <StackLayout Padding="20">
-        <Label
-            Margin="0,0,0,15"
-            FontAttributes="Bold"
-            FontSize="24"
-            Text="{Binding NomeTime, StringFormat='Próximas Partidas de {0}'}" />
+    <ScrollView>
+        <StackLayout Padding="20">
+            <Label
+                Margin="0,0,0,15"
+                FontAttributes="Bold"
+                FontSize="24"
+                Text="{Binding NomeTime, StringFormat='Próximas Partidas de {0}'}" />
 
-        <CollectionView
-            EmptyView="Nenhuma partida agendada ou em andamento encontrada para este time."
-            ItemsSource="{Binding PartidasDoTime}"
-            SelectionMode="None">
+            <CollectionView
+                EmptyView="Nenhuma partida agendada ou em andamento encontrada para este time."
+                ItemsSource="{Binding PartidasDoTime}"
+                SelectionMode="None">
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="model:Jogo">
-                    <Frame
-                        Margin="0,5"
-                        Padding="10"
-                        CornerRadius="8"
-                        HasShadow="True">
-                        <StackLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:Jogo">
+                        <Frame
+                            Margin="0,5"
+                            Padding="10"
+                            CornerRadius="8"
+                            HasShadow="True">
+                            <StackLayout>
 
-                            <Label
-                                Margin="0,0,0,5"
-                                FontAttributes="Italic"
-                                FontSize="Small"
-                                HorizontalOptions="Center"
-                                Text="{Binding NomeCampeonato}"
-                                TextColor="#FF9800" />
-
-                            <Grid Padding="5" ColumnDefinitions="*,Auto,*">
-
-                                <StackLayout Grid.Column="0" HorizontalOptions="Start">
-                                    <Image
-                                        HeightRequest="40"
-                                        HorizontalOptions="Center"
-                                        Source="{Binding TimeA.LogoUrl}"
-                                        WidthRequest="40" />
-                                    <Label
-                                        FontAttributes="Bold"
-                                        HorizontalOptions="Center"
-                                        Text="{Binding TimeA.Nome}" />
-                                </StackLayout>
-
-                                <StackLayout
-                                    Grid.Column="1"
+                                <Label
+                                    Margin="0,0,0,5"
+                                    FontAttributes="Italic"
+                                    FontSize="Small"
                                     HorizontalOptions="Center"
-                                    Spacing="2">
-                                    <Label
-                                        FontSize="12"
-                                        HorizontalTextAlignment="Center"
-                                        Text="{Binding DataHora, StringFormat='{0:dd/MM - HH:mm}'}" />
-                                    <Label
-                                        FontSize="12"
-                                        HorizontalTextAlignment="Center"
-                                        Text="{Binding Local}" />
-                                    <Label
-                                        FontAttributes="Bold"
-                                        HorizontalTextAlignment="Center"
-                                        Text="VS" />
-                                    <Label
-                                        FontSize="12"
-                                        HorizontalTextAlignment="Center"
-                                        Text="{Binding Rodada, StringFormat='Rodada {0}'}" />
-                                </StackLayout>
+                                    Text="{Binding NomeCampeonato}"
+                                    TextColor="#FF9800" />
 
-                                <StackLayout Grid.Column="2" HorizontalOptions="End">
-                                    <Image
-                                        HeightRequest="40"
+                                <Grid Padding="5" ColumnDefinitions="*,Auto,*">
+
+                                    <StackLayout Grid.Column="0" HorizontalOptions="Start">
+                                        <Image
+                                            HeightRequest="40"
+                                            HorizontalOptions="Center"
+                                            Source="{Binding TimeA.LogoUrl}"
+                                            WidthRequest="40" />
+                                        <Label
+                                            FontAttributes="Bold"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding TimeA.Nome}" />
+                                    </StackLayout>
+
+                                    <StackLayout
+                                        Grid.Column="1"
                                         HorizontalOptions="Center"
-                                        Source="{Binding TimeB.LogoUrl}"
-                                        WidthRequest="40" />
-                                    <Label
-                                        FontAttributes="Bold"
-                                        HorizontalOptions="Center"
-                                        Text="{Binding TimeB.Nome}" />
-                                </StackLayout>
+                                        Spacing="2">
+                                        <Label
+                                            FontSize="12"
+                                            HorizontalTextAlignment="Center"
+                                            Text="{Binding DataHora, StringFormat='{0:dd/MM - HH:mm}'}" />
+                                        <Label
+                                            FontSize="12"
+                                            HorizontalTextAlignment="Center"
+                                            Text="{Binding Local}" />
+                                        <Label
+                                            FontAttributes="Bold"
+                                            HorizontalTextAlignment="Center"
+                                            Text="VS" />
+                                        <Label
+                                            FontSize="12"
+                                            HorizontalTextAlignment="Center"
+                                            Text="{Binding Rodada, StringFormat='Rodada {0}'}" />
+                                    </StackLayout>
 
-                            </Grid>
+                                    <StackLayout Grid.Column="2" HorizontalOptions="End">
+                                        <Image
+                                            HeightRequest="40"
+                                            HorizontalOptions="Center"
+                                            Source="{Binding TimeB.LogoUrl}"
+                                            WidthRequest="40" />
+                                        <Label
+                                            FontAttributes="Bold"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding TimeB.Nome}" />
+                                    </StackLayout>
 
-                        </StackLayout>
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </StackLayout>
+                                </Grid>
+
+                            </StackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </StackLayout>
+    </ScrollView>
 </ContentPage>

@@ -46,13 +46,15 @@
                             </VisualState>
                             <VisualState Name="Pressed">
                                 <VisualState.Setters>
-                                    <Setter Property="BackgroundColor" Value="#99000000" />
+                                    <Setter Property="BackgroundColor" Value="#FF4500" />
+                                    <Setter Property="TextColor" Value="Black" />
                                 </VisualState.Setters>
                             </VisualState>
                         </VisualStateGroup>
                     </VisualStateGroupList>
                 </Setter>
             </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

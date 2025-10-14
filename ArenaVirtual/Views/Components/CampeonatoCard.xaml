@@ -1,4 +1,5 @@
-﻿<ContentView
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView
     x:Class="ArenaVirtual.Views.Components.CampeonatoCard"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -23,7 +24,6 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!--  Ícone de Favorito no canto superior direito  -->
             <Label
                 Grid.Row="0"
                 Grid.Column="1"
@@ -50,28 +50,35 @@
             <StackLayout
                 Grid.Row="1"
                 Grid.Column="1"
-                HorizontalOptions="Center"
+                HorizontalOptions="Start"
                 Spacing="6"
                 VerticalOptions="Center">
                 <Label
                     FontAttributes="Bold"
                     FontSize="18"
+                    HorizontalTextAlignment="Start"
                     Text="{Binding Nome}"
                     TextColor="White" />
                 <Label
                     FontSize="14"
+                    HorizontalTextAlignment="Start"
                     Text="{Binding Local}"
                     TextColor="White" />
                 <Label
                     FontSize="12"
+                    HorizontalTextAlignment="Start"
                     Text="{Binding DataInicio, StringFormat='Início: {0:dd/MM/yyyy}'}"
                     TextColor="White" />
                 <Label
                     FontSize="12"
+                    HorizontalTextAlignment="Start"
                     Text="{Binding DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}"
                     TextColor="White" />
 
-                <HorizontalStackLayout Margin="0,8,0,0" Spacing="10">
+                <HorizontalStackLayout
+                    Margin="0,8,0,0"
+                    HorizontalOptions="Start"
+                    Spacing="10">
                     <Button
                         BackgroundColor="Transparent"
                         BorderColor="OrangeRed"

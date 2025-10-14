@@ -32,6 +32,7 @@
                     <Button
                         Grid.Column="1"
                         Command="{Binding UploadLogoCommand}"
+                        Style="{StaticResource BotaoPrincipal}"
                         Text="Trocar Logo" />
                 </Grid>
             </Frame>
@@ -52,6 +53,7 @@
                 BackgroundColor="#4CAF50"
                 Command="{Binding SalvarAlteracoesCommand}"
                 IsEnabled="{Binding !IsBusy}"
+                Style="{StaticResource BotaoPrincipal}"
                 Text="Salvar Alterações"
                 TextColor="White" />
 
@@ -59,6 +61,7 @@
                 BackgroundColor="#F44336"
                 Command="{Binding ExcluirTimeCommand}"
                 IsEnabled="{Binding !IsBusy}"
+                Style="{StaticResource BotaoPrincipal}"
                 Text="Excluir Time"
                 TextColor="White" />
         </VerticalStackLayout>

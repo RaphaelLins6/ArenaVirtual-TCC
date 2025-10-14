@@ -65,7 +65,10 @@
                                         HorizontalTextAlignment="Center"
                                         Text="{Binding DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}"
                                         TextColor="White" />
-                                    <HorizontalStackLayout Margin="0,10,0,0" Spacing="12">
+                                    <HorizontalStackLayout
+                                        Margin="0,10,0,0"
+                                        HorizontalOptions="Center"
+                                        Spacing="12">
                                         <Button
                                             Padding="10,4"
                                             BackgroundColor="#2196F3"
