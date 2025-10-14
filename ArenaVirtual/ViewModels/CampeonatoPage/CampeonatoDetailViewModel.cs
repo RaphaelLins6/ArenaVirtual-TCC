@@ -6,17 +6,8 @@ using ArenaVirtual.Services;
 using System.Collections.ObjectModel;
 using ArenaVirtual.Popups;
 using ArenaVirtual.Views.CampeonatoPage;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System;
-using System.Linq;
-using Microsoft.Maui.Controls;
-using System.IO;
-using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.Devices;
 
 namespace ArenaVirtual.ViewModels.CampeonatoPage {
-    // Classe auxiliar para permitir o agrupamento de itens no CollectionView
     public class Grouping<K, T> : ObservableCollection<T> {
         public K Key { get; private set; }
         public Grouping(K key, IEnumerable<T> items) {
@@ -26,7 +17,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         }
     }
     public class RodadaGrouping : Grouping<int, Jogo> {
-        // Construtor corrigido para usar o tipo Jogo
         public RodadaGrouping(int key, IEnumerable<Jogo> items) : base(key, items) { }
     }
 
@@ -74,6 +64,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         [ObservableProperty]
         private bool isFiltroGrupoVisivel = false;
 
+        // NOVA PROPRIEDADE → Adicionada na primeira correção (mantida)
+        [ObservableProperty]
+        private bool isFiltroFaseVisivel = false;
+
         // Dicionários privados
         private readonly Dictionary<int, ObservableCollection<Jogo>> _jogosPorRodada = new();
         private readonly Dictionary<string, List<Time>> _timesPorGrupo = new();
@@ -94,12 +88,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             Campeonato?.FormatoCampeonato?.IndexOf("Pontos", StringComparison.OrdinalIgnoreCase) >= 0 ||
             IsFormatoComGrupos;
 
+        // CORREÇÃO: Removemos '|| IsFormatoHibrido' para que esta propriedade
+        // descreva o *formato base* do campeonato, e não o estado da fase atual.
         public bool IsMataMataFormat =>
             Campeonato?.FormatoCampeonato?.IndexOf("Mata-mata", StringComparison.OrdinalIgnoreCase) >= 0 ||
-            Campeonato?.FormatoCampeonato?.IndexOf("Eliminação", StringComparison.OrdinalIgnoreCase) >= 0 ||
-            IsFormatoHibrido;
+            Campeonato?.FormatoCampeonato?.IndexOf("Eliminação", StringComparison.OrdinalIgnoreCase) >= 0;
 
-        // Propriedades auxiliares para uso no XAML, baseadas na FaseAtual
         public bool IsFaseTabelaEJogos => FaseAtual == "Tabela & Jogos";
         public bool IsFaseMataMata => FaseAtual == "Mata-Mata";
 
@@ -123,14 +117,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             Debug.WriteLine($"[CampeonatoDetailViewModel] Device Idiom: {DeviceInfo.Idiom}. IsDesktop: {IsDesktop}");
         }
 
-        // Lógica de reação quando GrupoSelecionado é alterado
         partial void OnGrupoSelecionadoChanged(string? value) {
             if (value != null) {
                 LoadTabelaClassificacaoPorGrupo(value);
             }
         }
 
-        // IMPLEMENTAÇÃO DO OnFaseAtualChanged 
         partial void OnFaseAtualChanged(string? value) {
             if (value != null) {
                 _ = ExecuteOnFaseAtualChangedAsync(value);
@@ -146,16 +138,17 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 await GerarJogosMataMata();
 
             } else if (newValue == "Tabela & Jogos") {
+                // A visibilidade do filtro de grupo só afeta a UI do filtro, não o conteúdo
                 IsFiltroGrupoVisivel = IsFormatoComGrupos;
                 await LoadTabelaClassificacaoAsync();
                 LoadRodada(RodadaAtual);
             }
         }
 
-        // IQueryAttributable -> recebe parâmetros de navegação
         public void ApplyQueryAttributes(IDictionary<string, object> query) {
             Debug.WriteLine("[DEBUG-ATTRIBUTES] ApplyQueryAttributes chamado.");
-            // 1) Caso venha atualização de jogo (ex: popup de árbitro)
+
+            // 1. Atualização de Jogo (Árbitro)
             if (query.TryGetValue("jogoAtualizado", out object jogoObj) && jogoObj is Jogo jogoAtualizado) {
                 Debug.WriteLine($"[DEBUG-ATTRIBUTES] Jogo ID {jogoAtualizado.Id} foi atualizado.");
                 query.Remove("jogoAtualizado");
@@ -173,14 +166,14 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     });
                 } else {
                     _ = RecarregarJogosESelecaoAsync();
-                    if (IsMataMataFormat)
+                    if (IsMataMataFormat || IsFormatoHibrido) // Usamos o híbrido aqui, pois queremos o Mata-Mata se for a fase
                         _ = GerarJogosMataMata();
                 }
 
                 return;
             }
 
-            // 2) Caso venha indicação de times atualizados
+            // 2. Atualização de Times (Inscrição)
             if (query.ContainsKey("TimesAtualizados")) {
                 Debug.WriteLine("[DEBUG-ATTRIBUTES] Lista de Times foi atualizada. Recarregando Classificação e Jogos.");
                 query.Remove("TimesAtualizados");
@@ -188,16 +181,16 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 if (Campeonato != null) {
                     _ = LoadTabelaClassificacaoAsync()
                         .ContinueWith(t => {
-                            if (IsFaseTabelaEJogos)
+                            if (IsFaseTabelaEJogos && IsTabelaFormat)
                                 _ = RecarregarJogosESelecaoAsync();
-                            else if (IsFaseMataMata)
+                            else if (IsFaseMataMata && IsMataMataFormat)
                                 _ = GerarJogosMataMata();
                         }, TaskScheduler.FromCurrentSynchronizationContext());
                 }
                 return;
             }
 
-            // 3) Se vier um Campeonato na query
+            // 3. Carregamento Inicial do Campeonato
             if (query.ContainsKey("Campeonato")) {
                 var campeonatoRecebido = query["Campeonato"] as Campeonato;
                 if (campeonatoRecebido == null) return;
@@ -209,16 +202,14 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     OnPropertyChanged(nameof(IsFormatoComGrupos));
                     OnPropertyChanged(nameof(IsTabelaFormat));
                     OnPropertyChanged(nameof(IsMataMataFormat));
-                    // Necessário chamar para atualizar a UI do formato
                     AtualizarFormatoCampeonato();
                     Debug.WriteLine("[DEBUG-ATTRIBUTES] ApplyQueryAttributes ignorou LoadCampeonato (Campeonato já carregado).");
                 }
             }
         }
 
-        // Método que garante recarga de jogos e seleção da rodada após atualizar a tabela
         private async Task RecarregarJogosESelecaoAsync() {
-            if (Campeonato == null) return;
+            if (Campeonato == null || !IsTabelaFormat) return;
             Debug.WriteLine("[DEBUG-RELOAD] Iniciando RecarregarJogosESelecaoAsync.");
 
             await GerarTabelaJogosAsync(Campeonato);
@@ -233,7 +224,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             Debug.WriteLine("[DEBUG-RELOAD] Finalizando RecarregarJogosESelecaoAsync.");
         }
 
-        // Carrega campeonato (inicial)
         public async Task LoadCampeonato(Campeonato campeonato) {
             Debug.WriteLine("[CampeonatoDetailViewModel] LoadCampeonato chamado.");
             if (IsBusy) return;
@@ -246,12 +236,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 }
 
                 Campeonato = campeonato;
-                // Atualiza as propriedades calculadas
                 OnPropertyChanged(nameof(IsFormatoComGrupos));
                 OnPropertyChanged(nameof(IsTabelaFormat));
                 OnPropertyChanged(nameof(IsMataMataFormat));
 
-                // Lógica centralizada para determinar o formato e configurar os Pickers
                 AtualizarFormatoCampeonato();
 
                 var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
@@ -260,17 +248,15 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
                 await LoadTabelaClassificacaoAsync();
 
-                // Garante que os jogos sejam gerados para o formato de Tabela/Grupos
+                // 4.1.a - Exibir jogos conforme formato base
                 if (IsTabelaFormat) {
                     await GerarTabelaJogosAsync(campeonato);
                     RodadaAtual = _jogosPorRodada.Keys.Any() ? _jogosPorRodada.Keys.Min() : 0;
                 }
 
-                // Carrega a tela inicial conforme o formato definido
-                if (IsFaseTabelaEJogos && RodadaAtual > 0) {
+                if (IsFaseTabelaEJogos && IsTabelaFormat && RodadaAtual > 0) {
                     LoadRodada(RodadaAtual);
-                    // A visibilidade do filtro de grupo é tratada no ExecuteOnFaseAtualChangedAsync
-                } else if (IsFaseMataMata) {
+                } else if (IsFaseMataMata && IsMataMataFormat) {
                     await GerarJogosMataMata();
                 }
 
@@ -283,52 +269,58 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             }
         }
 
-        /// <summary>
-        /// Centraliza a lógica de definição do formato de campeonato (híbrido ou puro)
-        /// e inicialização do Picker de Fases.
-        /// </summary>
         private void AtualizarFormatoCampeonato() {
             if (Campeonato is null) return;
 
-            // 1. ADICIONADO LOG PARA DEBUGAR A STRING
             Debug.WriteLine($"[DEBUG-FORMATO] Valor de FormatoCampeonato: '{Campeonato.FormatoCampeonato}'");
 
-            // 2. LÓGICA DE DEFINIÇÃO DO FORMATO HÍBRIDO
-            // Lógica expandida conforme a primeira requisição para cobrir todas as strings de híbrido
             bool isPontosMaisEliminatoria = Campeonato.FormatoCampeonato.IndexOf("Pontos + Eliminatórias", StringComparison.OrdinalIgnoreCase) >= 0;
             bool isGruposMaisEliminatoria = Campeonato.FormatoCampeonato.IndexOf("Grupos + Eliminatórias", StringComparison.OrdinalIgnoreCase) >= 0;
             bool isMaisEliminatoria = Campeonato.FormatoCampeonato.IndexOf("Mais Eliminatória", StringComparison.OrdinalIgnoreCase) >= 0;
 
             IsFormatoHibrido = isPontosMaisEliminatoria || isGruposMaisEliminatoria || isMaisEliminatoria;
 
+            // Filtro de fases visível apenas em híbridos
+            IsFiltroFaseVisivel = IsFormatoHibrido;
 
-            // Loga o resultado
-            Debug.WriteLine($"[DEBUG-FORMATO] IsFormatoHibrido set to: {IsFormatoHibrido}");
+            Debug.WriteLine($"[DEBUG-FORMATO] IsFormatoHibrido set to: {IsFormatoHibrido}. IsFiltroFaseVisivel: {IsFiltroFaseVisivel}");
 
+            FasesDisponiveis.Clear(); // Limpar a lista para reconstruir
 
             if (IsFormatoHibrido) {
-                // Inicializa as opções do Picker de Fases
-                FasesDisponiveis.Clear();
                 FasesDisponiveis.Add("Tabela & Jogos");
                 FasesDisponiveis.Add("Mata-Mata");
-                // Garante valor inicial e dispara OnFaseAtualChanged
-                FaseAtual = "Tabela & Jogos";
+                FaseAtual = "Tabela & Jogos"; // Padrão
             } else {
-                // Para formatos não híbridos, define a fase inicial correta
-                FaseAtual = IsMataMataFormat ? "Mata-Mata" : "Tabela & Jogos";
-                FasesDisponiveis.Clear(); // Limpa se houver dados de uma carga anterior
+                // Em não híbridos, define a FaseAtual com base no formato principal.
+                if (IsMataMataFormat)
+                    FaseAtual = "Mata-Mata";
+                else
+                    FaseAtual = "Tabela & Jogos";
+
+                // CORREÇÃO CRÍTICA: Adiciona a fase única para evitar problemas de binding
+                // em componentes que esperam um item na lista de fases disponíveis.
+                FasesDisponiveis.Add(FaseAtual);
+            }
+
+            // Garante que o filtro de grupo esteja visível na fase "Tabela & Jogos" se houver grupos
+            if (IsFaseTabelaEJogos) {
+                // A visibilidade do filtro de grupo só afeta a UI do filtro, não o conteúdo
+                IsFiltroGrupoVisivel = IsFormatoComGrupos && GruposDisponiveis.Any();
+            } else {
+                IsFiltroGrupoVisivel = false;
             }
         }
 
-        // Gera o bracket Mata-Mata com base em TabelaClassificacao (mock/placeholder)
         private async Task GerarJogosMataMata() {
-            // Usa IsFaseMataMata para garantir que a lógica só rode quando relevante
-            if (!IsMataMataFormat || Campeonato is null) return;
+            if (!IsMataMataFormat && !IsFormatoHibrido || Campeonato is null) return;
 
             MainThread.BeginInvokeOnMainThread(() => {
                 JogosMataMata.Clear();
             });
 
+            // Usamos TabelaClassificacao (que já é carregada no LoadTabelaClassificacaoAsync)
+            // para obter os times que avançaram (todos, neste mock)
             var timesAceitos = TabelaClassificacao.OrderByDescending(t => t.PontuacaoTotal).ToList();
 
             if (timesAceitos.Count < 2) {
@@ -339,8 +331,8 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             int mockIdCounter = -1;
             var mockJogosFlat = new List<Jogo>();
 
+            // Lógica de Geração de Bracket (Mock) - Mantida a lógica original
             if (timesAceitos.Count == 2) {
-                // Lógica de 2 Times (Rodada 1 = FINAL)
                 var jogoFinal = new Jogo {
                     Id = mockIdCounter--,
                     TimeA = timesAceitos[0],
@@ -356,8 +348,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 Debug.WriteLine("[MATA-MATA] Bracket de 2 times (Final) gerado.");
 
             } else if (timesAceitos.Count == 3) {
-                // Lógica de 3 Times (Rodada 1 = Semi, Rodada 2 = Final com Bye)
-                // O Time 1 (melhor pontuação) ganha um Bye
                 var jogoSemi1 = new Jogo {
                     Id = mockIdCounter--,
                     TimeA = timesAceitos[1],
@@ -386,47 +376,51 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 Debug.WriteLine("[MATA-MATA] Bracket de 3 times gerado (Semi + Final com Bye).");
 
             } else if (timesAceitos.Count >= 4) {
-                // Rodada 1 = SEMI-FINAL (2 Jogos para 4 times, ou a primeira fase para mais)
-                var jogo1 = new Jogo {
-                    Id = mockIdCounter--,
-                    TimeA = timesAceitos[0],
-                    TimeAId = timesAceitos[0].Id,
-                    TimeB = timesAceitos[3],
-                    TimeBId = timesAceitos[3].Id,
-                    Rodada = 1,
-                    IsOrganizador = IsOrganizador,
-                    NomeArbitro = string.Empty,
-                    Local = "A Definir",
-                };
-                var jogo2 = new Jogo {
-                    Id = mockIdCounter--,
-                    TimeA = timesAceitos[1],
-                    TimeAId = timesAceitos[1].Id,
-                    TimeB = timesAceitos[2],
-                    TimeBId = timesAceitos[2].Id,
-                    Rodada = 1,
-                    IsOrganizador = IsOrganizador,
-                    NomeArbitro = string.Empty,
-                    Local = "A Definir",
-                };
-                mockJogosFlat.Add(jogo1);
-                mockJogosFlat.Add(jogo2);
+                // Primeira Rodada (Quartas, se houver 4)
+                for (int i = 0; i < timesAceitos.Count; i += 2) {
+                    if (i + 1 < timesAceitos.Count) {
+                        mockJogosFlat.Add(new Jogo {
+                            Id = mockIdCounter--,
+                            TimeA = timesAceitos[i],
+                            TimeAId = timesAceitos[i].Id,
+                            TimeB = timesAceitos[i + 1],
+                            TimeBId = timesAceitos[i + 1].Id,
+                            Rodada = 1,
+                            IsOrganizador = IsOrganizador,
+                            NomeArbitro = string.Empty,
+                            Local = "A Definir",
+                        });
+                    }
+                }
 
-                // Rodada 2 = FINAL
-                var jogoFinal = new Jogo {
-                    Id = mockIdCounter--,
-                    TimeA = new Time { Nome = "Vencedor Jogo 1", LogoUrl = "default_logo.png", Id = mockIdCounter-- },
-                    TimeAId = jogo1.Id,
-                    TimeB = new Time { Nome = "Vencedor Jogo 2", LogoUrl = "default_logo.png", Id = mockIdCounter-- },
-                    TimeBId = jogo2.Id,
-                    Rodada = 2,
-                    IsOrganizador = IsOrganizador,
-                    NomeArbitro = string.Empty,
-                    Local = "A Definir",
-                };
-                mockJogosFlat.Add(jogoFinal);
+                // Simulação da próxima rodada (Semi)
+                if (mockJogosFlat.Count >= 2) {
+                    var vencedoresMock = new List<Time>();
+                    for (int i = 0; i < mockJogosFlat.Count; i += 2) {
+                        var jogo1 = mockJogosFlat[i];
+                        var jogo2 = i + 1 < mockJogosFlat.Count ? mockJogosFlat[i + 1] : null;
 
-                Debug.WriteLine("[MATA-MATA] Bracket de 4+ times gerado (Semi + Final simuladas).");
+                        var vencedor1 = new Time { Nome = $"Vencedor Jogo {i + 1}", LogoUrl = "default_logo.png", Id = mockIdCounter-- };
+                        var vencedor2 = jogo2 != null ? new Time { Nome = $"Vencedor Jogo {i + 2}", LogoUrl = "default_logo.png", Id = mockIdCounter-- } : null;
+
+                        if (jogo2 != null) {
+                            var jogoProximaRodada = new Jogo {
+                                Id = mockIdCounter--,
+                                TimeA = vencedor1,
+                                TimeAId = jogo1.Id, // Referência ao Jogo anterior
+                                TimeB = vencedor2,
+                                TimeBId = jogo2.Id, // Referência ao Jogo anterior
+                                Rodada = 2,
+                                IsOrganizador = IsOrganizador,
+                                NomeArbitro = string.Empty,
+                                Local = "A Definir",
+                            };
+                            mockJogosFlat.Add(jogoProximaRodada);
+                        }
+                    }
+                }
+
+                Debug.WriteLine("[MATA-MATA] Bracket de 4+ times gerado (Rodadas simuladas).");
             }
 
             Debug.WriteLine($"[MATA-MATA] Total de jogos planos gerados: {mockJogosFlat.Count}");
@@ -501,11 +495,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             var todosOsTimes = await _databaseService.ObterTimesAceitosAsync(Campeonato.Id) ?? new List<Time>();
 
-            // Lógica de agrupamento para formato com grupos
             if (todosOsTimes.Any() && IsFormatoComGrupos) {
                 int numTimes = todosOsTimes.Count;
                 int numGruposNecessarios = 1;
 
+                // Lógica de atribuição de grupos mantida (simplificada)
                 if (numTimes > 0) {
                     if (numTimes % 3 == 0 && numTimes / 3 >= 1)
                         numGruposNecessarios = numTimes / 3;
@@ -538,6 +532,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     }
                 }
 
+                // Garante que todos os times tenham um grupo (mock)
                 for (int i = 0; i < numTimes; i++) {
                     var time = todosOsTimes[i];
                     if (string.IsNullOrEmpty(time.Grupo)) {
@@ -558,28 +553,27 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     }
 
                     if (GruposDisponiveis.Any()) {
-                        // CORREÇÃO: Garante que o GrupoSelecionado seja um grupo válido ou o primeiro.
                         if (string.IsNullOrEmpty(GrupoSelecionado) || !GruposDisponiveis.Contains(GrupoSelecionado))
                             GrupoSelecionado = GruposDisponiveis.First();
 
-                        // Garante a visibilidade inicial se for formato com grupos e fase de tabela
+                        // Ajuste: A visibilidade do filtro de grupo só depende do formato e da fase Tabela & Jogos
                         IsFiltroGrupoVisivel = IsFaseTabelaEJogos;
 
-                        // Garante que a tabela carregue pelo grupo selecionado (chamado manualmente pois OnGrupoSelecionadoChanged não dispara se o valor não mudar)
                         LoadTabelaClassificacaoPorGrupo(GrupoSelecionado);
 
                     } else {
                         TabelaClassificacao.Clear();
+                        IsFiltroGrupoVisivel = false;
                     }
                 });
             } else {
-                // Lógica para formato sem grupos (Classificação Geral)
+                // Sem grupos
                 var timesOrdenados = todosOsTimes
                     .OrderByDescending(t => t.PontuacaoTotal)
                     .ToList();
                 MainThread.BeginInvokeOnMainThread(() => {
                     TabelaClassificacao.Clear();
-                    IsFiltroGrupoVisivel = false; // Garante que o filtro de grupo não apareça
+                    IsFiltroGrupoVisivel = false;
 
                     for (int i = 0; i < timesOrdenados.Count; i++) {
                         var time = timesOrdenados[i];
@@ -621,7 +615,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             }
         }
 
-        // Gera a tabela de jogos por rodada (usa o serviço de jogos)
         private async Task GerarTabelaJogosAsync(Campeonato campeonato) {
             Debug.WriteLine("[DEBUG-JOGOS] Iniciando GerarTabelaJogosAsync.");
             _jogosPorRodada.Clear();

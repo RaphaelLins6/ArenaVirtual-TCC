@@ -115,7 +115,7 @@
 
                 <VerticalStackLayout
                     Padding="15,0"
-                    IsVisible="{Binding IsFormatoHibrido}"
+                    IsVisible="{Binding IsFiltroFaseVisivel}"
                     Spacing="10">
 
                     <Label
@@ -666,12 +666,16 @@
                                                             CornerRadius="5"
                                                             FontSize="14"
                                                             IsEnabled="{Binding BotaoArbitroHabilitado}"
-                                                            IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=IsOrganizador}"
                                                             MaximumWidthRequest="250"
                                                             Style="{StaticResource BotaoPrincipal}"
                                                             Text="{Binding TextoBotaoArbitro}"
                                                             TextColor="White"
-                                                            VerticalOptions="End" />
+                                                            VerticalOptions="End">
+
+                                                            <Button.IsVisible>
+                                                                <Binding Path="IsOrganizador" Source="{RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}" />
+                                                            </Button.IsVisible>
+                                                        </Button>
 
 
                                                     </VerticalStackLayout>
