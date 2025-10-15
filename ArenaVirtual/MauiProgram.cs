@@ -95,7 +95,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<TimesCadastradosPage>();
         builder.Services.AddTransient<Views.Atleta.PartidasPage>();
         builder.Services.AddTransient<DashboardArbitroPage>();
-        //builder.Services.AddTransient<LancamentoEstatisticaPage>();
+        builder.Services.AddTransient<LancamentoEstatisticaPage>();
         builder.Services.AddTransient<CampeonatoInscricao>();
         builder.Services.AddTransient<ArbitrosInscritosPage>();
 

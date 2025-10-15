@@ -1,10 +1,12 @@
-﻿
+﻿using ArenaVirtual.ViewModels.Arbitro;
+using Microsoft.Maui.Controls;
+
 namespace ArenaVirtual.Views.Arbitro {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class AvaliacaoArbitralPage : ContentPage {
-        public AvaliacaoArbitralPage() {
+    public partial class LancamentoEstatisticaPage : ContentPage {
+        public LancamentoEstatisticaPage(LancamentoEstatisticaViewModel viewModel) {
             InitializeComponent();
-            Title = "Avaliação Arbitral";
+
+            BindingContext = viewModel;
         }
     }
 }

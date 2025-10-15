@@ -7,7 +7,6 @@ using System.Diagnostics;
 
 namespace ArenaVirtual.ViewModels.Arbitro {
 
-    // ViewModel para cada item da lista (Campeonato)
     public partial class CampeonatoItemViewModel : ObservableObject {
         public Campeonato Campeonato { get; set; }
         public string Nome => Campeonato?.Nome;
@@ -24,12 +23,10 @@ namespace ArenaVirtual.ViewModels.Arbitro {
             IsButtonEnabled = isEnabled;
             ButtonColor = buttonColor;
 
-            // NOVO LOG: Confirma a criação de cada item
             Debug.WriteLine($"[CampeonatoItemVM] Item criado: {Nome}, Habilitado: {IsButtonEnabled}");
         }
     }
 
-    // ViewModel da página principal
     public partial class CampeonatoInscricaoViewModel : ObservableObject {
 
         [ObservableProperty]
@@ -58,7 +55,6 @@ namespace ArenaVirtual.ViewModels.Arbitro {
             _sessaoService = sessaoService;
             _alertService = alertService;
 
-            // LOG: Confirma a inicialização da ViewModel e da lista
             Debug.WriteLine("[CampeonatoInscricaoViewModel] ViewModel inicializada.");
 
             CampeonatosDisponiveis = new ObservableCollection<CampeonatoItemViewModel>();
@@ -73,7 +69,6 @@ namespace ArenaVirtual.ViewModels.Arbitro {
         public async Task CarregarCampeonatosAsync(string query) {
             Debug.WriteLine($"[CarregarCampeonatosAsync] INÍCIO. IsBusy={IsBusy}. Query: '{query}'");
 
-            // Garante que IsBusy seja sempre true no início, mesmo que fosse false
             if (IsBusy) {
                 Debug.WriteLine("[CarregarCampeonatosAsync] Já está ocupado. Saindo.");
                 return;
@@ -106,11 +101,10 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                 var novosItens = new List<CampeonatoItemViewModel>();
 
                 foreach (var campeonato in campeonatosFiltrados) {
-                    // Verificação de solicitação existente e determinação do botão
                     var solicitacaoExistente = await _databaseService.ObterSolicitacaoPorArbitroECampeonatoAsync(
-            arbitroClientAppId,
-            campeonato.ClientAppId.ToString(),
-            TipoConvite.InscricaoArbitro);
+                    arbitroClientAppId,
+                    campeonato.ClientAppId.ToString(),
+                    TipoConvite.InscricaoArbitro);
 
                     Debug.WriteLine($"[CarregarCampeonatosAsync] Processando '{campeonato.Nome}'. Status: {(solicitacaoExistente != null ? solicitacaoExistente.Status.ToString() : "NENHUMA")}");
 
@@ -131,11 +125,9 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                     novosItens.Add(new CampeonatoItemViewModel(campeonato, buttonText, isEnabled, buttonColor));
                 }
 
-                // NOVO LOG: Quantidade de itens prontos para ir para a UI
                 Debug.WriteLine($"[CarregarCampeonatosAsync] Total de ViewModels criadas: {novosItens.Count}. Movendo para a MainThread.");
 
                 MainThread.BeginInvokeOnMainThread(() => {
-                    // NOVO LOG: Limpando lista na MainThread
                     Debug.WriteLine($"[MainThread] Limpando CampeonatosDisponiveis. Contagem inicial: {CampeonatosDisponiveis.Count}");
 
                     CampeonatosDisponiveis.Clear();
@@ -146,10 +138,8 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                         itensAdicionados++;
                     }
 
-                    // LOG FINAL: Confirmação da contagem final
                     Debug.WriteLine($"[MainThread] Itens adicionados: {itensAdicionados}. Contagem final de CampeonatosDisponiveis: {CampeonatosDisponiveis.Count}");
 
-                    // Este é o momento onde a UI deveria renderizar.
                 });
 
             } catch (Exception ex) {
@@ -162,11 +152,9 @@ namespace ArenaVirtual.ViewModels.Arbitro {
 
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
         public async Task SolicitarArbitragemAsync(CampeonatoItemViewModel campeonatoItemVM) {
-            // Logs de Solicitação
             Debug.WriteLine($"[SolicitarArbitragemAsync] INÍCIO. Solicitando para: {campeonatoItemVM?.Nome ?? "NULO"}");
             if (campeonatoItemVM == null) return;
 
-            // NOTE: IsBusy está sendo gerenciado aqui, mas o CanExecute do RelayCommand não é usado pelo evento Clicked
             IsBusy = true;
             try {
                 var arbitroAtual = await _sessaoService.GetArbitroAtualAsync();
@@ -191,7 +179,6 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                   $"Sua solicitação de arbitragem no campeonato '{campeonatoItemVM.Nome}' foi enviada.",
                   "OK");
 
-                // Atualização local do item para refletir a solicitação
                 MainThread.BeginInvokeOnMainThread(() => {
                     campeonatoItemVM.ButtonText = "Pendente";
                     campeonatoItemVM.IsButtonEnabled = false;

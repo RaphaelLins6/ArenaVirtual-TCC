@@ -68,13 +68,14 @@ namespace ArenaVirtual.ViewModels.Atleta {
 
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
         public async Task PesquisarCampeonatosAsync(string query) {
-            IsBusy = true;
+            if (IsBusy) return;
+            IsBusy = true; 
             try {
                 var todosCampeonatos = await _campeonatoService.ObterTodosAsync();
                 var timeAtual = await _sessaoService.GetTimeAtualAsync();
 
                 if (timeAtual == null) {
-                    Debug.WriteLine("Usuário não pertence a nenhum time. Não é possível solicitar inscrição em campeonatos.");
+                    // ... (Lógica de time não encontrado)
                     MainThread.BeginInvokeOnMainThread(() => {
                         CampeonatosDisponiveis.Clear();
                     });
@@ -82,54 +83,46 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 }
 
                 var campeonatosFiltrados = string.IsNullOrWhiteSpace(query)
-                ? todosCampeonatos
-                : todosCampeonatos.Where(c => c.Nome.ToLower().Contains(query.ToLower())).ToList();
+                    ? todosCampeonatos
+                    : todosCampeonatos.Where(c => c.Nome.ToLower().Contains(query.ToLower())).ToList();
 
-                MainThread.BeginInvokeOnMainThread(async () => {
+                var novosItens = new List<CampeonatoItemViewModel>(); // Lista temporária para novos itens
+
+                foreach (var campeonato in campeonatosFiltrados) {
+                    var timesAceitos = await _databaseService.ObterTimesAceitosAsync(campeonato.Id);
+                    var solicitacaoExistente = await _databaseService.ObterSolicitacaoPorTimeECampeonatoAsync(timeAtual.ClientAppId.ToString(), campeonato.ClientAppId.ToString());
+
+                    string buttonText = "Solicitar Inscrição";
+                    bool isEnabled = true;
+                    Color buttonColor = Color.FromArgb("#FF9800");
+
+                    if (solicitacaoExistente?.Status == StatusConvite.Aceito) {
+                        buttonText = "Inscrito";
+                        isEnabled = false;
+                        buttonColor = Color.FromArgb("#4CAF50");
+                    }
+                    else if (timesAceitos.Count >= campeonato.NumeroMaximoEquipes) {
+                        buttonText = "Vagas Esgotadas";
+                        isEnabled = false;
+                        buttonColor = Color.FromArgb("#FF0000");
+                    }
+                    else if (solicitacaoExistente?.Status == StatusConvite.Pendente) {
+                        buttonText = "Pendente";
+                        isEnabled = false;
+                        buttonColor = Color.FromArgb("#9E9E9E");
+                    }
+                    novosItens.Add(new CampeonatoItemViewModel(campeonato, buttonText, isEnabled, buttonColor));
+                }
+
+                MainThread.BeginInvokeOnMainThread(() => {
                     CampeonatosDisponiveis.Clear();
-                    foreach (var campeonato in campeonatosFiltrados) {
-
-                        // ******************************************************
-                        // 1. LÓGICA DE VERIFICAÇÃO DE VAGAS
-                        // ******************************************************
-                        // Usando o 'Id' do campeonato para obter os times aceitos
-                        var timesAceitos = await _databaseService.ObterTimesAceitosAsync(campeonato.Id);
-
-                        // Usamos NumeroMaximoEquipes do seu modelo (assumimos que Campeonato tem essa prop)
-                        bool vagasEsgotadas = timesAceitos.Count >= campeonato.NumeroMaximoEquipes;
-
-                        // 2. VERIFICAÇÃO DE STATUS DE SOLICITAÇÃO EXISTENTE
-                        var solicitacaoExistente = await _databaseService.ObterSolicitacaoPorTimeECampeonatoAsync(timeAtual.ClientAppId.ToString(), campeonato.ClientAppId.ToString());
-
-                        string buttonText = "Solicitar Inscrição";
-                        bool isEnabled = true;
-                        Color buttonColor = Color.FromArgb("#FF9800"); // Laranja (Padrão)
-
-                        // 3. APLICAÇÃO DA LÓGICA (Prioridade: Inscrito > Vagas Esgotadas > Pendente)
-
-                        // Prioridade 1: Já Inscrito/Aceito?
-                        if (solicitacaoExistente?.Status == StatusConvite.Aceito) {
-                            buttonText = "Inscrito";
-                            isEnabled = false;
-                            buttonColor = Color.FromArgb("#4CAF50"); // Verde
-                        }
-                        // Prioridade 2: Vagas Esgotadas? (Bloqueia novas solicitações)
-                        else if (vagasEsgotadas) {
-                            buttonText = "Vagas Esgotadas";
-                            isEnabled = false;
-                            buttonColor = Color.FromArgb("#FF0000"); // Vermelho
-                        }
-                        // Prioridade 3: Solicitação Pendente? (Bloqueia novas solicitações)
-                        else if (solicitacaoExistente?.Status == StatusConvite.Pendente) {
-                            buttonText = "Pendente";
-                            isEnabled = false;
-                            buttonColor = Color.FromArgb("#9E9E9E"); // Cinza
-                        }
-                        // Prioridade 4: Recusado ou Nulo (Default) -> Permanece Solicitar Inscrição
-
-                        CampeonatosDisponiveis.Add(new CampeonatoItemViewModel(campeonato, buttonText, isEnabled, buttonColor));
+                    foreach (var item in novosItens) {
+                        CampeonatosDisponiveis.Add(item);
                     }
                 });
+
+            } catch (Exception ex) {
+                Debug.WriteLine($"[PesquisarCampeonatosAsync] ERRO CRÍTICO: {ex.Message}");
             } finally {
                 IsBusy = false;
             }

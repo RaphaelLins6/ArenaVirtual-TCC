@@ -118,7 +118,7 @@
                                     <Button
                                         Margin="0,10,0,0"
                                         BackgroundColor="#FFA500"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardArbitroViewModel}}, Path=PartidaSelecionadaCommand}"
+                                        Clicked="OnLancarEstatisticasClicked"
                                         CommandParameter="{Binding .}"
                                         IsVisible="{Binding PodeLancarEstatisticas}"
                                         Style="{StaticResource BotaoPrincipal}"
