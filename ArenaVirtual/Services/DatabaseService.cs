@@ -245,8 +245,46 @@ namespace ArenaVirtual.Services {
         public Task<int> DeletarEstatisticaAsync(EstatisticaPartida item) => _database.DeleteAsync(item);
         public Task<List<EstatisticaPartida>> ObterEstatisticasPorJogoAsync(int jogoId) => _database.Table<EstatisticaPartida>().Where(e => e.JogoId == jogoId).ToListAsync();
         public Task<List<EstatisticaPartida>> ObterEstatisticasPorAtletaAsync(int usuarioId) => _database.Table<EstatisticaPartida>().Where(e => e.UsuarioId == usuarioId).ToListAsync();
+        public async Task<bool> SalvarEstatisticasDoJogoAsync(Jogo jogo, IEnumerable<EstatisticaPartida> estatisticas) {
+            try {
+                // 1. Atualizar o Jogo (Placar)
+                int jogoAtualizado = await AtualizarJogoAsync(jogo);
 
-        
+                if (jogoAtualizado != 1) {
+                    System.Diagnostics.Debug.WriteLine("[DB SERVICE] Falha ao atualizar o Jogo (Placar). UpdateAsync retornou: " + jogoAtualizado);
+                    return false;
+                }
+
+                // 2. CRÍTICO: Deletar estatísticas antigas do jogo antes de inserir as novas
+                if (jogo.Id > 0) {
+                    await DeletarEstatisticasPorJogoAsync(jogo.Id);
+                }
+
+                // 3. Inserir todas as novas Estatísticas
+                int countEsperado = estatisticas.Count();
+                int estatisticasInseridas = await InsertAllAsync(estatisticas);
+
+                if (estatisticasInseridas == countEsperado) {
+                    return true;
+                } else {
+                    System.Diagnostics.Debug.WriteLine($"[DB SERVICE] Inserção de estatísticas incompleta: {estatisticasInseridas} de {countEsperado}.");
+                    return false; // Retorna falha se a contagem não bater
+                }
+
+            } catch (Exception ex) {
+                System.Diagnostics.Debug.WriteLine($"[DB SERVICE] Erro FATAL em SalvarEstatisticasDoJogoAsync: {ex.Message}");
+                return false;
+            }
+        }
+        public Task<int> DeletarEstatisticasPorJogoAsync(int jogoId) {
+            // Comando SQL para deletar todas as estatísticas associadas a um JogoId específico.
+            string sql = "DELETE FROM EstatisticaPartida WHERE JogoId = ?";
+            return _database.ExecuteAsync(sql, jogoId);
+        }
+        public Task<List<EstatisticaPartida>> GetEstatisticasPorJogoIdAsync(int jogoId) {
+            return _database.Table<EstatisticaPartida>().Where(s => s.JogoId == jogoId).ToListAsync();
+        }
+
         // --- MÉTODOS DE JOGOS ---
         public async Task<int> AtualizarJogoAsync(Jogo item) {
             Debug.WriteLine($"[E] DB SERVICE (Atualizar Jogo): Jogo.Id: {item.Id} | ArbitroId: {item.ArbitroId} | IsSynced: {item.IsSynced}");
@@ -305,12 +343,13 @@ namespace ArenaVirtual.Services {
                             .ToListAsync();
         }
         public Task<int> DesvincularArbitroDosJogosAsync(Guid campeonatoClientAppId, Guid arbitroClientAppId) {
-           string sql = @"
+            string sql = @"
                 UPDATE Jogo 
                 SET ArbitroId = NULL 
                 WHERE CampeonatoClientAppId = ? AND ArbitroId = ?";
             return _database.ExecuteAsync(sql, campeonatoClientAppId, arbitroClientAppId);
         }
+        
 
         // --- MÉTODOS DE FAVORITOS ---
         public Task<int> InserirFavoritoAsync(UsuarioCampeonatoFavorito favorito) => _database.InsertAsync(favorito);

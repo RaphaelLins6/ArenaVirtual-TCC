@@ -147,29 +147,19 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         public void ApplyQueryAttributes(IDictionary<string, object> query) {
             Debug.WriteLine("[DEBUG-ATTRIBUTES] ApplyQueryAttributes chamado.");
-
-            // 1. Atualização de Jogo (Árbitro)
+            // 1. Atualização de Jogo (Árbitro) ou Jogo (Placar/Outros)
             if (query.TryGetValue("jogoAtualizado", out object jogoObj) && jogoObj is Jogo jogoAtualizado) {
                 Debug.WriteLine($"[DEBUG-ATTRIBUTES] Jogo ID {jogoAtualizado.Id} foi atualizado.");
                 query.Remove("jogoAtualizado");
 
-                var jogoNaListaTabela = TabelaJogos.FirstOrDefault(j => j.Id == jogoAtualizado.Id);
-                var jogoNaListaMataMata = JogosMataMata.SelectMany(g => g).FirstOrDefault(j => j.Id == jogoAtualizado.Id);
-                var jogoNaLista = jogoNaListaTabela ?? jogoNaListaMataMata;
+                _ = LoadTabelaClassificacaoAsync();
 
-                if (jogoNaLista != null) {
-                    MainThread.BeginInvokeOnMainThread(() => {
-                        jogoNaLista.ArbitroId = jogoAtualizado.ArbitroId;
-                        jogoNaLista.NomeArbitro = jogoAtualizado.NomeArbitro;
-                        jogoNaLista.NotifyArbitroStatusChanged();
-                        Debug.WriteLine($"[DEBUG-ATTRIBUTES] UI do Jogo ID {jogoAtualizado.Id} atualizada diretamente na lista.");
-                    });
-                } else {
-                    _ = RecarregarJogosESelecaoAsync();
-                    if (IsMataMataFormat || IsFormatoHibrido) // Usamos o híbrido aqui, pois queremos o Mata-Mata se for a fase
-                        _ = GerarJogosMataMata();
-                }
+                _ = RecarregarJogosESelecaoAsync();
 
+                if (IsMataMataFormat || IsFormatoHibrido) 
+                    _ = GerarJogosMataMata();
+
+                Debug.WriteLine($"[DEBUG-ATTRIBUTES] Recarga completa do Campeonato após atualização do Jogo ID {jogoAtualizado.Id}.");
                 return;
             }
 

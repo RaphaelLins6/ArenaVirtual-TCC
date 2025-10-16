@@ -99,58 +99,35 @@ namespace ArenaVirtual.ViewModels.Arbitro {
 
         public bool IsNotOcupado => !EstaOcupado;
 
-        [RelayCommand(CanExecute = nameof(IsNotOcupado))]
-        private async Task SalvarEstatisticasAsync() {
-            if (Jogo == null || EstaOcupado) return;
+        [RelayCommand]
+        private async Task SalvarEstatisticas() {
+            if (EstaOcupado) return;
+            EstaOcupado = true; 
 
-            EstaOcupado = true;
             try {
-                // 1. Prepara todas as estatísticas para inserção
-                Func<AtletaEstatisticaItem, bool> hasData = item =>
-                    item.Pontos > 0 || item.Rebotes > 0 || item.Assistencias > 0 ||
-                    item.Roubos > 0 || item.Bloqueios > 0 || item.Faltas > 0 ||
-                    item.Turnovers > 0 || item.Arremessos2PontosConvertidos > 0 ||
-                    item.Arremessos2PontosTentados > 0 || item.Arremessos3PontosConvertidos > 0 ||
-                    item.Arremessos3PontosTentados > 0 || item.LancesLivresConvertidos > 0 ||
-                    item.LancesLivresTentados > 0;
-
-                var estatisticasTimeA = EstatisticasTimeA
-                    .Where(hasData)
-                    .Select(item => item.ToEstatisticaPartidaModel(Jogo.Id));
-
-                var estatisticasTimeB = EstatisticasTimeB
-                    .Where(hasData)
-                    .Select(item => item.ToEstatisticaPartidaModel(Jogo.Id));
-
-                var todasEstatisticas = estatisticasTimeA.Concat(estatisticasTimeB).ToList();
-
-                if (!todasEstatisticas.Any()) {
-                    await Shell.Current.DisplayAlert("Atenção", "Nenhuma estatística para salvar. Por favor, insira os dados.", "OK");
-                    return;
-                }
-
-                // 2. Inserir as estatísticas no Banco de Dados
-                foreach (var estatistica in todasEstatisticas) {
-                    await _databaseService.InserirEstatisticaAsync(estatistica);
-                }
-
-                // 3. Calcular e Atualizar o Placar Final do Jogo
-                PlacarTimeA = EstatisticasTimeA.Sum(e => e.Pontos);
-                PlacarTimeB = EstatisticasTimeB.Sum(e => e.Pontos);
-
                 Jogo.PlacarTimeAInt = PlacarTimeA;
                 Jogo.PlacarTimeBInt = PlacarTimeB;
-                Jogo.Status = JogoStatus.Finalizado;
 
-                await _databaseService.AtualizarJogoAsync(Jogo);
+                var estatisticasParaSalvar = EstatisticasTimeA
+                    .Concat(EstatisticasTimeB)
+                    .Select(item => item.ToEstatisticaPartidaModel(Jogo.Id))
+                    .ToList();
 
-                // 4. Navegar de volta
-                Debug.WriteLine($"Estatísticas salvas. Placar: {PlacarTimeA} x {PlacarTimeB}");
-                await Shell.Current.DisplayAlert("Sucesso", "Estatísticas e Placar finalizados com sucesso!", "OK");
-                await Shell.Current.GoToAsync("..");
+                bool sucesso = await _databaseService.SalvarEstatisticasDoJogoAsync(Jogo, estatisticasParaSalvar);
+
+                if (sucesso) {
+                    await Shell.Current.DisplayAlert("Sucesso", "Estatísticas salvas com sucesso!", "OK");
+                    var navigationParameters = new ShellNavigationQueryParameters {
+                        { "jogoAtualizado", Jogo }
+                    };
+                    await Shell.Current.GoToAsync("..", navigationParameters);
+                } else {
+                    await Shell.Current.DisplayAlert("Erro", "Falha ao salvar as estatísticas. Tente novamente.", "OK");
+                }
+
             } catch (Exception ex) {
                 Debug.WriteLine($"Erro ao salvar estatísticas: {ex.Message}");
-                await Shell.Current.DisplayAlert("Erro", "Ocorreu um erro ao salvar as estatísticas.", "OK");
+                await Shell.Current.DisplayAlert("Erro", "Ocorreu um erro inesperado ao salvar. Detalhes: " + ex.Message, "OK");
             } finally {
                 EstaOcupado = false;
             }
@@ -168,6 +145,7 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                     await Shell.Current.GoToAsync("..");
                     return;
                 }
+
                 // 2. Obter os Times
                 var timeA = await _databaseService.GetTimeByIdAsync(jogo.TimeAId);
                 var timeB = await _databaseService.GetTimeByIdAsync(jogo.TimeBId);
@@ -192,15 +170,66 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                 var atletasA = await _databaseService.GetMembrosByTimeClientAppIdAsync(jogo.TimeA.ClientAppId);
                 var atletasB = await _databaseService.GetMembrosByTimeClientAppIdAsync(jogo.TimeB.ClientAppId);
 
-                // 4. Preencher a lista de Estatísticas
+                // 4. Obter estatísticas existentes
+                var estatisticasSalvas = await _databaseService.GetEstatisticasPorJogoIdAsync(jogo.Id);
+
+
+                // 5. Preencher a lista de Estatísticas do Time A
                 EstatisticasTimeA.Clear();
                 foreach (var atleta in atletasA) {
-                    EstatisticasTimeA.Add(new AtletaEstatisticaItem(atleta, timeA));
+                    var item = new AtletaEstatisticaItem(atleta, timeA);
+
+                    // CRÍTICO: Pré-preencher com estatísticas salvas
+                    var statsDoAtleta = estatisticasSalvas.FirstOrDefault(s => s.UsuarioId == atleta.Id);
+                    if (statsDoAtleta != null) {
+                        // Mapear todos os campos salvos para o ViewModel
+                        item.Pontos = statsDoAtleta.Pontos;
+                        item.Rebotes = statsDoAtleta.Rebotes;
+                        item.Assistencias = statsDoAtleta.Assistencias;
+                        item.Roubos = statsDoAtleta.Roubos;
+                        item.Bloqueios = statsDoAtleta.Bloqueios;
+                        item.Faltas = statsDoAtleta.Faltas;
+                        item.Turnovers = statsDoAtleta.Turnovers;
+                        item.Arremessos2PontosConvertidos = statsDoAtleta.Arremessos2PontosConvertidos;
+                        item.Arremessos2PontosTentados = statsDoAtleta.Arremessos2PontosTentados;
+                        item.Arremessos3PontosConvertidos = statsDoAtleta.Arremessos3PontosConvertidos;
+                        item.Arremessos3PontosTentados = statsDoAtleta.Arremessos3PontosTentados;
+                        item.LancesLivresConvertidos = statsDoAtleta.LancesLivresConvertidos;
+                        item.LancesLivresTentados = statsDoAtleta.LancesLivresTentados;
+
+                        Debug.WriteLine($"[DEBUG-RECARGA] Estatísticas do Atleta {atleta.Nome} (Time A) carregadas (Pontos: {item.Pontos})");
+                    }
+
+                    EstatisticasTimeA.Add(item);
                 }
 
+                // 6. Preencher a lista de Estatísticas do Time B
                 EstatisticasTimeB.Clear();
                 foreach (var atleta in atletasB) {
-                    EstatisticasTimeB.Add(new AtletaEstatisticaItem(atleta, timeB));
+                    var item = new AtletaEstatisticaItem(atleta, timeB);
+
+                    // CRÍTICO: Pré-preencher com estatísticas salvas
+                    var statsDoAtleta = estatisticasSalvas.FirstOrDefault(s => s.UsuarioId == atleta.Id);
+                    if (statsDoAtleta != null) {
+                        // Mapear todos os campos salvos para o ViewModel
+                        item.Pontos = statsDoAtleta.Pontos;
+                        item.Rebotes = statsDoAtleta.Rebotes;
+                        item.Assistencias = statsDoAtleta.Assistencias;
+                        item.Roubos = statsDoAtleta.Roubos;
+                        item.Bloqueios = statsDoAtleta.Bloqueios;
+                        item.Faltas = statsDoAtleta.Faltas;
+                        item.Turnovers = statsDoAtleta.Turnovers;
+                        item.Arremessos2PontosConvertidos = statsDoAtleta.Arremessos2PontosConvertidos;
+                        item.Arremessos2PontosTentados = statsDoAtleta.Arremessos2PontosTentados;
+                        item.Arremessos3PontosConvertidos = statsDoAtleta.Arremessos3PontosConvertidos;
+                        item.Arremessos3PontosTentados = statsDoAtleta.Arremessos3PontosTentados;
+                        item.LancesLivresConvertidos = statsDoAtleta.LancesLivresConvertidos;
+                        item.LancesLivresTentados = statsDoAtleta.LancesLivresTentados;
+
+                        Debug.WriteLine($"[DEBUG-RECARGA] Estatísticas do Atleta {atleta.Nome} (Time B) carregadas (Pontos: {item.Pontos})");
+                    }
+
+                    EstatisticasTimeB.Add(item);
                 }
 
                 Debug.WriteLine($"Elenco do Time A carregado: {EstatisticasTimeA.Count} atletas.");
