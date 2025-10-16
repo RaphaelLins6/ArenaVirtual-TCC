@@ -284,6 +284,20 @@ namespace ArenaVirtual.Services {
         public Task<List<EstatisticaPartida>> GetEstatisticasPorJogoIdAsync(int jogoId) {
             return _database.Table<EstatisticaPartida>().Where(s => s.JogoId == jogoId).ToListAsync();
         }
+        public async Task<List<EstatisticaPartida>> GetEstatisticasByCampeonatoIdAsync(int campeonatoId) {
+            var jogos = await _database.Table<Jogo>()
+                .Where(j => j.CampeonatoId == campeonatoId)
+                .ToListAsync();
+            var jogoIds = jogos
+                .Select(j => j.Id)
+                .ToList();
+            if (jogoIds == null || jogoIds.Count == 0) {
+                return new List<EstatisticaPartida>();
+            }
+            string idsString = string.Join(",", jogoIds);
+            string query = $"SELECT * FROM {nameof(EstatisticaPartida)} WHERE {nameof(EstatisticaPartida.JogoId)} IN ({idsString})";
+            return await _database.QueryAsync<EstatisticaPartida>(query);
+        }
 
         // --- MÉTODOS DE JOGOS ---
         public async Task<int> AtualizarJogoAsync(Jogo item) {

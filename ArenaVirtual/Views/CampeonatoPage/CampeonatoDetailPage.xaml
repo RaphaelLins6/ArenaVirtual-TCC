@@ -123,8 +123,10 @@
                     <Label
                         Margin="0,0,0,5"
                         FontAttributes="Bold"
+                        FontSize="20"
                         HorizontalOptions="Center"
-                        Text="Fase do Campeonato:" />
+                        Text="Fase do Campeonato:"
+                        TextColor="White" />
 
                     <Picker
                         Title="Selecione a Fase"
@@ -141,6 +143,7 @@
                     <Label
                         FontAttributes="Bold"
                         FontSize="20"
+                        HorizontalOptions="Center"
                         Text="Tabela de Classificação"
                         TextColor="White" />
 
@@ -623,6 +626,175 @@
 
                     </CollectionView>
 
+                </VerticalStackLayout>
+
+                <VerticalStackLayout
+                    Padding="15,0"
+                    IsVisible="{Binding IsFaseEstatisticas}"
+                    Spacing="10">
+
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="20"
+                        HorizontalOptions="Center"
+                        Text="Estatísticas do Campeonato (Médias por Jogo)"
+                        TextColor="White" />
+
+                    <CollectionView ItemsSource="{Binding EstatisticasTimes}">
+                        <CollectionView.Header>
+                            <Grid Padding="5" ColumnDefinitions="50,*,60,60,60,60,60,60,60,60,60,60">
+                                <Label
+                                    Grid.Column="1"
+                                    FontAttributes="Bold"
+                                    Text="Time"
+                                    TextColor="Orange" />
+                                <Label
+                                    Grid.Column="2"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    Text="P/J"
+                                    TextColor="Orange" />
+                                <Label
+                                    Grid.Column="3"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    Text="RBT/J"
+                                    TextColor="Orange" />
+                                <Label
+                                    Grid.Column="4"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    Text="AST/J"
+                                    TextColor="Orange" />
+                                <Label
+                                    Grid.Column="5"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    Text="ROU/J"
+                                    TextColor="Orange" />
+                                <Label
+                                    Grid.Column="6"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    Text="BLO/J"
+                                    TextColor="Orange" />
+                                <Label
+                                    Grid.Column="7"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    Text="T/J"
+                                    TextColor="Orange" />
+                                <Label
+                                    Grid.Column="8"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    Text="F/J"
+                                    TextColor="Orange" />
+
+                                <Label
+                                    Grid.Column="9"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    Text="2P%"
+                                    TextColor="Orange" />
+                                <Label
+                                    Grid.Column="10"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    Text="3P%"
+                                    TextColor="Orange" />
+                                <Label
+                                    Grid.Column="11"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    Text="LL%"
+                                    TextColor="Orange" />
+                            </Grid>
+                        </CollectionView.Header>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="{x:Type vm:TimeEstatisticaViewModel}">
+                                <Grid
+                                    Padding="5"
+                                    BackgroundColor="#282828"
+                                    ColumnDefinitions="50,*,60,60,60,60,60,60,60,60,60,60">
+
+                                    <Image
+                                        Grid.Column="0"
+                                        HeightRequest="40"
+                                        Source="{Binding logoUrl}"
+                                        WidthRequest="40" />
+                                    <Label
+                                        Grid.Column="1"
+                                        Text="{Binding NomeTime}"
+                                        TextColor="White"
+                                        VerticalOptions="Center" />
+
+                                    <Label
+                                        Grid.Column="2"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding MediaPontos, StringFormat='{0:F1}'}"
+                                        TextColor="White"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Column="3"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding MediaRebotes, StringFormat='{0:F1}'}"
+                                        TextColor="White"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Column="4"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding MediaAssistencias, StringFormat='{0:F1}'}"
+                                        TextColor="White"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Column="5"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding MediaRoubos, StringFormat='{0:F1}'}"
+                                        TextColor="White"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Column="6"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding MediaBloqueios, StringFormat='{0:F1}'}"
+                                        TextColor="White"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Column="7"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding MediaTurnovers, StringFormat='{0:F1}'}"
+                                        TextColor="White"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Column="8"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding MediaFaltas, StringFormat='{0:F1}'}"
+                                        TextColor="White"
+                                        VerticalOptions="Center" />
+
+                                    <Label
+                                        Grid.Column="9"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding Percentual2P, StringFormat='{0:F1}'}"
+                                        TextColor="White"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Column="10"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding Percentual3P, StringFormat='{0:F1}'}"
+                                        TextColor="White"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Column="11"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding PercentualLancesLivres, StringFormat='{0:F1}'}"
+                                        TextColor="White"
+                                        VerticalOptions="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
                 </VerticalStackLayout>
 
             </VerticalStackLayout>

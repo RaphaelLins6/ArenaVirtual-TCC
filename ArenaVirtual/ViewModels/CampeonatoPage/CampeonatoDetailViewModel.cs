@@ -1,11 +1,11 @@
 ﻿using ArenaVirtual.Models;
+using ArenaVirtual.Popups;
+using ArenaVirtual.Services;
+using ArenaVirtual.Views.CampeonatoPage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Diagnostics;
-using ArenaVirtual.Services;
 using System.Collections.ObjectModel;
-using ArenaVirtual.Popups;
-using ArenaVirtual.Views.CampeonatoPage;
+using System.Diagnostics;
 using System.Text;
 
 namespace ArenaVirtual.ViewModels.CampeonatoPage {
@@ -21,6 +21,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         public RodadaGrouping(int key, IEnumerable<Jogo> items) : base(key, items) { }
     }
 
+    // Incluir o TimeEstatisticaViewModel aqui, ou em seu próprio arquivo
+    // (A definição completa está no bloco anterior, assumindo um arquivo separado ou incluído no mesmo namespace)
+
     public partial class CampeonatoDetailViewModel : ObservableObject, IQueryAttributable {
 
         // =====================================================================================
@@ -32,6 +35,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         private ObservableCollection<Time> tabelaClassificacao;
         [ObservableProperty]
         private ObservableCollection<Jogo> tabelaJogos;
+
+        // NOVO: Propriedade para as estatísticas agregadas
+        [ObservableProperty]
+        private ObservableCollection<TimeEstatisticaViewModel> estatisticasTimes;
+
         [ObservableProperty]
         private ObservableCollection<RodadaGrouping> jogosMataMata = new();
         [ObservableProperty]
@@ -110,6 +118,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             UsuarioService usuarioService) {
             TabelaClassificacao = new ObservableCollection<Time>();
             TabelaJogos = new ObservableCollection<Jogo>();
+            EstatisticasTimes = new ObservableCollection<TimeEstatisticaViewModel>(); // Inicializa a nova propriedade
 
             _alertService = alertService;
             _databaseService = databaseService;
@@ -495,13 +504,13 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             if (!todosOsTimes.Any()) {
                 MainThread.BeginInvokeOnMainThread(() => {
                     TabelaClassificacao.Clear();
+                    EstatisticasTimes.Clear(); // Limpa a nova lista também
                     IsFiltroGrupoVisivel = false;
                 });
                 return;
             }
 
             // 2. Obter Jogos e Estatísticas
-            // (Implementação crítica da nova abordagem)
             _todosOsJogosDoCampeonato = await _databaseService.ObterJogosPorCampeonatoAsync(Campeonato.ClientAppId);
 
             // CRÍTICO: Recalcular as estatísticas totais (Pontos, Vitórias, etc.)
@@ -510,8 +519,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             // ** NOVO: 3. Calcular a sequência V/D/E/-
             CalcularSequenciaDeJogos(todosOsTimes, _todosOsJogosDoCampeonato);
 
-            // 4. Processamento de Grupos e Visualização
+            // ** NOVO: 4. Calcular estatísticas de agregação (média de pontos, rebotes, etc.)
+            // Chamada do novo método
+            await CalcularEstatisticasGeraisAsync(todosOsTimes, _todosOsJogosDoCampeonato);
 
+            // 5. Processamento de Grupos e Visualização
             if (IsFormatoComGrupos) {
 
                 // --- Lógica de atribuição/organização de grupos (mantida do código original) ---
@@ -618,6 +630,63 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     Debug.WriteLine($"[DEBUG-LOAD] Tabela de Classificação recarregada (Geral). Total: {TabelaClassificacao.Count}");
                 });
             }
+        }
+
+        private async Task CalcularEstatisticasGeraisAsync(List<Time> times, List<Jogo> todosOsJogosDoCampeonato) {
+
+            var listaEstatisticas = new List<TimeEstatisticaViewModel>();
+
+            // 1. Obter todas as estatísticas de partida para o campeonato
+            // (Assumindo que o GetEstatisticasByCampeonatoIdAsync existe no DatabaseService)
+            var todasAsEstatisticasDoCampeonato = await _databaseService.GetEstatisticasByCampeonatoIdAsync(Campeonato.Id);
+
+            // 2. Filtrar apenas jogos que foram FINALIZADOS para contar os "Jogos Disputados"
+            var jogosFinalizados = todosOsJogosDoCampeonato
+                .Where(j => j.PlacarTimeAInt >= 0 && j.PlacarTimeBInt >= 0)
+                .ToList();
+
+            // 3. Processar cada time
+            foreach (var time in times) {
+                var statsViewModel = new TimeEstatisticaViewModel(time);
+
+                // A. Calcular Jogos Disputados (necessário para a média)
+                statsViewModel.JogosDisputados = jogosFinalizados
+                    .Count(j => j.TimeAId == time.Id || j.TimeBId == time.Id);
+
+                // B. Somar as Estatísticas por Jogador para este Time
+                var estatisticasDoTime = todasAsEstatisticasDoCampeonato
+                    .Where(e => e.TimeId == time.Id)
+                    .ToList();
+
+                // C. Agregação - COMPLETANDO OS DEMAIS CAMPOS
+                statsViewModel.TotalPontos = estatisticasDoTime.Sum(e => e.Pontos);
+                statsViewModel.TotalRebotes = estatisticasDoTime.Sum(e => e.Rebotes);
+                statsViewModel.TotalAssistencias = estatisticasDoTime.Sum(e => e.Assistencias);
+                statsViewModel.TotalRoubos = estatisticasDoTime.Sum(e => e.Roubos);
+                statsViewModel.TotalBloqueios = estatisticasDoTime.Sum(e => e.Bloqueios);
+                statsViewModel.TotalTurnovers = estatisticasDoTime.Sum(e => e.Turnovers);
+                statsViewModel.TotalFaltas = estatisticasDoTime.Sum(e => e.Faltas);
+
+                // Agregação de Arremessos 2 Pontos
+                statsViewModel.TotalArremessos2PontosConvertidos = estatisticasDoTime.Sum(e => e.Arremessos2PontosConvertidos);
+                statsViewModel.TotalArremessos2PontosTentados = estatisticasDoTime.Sum(e => e.Arremessos2PontosTentados);
+
+                // Agregação de Arremessos 3 Pontos
+                statsViewModel.TotalArremessos3PontosConvertidos = estatisticasDoTime.Sum(e => e.Arremessos3PontosConvertidos);
+                statsViewModel.TotalArremessos3PontosTentados = estatisticasDoTime.Sum(e => e.Arremessos3PontosTentados);
+
+                // Agregação de Lances Livres
+                statsViewModel.TotalLancesLivresConvertidos = estatisticasDoTime.Sum(e => e.LancesLivresConvertidos);
+                statsViewModel.TotalLancesLivresTentados = estatisticasDoTime.Sum(e => e.LancesLivresTentados);
+
+                listaEstatisticas.Add(statsViewModel);
+            }
+
+            // 4. Ordenar a lista pela métrica principal (MediaPontos)
+            // A ordenação é feita pela propriedade calculada MediaPontos
+            EstatisticasTimes = new ObservableCollection<TimeEstatisticaViewModel>(
+                listaEstatisticas.OrderByDescending(t => t.MediaPontos)
+            );
         }
 
         private void CalcularSequenciaDeJogos(List<Time> times, List<Jogo> todosOsJogosDoCampeonato) {
