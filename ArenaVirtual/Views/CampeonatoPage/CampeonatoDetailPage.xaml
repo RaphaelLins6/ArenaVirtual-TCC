@@ -13,6 +13,8 @@
     <ContentPage.Resources>
         <converters:IntToPhaseNameConverter x:Key="PhaseNameConverter" />
         <converters:IntToBracketMarginConverter x:Key="BracketMarginConverter" />
+
+        <converters:SequenciaToColorConverter x:Key="SequenciaToColorConverter" />
     </ContentPage.Resources>
 
     <ContentPage.Content>
@@ -149,7 +151,7 @@
                         SelectedItem="{Binding GrupoSelecionado}"
                         Style="{StaticResource PickerStyle}" />
 
-                    <Grid Padding="0,5" ColumnDefinitions="40, 40, *, 40, 40, 60, 40, 60, 60">
+                    <Grid Padding="0,5" ColumnDefinitions="40, 40, *, 40, 40, 60, 60">
                         <Label
                             Grid.Column="0"
                             FontAttributes="Bold"
@@ -162,6 +164,7 @@
                             FontAttributes="Bold"
                             Text="Time"
                             TextColor="Orange" />
+
                         <Label
                             Grid.Column="3"
                             FontAttributes="Bold"
@@ -175,32 +178,18 @@
                             HorizontalOptions="Center"
                             Text="D"
                             TextColor="Orange" />
+
                         <Label
                             Grid.Column="5"
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
                             Text="Vit%"
                             TextColor="Orange" />
+
                         <Label
                             Grid.Column="6"
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
-                            IsVisible="{Binding IsDesktop}"
-                            Text="JA"
-                            TextColor="Orange" />
-
-                        <Label
-                            Grid.Column="7"
-                            FontAttributes="Bold"
-                            HorizontalOptions="Center"
-                            IsVisible="{Binding IsDesktop}"
-                            Text="Total Pts."
-                            TextColor="Orange" />
-                        <Label
-                            Grid.Column="8"
-                            FontAttributes="Bold"
-                            HorizontalOptions="Center"
-                            IsVisible="{Binding IsDesktop}"
                             Text="Seq."
                             TextColor="Orange" />
                     </Grid>
@@ -214,23 +203,27 @@
                                 <Grid
                                     Padding="0,5"
                                     BackgroundColor="#282828"
-                                    ColumnDefinitions="40, 40, *, 40, 40, 60, 40, 60, 60">
+                                    ColumnDefinitions="40, 40, *, 40, 40, 60, 60">
+
                                     <Label
                                         Grid.Column="0"
                                         HorizontalOptions="Center"
                                         Text="{Binding Posicao}"
                                         TextColor="White" />
+
                                     <Image
                                         Grid.Column="1"
                                         Aspect="AspectFit"
                                         HeightRequest="30"
                                         Source="{Binding LogoUrl}"
                                         WidthRequest="30" />
+
                                     <Label
                                         Grid.Column="2"
                                         Text="{Binding Nome}"
                                         TextColor="White"
                                         VerticalOptions="Center" />
+
                                     <Label
                                         Grid.Column="3"
                                         HorizontalOptions="Center"
@@ -238,13 +231,13 @@
                                         TextColor="White"
                                         VerticalOptions="Center" />
 
-
                                     <Label
                                         Grid.Column="4"
                                         HorizontalOptions="Center"
                                         Text="{Binding Derrotas}"
                                         TextColor="White"
                                         VerticalOptions="Center" />
+
                                     <Label
                                         Grid.Column="5"
                                         HorizontalOptions="Center"
@@ -253,27 +246,42 @@
                                         VerticalOptions="Center" />
 
 
-                                    <Label
+                                    <Grid
                                         Grid.Column="6"
+                                        ColumnDefinitions="*,*,*,*,*"
                                         HorizontalOptions="Center"
-                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=IsDesktop}"
-                                        Text="{Binding JogosAtras}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
-                                    <Label
-                                        Grid.Column="7"
-                                        HorizontalOptions="Center"
-                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=IsDesktop}"
-                                        Text="{Binding PontuacaoTotal}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
-                                    <Label
-                                        Grid.Column="8"
-                                        HorizontalOptions="Center"
-                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=IsDesktop}"
-                                        Text="{Binding Sequencia}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
+                                        VerticalOptions="Center">
+                                        <Label
+                                            Grid.Column="0"
+                                            FontSize="12"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding SequenciaChar1}"
+                                            TextColor="{Binding SequenciaChar1, Converter={StaticResource SequenciaToColorConverter}}" />
+                                        <Label
+                                            Grid.Column="1"
+                                            FontSize="12"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding SequenciaChar2}"
+                                            TextColor="{Binding SequenciaChar2, Converter={StaticResource SequenciaToColorConverter}}" />
+                                        <Label
+                                            Grid.Column="2"
+                                            FontSize="12"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding SequenciaChar3}"
+                                            TextColor="{Binding SequenciaChar3, Converter={StaticResource SequenciaToColorConverter}}" />
+                                        <Label
+                                            Grid.Column="3"
+                                            FontSize="12"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding SequenciaChar4}"
+                                            TextColor="{Binding SequenciaChar4, Converter={StaticResource SequenciaToColorConverter}}" />
+                                        <Label
+                                            Grid.Column="4"
+                                            FontSize="12"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding SequenciaChar5}"
+                                            TextColor="{Binding SequenciaChar5, Converter={StaticResource SequenciaToColorConverter}}" />
+                                    </Grid>
                                 </Grid>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
@@ -371,54 +379,16 @@
                                             HorizontalOptions="FillAndExpand"
                                             RowDefinitions="Auto, Auto">
 
-                                            <HorizontalStackLayout
-                                                Grid.Row="0"
-                                                Grid.Column="0"
-                                                HorizontalOptions="End"
-                                                Spacing="5">
-
-                                                <Label
-                                                    FontAttributes="Bold"
-                                                    Text="{Binding PlacarA}"
-                                                    TextColor="OrangeRed"
-                                                    VerticalOptions="Center" />
-                                                <Label
-                                                    FontAttributes="Bold"
-                                                    Text="-"
-                                                    TextColor="OrangeRed"
-                                                    VerticalOptions="Center" />
-                                            </HorizontalStackLayout>
-
                                             <Label
                                                 Grid.Row="0"
-                                                Grid.Column="1"
+                                                Grid.Column="0"
+                                                Grid.ColumnSpan="3"
                                                 FontAttributes="Bold"
-                                                FontSize="14"
+                                                FontSize="18"
                                                 HorizontalOptions="Center"
-                                                Text="vs"
-                                                TextColor="White"
+                                                Text="{Binding PlacarParaExibir}"
+                                                TextColor="OrangeRed"
                                                 VerticalOptions="Center" />
-
-
-
-                                            <HorizontalStackLayout
-                                                Grid.Row="0"
-                                                Grid.Column="2"
-                                                HorizontalOptions="Start"
-                                                Spacing="5">
-                                                <Label
-                                                    FontAttributes="Bold"
-                                                    Text="-"
-                                                    TextColor="OrangeRed"
-                                                    VerticalOptions="Center" />
-
-                                                <Label
-                                                    FontAttributes="Bold"
-                                                    Text="{Binding PlacarB}"
-                                                    TextColor="OrangeRed"
-                                                    VerticalOptions="Center" />
-                                            </HorizontalStackLayout>
-
 
 
                                             <Image
@@ -481,7 +451,6 @@
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
-
 
 
                 </VerticalStackLayout>
@@ -566,54 +535,16 @@
                                                             RowDefinitions="Auto, Auto">
 
 
-                                                            <HorizontalStackLayout
-                                                                Grid.Row="0"
-                                                                Grid.Column="0"
-                                                                HorizontalOptions="End"
-                                                                Spacing="5">
-                                                                <Label
-                                                                    FontAttributes="Bold"
-                                                                    Text="{Binding PlacarA}"
-                                                                    TextColor="OrangeRed"
-                                                                    VerticalOptions="Center" />
-
-                                                                <Label
-                                                                    FontAttributes="Bold"
-                                                                    Text="-"
-                                                                    TextColor="OrangeRed"
-                                                                    VerticalOptions="Center" />
-
-                                                            </HorizontalStackLayout>
-
                                                             <Label
                                                                 Grid.Row="0"
-                                                                Grid.Column="1"
+                                                                Grid.Column="0"
+                                                                Grid.ColumnSpan="3"
                                                                 FontAttributes="Bold"
-                                                                FontSize="14"
+                                                                FontSize="18"
                                                                 HorizontalOptions="Center"
-                                                                Text="vs"
-                                                                TextColor="White"
+                                                                Text="{Binding PlacarParaExibir}"
+                                                                TextColor="OrangeRed"
                                                                 VerticalOptions="Center" />
-
-
-                                                            <HorizontalStackLayout
-                                                                Grid.Row="0"
-                                                                Grid.Column="2"
-                                                                HorizontalOptions="Start"
-                                                                Spacing="5">
-                                                                <Label
-                                                                    FontAttributes="Bold"
-                                                                    Text="-"
-                                                                    TextColor="OrangeRed"
-                                                                    VerticalOptions="Center" />
-
-                                                                <Label
-                                                                    FontAttributes="Bold"
-                                                                    Text="{Binding PlacarB}"
-                                                                    TextColor="OrangeRed"
-                                                                    VerticalOptions="Center" />
-                                                            </HorizontalStackLayout>
-
 
 
                                                             <Image
@@ -680,6 +611,7 @@
 
                                                     </VerticalStackLayout>
                                                 </Frame>
+
 
                                             </DataTemplate>
                                         </CollectionView.ItemTemplate>

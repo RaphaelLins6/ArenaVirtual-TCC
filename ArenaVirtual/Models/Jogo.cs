@@ -139,6 +139,19 @@ namespace ArenaVirtual.Models {
                     : "Anexar Árbitros");
 
         [Ignore]
+        public string PlacarParaExibir {
+            get {
+                // Usa a propriedade de Status (que é do tipo JogoStatus)
+                if (Status == JogoStatus.Finalizado) {
+                    // Usa as propriedades PlacarTimeAInt e PlacarTimeBInt, que são inteiros
+                    return $"{PlacarTimeAInt} - vs - {PlacarTimeBInt}";
+                }
+                // Retorna o marcador X - vs - Y para jogos não concluídos/agendados
+                return "X - vs - Y";
+            }
+        }
+
+        [Ignore]
         public bool BotaoArbitroDesabilitado => !BotaoArbitroHabilitado;
 
         // --- Callbacks automáticos do MVVM Toolkit (CRÍTICO para a persistência) ---
@@ -158,6 +171,18 @@ namespace ArenaVirtual.Models {
         partial void OnIsOrganizadorChanged(bool value) {
             Debug.WriteLine($"[JOGO MODEL] IsOrganizador alterado -> {value}");
             NotifyArbitroStatusChanged();
+        }
+
+        partial void OnStatusChanged(JogoStatus value) {
+            OnPropertyChanged(nameof(PlacarParaExibir)); 
+        }
+
+        partial void OnPlacarTimeAIntChanged(int value) {
+            OnPropertyChanged(nameof(PlacarParaExibir)); 
+        }
+
+        partial void OnPlacarTimeBIntChanged(int value) {
+            OnPropertyChanged(nameof(PlacarParaExibir)); 
         }
 
         // --- Notificação manual para a UI ---

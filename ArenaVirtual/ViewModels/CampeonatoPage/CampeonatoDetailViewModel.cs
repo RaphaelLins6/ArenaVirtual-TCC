@@ -6,6 +6,7 @@ using ArenaVirtual.Services;
 using System.Collections.ObjectModel;
 using ArenaVirtual.Popups;
 using ArenaVirtual.Views.CampeonatoPage;
+using System.Text;
 
 namespace ArenaVirtual.ViewModels.CampeonatoPage {
     public class Grouping<K, T> : ObservableCollection<T> {
@@ -71,6 +72,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         // Dicionários privados
         private readonly Dictionary<int, ObservableCollection<Jogo>> _jogosPorRodada = new();
         private readonly Dictionary<string, List<Time>> _timesPorGrupo = new();
+
+        // ** ADICIONADO: Lista privada de todos os jogos para cálculo da sequência
+        private List<Jogo> _todosOsJogosDoCampeonato = new();
 
         // Serviços injetados
         private readonly IAlertService _alertService;
@@ -156,7 +160,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
                 _ = RecarregarJogosESelecaoAsync();
 
-                if (IsMataMataFormat || IsFormatoHibrido) 
+                if (IsMataMataFormat || IsFormatoHibrido)
                     _ = GerarJogosMataMata();
 
                 Debug.WriteLine($"[DEBUG-ATTRIBUTES] Recarga completa do Campeonato após atualização do Jogo ID {jogoAtualizado.Id}.");
@@ -480,12 +484,37 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         private async Task LoadTabelaClassificacaoAsync() {
             if (Campeonato is null) return;
+
+            // Limpeza inicial (manter do código atual)
             _timesPorGrupo.Clear();
             GruposDisponiveis.Clear();
 
+            // 1. Obter Times
             var todosOsTimes = await _databaseService.ObterTimesAceitosAsync(Campeonato.Id) ?? new List<Time>();
 
-            if (todosOsTimes.Any() && IsFormatoComGrupos) {
+            if (!todosOsTimes.Any()) {
+                MainThread.BeginInvokeOnMainThread(() => {
+                    TabelaClassificacao.Clear();
+                    IsFiltroGrupoVisivel = false;
+                });
+                return;
+            }
+
+            // 2. Obter Jogos e Estatísticas
+            // (Implementação crítica da nova abordagem)
+            _todosOsJogosDoCampeonato = await _databaseService.ObterJogosPorCampeonatoAsync(Campeonato.ClientAppId);
+
+            // CRÍTICO: Recalcular as estatísticas totais (Pontos, Vitórias, etc.)
+            await RecalcularEstatisticasDosTimesAsync(todosOsTimes);
+
+            // ** NOVO: 3. Calcular a sequência V/D/E/-
+            CalcularSequenciaDeJogos(todosOsTimes, _todosOsJogosDoCampeonato);
+
+            // 4. Processamento de Grupos e Visualização
+
+            if (IsFormatoComGrupos) {
+
+                // --- Lógica de atribuição/organização de grupos (mantida do código original) ---
                 int numTimes = todosOsTimes.Count;
                 int numGruposNecessarios = 1;
 
@@ -535,10 +564,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     .Where(t => !string.IsNullOrEmpty(t.Grupo))
                     .GroupBy(t => t.Grupo)
                     .OrderBy(g => g.Key);
+                // --- Fim da Lógica de grupos ---
 
                 MainThread.BeginInvokeOnMainThread(() => {
                     foreach (var group in grupos) {
                         GruposDisponiveis.Add(group.Key);
+                        // Adiciona a lista de times com estatísticas JÁ ATUALIZADAS
                         _timesPorGrupo[group.Key] = group.ToList();
                     }
 
@@ -546,9 +577,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                         if (string.IsNullOrEmpty(GrupoSelecionado) || !GruposDisponiveis.Contains(GrupoSelecionado))
                             GrupoSelecionado = GruposDisponiveis.First();
 
-                        // Ajuste: A visibilidade do filtro de grupo só depende do formato e da fase Tabela & Jogos
                         IsFiltroGrupoVisivel = IsFaseTabelaEJogos;
 
+                        // Chama LoadTabelaClassificacaoPorGrupo para processar a tabela do grupo
+                        // (Este método deve ordenar e processar a lista _timesPorGrupo[GrupoSelecionado]
+                        // que já contém as estatísticas recalculadas)
                         LoadTabelaClassificacaoPorGrupo(GrupoSelecionado);
 
                     } else {
@@ -556,11 +589,16 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                         IsFiltroGrupoVisivel = false;
                     }
                 });
+
             } else {
-                // Sem grupos
+                // Sem grupos - Os objetos Time já contêm as estatísticas recalculadas
                 var timesOrdenados = todosOsTimes
-                    .OrderByDescending(t => t.PontuacaoTotal)
+                    // ** ALTERADO: Prioriza Vitórias, depois PorcentagemVitoria
+                    .OrderByDescending(t => t.Vitorias)
+                    .ThenByDescending(t => t.PorcentagemVitoria)
+                    // ... (outros critérios de desempate, se houver)
                     .ToList();
+
                 MainThread.BeginInvokeOnMainThread(() => {
                     TabelaClassificacao.Clear();
                     IsFiltroGrupoVisivel = false;
@@ -568,10 +606,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     for (int i = 0; i < timesOrdenados.Count; i++) {
                         var time = timesOrdenados[i];
                         time.Posicao = i + 1;
-                        int totalJogosDecididos = time.Vitorias + time.Derrotas;
-                        time.PorcentagemVitoria = (totalJogosDecididos > 0) ? (double)time.Vitorias / totalJogosDecididos : 0.0;
-                        time.JogosAtras = 0;
-                        time.Sequencia = time.Vitorias > 0 ? "V" : (time.Derrotas > 0 ? "D" : "N/A");
+                        int totalJogosJogados = time.Vitorias + time.Derrotas + time.Empates; // Corrigido para incluir Empates
+                        // ** Proteção 2.A: Garantida a divisão segura
+                        time.PorcentagemVitoria = (totalJogosJogados > 0) ? (double)time.Vitorias / totalJogosJogados : 0.0;
+                        time.JogosAtras = 0; // Valor a ser recalculado se necessário ou mantido 0
+                        // time.Sequencia e os SequenciaChar já foram calculados no CalcularSequenciaDeJogos(todosOsTimes)
 
                         TabelaClassificacao.Add(time);
                     }
@@ -581,10 +620,113 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             }
         }
 
+        private void CalcularSequenciaDeJogos(List<Time> times, List<Jogo> todosOsJogosDoCampeonato) {
+            var jogosFinalizados = todosOsJogosDoCampeonato
+                .Where(j => j.Status == JogoStatus.Finalizado)
+                .OrderByDescending(j => j.DataHora) 
+                .ToList();
+
+            foreach (var time in times) {
+                var jogosDoTime = jogosFinalizados
+                    .Where(j => j.TimeAId == time.Id || j.TimeBId == time.Id)
+                    .Take(5)
+                    .ToList();
+
+                var sequencia = new StringBuilder();
+
+                foreach (var jogo in jogosDoTime.AsEnumerable().Reverse()) {
+                    char resultado = '-'; 
+
+                    if (jogo.TimeAId == time.Id) {
+                        if (jogo.PlacarTimeAInt > jogo.PlacarTimeBInt)
+                            resultado = 'V';
+                        else if (jogo.PlacarTimeAInt < jogo.PlacarTimeBInt)
+                            resultado = 'D';
+                        else
+                            resultado = 'E'; 
+                    } else { 
+                        if (jogo.PlacarTimeBInt > jogo.PlacarTimeAInt)
+                            resultado = 'V';
+                        else if (jogo.PlacarTimeBInt < jogo.PlacarTimeAInt)
+                            resultado = 'D';
+                        else
+                            resultado = 'E'; 
+                    }
+
+                    sequencia.Append(resultado); 
+                }
+
+                while (sequencia.Length < 5) {
+                    sequencia.Insert(0, '-'); 
+                }
+
+                string seqFinal = sequencia.ToString();
+
+                time.SequenciaChar1 = seqFinal[0].ToString();
+                time.SequenciaChar2 = seqFinal[1].ToString();
+                time.SequenciaChar3 = seqFinal[2].ToString();
+                time.SequenciaChar4 = seqFinal[3].ToString();
+                time.SequenciaChar5 = seqFinal[4].ToString();
+            }
+        }
+
+        private async Task RecalcularEstatisticasDosTimesAsync(List<Time> times) {
+            if (Campeonato is null) return;
+
+            // 1. Obter todos os jogos do campeonato usando CampeonatoClientAppId (Guid)
+            // Já carregado em _todosOsJogosDoCampeonato no LoadTabelaClassificacaoAsync
+            var todosOsJogos = _todosOsJogosDoCampeonato;
+
+            // 2. Inicializar as estatísticas de todos os times para zero
+            foreach (var time in times) {
+                // Zera APENAS as propriedades que existem no Time.cs
+                time.PontuacaoTotal = 0;
+                time.Vitorias = 0;
+                time.Derrotas = 0;
+                time.Empates = 0;
+                // Nota: O seu modelo Time não possui PontosFeitos/Sofridos.
+            }
+
+            // Usar um Dictionary para fácil acesso, usando o ID inteiro (Time.Id)
+            var timesMap = times.ToDictionary(t => t.Id);
+
+            // 3. Processar cada jogo finalizado
+            foreach (var jogo in todosOsJogos) {
+                // Só processa jogos com placar lançado (indicando que foi finalizado)
+                if (jogo.PlacarTimeAInt >= 0 && jogo.PlacarTimeBInt >= 0) {
+
+                    // CORREÇÃO: Tentando obter os times usando Jogo.TimeAId e Jogo.TimeBId (IDs inteiros)
+                    if (timesMap.TryGetValue(jogo.TimeAId, out var timeA) &&
+                        timesMap.TryGetValue(jogo.TimeBId, out var timeB)) {
+
+                        if (jogo.PlacarTimeAInt > jogo.PlacarTimeBInt) {
+                            // Time A Venceu
+                            timeA.Vitorias++;
+                            timeB.Derrotas++;
+                            timeA.PontuacaoTotal += 3; // 3 pontos por vitória (mantido para a lógica de Pontos Ganhos)
+                        } else if (jogo.PlacarTimeBInt > jogo.PlacarTimeAInt) {
+                            // Time B Venceu
+                            timeB.Vitorias++;
+                            timeA.Derrotas++;
+                            timeB.PontuacaoTotal += 3; // 3 pontos por vitória (mantido para a lógica de Pontos Ganhos)
+                        } else if (jogo.PlacarTimeAInt == jogo.PlacarTimeBInt) {
+                            // Empate 
+                            timeA.Empates++;
+                            timeB.Empates++;
+                            timeA.PontuacaoTotal += 1; // 1 ponto por empate (mantido para a lógica de Pontos Ganhos)
+                            timeB.PontuacaoTotal += 1;
+                        }
+                    }
+                }
+            }
+        }
+
         private void LoadTabelaClassificacaoPorGrupo(string grupo) {
             if (_timesPorGrupo.TryGetValue(grupo, out var timesDoGrupo)) {
                 var timesOrdenados = timesDoGrupo
-                    .OrderByDescending(t => t.PontuacaoTotal)
+                    // ** ALTERADO: Prioriza Vitórias, depois PorcentagemVitoria
+                    .OrderByDescending(t => t.Vitorias)
+                    .ThenByDescending(t => t.PorcentagemVitoria)
                     .ToList();
                 MainThread.BeginInvokeOnMainThread(() => {
                     TabelaClassificacao.Clear();
@@ -592,10 +734,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     for (int i = 0; i < timesOrdenados.Count; i++) {
                         var time = timesOrdenados[i];
                         time.Posicao = i + 1;
-                        int totalJogosDecididos = time.Vitorias + time.Derrotas;
-                        time.PorcentagemVitoria = (totalJogosDecididos > 0) ? (double)time.Vitorias / totalJogosDecididos : 0.0;
+                        int totalJogosJogados = time.Vitorias + time.Derrotas + time.Empates; // Corrigido para incluir Empates
+                        // ** Proteção 2.A: Garantida a divisão segura
+                        time.PorcentagemVitoria = (totalJogosJogados > 0) ? (double)time.Vitorias / totalJogosJogados : 0.0;
                         time.JogosAtras = 0;
-                        time.Sequencia = time.Vitorias > 0 ? "V" : (time.Derrotas > 0 ? "D" : "N/A");
+                        // time.Sequencia e os SequenciaChar já foram calculados no CalcularSequenciaDeJogos(todosOsTimes)
 
                         TabelaClassificacao.Add(time);
                     }

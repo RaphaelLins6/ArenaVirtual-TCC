@@ -102,17 +102,26 @@ namespace ArenaVirtual.ViewModels.Arbitro {
         [RelayCommand]
         private async Task SalvarEstatisticas() {
             if (EstaOcupado) return;
-            EstaOcupado = true; 
+            EstaOcupado = true;
 
             try {
+                // 1. Atualiza os placares no objeto Jogo em memória
                 Jogo.PlacarTimeAInt = PlacarTimeA;
                 Jogo.PlacarTimeBInt = PlacarTimeB;
+
+                // 🏆 CORREÇÃO CRÍTICA: Força o Status do Jogo para FINALIZADO (2)
+                // Isso garante que o jogo será incluído na Tabela de Classificação
+                if (Jogo.Status != JogoStatus.Finalizado) {
+                    // Presumindo que o enum JogoStatus.Finalizado está acessível e tem valor 2
+                    Jogo.Status = JogoStatus.Finalizado;
+                }
 
                 var estatisticasParaSalvar = EstatisticasTimeA
                     .Concat(EstatisticasTimeB)
                     .Select(item => item.ToEstatisticaPartidaModel(Jogo.Id))
                     .ToList();
 
+                // 2. Chama o Service para salvar o Jogo atualizado (com o novo Status) e as Estatísticas
                 bool sucesso = await _databaseService.SalvarEstatisticasDoJogoAsync(Jogo, estatisticasParaSalvar);
 
                 if (sucesso) {

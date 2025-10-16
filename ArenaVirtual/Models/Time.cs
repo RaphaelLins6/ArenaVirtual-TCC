@@ -46,6 +46,13 @@ namespace ArenaVirtual.Models {
         private int _jogosAtras;
         private string? _sequencia;
 
+        // Adicione as backing fields privadas
+        private string? sequenciaChar1;
+        private string? sequenciaChar2;
+        private string? sequenciaChar3;
+        private string? sequenciaChar4;
+        private string? sequenciaChar5;
+
         [PrimaryKey, AutoIncrement]
         [JsonIgnore]
         public int Id { get; set; }
@@ -108,8 +115,8 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref regiao, value);
         }
 
-        [MaxLength(10)] 
-        public string? Grupo {
+        [MaxLength(10)]
+        public string? Grupo {
             get => grupo;
             set => SetProperty(ref grupo, value);
         }
@@ -212,6 +219,37 @@ namespace ArenaVirtual.Models {
         public string? Sequencia {
             get => _sequencia;
             set => SetProperty(ref _sequencia, value);
+        }
+
+        // Adicione as propriedades públicas
+        [Ignore]
+        public string? SequenciaChar1 {
+            get => sequenciaChar1;
+            set => SetProperty(ref sequenciaChar1, value);
+        }
+
+        [Ignore]
+        public string? SequenciaChar2 {
+            get => sequenciaChar2;
+            set => SetProperty(ref sequenciaChar2, value);
+        }
+
+        [Ignore]
+        public string? SequenciaChar3 {
+            get => sequenciaChar3;
+            set => SetProperty(ref sequenciaChar3, value);
+        }
+
+        [Ignore]
+        public string? SequenciaChar4 {
+            get => sequenciaChar4;
+            set => SetProperty(ref sequenciaChar4, value);
+        }
+
+        [Ignore]
+        public string? SequenciaChar5 {
+            get => sequenciaChar5;
+            set => SetProperty(ref sequenciaChar5, value);
         }
 
         public Time() {
