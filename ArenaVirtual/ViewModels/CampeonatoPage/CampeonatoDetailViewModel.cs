@@ -77,6 +77,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         [ObservableProperty]
         private bool isFiltroFaseVisivel = false;
 
+        [ObservableProperty]
+        private ObservableCollection<PropostaPatrocinio> patrocinadoresAtivos = new();
+        [ObservableProperty]
+        private string bannerDivulgacaoSource;
         // Dicionários privados
         private readonly Dictionary<int, ObservableCollection<Jogo>> _jogosPorRodada = new();
         private readonly Dictionary<string, List<Time>> _timesPorGrupo = new();
@@ -151,15 +155,15 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 await GerarJogosMataMata();
 
             } else if (newValue == "Tabela & Jogos") {
-                // A visibilidade do filtro de grupo só afeta a UI do filtro, não o conteúdo
                 IsFiltroGrupoVisivel = IsFormatoComGrupos;
                 await LoadTabelaClassificacaoAsync();
                 LoadRodada(RodadaAtual);
             }
         }
 
-        public void ApplyQueryAttributes(IDictionary<string, object> query) {
+        public async void ApplyQueryAttributes(IDictionary<string, object> query) {
             Debug.WriteLine("[DEBUG-ATTRIBUTES] ApplyQueryAttributes chamado.");
+
             // 1. Atualização de Jogo (Árbitro) ou Jogo (Placar/Outros)
             if (query.TryGetValue("jogoAtualizado", out object jogoObj) && jogoObj is Jogo jogoAtualizado) {
                 Debug.WriteLine($"[DEBUG-ATTRIBUTES] Jogo ID {jogoAtualizado.Id} foi atualizado.");
@@ -207,6 +211,41 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     OnPropertyChanged(nameof(IsMataMataFormat));
                     AtualizarFormatoCampeonato();
                     Debug.WriteLine("[DEBUG-ATTRIBUTES] ApplyQueryAttributes ignorou LoadCampeonato (Campeonato já carregado).");
+                }
+
+                // ----------------------------------------------------
+                // CARREGAR PATROCINADORES E BANNER DE DIVULGAÇÃO COM FALLBACK
+                // ----------------------------------------------------
+                if (Campeonato != null) {
+                    try {
+                        var listaPatrocinios = await _databaseService.ObterPatrociniosAtivosDoCampeonatoAsync(Campeonato.ClientAppId);
+
+                        PatrocinadoresAtivos.Clear();
+                        foreach (var p in listaPatrocinios) {
+                            PatrocinadoresAtivos.Add(p);
+                        }
+
+                        if (PatrocinadoresAtivos.Any()) {
+                            string? caminhoBanner = PatrocinadoresAtivos.First().ImagemPatrocinador;
+
+                            // 1. Aplica o placeholder se o caminho for nulo ou vazio
+                            if (string.IsNullOrEmpty(caminhoBanner)) {
+                                BannerDivulgacaoSource = "placeholder.png";
+                                Debug.WriteLine("[CampeonatoDetailViewModel] Usando imagem placeholder para divulgação.");
+                            }
+                            // 2. Ou usa o caminho salvo
+                            else {
+                                BannerDivulgacaoSource = caminhoBanner;
+                            }
+                        } else {
+                            // Se não há patrocinadores ativos, assume que a seção é ocultada.
+                            BannerDivulgacaoSource = null;
+                        }
+
+                    } catch (Exception ex) {
+                        Debug.WriteLine($"[PATROCINIO] Erro ao carregar patrocinadores: {ex.Message}");
+                        // Lidar com o erro
+                    }
                 }
             }
         }
@@ -970,6 +1009,27 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 { "CampeonatoId", Campeonato.ClientAppId }
             };
             await Shell.Current.GoToAsync(nameof(ArbitrosInscritosPage), navigationParameters);
+        }
+        [RelayCommand]
+        private async Task AlterarBannerDivulgacao() {
+            Debug.WriteLine("[CampeonatoDetailViewModel] Botão 'Alterar Banner Divulgação' clicado.");
+            var patrocinioPrincipal = PatrocinadoresAtivos.FirstOrDefault();
+            if (patrocinioPrincipal == null) {
+                await _alertService.DisplayAlert("Sem Patrocínio", "Não há patrocínios ativos para alterar o banner.", "OK");
+                return;
+            }
+            // NOTA: Certifique-se de que AlterarBannerPatrocinioPopup foi criado corretamente.
+            var popup = new AlterarBannerPatrocinioPopup(patrocinioPrincipal, _alertService, _databaseService, _syncService);
+
+            popup.BannerAtualizado += (s, newBannerPath) => {
+                Debug.WriteLine($"[CampeonatoDetailViewModel] Evento BannerAtualizado (Patrocínio) recebido com caminho: '{newBannerPath}'");
+                MainThread.BeginInvokeOnMainThread(() => {
+                    // AQUI está o ponto: O popup já deve ter atualizado a proposta.
+                    // Apenas garantimos que o BannerDivulgacaoSource é atualizado para a UI.
+                    BannerDivulgacaoSource = newBannerPath; // Se for vazio/nulo, a lógica de carregamento irá tratá-lo.
+                });
+            };
+            await Application.Current.MainPage.Navigation.PushModalAsync(popup);
         }
     }
 }

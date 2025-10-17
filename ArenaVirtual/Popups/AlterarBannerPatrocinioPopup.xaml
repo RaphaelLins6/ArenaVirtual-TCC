@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ArenaVirtual.Popups.AlterarBannerPatrocinioPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Padding="30"
+    BackgroundColor="#80000000">
+
+    <Grid>
+        <Border
+            Padding="20"
+            BackgroundColor="White"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            WidthRequest="300">
+            <VerticalStackLayout Spacing="20">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="20"
+                    HorizontalOptions="Center"
+                    Text="Alterar Banner de Divulgação" />
+                <Border
+                    BackgroundColor="#eee"
+                    HeightRequest="150"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    WidthRequest="150">
+                    <Image
+                        x:Name="ImagemBanner"
+                        Aspect="AspectFill"
+                        HeightRequest="150"
+                        WidthRequest="150" />
+                </Border>
+                <Button
+                    Clicked="EscolherImagem_Clicked"
+                    Style="{StaticResource BotaoPrincipal}"
+                    Text="Escolher imagem" />
+                <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
+                    <Button
+                        Clicked="Cancelar_Clicked"
+                        Style="{StaticResource BotaoPrincipal}"
+                        Text="Cancelar" />
+                    <Button
+                        Clicked="Salvar_Clicked"
+                        Style="{StaticResource BotaoPrincipal}"
+                        Text="Salvar" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+        <Grid
+            Grid.RowSpan="2"
+            BackgroundColor="#000000"
+            IsVisible="{Binding IsBusy}"
+            Opacity="0.5">
+            <ActivityIndicator
+                HorizontalOptions="Center"
+                IsRunning="{Binding IsBusy}"
+                VerticalOptions="Center"
+                Color="OrangeRed" />
+        </Grid>
+    </Grid>
+</ContentPage>

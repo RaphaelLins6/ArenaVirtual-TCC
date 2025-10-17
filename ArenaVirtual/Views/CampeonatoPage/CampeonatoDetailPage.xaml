@@ -67,7 +67,6 @@
                     </VerticalStackLayout>
                 </Grid>
 
-
                 <VerticalStackLayout
                     Padding="15,0"
                     HorizontalOptions="Center"
@@ -114,6 +113,34 @@
                     HeightRequest="1"
                     HorizontalOptions="FillAndExpand"
                     Color="Gray" />
+
+                <VerticalStackLayout
+                    Padding="0"
+                    IsVisible="{Binding BannerDivulgacaoSource, Converter={StaticResource StringToBoolConverter}}"
+                    Spacing="0">
+
+                    <Label
+                        Margin="15,0,15,5"
+                        FontAttributes="Bold"
+                        FontSize="Subtitle"
+                        HorizontalOptions="Center"
+                        Text="Patrocínio Principal"
+                        TextColor="White"/>
+
+                    <Grid Margin="0" HeightRequest="150">
+                        <Image Aspect="AspectFill" Source="{Binding BannerDivulgacaoSource}" />
+
+                        <ImageButton
+                            Margin="10"
+                            BackgroundColor="Transparent"
+                            Command="{Binding AlterarBannerDivulgacaoCommand}"
+                            HeightRequest="15"
+                            HorizontalOptions="End"
+                            IsVisible="{Binding IsOrganizador}"
+                            Source="icone_editar.png"
+                            VerticalOptions="Start" />
+                    </Grid>
+                </VerticalStackLayout>
 
                 <VerticalStackLayout
                     Padding="15,0"

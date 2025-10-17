@@ -252,6 +252,23 @@ namespace ArenaVirtual.Services {
                                   .Where(p => p.CampeonatoId == campeonato.Id)
                                   .ToListAsync();
         }
+        public async Task<List<PropostaPatrocinio>> ObterPatrociniosAtivosDoCampeonatoAsync(Guid campeonatoClientAppId) {
+
+            // 1. Encontra o Campeonato pelo seu ClientAppId para obter o ID Local (int)
+            var campeonato = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.ClientAppId == campeonatoClientAppId);
+
+            if (campeonato == null) {
+                System.Diagnostics.Debug.WriteLine($"[DB Patrocinio] Campeonato com ClientAppId {campeonatoClientAppId} não encontrado localmente.");
+                return new List<PropostaPatrocinio>();
+            }
+
+            // 2. Filtra as propostas pelo ID local do Campeonato E se Aprovada for true
+            // CORRIGIDO: usa 'p.Aprovada == true' em vez de Status/StatusProposta
+            return await _database.Table<PropostaPatrocinio>()
+                .Where(p => p.CampeonatoId == campeonato.Id
+                         && p.Aprovada == true)
+                .ToListAsync();
+        }
 
         // --- MÉTODOS DE Estatísticas ---
         public Task<int> InserirEstatisticaAsync(EstatisticaPartida item) => _database.InsertAsync(item);
