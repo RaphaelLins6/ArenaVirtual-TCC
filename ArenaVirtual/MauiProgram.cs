@@ -73,7 +73,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<DashboardArbitroViewModel>();
         builder.Services.AddTransient<CampeonatoInscricaoViewModel>();
         builder.Services.AddTransient<ArbitrosInscritosViewModel>();
-
+        builder.Services.AddTransient<EstatisticasPessoaisViewModel>();
 
         // Registre as Páginas e Popups como Transient
         builder.Services.AddTransient<LoginPage>();
@@ -98,6 +98,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<LancamentoEstatisticaPage>();
         builder.Services.AddTransient<CampeonatoInscricao>();
         builder.Services.AddTransient<ArbitrosInscritosPage>();
+        builder.Services.AddTransient<EstatisticasPessoaisPage>();
 
         // Registre os popups que agora recebem injeção de dependência
         builder.Services.AddTransient<AlterarImagemPopup>();

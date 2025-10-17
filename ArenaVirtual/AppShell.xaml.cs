@@ -38,6 +38,7 @@ namespace ArenaVirtual {
             Routing.RegisterRoute(nameof(CampeonatoInscricao), typeof(CampeonatoInscricao));
             Routing.RegisterRoute(nameof(ArbitrosInscritosPage), typeof(ArbitrosInscritosPage));
             Routing.RegisterRoute("AtribuirArbitros", typeof(Popups.AtribuirArbitrosPopup));
+            Routing.RegisterRoute(nameof(EstatisticasPessoaisPage), typeof(EstatisticasPessoaisPage));
 
             CriarMenuPorPerfil(usuarioLogado);
         }
@@ -72,7 +73,8 @@ namespace ArenaVirtual {
                     Title = "Meu Time",
                     Items = {
                         new ShellContent { Title = "Informações do Time", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<MeusTimesPage>()) },
-                        new ShellContent { Title = "Jogos", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<Views.Atleta.PartidasPage>()) }
+                        new ShellContent { Title = "Jogos", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<Views.Atleta.PartidasPage>()) },
+                        new ShellContent { Title = "Estatísticas", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<Views.Atleta.EstatisticasPessoaisPage>()) }
                     }
                 });
             } else if (usuario.Perfil == TipoPerfil.Organizador) {

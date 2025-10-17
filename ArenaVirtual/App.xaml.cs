@@ -42,7 +42,6 @@ public partial class App : Application {
                         await databaseService.InitializeAsync();
                         System.Diagnostics.Debug.WriteLine("DatabaseService inicializado com sucesso.");
 
-                        // ⚡️ ADICIONANDO ESTAS LINHAS PARA FORÇAR A SINCRONIZAÇÃO INICIAL!
                         var syncService = windowServiceProvider.GetRequiredService<SyncService>();
                         await syncService.SyncAsync(new Progress<string>(status => System.Diagnostics.Debug.WriteLine($"[SyncStatus] {status}")));
 

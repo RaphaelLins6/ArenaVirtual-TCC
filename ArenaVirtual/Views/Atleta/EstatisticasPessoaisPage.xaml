@@ -3,9 +3,239 @@
     x:Class="ArenaVirtual.Views.Atleta.EstatisticasPessoaisPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:ArenaVirtual.Views.Atleta"
-    Title="Estatisticas Pessoais">
-    <StackLayout Padding="20">
-        <Label FontSize="20" Text="Página de estatisticas pessoais do Atleta" />
-    </StackLayout>
+    xmlns:converters="clr-namespace:ArenaVirtual.Converters"
+    xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.Atleta"
+    Title="Estatísticas Pessoais">
+
+    <ContentPage.Resources>
+        <converters:InverterBooleanConverter x:Key="InverterBooleanConverter" />
+    </ContentPage.Resources>
+
+    <VerticalStackLayout
+        Padding="15,20"
+        BackgroundColor="#1E1E1E"
+        Spacing="10">
+
+        <Label
+            Margin="0,0,0,10"
+            FontAttributes="Bold"
+            FontSize="24"
+            HorizontalOptions="Center"
+            Text="Minhas Estatísticas (Médias por Jogo)"
+            TextColor="Orange" />
+
+        <Frame
+            Margin="0,10,0,20"
+            Padding="0"
+            BorderColor="Orange"
+            CornerRadius="60"
+            HasShadow="False"
+            HeightRequest="120"
+            HorizontalOptions="Center"
+            IsClippedToBounds="True"
+            WidthRequest="120">
+            <Image
+                Aspect="AspectFill"
+                HorizontalOptions="CenterAndExpand"
+                Source="{Binding FotoAtletaSource}"
+                VerticalOptions="CenterAndExpand" />
+        </Frame>
+
+        <Grid RowDefinitions="*">
+
+            <ActivityIndicator
+                Grid.Row="0"
+                HeightRequest="50"
+                HorizontalOptions="Center"
+                IsRunning="{Binding EstaCarregando}"
+                IsVisible="{Binding EstaCarregando}"
+                VerticalOptions="Center"
+                WidthRequest="50"
+                Color="Orange" />
+
+            <ScrollView Grid.Row="0" IsVisible="{Binding EstaCarregando, Converter={StaticResource InverterBooleanConverter}}">
+                <Grid
+                    Padding="0,5"
+                    BindingContext="{Binding EstatisticasAtleta}"
+                    ColumnDefinitions="*,60,60,60,60,60,60,60,70,70,70"
+                    RowDefinitions="Auto, Auto">
+
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Padding="0,5"
+                        FontAttributes="Bold"
+                        Text="Atleta"
+                        TextColor="Orange" />
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Text="P/J"
+                        TextColor="Orange" />
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Text="RBT/J"
+                        TextColor="Orange" />
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="3"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Text="AST/J"
+                        TextColor="Orange" />
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="4"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Text="ROU/J"
+                        TextColor="Orange" />
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="5"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Text="BLO/J"
+                        TextColor="Orange" />
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="6"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Text="T/J"
+                        TextColor="Orange" />
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="7"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Text="F/J"
+                        TextColor="Orange" />
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="8"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Text="2P%"
+                        TextColor="Orange" />
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="9"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Text="3P%"
+                        TextColor="Orange" />
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="10"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Text="LL%"
+                        TextColor="Orange" />
+
+                    <BoxView
+                        Grid.Row="1"
+                        Grid.ColumnSpan="11"
+                        Margin="0,-5,0,-5"
+                        BackgroundColor="#282828"
+                        VerticalOptions="FillAndExpand" />
+
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Padding="5,0"
+                        Text="{Binding NomeAtleta}"
+                        TextColor="White"
+                        VerticalOptions="Center"
+                        ZIndex="1" />
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        HorizontalOptions="Center"
+                        Text="{Binding MediaPontos, StringFormat='{0:F1}'}"
+                        TextColor="White"
+                        VerticalOptions="Center"
+                        ZIndex="1" />
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        HorizontalOptions="Center"
+                        Text="{Binding MediaRebotes, StringFormat='{0:F1}'}"
+                        TextColor="White"
+                        VerticalOptions="Center"
+                        ZIndex="1" />
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="3"
+                        HorizontalOptions="Center"
+                        Text="{Binding MediaAssistencias, StringFormat='{0:F1}'}"
+                        TextColor="White"
+                        VerticalOptions="Center"
+                        ZIndex="1" />
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="4"
+                        HorizontalOptions="Center"
+                        Text="{Binding MediaRoubos, StringFormat='{0:F1}'}"
+                        TextColor="White"
+                        VerticalOptions="Center"
+                        ZIndex="1" />
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="5"
+                        HorizontalOptions="Center"
+                        Text="{Binding MediaBloqueios, StringFormat='{0:F1}'}"
+                        TextColor="White"
+                        VerticalOptions="Center"
+                        ZIndex="1" />
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="6"
+                        HorizontalOptions="Center"
+                        Text="{Binding MediaTurnovers, StringFormat='{0:F1}'}"
+                        TextColor="White"
+                        VerticalOptions="Center"
+                        ZIndex="1" />
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="7"
+                        HorizontalOptions="Center"
+                        Text="{Binding MediaFaltas, StringFormat='{0:F1}'}"
+                        TextColor="White"
+                        VerticalOptions="Center"
+                        ZIndex="1" />
+
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="8"
+                        HorizontalOptions="Center"
+                        Text="{Binding Percentual2P, StringFormat='{0:F1}%'}"
+                        TextColor="White"
+                        VerticalOptions="Center"
+                        ZIndex="1" />
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="9"
+                        HorizontalOptions="Center"
+                        Text="{Binding Percentual3P, StringFormat='{0:F1}%'}"
+                        TextColor="White"
+                        VerticalOptions="Center"
+                        ZIndex="1" />
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="10"
+                        HorizontalOptions="Center"
+                        Text="{Binding PercentualLancesLivres, StringFormat='{0:F1}%'}"
+                        TextColor="White"
+                        VerticalOptions="Center"
+                        ZIndex="1" />
+                </Grid>
+            </ScrollView>
+        </Grid>
+    </VerticalStackLayout>
 </ContentPage>
