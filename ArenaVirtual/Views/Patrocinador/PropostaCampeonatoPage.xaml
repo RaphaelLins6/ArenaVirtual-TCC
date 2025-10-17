@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ArenaVirtual.Views.Patrocinador.InscricaoCampeonatoPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.Patrocinador"
+    Title="Propor Patrocínio"
+    x:DataType="vm:InscricaoCampeonatoViewModel"
+    BackgroundColor="{AppThemeBinding Light=#F5F5F5,
+                                      Dark=#121212}">
+
+    <ContentPage.Resources>
+        <Style TargetType="Label">
+            <Setter Property="TextColor" Value="{AppThemeBinding Light=Black, Dark=White}" />
+        </Style>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="25">
+
+            <Label
+                Margin="0,10,0,10"
+                FontAttributes="Bold"
+                FontSize="24"
+                HorizontalOptions="Center"
+                Text="{Binding NomeCampeonato}"
+                TextColor="#FFA500" />
+
+            <ActivityIndicator
+                IsRunning="{Binding IsBusy}"
+                IsVisible="{Binding IsBusy}"
+                Color="#FF4500" />
+
+            <Label FontSize="16" Text="Valor Proposto para Patrocínio (R$)" />
+            <Entry
+                FontSize="16"
+                Keyboard="Numeric"
+                Placeholder="Ex: 5000,00"
+                Text="{Binding ValorPatrocinio}" />
+
+            <Label FontSize="16" Text="Mensagem / Detalhes da Proposta (Opcional)" />
+            <Editor
+                AutoSize="TextChanges"
+                FontSize="14"
+                HeightRequest="150"
+                Placeholder="Detalhes do seu patrocínio, condições ou mensagem ao organizador."
+                Text="{Binding MensagemAdicional}" />
+
+            <Button
+                Margin="0,30,0,0"
+                BackgroundColor="#FFA500"
+                Command="{Binding EnviarPropostaPatrocinioCommand}"
+                Style="{StaticResource BotaoPrincipal}"
+                Text="Enviar Proposta de Patrocínio"
+                TextColor="Black"
+                VerticalOptions="EndAndExpand" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -31,18 +31,12 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
             _ = LoadCampanhasCommand.ExecuteAsync(null);
         }
 
-        // Comando para Navegar para a Criação de Campanha
-        [RelayCommand]
-        private async Task NavegarParaCriacaoCampanha() {
-            // TODO: Implementar a navegação para a página de criação
-            await Shell.Current.GoToAsync("CriarCampanhaPage");
-        }
-
+        
         // Comando para Navegar para a Busca de Campeonatos (Para padrinhar)
         [RelayCommand]
         private async Task NavegarParaBuscaCampeonatos() {
             // TODO: Implementar a navegação para a busca de campeonatos
-            await Shell.Current.GoToAsync("BuscarCampeonatosPage");
+            await Shell.Current.GoToAsync("InscricaoCampeonatoPage");
         }
 
         // Comando para Carregar as Campanhas Ativas (Substitui LoadPartidasCommand)

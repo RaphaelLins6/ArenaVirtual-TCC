@@ -39,6 +39,7 @@ namespace ArenaVirtual {
             Routing.RegisterRoute("AtribuirArbitros", typeof(Popups.AtribuirArbitrosPopup));
             Routing.RegisterRoute(nameof(EstatisticasPessoaisPage), typeof(EstatisticasPessoaisPage));
             Routing.RegisterRoute(nameof(DashboardPatrocinadorPage), typeof(DashboardPatrocinadorPage));
+            Routing.RegisterRoute(nameof(InscricaoCampeonatoPage), typeof(InscricaoCampeonatoPage));
 
             CriarMenuPorPerfil(usuarioLogado);
         }
