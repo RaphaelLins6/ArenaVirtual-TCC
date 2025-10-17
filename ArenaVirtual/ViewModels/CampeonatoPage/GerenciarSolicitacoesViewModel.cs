@@ -404,6 +404,27 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 // 1. Atualiza a Proposta no DB (agora Aprovada)
                 await _patrocinioService.AtualizarPropostaAsync(propostaOriginal);
 
+                // --- Variáveis temporárias para a correção da lógica de data ---
+                var dataInicioProposta = propostaOriginal.DataInicio;
+                var dataFimProposta = propostaOriginal.DataFim;
+
+                // ⭐️ CORREÇÕES APLICADAS AQUI ⭐️
+                var novaCampanha = new CampanhaPatrocinio {
+                    PatrocinadorId = propostaOriginal.PatrocinadorId,
+                    CampeonatoId = propostaOriginal.CampeonatoId, 
+                    Nome = $"Patrocínio Ativo - {solicitacaoItem.NomePatrocinador}",
+                    Inicio = dataInicioProposta == DateTime.MinValue ? DateTime.Now.Date : dataInicioProposta.Date,
+                    Fim = dataFimProposta == DateTime.MinValue ? DateTime.Now.AddMonths(1).Date : dataFimProposta.Date,
+
+                };
+
+                // 3. Insere a Campanha no DB.
+                // Chamada via PatrocinioService. Você deve implementar o wrapper (veja a próxima seção).
+                await _patrocinioService.InserirCampanhaAsync(novaCampanha);
+
+                Debug.WriteLine($"[Aceite] Campanha {novaCampanha.Nome} criada e inserida para Patrocinador ID {novaCampanha.PatrocinadorId}.");
+                // Fim do bloco de correção ⭐️
+
                 MainThread.BeginInvokeOnMainThread(() => {
                     SolicitacoesPatrocinioPendentes.Remove(solicitacaoItem);
                     UpdatePatrociniosListVisibility();

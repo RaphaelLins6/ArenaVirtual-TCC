@@ -134,7 +134,13 @@ namespace ArenaVirtual.Services {
         }
         public Task<Campeonato?> ObterCampeonatoPorClientAppIdAsync(Guid clientAppId) =>
             _database.Table<Campeonato>().Where(c => c.ClientAppId == clientAppId).FirstOrDefaultAsync();
-
+        public Task<Campeonato?> GetCampeonatoByIdAsync(int id) {
+            if (id <= 0) {
+                return Task.FromResult<Campeonato?>(null);
+            }
+            // O Id aqui é a chave primária INT
+            return _database.Table<Campeonato>().Where(c => c.Id == id).FirstOrDefaultAsync();
+        }
 
         // --- MÉTODOS DE TIME ---
         public Task<int> InserirTimeAsync(Time item) => _database.InsertAsync(item);
@@ -268,6 +274,34 @@ namespace ArenaVirtual.Services {
                 .Where(p => p.CampeonatoId == campeonato.Id
                          && p.Aprovada == true)
                 .ToListAsync();
+        }
+        public async Task<List<CampanhaPatrocinio>> ObterCampanhasDoPatrocinadorAsync(int patrocinadorId) {
+            if (patrocinadorId <= 0) {
+                System.Diagnostics.Debug.WriteLine("[DB Patrocinio] ID do patrocinador inválido (<= 0). Retornando lista vazia.");
+                return new List<CampanhaPatrocinio>();
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[DB Patrocinio] Buscando TODAS as Campanhas para Patrocinador ID: {patrocinadorId}.");
+
+            // 1. Busca todos os itens do patrocinador (Filtro simples que funciona no SQLite)
+            var todasAsCampanhas = await _database.Table<CampanhaPatrocinio>()
+                                                  .Where(c => c.PatrocinadorId == patrocinadorId)
+                                                  .OrderByDescending(c => c.Fim)
+                                                  .ToListAsync(); // <-- A consulta SQL é executada aqui.
+
+            System.Diagnostics.Debug.WriteLine($"[DB Patrocinio] Encontradas {todasAsCampanhas.Count} campanhas totais (incluindo expiradas).");
+
+            // 2. Filtra a data APÓS os dados terem vindo do banco (LINQ to Objects, puro C#)
+            var campanhasAtivas = todasAsCampanhas
+                .Where(c => c.Fim.Date >= DateTime.Now.Date) // <-- AGORA o .Date FUNCIONA, pois é C# puro e não LINQ para SQL
+                .ToList();
+
+            System.Diagnostics.Debug.WriteLine($"[DB Patrocinio] Retornou {campanhasAtivas.Count} campanhas ATIVAS (após filtro de data) para o dashboard.");
+
+            return campanhasAtivas;
+        }
+        public Task InserirCampanhaAsync(CampanhaPatrocinio campanha) {
+            return _database.InsertAsync(campanha);
         }
 
         // --- MÉTODOS DE Estatísticas ---

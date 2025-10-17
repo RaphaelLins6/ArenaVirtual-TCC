@@ -185,5 +185,10 @@ namespace ArenaVirtual.Services {
                 throw; // Re-lança para que o ViewModel possa tratar o erro.
             }
         }
+
+        public Task InserirCampanhaAsync(CampanhaPatrocinio campanha) {
+            // Chama o método que você implementou no DatabaseService
+            return _databaseService.InserirCampanhaAsync(campanha);
+        }
     }
 }
