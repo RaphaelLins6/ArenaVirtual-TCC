@@ -25,7 +25,9 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
         [ObservableProperty]
         private string nomeCampeonato = "Carregando...";
 
+        // CORREÇÃO 1: Notifica o comando para reavaliar CanExecute quando o valor do patrocínio muda.
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(EnviarPropostaPatrocinioCommand))]
         private string valorPatrocinio = string.Empty; // Input do usuário para o valor
 
         [ObservableProperty]
@@ -67,12 +69,15 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
                 NomeCampeonato = "Erro ao Carregar";
             } finally {
                 IsBusy = false;
+                // CORREÇÃO 2: Notifica o comando após IsBusy ser false e o ID interno ter sido carregado.
+                EnviarPropostaPatrocinioCommand.NotifyCanExecuteChanged();
             }
         }
 
         // Comando principal para enviar a proposta
         [RelayCommand(CanExecute = nameof(CanSendProposta))]
         private async Task EnviarPropostaPatrocinioAsync() {
+            // ... (restante do método permanece inalterado) ...
             if (!CanSendProposta()) return;
 
             IsBusy = true;
@@ -103,8 +108,15 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
         }
 
         private bool CanSendProposta() {
+            bool isNotBusy = !IsBusy;
+            bool hasValue = !string.IsNullOrWhiteSpace(ValorPatrocinio);
+            bool hasInternalId = _campeonatoInternalId > 0;
+
+            // CORREÇÃO 3: Adicionar Log de Debug para rastrear a habilitação do botão
+            Debug.WriteLine($"[CanExecute] Proposta: Busy={isNotBusy} | Value={hasValue} | ID={hasInternalId}. Resultado: {isNotBusy && hasValue && hasInternalId}");
+
             // Verifica se o valor do patrocínio é válido (não nulo/vazio) e se o campeonato interno foi carregado.
-            return !IsBusy && !string.IsNullOrWhiteSpace(ValorPatrocinio) && _campeonatoInternalId > 0;
+            return isNotBusy && hasValue && hasInternalId;
         }
     }
 }

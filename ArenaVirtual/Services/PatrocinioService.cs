@@ -105,6 +105,32 @@ namespace ArenaVirtual.Services {
             return result;
         }
 
+        public async Task<List<PropostaPatrocinio>> ObterPropostasDoPatrocinadorAsync() {
+            var usuarioAtual = _sessaoService.GetUsuarioAtual();
+
+            // 1. Verifica se o usuário está logado e se é um Patrocinador
+            if (usuarioAtual == null || usuarioAtual.Perfil != TipoPerfil.Patrocinador) {
+                Debug.WriteLine("[PatrocinioService] Patrocinador não logado ou perfil incorreto para obter propostas.");
+                return new List<PropostaPatrocinio>();
+            }
+
+            try {
+                // 2. Busca todas as propostas no banco de dados
+                var todasPropostas = await _databaseService.ListarPropostasPatrocinioAsync();
+                // ^ Assumindo que você tem este método no seu DatabaseService
+
+                // 3. Filtra apenas as propostas do usuário logado
+                var propostasDoUsuario = todasPropostas
+                    .Where(p => p.PatrocinadorId == usuarioAtual.Id)
+                    .ToList();
+
+                return propostasDoUsuario;
+
+            } catch (Exception ex) {
+                Debug.WriteLine($"[PatrocinioService] Erro ao obter propostas do patrocinador: {ex.Message}");
+                return new List<PropostaPatrocinio>();
+            }
+        }
         // TODO: Implementar ObterPropostasPorPatrocinadorAsync
         // TODO: Implementar ObterPropostasPorCampeonatoAsync
     }
