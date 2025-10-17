@@ -116,7 +116,7 @@
 
                 <VerticalStackLayout
                     Padding="0"
-                    IsVisible="{Binding BannerDivulgacaoSource, Converter={StaticResource StringToBoolConverter}}"
+                    IsVisible="{Binding IsPatrocinioDivulgacaoVisible}"
                     Spacing="0">
 
                     <Label
@@ -125,9 +125,9 @@
                         FontSize="Subtitle"
                         HorizontalOptions="Center"
                         Text="Patrocínio Principal"
-                        TextColor="White"/>
+                        TextColor="White" />
 
-                    <Grid Margin="0" HeightRequest="150">
+                    <Grid Margin="0" HeightRequest="300">
                         <Image Aspect="AspectFill" Source="{Binding BannerDivulgacaoSource}" />
 
                         <ImageButton

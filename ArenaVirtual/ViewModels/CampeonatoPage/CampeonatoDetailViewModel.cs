@@ -31,8 +31,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         // =====================================================================================
         [ObservableProperty]
         private Campeonato campeonato;
+
         [ObservableProperty]
         private ObservableCollection<Time> tabelaClassificacao;
+
         [ObservableProperty]
         private ObservableCollection<Jogo> tabelaJogos;
 
@@ -42,26 +44,35 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         [ObservableProperty]
         private ObservableCollection<RodadaGrouping> jogosMataMata = new();
+
         [ObservableProperty]
         private int rodadaAtual;
+
         [ObservableProperty]
         private bool isOrganizador = false;
+
         [ObservableProperty]
         private bool isBusy;
+
         [ObservableProperty]
         private ImageSource bannerSource;
+
         [ObservableProperty]
         private ImageSource logoSource;
+
         [ObservableProperty]
         private bool isDesktop;
+
         [ObservableProperty]
         private ObservableCollection<string> gruposDisponiveis = new();
+
         [ObservableProperty]
         private string? grupoSelecionado;
 
         // PROPRIEDADES DE CONTROLE DE FASE
         [ObservableProperty]
         private bool isFormatoHibrido = false;
+
         [ObservableProperty]
         private ObservableCollection<string> fasesDisponiveis = new();
 
@@ -73,14 +84,18 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         [ObservableProperty]
         private bool isFiltroGrupoVisivel = false;
 
-        // NOVA PROPRIEDADE → Adicionada na primeira correção (mantida)
         [ObservableProperty]
         private bool isFiltroFaseVisivel = false;
+        [ObservableProperty]
+
+        private ObservableCollection<PropostaPatrocinio> patrocinadoresAtivos = new();
 
         [ObservableProperty]
-        private ObservableCollection<PropostaPatrocinio> patrocinadoresAtivos = new();
-        [ObservableProperty]
         private string bannerDivulgacaoSource;
+
+        [ObservableProperty]
+        private bool isPatrocinioDivulgacaoVisible;
+
         // Dicionários privados
         private readonly Dictionary<int, ObservableCollection<Jogo>> _jogosPorRodada = new();
         private readonly Dictionary<string, List<Time>> _timesPorGrupo = new();
@@ -170,11 +185,13 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 query.Remove("jogoAtualizado");
 
                 _ = LoadTabelaClassificacaoAsync();
-
                 _ = RecarregarJogosESelecaoAsync();
 
                 if (IsMataMataFormat || IsFormatoHibrido)
                     _ = GerarJogosMataMata();
+
+                // NOVO: Carregar Patrocínios após a atualização do jogo
+                _ = LoadPatrocinadoresAsync();
 
                 Debug.WriteLine($"[DEBUG-ATTRIBUTES] Recarga completa do Campeonato após atualização do Jogo ID {jogoAtualizado.Id}.");
                 return;
@@ -193,6 +210,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                             else if (IsFaseMataMata && IsMataMataFormat)
                                 _ = GerarJogosMataMata();
                         }, TaskScheduler.FromCurrentSynchronizationContext());
+
+                    // NOVO: Carregar Patrocínios após a atualização de times
+                    _ = LoadPatrocinadoresAsync();
                 }
                 return;
             }
@@ -217,35 +237,8 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 // CARREGAR PATROCINADORES E BANNER DE DIVULGAÇÃO COM FALLBACK
                 // ----------------------------------------------------
                 if (Campeonato != null) {
-                    try {
-                        var listaPatrocinios = await _databaseService.ObterPatrociniosAtivosDoCampeonatoAsync(Campeonato.ClientAppId);
-
-                        PatrocinadoresAtivos.Clear();
-                        foreach (var p in listaPatrocinios) {
-                            PatrocinadoresAtivos.Add(p);
-                        }
-
-                        if (PatrocinadoresAtivos.Any()) {
-                            string? caminhoBanner = PatrocinadoresAtivos.First().ImagemPatrocinador;
-
-                            // 1. Aplica o placeholder se o caminho for nulo ou vazio
-                            if (string.IsNullOrEmpty(caminhoBanner)) {
-                                BannerDivulgacaoSource = "placeholder.png";
-                                Debug.WriteLine("[CampeonatoDetailViewModel] Usando imagem placeholder para divulgação.");
-                            }
-                            // 2. Ou usa o caminho salvo
-                            else {
-                                BannerDivulgacaoSource = caminhoBanner;
-                            }
-                        } else {
-                            // Se não há patrocinadores ativos, assume que a seção é ocultada.
-                            BannerDivulgacaoSource = null;
-                        }
-
-                    } catch (Exception ex) {
-                        Debug.WriteLine($"[PATROCINIO] Erro ao carregar patrocinadores: {ex.Message}");
-                        // Lidar com o erro
-                    }
+                    // Chamada ÚNICA para o método refatorado que contém a lógica do placeholder
+                    _ = LoadPatrocinadoresAsync();
                 }
             }
         }
@@ -908,6 +901,41 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             } else {
                 MainThread.BeginInvokeOnMainThread(() => TabelaJogos.Clear());
                 Debug.WriteLine($"[DEBUG-LOADRODADA] Rodada {rodada} não encontrada. TabelaJogos limpa.");
+            }
+        }
+
+        private async Task LoadPatrocinadoresAsync() {
+            if (Campeonato == null) return;
+
+            try {
+                var listaPatrocinios = await _databaseService.ObterPatrociniosAtivosDoCampeonatoAsync(Campeonato.ClientAppId);
+
+                PatrocinadoresAtivos.Clear();
+                foreach (var p in listaPatrocinios) {
+                    PatrocinadoresAtivos.Add(p);
+                }
+
+                // PASSO CRÍTICO: Define a visibilidade da seção com base se a lista tem itens
+                IsPatrocinioDivulgacaoVisible = PatrocinadoresAtivos.Any();
+
+                if (IsPatrocinioDivulgacaoVisible) {
+                    string? caminhoBanner = PatrocinadoresAtivos.First().ImagemPatrocinador;
+
+                    // Se tem patrocinador, mas não tem imagem customizada, usa o placeholder
+                    if (string.IsNullOrEmpty(caminhoBanner)) {
+                        BannerDivulgacaoSource = "placeholder.png";
+                    } else {
+                        // Usa o caminho salvo
+                        BannerDivulgacaoSource = caminhoBanner;
+                    }
+                } else {
+                    // Se não tem patrocinador (IsPatrocinioDivulgacaoVisible = false), limpa a Source.
+                    BannerDivulgacaoSource = null;
+                }
+            } catch (Exception ex) {
+                Debug.WriteLine($"[PATROCINIO] Erro ao carregar patrocinadores: {ex.Message}");
+                IsPatrocinioDivulgacaoVisible = false; // Garante que a seção não aparece em caso de erro
+                BannerDivulgacaoSource = null;
             }
         }
 
