@@ -1,9 +1,7 @@
 ﻿using ArenaVirtual.Models;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+using ArenaVirtual.ViewModels.Patrocinador;
+using ArenaVirtual.Views.Patrocinador;
 
 namespace ArenaVirtual.Services {
     public class PatrocinioService {
@@ -31,6 +29,7 @@ namespace ArenaVirtual.Services {
             }
 
             try {
+                // Assumindo que ListarCampanhasPatrocinioAsync existe no DatabaseService
                 var todasCampanhas = await _databaseService.ListarCampanhasPatrocinioAsync();
 
                 // Filtra pelo ID do Patrocinador logado e por campanhas ativas (data Fim ainda não passou)
@@ -62,6 +61,7 @@ namespace ArenaVirtual.Services {
             campanha.UpdatedAt = DateTime.UtcNow;
 
             // 2. Inserir no banco de dados
+            // Assumindo que InserirCampanhaPatrocinioAsync existe no DatabaseService
             int result = await _databaseService.InserirCampanhaPatrocinioAsync(campanha);
 
             if (result > 0) {
@@ -88,7 +88,7 @@ namespace ArenaVirtual.Services {
 
             var proposta = new PropostaPatrocinio {
                 PatrocinadorId = usuarioAtual.Id,
-                CampeonatoId = campeonatoId,
+                CampeonatoId = campeonatoId, // Note: O correto aqui seria o ClientAppId do Campeonato, dependendo da sua arquitetura
                 Mensagem = mensagem,
                 Aprovada = false, // Sempre começa como não aprovada
                 ClientAppId = Guid.NewGuid(),
@@ -96,6 +96,7 @@ namespace ArenaVirtual.Services {
                 UpdatedAt = DateTime.UtcNow
             };
 
+            // Assumindo que InserirPropostaPatrocinioAsync existe no DatabaseService
             int result = await _databaseService.InserirPropostaPatrocinioAsync(proposta);
 
             if (result > 0) {
@@ -105,21 +106,21 @@ namespace ArenaVirtual.Services {
             return result;
         }
 
+        /// <summary>
+        /// Obtém todas as propostas feitas pelo Patrocinador logado.
+        /// </summary>
         public async Task<List<PropostaPatrocinio>> ObterPropostasDoPatrocinadorAsync() {
             var usuarioAtual = _sessaoService.GetUsuarioAtual();
 
-            // 1. Verifica se o usuário está logado e se é um Patrocinador
             if (usuarioAtual == null || usuarioAtual.Perfil != TipoPerfil.Patrocinador) {
                 Debug.WriteLine("[PatrocinioService] Patrocinador não logado ou perfil incorreto para obter propostas.");
                 return new List<PropostaPatrocinio>();
             }
 
             try {
-                // 2. Busca todas as propostas no banco de dados
+                // Assumindo que ListarPropostasPatrocinioAsync existe no DatabaseService
                 var todasPropostas = await _databaseService.ListarPropostasPatrocinioAsync();
-                // ^ Assumindo que você tem este método no seu DatabaseService
 
-                // 3. Filtra apenas as propostas do usuário logado
                 var propostasDoUsuario = todasPropostas
                     .Where(p => p.PatrocinadorId == usuarioAtual.Id)
                     .ToList();
@@ -131,7 +132,58 @@ namespace ArenaVirtual.Services {
                 return new List<PropostaPatrocinio>();
             }
         }
-        // TODO: Implementar ObterPropostasPorPatrocinadorAsync
-        // TODO: Implementar ObterPropostasPorCampeonatoAsync
+
+        // =========================================================
+        // MÉTODOS ADICIONADOS PARA O GerenciarSolicitacoesViewModel
+        // =========================================================
+
+        public async Task<IEnumerable<PropostaPatrocinio>> ObterPropostasPendentesPorCampeonatoAsync(Guid campeonatoClientAppId) {
+            try {
+                // Assumindo que você tem um método no DatabaseService que obtém as propostas por Campeonato ClientAppId
+                var propostas = await _databaseService.ListarPropostasPatrocinioPorCampeonatoAsync(campeonatoClientAppId);
+
+                // Filtra apenas as propostas que ainda não foram aprovadas
+                return propostas.Where(p => !p.Aprovada);
+            } catch (Exception ex) {
+                Debug.WriteLine($"[PatrocinioService] Erro ao obter propostas pendentes: {ex.Message}");
+                return new List<PropostaPatrocinio>();
+            }
+        }
+
+        public async Task<Usuario> ObterPatrocinadorPorIdAsync(int patrocinadorId) { // << CORREÇÃO: Mudar retorno para Usuario
+            try {
+                // Chama o método do DatabaseService que busca um Usuario por ID
+                // Assumindo que ObterUsuarioPorIdAsync existe e é público no DatabaseService (ou fazemos a chamada direta abaixo)
+                return await _databaseService.ObterUsuarioPorIdAsync(patrocinadorId); // << CORREÇÃO: Chamar o método correto
+            } catch (Exception ex) {
+                Debug.WriteLine($"[PatrocinioService] Erro ao obter patrocinador/usuario: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task AtualizarPropostaAsync(PropostaPatrocinio proposta) {
+            try {
+                proposta.UpdatedAt = DateTime.UtcNow;
+                proposta.IsSynced = false;
+
+                // Assumindo que AtualizarPropostaPatrocinioAsync existe no DatabaseService
+                await _databaseService.AtualizarPropostaPatrocinioAsync(proposta);
+                _syncService.ScheduleSync();
+            } catch (Exception ex) {
+                Debug.WriteLine($"[PatrocinioService] Erro ao atualizar proposta: {ex.Message}");
+                throw; // Re-lança para que o ViewModel possa tratar o erro.
+            }
+        }
+
+        public async Task DeletarPropostaAsync(PropostaPatrocinio proposta) {
+            try {
+                // CORREÇÃO: Usar o nome correto do método no DatabaseService
+                await _databaseService.DeletarPropostaPatrocinioAsync(proposta); //
+                _syncService.ScheduleSync();
+            } catch (Exception ex) {
+                Debug.WriteLine($"[PatrocinioService] Erro ao deletar proposta: {ex.Message}");
+                throw; // Re-lança para que o ViewModel possa tratar o erro.
+            }
+        }
     }
 }

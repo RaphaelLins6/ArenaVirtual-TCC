@@ -7,6 +7,7 @@
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.CampeonatoPage"
     xmlns:vmarbitros="clr-namespace:ArenaVirtual.ViewModels.Arbitro"
+    xmlns:vmpatrocinio="clr-namespace:ArenaVirtual.ViewModels.Patrocinio"
     Title="Gerenciar Solicitações"
     x:DataType="vm:GerenciarSolicitacoesViewModel"
     BackgroundColor="{AppThemeBinding Light=#f0f0f0,
@@ -191,6 +192,114 @@
                                             <Button
                                                 BackgroundColor="#F44336"
                                                 Clicked="RecusarArbitro_Clicked"
+                                                CornerRadius="20"
+                                                Style="{StaticResource BotaoPrincipal}"
+                                                Text="Recusar"
+                                                TextColor="White"
+                                                WidthRequest="100" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <BoxView BackgroundColor="#FF4500" HeightRequest="1" />
+
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="18"
+                        Text="Propostas de Patrocínio"
+                        TextColor="#FF4500" />
+
+                    <Label
+                        FontSize="14"
+                        HorizontalOptions="Center"
+                        IsVisible="{Binding IsPatrociniosListEmpty}"
+                        Text="Nenhuma proposta de patrocínio pendente."
+                        TextColor="Gray" />
+
+                    <CollectionView IsVisible="{Binding IsPatrociniosListEmpty, Converter={StaticResource InverterBooleanConverter}}" ItemsSource="{Binding SolicitacoesPatrocinioPendentes}">
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="vmpatrocinio:SolicitacaoPatrocinioItemViewModel">
+                                <Frame
+                                    Margin="0,5"
+                                    Padding="10"
+                                    BackgroundColor="{AppThemeBinding Light=White,
+                                                                      Dark=#1e1e1e}"
+                                    CornerRadius="10"
+                                    HasShadow="True">
+                                    <VerticalStackLayout Spacing="5">
+
+                                        <Grid ColumnDefinitions="Auto, *">
+                                            <Image
+                                                Grid.Column="0"
+                                                Margin="0,0,15,0"
+                                                Aspect="AspectFill"
+                                                HeightRequest="50"
+                                                Source="{Binding FotoPatrocinadorUrl}"
+                                                WidthRequest="50">
+                                                <Image.Clip>
+                                                    <EllipseGeometry
+                                                        Center="25,25"
+                                                        RadiusX="25"
+                                                        RadiusY="25" />
+                                                </Image.Clip>
+                                            </Image>
+                                            <VerticalStackLayout
+                                                Grid.Column="1"
+                                                Spacing="2"
+                                                VerticalOptions="Center">
+                                                <Label
+                                                    FontAttributes="Bold"
+                                                    FontSize="18"
+                                                    Text="{Binding NomePatrocinador}"
+                                                    TextColor="{AppThemeBinding Light=Black,
+                                                                                Dark=White}" />
+                                                <Label
+                                                    FontSize="14"
+                                                    Text="{Binding NomeEmpresa}"
+                                                    TextColor="Gray" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                        <BoxView
+                                            Margin="0,5"
+                                            BackgroundColor="Gray"
+                                            HeightRequest="1" />
+
+                                        <Label
+                                            Margin="0,5,0,0"
+                                            FontAttributes="Bold"
+                                            FontSize="16"
+                                            HorizontalOptions="Start"
+                                            Text="{Binding ValorProposto, StringFormat='PROPOSTA: R$ {0}'}"
+                                            TextColor="#FF4500" />
+
+                                        <Label
+                                            FontAttributes="Italic"
+                                            FontSize="14"
+                                            Text="{Binding DetalhesProposta}"
+                                            TextColor="{AppThemeBinding Light=Black,
+                                                                        Dark=White}" />
+
+                                        <HorizontalStackLayout
+                                            Margin="0,10,0,0"
+                                            HorizontalOptions="End"
+                                            Spacing="10">
+                                            <Button
+                                                BackgroundColor="#4CAF50"
+                                                Clicked="AceitarPatrocinio_Clicked"
+                                                CornerRadius="20"
+                                                Style="{StaticResource BotaoPrincipal}"
+                                                Text="Aceitar"
+                                                TextColor="White"
+                                                WidthRequest="100" />
+                                            <Button
+                                                BackgroundColor="#F44336"
+                                                Clicked="RecusarPatrocinio_Clicked"
                                                 CornerRadius="20"
                                                 Style="{StaticResource BotaoPrincipal}"
                                                 Text="Recusar"

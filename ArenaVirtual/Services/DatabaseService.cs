@@ -116,6 +116,8 @@ namespace ArenaVirtual.Services {
             if (userIds == null || !userIds.Any()) return new List<Usuario>();
             return await _database.Table<Usuario>().Where(u => userIds.Contains(u.ClientAppId)).ToListAsync();
         }
+        public Task<Usuario?> ObterUsuarioPorIdAsync(int id) =>
+            _database.Table<Usuario>().Where(u => u.Id == id).FirstOrDefaultAsync();
 
         // --- MÉTODOS DE CAMPEONATO ---
         public async Task<int> InserirCampeonatoAsync(Campeonato campeonato) => await _database.Table<Campeonato>().Where(c => c.Nome == campeonato.Nome && c.DataInicio == campeonato.DataInicio).CountAsync() > 0 ? 0 : await _database.InsertAsync(campeonato);
@@ -236,8 +238,21 @@ namespace ArenaVirtual.Services {
         public Task<List<CampanhaPatrocinio>> ListarCampanhasPatrocinioAsync() => _database.Table<CampanhaPatrocinio>().ToListAsync();
         public Task<int> AtualizarCampanhaPatrocinioAsync(CampanhaPatrocinio item) => _database.UpdateAsync(item);
         public Task<int> DeletarCampanhaPatrocinioAsync(CampanhaPatrocinio item) => _database.DeleteAsync(item);
+        public async Task<List<PropostaPatrocinio>> ListarPropostasPatrocinioPorCampeonatoAsync(Guid campeonatoClientAppId) {
+            // 1. Encontra o Campeonato pelo seu ClientAppId para obter o ID Local (int)
+            var campeonato = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.ClientAppId == campeonatoClientAppId);
 
-        
+            if (campeonato == null) {
+                Debug.WriteLine($"[DB Patrocinio] Campeonato com ClientAppId {campeonatoClientAppId} não encontrado localmente.");
+                return new List<PropostaPatrocinio>();
+            }
+
+            // 2. Filtra as propostas pelo ID local do Campeonato
+            return await _database.Table<PropostaPatrocinio>()
+                                  .Where(p => p.CampeonatoId == campeonato.Id)
+                                  .ToListAsync();
+        }
+
         // --- MÉTODOS DE Estatísticas ---
         public Task<int> InserirEstatisticaAsync(EstatisticaPartida item) => _database.InsertAsync(item);
         public Task<List<EstatisticaPartida>> ListarEstatisticasAsync() => _database.Table<EstatisticaPartida>().ToListAsync();

@@ -9,9 +9,8 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-
-// NOTA: Certifique-se de que o IAlertService está em um namespace acessível (provavelmente ArenaVirtual.Services)
-// E que o MainThread está sendo importado (provavelmente using Microsoft.Maui.Controls; ou usando Microsoft.Maui.ApplicationModel;)
+using Microsoft.Maui.ApplicationModel; // Importação essencial para MainThread
+using ArenaVirtual.ViewModels.Patrocinio;
 
 namespace ArenaVirtual.ViewModels.CampeonatoPage {
     [QueryProperty(nameof(Campeonato), "Campeonato")]
@@ -23,6 +22,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         private readonly TimeService _timeService;
         private readonly IAlertService _alertService;
         private readonly UsuarioService _usuarioService;
+        private readonly PatrocinioService _patrocinioService;
 
         [ObservableProperty]
         private bool isBusy;
@@ -40,15 +40,22 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         [ObservableProperty]
         private ObservableCollection<SolicitacaoArbitroItemViewModel> solicitacoesArbitrosPendentes;
 
+        // COLEÇÃO PARA SOLICITAÇÕES DE PATROCÍNIO
+        [ObservableProperty]
+        private ObservableCollection<SolicitacaoPatrocinioItemViewModel> solicitacoesPatrocinioPendentes;
+
         // PROPRIEDADES DE CONTROLE DE VISIBILIDADE
         [ObservableProperty]
-        private bool isListEmpty; // Visibilidade Geral
+        private bool isListEmpty;
 
         [ObservableProperty]
-        private bool isTimesListEmpty; // Visibilidade da seção Times
+        private bool isTimesListEmpty;
 
         [ObservableProperty]
-        private bool isArbitrosListEmpty; // Visibilidade da seção Árbitros
+        private bool isArbitrosListEmpty;
+
+        [ObservableProperty]
+        private bool isPatrociniosListEmpty;
 
         public GerenciarSolicitacoesViewModel(
             DatabaseService databaseService,
@@ -56,22 +63,23 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             SessaoService sessaoService,
             TimeService timeService,
             IAlertService alertService,
-            UsuarioService usuarioService) {
+            UsuarioService usuarioService,
+            PatrocinioService patrocinioService) {
             _databaseService = databaseService;
             _campeonatoService = campeonatoService;
             _sessaoService = sessaoService;
             _timeService = timeService;
             _alertService = alertService;
             _usuarioService = usuarioService;
+            _patrocinioService = patrocinioService;
 
             SolicitacoesPendentes = new ObservableCollection<SolicitacaoTimeItemViewModel>();
             SolicitacoesArbitrosPendentes = new ObservableCollection<SolicitacaoArbitroItemViewModel>();
+            SolicitacoesPatrocinioPendentes = new ObservableCollection<SolicitacaoPatrocinioItemViewModel>();
         }
 
         partial void OnCampeonatoChanged(Campeonato value) {
             if (value != null) {
-                // Ao usar _ = LoadAllSolicitacoesAsync(), garantimos que o Command não aguarda o término
-                // e permite a continuação imediata, mas não captura exceções, por isso o try/catch interno é crucial.
                 _ = LoadAllSolicitacoesAsync();
             }
         }
@@ -81,10 +89,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             try {
                 await Task.WhenAll(
                     LoadSolicitacoesTimesInternalAsync(),
-                    LoadSolicitacoesArbitrosInternalAsync()
+                    LoadSolicitacoesArbitrosInternalAsync(),
+                    LoadSolicitacoesPatrocinioInternalAsync()
                 );
             } catch (Exception ex) {
-                // Este bloco agora só pega erros que impediram o Task.WhenAll de iniciar ou erros muito críticos
                 Debug.WriteLine($"Erro ao carregar todas as solicitações: {ex.Message}");
                 await _alertService.DisplayAlert("Erro de Carregamento", "Ocorreu um erro ao carregar as solicitações.", "OK");
             } finally {
@@ -92,6 +100,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 MainThread.BeginInvokeOnMainThread(() => {
                     UpdateTimesListVisibility();
                     UpdateArbitrosListVisibility();
+                    UpdatePatrociniosListVisibility();
                     UpdateGeneralListEmptyStatus();
                 });
                 IsBusy = false;
@@ -110,8 +119,14 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             UpdateGeneralListEmptyStatus();
         }
 
+        private void UpdatePatrociniosListVisibility() {
+            IsPatrociniosListEmpty = !SolicitacoesPatrocinioPendentes.Any();
+            UpdateGeneralListEmptyStatus();
+        }
+
         private void UpdateGeneralListEmptyStatus() {
-            IsListEmpty = IsTimesListEmpty && IsArbitrosListEmpty;
+            // ATUALIZADO para incluir a nova lista
+            IsListEmpty = IsTimesListEmpty && IsArbitrosListEmpty && IsPatrociniosListEmpty;
         }
 
         // --- MÉTODOS DE CARREGAMENTO ---
@@ -182,9 +197,53 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             }
         }
 
+        public async Task LoadSolicitacoesPatrocinioInternalAsync() {
+            Debug.WriteLine("Iniciando LoadSolicitacoesPatrocinioInternalAsync...");
+
+            if (Campeonato is null) return;
+
+            IEnumerable<PropostaPatrocinio> propostas = null;
+            try {
+                propostas = await _patrocinioService.ObterPropostasPendentesPorCampeonatoAsync(Campeonato.ClientAppId);
+                var propostasList = propostas.ToList();
+
+                // >>> LINHA DE DEBUG 1: CONFIRMA QUANTAS PROPOSTAS FORAM ENCONTRADAS
+                Debug.WriteLine($"[DEBUG-PATROCINIO] {propostasList.Count} propostas pendentes encontradas.");
+
+                // 1. Coleta o Patrocinador (Usuario) de cada proposta
+                var tarefasPatrocinador = propostasList
+                    .Select(p => _usuarioService.ObterUsuarioPorIdAsync(p.PatrocinadorId))
+                    .ToList();
+                var patrocinadores = await Task.WhenAll(tarefasPatrocinador);
+
+                // >>> LINHA DE DEBUG 2: CONFIRMA O STATUS DE CARREGAMENTO DO PRIMEIRO PATROCINADOR
+                if (patrocinadores.Any()) {
+                    Debug.WriteLine($"[DEBUG-PATROCINIO] ID do Patrocinador na Proposta 1: {propostasList.First().PatrocinadorId}");
+                    Debug.WriteLine($"[DEBUG-PATROCINIO] Patrocinador 1 Carregado: {patrocinadores.First() != null}");
+                }
+
+                MainThread.BeginInvokeOnMainThread(() => {
+                    SolicitacoesPatrocinioPendentes.Clear();
+
+                    for (int i = 0; i < propostasList.Count; i++) {
+                        var proposta = propostasList[i];
+                        var patrocinador = patrocinadores[i];
+                        if (patrocinador != null) {
+                            SolicitacoesPatrocinioPendentes.Add(new SolicitacaoPatrocinioItemViewModel(proposta, patrocinador));
+                        }
+                    }
+                    Debug.WriteLine($"[DEBUG-PATROCINIO] CONTAGEM FINAL NA THREAD PRINCIPAL: {SolicitacoesPatrocinioPendentes.Count}");
+                    UpdatePatrociniosListVisibility();
+                });
+
+            } catch (Exception ex) {
+                Debug.WriteLine($"[ERRO FATAL] Erro ao carregar propostas de Patrocínio: {ex.Message}");
+                await _alertService.DisplayAlert("Erro", "Ocorreu um erro ao carregar as propostas de patrocínio.", "OK");
+            }
+        }
+
         // --- MÉTODOS DE AÇÃO (ÁRBITROS) ---
 
-        // CORREÇÃO: Removido 'Command' do nome do método AceitarArbitro
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
         public async Task AceitarArbitro(SolicitacaoArbitroItemViewModel solicitacaoItem) {
             if (solicitacaoItem is null) return;
@@ -217,7 +276,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             }
         }
 
-        // CORREÇÃO: Removido 'Command' do nome do método RecusarArbitro
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
         public async Task RecusarArbitro(SolicitacaoArbitroItemViewModel solicitacaoItem) {
             if (solicitacaoItem is null) return;
@@ -267,30 +325,21 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
                 await _databaseService.AtualizarConviteAsync(solicitacaoOriginal);
 
-                // -----------------------------------------------------------------
-                // CORREÇÃO DOS ERROS DE COMPILAÇÃO E LÓGICA
-                // -----------------------------------------------------------------
-
                 // 1. Busca o objeto Time pelo ClientAppId do convite.
-                // CORREÇÃO: Utiliza o nome do método que existe no seu TimeService: ObterPorClientAppIdAsync
                 var timeAceito = await _timeService.ObterPorClientAppIdAsync(solicitacaoOriginal.TimeClientAppId);
 
                 if (timeAceito != null) {
                     // 2. Vincula o Time ao Campeonato
-                    // Nota: 'Campeonato' deve ser uma propriedade acessível no seu ViewModel.
                     timeAceito.CampeonatoId = Campeonato.Id;
                     timeAceito.IsSynced = false;
                     timeAceito.UpdatedAt = DateTime.UtcNow;
 
                     // 3. Atualiza o Time no DB.
-                    // CORREÇÃO: Utiliza o nome do método que existe no seu TimeService: AtualizarTimeAsync
                     await _timeService.AtualizarTimeAsync(timeAceito);
 
                     // 4. REGENERA A TABELA DE JOGOS.
-                    // Nota: Depende da implementação dos novos métodos no CampeonatoService e DatabaseService.
                     await _campeonatoService.RecalcularEGerarJogosAsync(Campeonato.ClientAppId);
                 }
-                // -----------------------------------------------------------------
 
                 MainThread.BeginInvokeOnMainThread(() => {
                     SolicitacoesPendentes.Remove(solicitacaoItem);
@@ -332,6 +381,66 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             } catch (Exception ex) {
                 Debug.WriteLine($"Erro ao recusar solicitação: {ex.Message}");
                 await _alertService.DisplayAlert("Erro", "Ocorreu um erro ao recusar a solicitação.", "OK");
+            } finally {
+                IsBusy = false;
+            }
+        }
+
+        // --- MÉTODOS DE AÇÃO (PATROCÍNIO) ---
+
+        [RelayCommand(CanExecute = nameof(IsNotBusy))]
+        public async Task AceitarPatrocinio(SolicitacaoPatrocinioItemViewModel solicitacaoItem) {
+            if (solicitacaoItem is null) return;
+
+            IsBusy = true;
+            try {
+                var propostaOriginal = solicitacaoItem.PropostaOriginal;
+                if (propostaOriginal == null) return;
+
+                propostaOriginal.Aprovada = true; // Define como Aprovada!
+                propostaOriginal.IsSynced = false;
+                propostaOriginal.UpdatedAt = DateTime.UtcNow;
+
+                // 1. Atualiza a Proposta no DB (agora Aprovada)
+                await _patrocinioService.AtualizarPropostaAsync(propostaOriginal);
+
+                MainThread.BeginInvokeOnMainThread(() => {
+                    SolicitacoesPatrocinioPendentes.Remove(solicitacaoItem);
+                    UpdatePatrociniosListVisibility();
+                });
+
+                await _alertService.DisplayAlert("Sucesso", $"Proposta do Patrocinador {solicitacaoItem.NomePatrocinador} aceita com sucesso!", "OK");
+
+            } catch (Exception ex) {
+                Debug.WriteLine($"[AceitarPatrocinio] ERRO: {ex.Message}");
+                await _alertService.DisplayAlert("Erro", "Ocorreu um erro ao aceitar a proposta de patrocínio.", "OK");
+            } finally {
+                IsBusy = false;
+            }
+        }
+
+        [RelayCommand(CanExecute = nameof(IsNotBusy))]
+        public async Task RecusarPatrocinio(SolicitacaoPatrocinioItemViewModel solicitacaoItem) {
+            if (solicitacaoItem is null) return;
+
+            IsBusy = true;
+            try {
+                var propostaOriginal = solicitacaoItem.PropostaOriginal;
+                if (propostaOriginal == null) return;
+
+                // 1. Remove a proposta do DB (recusar = deletar, para limpar a lista pendente)
+                await _patrocinioService.DeletarPropostaAsync(propostaOriginal);
+
+                MainThread.BeginInvokeOnMainThread(() => {
+                    SolicitacoesPatrocinioPendentes.Remove(solicitacaoItem);
+                    UpdatePatrociniosListVisibility();
+                });
+
+                await _alertService.DisplayAlert("Sucesso", $"Proposta do Patrocinador {solicitacaoItem.NomePatrocinador} recusada com sucesso!", "OK");
+
+            } catch (Exception ex) {
+                Debug.WriteLine($"Erro ao recusar proposta de patrocínio: {ex.Message}");
+                await _alertService.DisplayAlert("Erro", "Ocorreu um erro ao recusar a proposta de patrocínio.", "OK");
             } finally {
                 IsBusy = false;
             }

@@ -46,4 +46,23 @@ public partial class GerenciarSolicitacoesPage : ContentPage {
             await _viewModel.RecusarArbitroCommand.ExecuteAsync(item);
         }
     }
+
+    // --- Métodos de Clique para PROPOSTAS DE PATROCÍNIO ---
+
+    private async void AceitarPatrocinio_Clicked(object sender, EventArgs e) {
+        // Usa o namespace completo, ou adicione o using para ArenaVirtual.ViewModels.Patrocinio
+        if (sender is Button button && button.BindingContext is ViewModels.Patrocinio.SolicitacaoPatrocinioItemViewModel item) {
+
+            // NOTE: O Comando MVVM 'AceitarPatrocinioCommand' DEVE existir em _viewModel
+            await _viewModel.AceitarPatrocinioCommand.ExecuteAsync(item);
+        }
+    }
+
+    private async void RecusarPatrocinio_Clicked(object sender, EventArgs e) {
+        if (sender is Button button && button.BindingContext is ViewModels.Patrocinio.SolicitacaoPatrocinioItemViewModel item) {
+
+            // NOTE: O Comando MVVM 'RecusarPatrocinioCommand' DEVE existir em _viewModel
+            await _viewModel.RecusarPatrocinioCommand.ExecuteAsync(item);
+        }
+    }
 }
