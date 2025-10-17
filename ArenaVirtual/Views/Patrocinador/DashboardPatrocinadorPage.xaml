@@ -108,6 +108,7 @@
                                                     CommandParameter="{Binding .}"
                                                     FontSize="Small"
                                                     HeightRequest="35"
+                                                    Style="{StaticResource BotaoPrincipal}"
                                                     Text="Ver Detalhes"
                                                     TextColor="White" />
                                             </StackLayout>

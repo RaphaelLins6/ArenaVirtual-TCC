@@ -271,14 +271,6 @@
                                             HeightRequest="1" />
 
                                         <Label
-                                            Margin="0,5,0,0"
-                                            FontAttributes="Bold"
-                                            FontSize="16"
-                                            HorizontalOptions="Start"
-                                            Text="{Binding ValorProposto, StringFormat='PROPOSTA: R$ {0}'}"
-                                            TextColor="#FF4500" />
-
-                                        <Label
                                             FontAttributes="Italic"
                                             FontSize="14"
                                             Text="{Binding DetalhesProposta}"

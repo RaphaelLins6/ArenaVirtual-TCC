@@ -46,6 +46,24 @@
                 Placeholder="Detalhes do seu patrocínio, condições ou mensagem ao organizador."
                 Text="{Binding MensagemAdicional}" />
 
+            <Label
+                Margin="0,10,0,0"
+                FontAttributes="Bold"
+                FontSize="16"
+                Text="Período Proposto para o Patrocínio" />
+            <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
+
+                <VerticalStackLayout Grid.Column="0" Spacing="5">
+                    <Label FontSize="14" Text="Data de Início" />
+                    <DatePicker Date="{Binding DataInicio}" Format="dd/MM/yyyy" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1" Spacing="5">
+                    <Label FontSize="14" Text="Data de Fim (Expiração da Proposta)" />
+                    <DatePicker Date="{Binding DataFim}" Format="dd/MM/yyyy" />
+                </VerticalStackLayout>
+
+            </Grid>
             <Button
                 Margin="0,30,0,0"
                 BackgroundColor="#FFA500"

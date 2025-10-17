@@ -4,11 +4,12 @@ using CommunityToolkit.Mvvm.Input;
 using System.Diagnostics;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Maui.Controls; // Necessário para Shell.Current.GoToAsync
 
 namespace ArenaVirtual.ViewModels.Patrocinador {
 
-    // Adicionado ObservableObject e atributos para roteamento (QueryProperty)
-    [QueryProperty(nameof(CampeonatoId), "campeonatoId")]
+    // Adicionado ObservableObject e atributos para roteamento (QueryProperty)
+    [QueryProperty(nameof(CampeonatoId), "campeonatoId")]
     public partial class PropostaCampeonatoViewModel : ObservableObject {
 
         private readonly PatrocinioService _patrocinioService;
@@ -18,38 +19,48 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
         [ObservableProperty]
         private bool isBusy;
 
-        // Propriedade para receber o ID do Campeonato via navegação
-        [ObservableProperty]
+        // Propriedade para receber o ID do Campeonato via navegação
+        [ObservableProperty]
         private string campeonatoId = string.Empty; // Recebe a GUID como string
 
-        [ObservableProperty]
+        [ObservableProperty]
         private string nomeCampeonato = "Carregando...";
 
-        // CORREÇÃO 1: Notifica o comando para reavaliar CanExecute quando o valor do patrocínio muda.
-        [ObservableProperty]
+        // CORREÇÃO 1: Notifica o comando para reavaliar CanExecute quando o valor do patrocínio muda.
+        [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(EnviarPropostaPatrocinioCommand))]
         private string valorPatrocinio = string.Empty; // Input do usuário para o valor
 
-        [ObservableProperty]
+        [ObservableProperty]
         private string mensagemAdicional = string.Empty; // Input opcional do usuário
 
-        private int _campeonatoInternalId;
+        // ⭐️ NOVAS PROPRIEDADES DE DATA ⭐️
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(EnviarPropostaPatrocinioCommand))]
+        private DateTime dataInicio = DateTime.Now.Date; // Inicializa com a data atual
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(EnviarPropostaPatrocinioCommand))]
+        private DateTime dataFim = DateTime.Now.Date.AddDays(7); // Inicializa com 7 dias no futuro
+
+        private int _campeonatoInternalId;
 
         public PropostaCampeonatoViewModel(
-            PatrocinioService patrocinioService,
-            CampeonatoService campeonatoService,
-            IAlertService alertService) {
+          PatrocinioService patrocinioService,
+          CampeonatoService campeonatoService,
+          IAlertService alertService) {
 
             _patrocinioService = patrocinioService;
             _campeonatoService = campeonatoService;
             _alertService = alertService;
         }
 
-        // Chamado após a propriedade CampeonatoId ser definida via QueryProperty
-        partial void OnCampeonatoIdChanged(string value) {
+        // Chamado após a propriedade CampeonatoId ser definida via QueryProperty
+        partial void OnCampeonatoIdChanged(string value) {
             if (Guid.TryParse(value, out Guid clientAppId)) {
-                // Chama o método para buscar o nome do campeonato e seu Id interno
-                Task.Run(() => CarregarDetalhesCampeonatoAsync(clientAppId));
+                // Chama o método para buscar o nome do campeonato e seu Id interno
+                // Garante que a chamada seja assíncrona
+                Task.Run(() => CarregarDetalhesCampeonatoAsync(clientAppId));
             }
         }
 
@@ -61,7 +72,7 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
                 if (campeonato != null) {
                     NomeCampeonato = campeonato.Nome;
                     _campeonatoInternalId = campeonato.Id; // Armazena o ID interno
-                } else {
+                } else {
                     NomeCampeonato = "Campeonato Não Encontrado";
                 }
             } catch (Exception ex) {
@@ -69,33 +80,44 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
                 NomeCampeonato = "Erro ao Carregar";
             } finally {
                 IsBusy = false;
-                // CORREÇÃO 2: Notifica o comando após IsBusy ser false e o ID interno ter sido carregado.
-                EnviarPropostaPatrocinioCommand.NotifyCanExecuteChanged();
+                // CORREÇÃO 2: Notifica o comando após IsBusy ser false e o ID interno ter sido carregado.
+                EnviarPropostaPatrocinioCommand.NotifyCanExecuteChanged();
             }
         }
 
-        // Comando principal para enviar a proposta
-        [RelayCommand(CanExecute = nameof(CanSendProposta))]
+        // Comando principal para enviar a proposta
+        [RelayCommand(CanExecute = nameof(CanSendProposta))]
         private async Task EnviarPropostaPatrocinioAsync() {
-            // ... (restante do método permanece inalterado) ...
             if (!CanSendProposta()) return;
+
+            // ⭐️ VALIDAÇÃO DA DATA ⭐️
+            // Embora CanSendProposta garanta que DataFim seja >= DataAtual, esta validação checa o período
+            if (DataFim.Date < DataInicio.Date) {
+                await _alertService.DisplayAlert("Erro de Data",
+                  "A Data Fim deve ser posterior ou igual à Data Início.", "OK");
+                return;
+            }
 
             IsBusy = true;
 
             try {
-                // Concatena valor e mensagem adicional para a propriedade 'Mensagem'
-                string mensagemCompleta = $"PROPOSTA: R$ {ValorPatrocinio}\n\nMENSAGEM: {MensagemAdicional}";
+                // ⭐️ INCLUI AS DATAS NA MENSAGEM para que o Organizador veja o período proposto ⭐️
+                string periodo = $"Período Proposto: {DataInicio:dd/MM/yyyy} a {DataFim:dd/MM/yyyy}";
 
-                // O método CriarPropostaPatrocinioAsync espera o ID interno (int) do campeonato.
-                int result = await _patrocinioService.CriarPropostaPatrocinioAsync(_campeonatoInternalId, mensagemCompleta);
+                // Concatena valor, período e mensagem adicional para a propriedade 'Mensagem'
+                string mensagemCompleta = $"PROPOSTA: R$ {ValorPatrocinio}\n{periodo}\n\nMENSAGEM: {MensagemAdicional}";
+
+                // Utiliza o método original, mas passando a mensagem completa com as datas.
+                int result = await _patrocinioService.CriarPropostaPatrocinioAsync(_campeonatoInternalId, mensagemCompleta);
 
                 if (result > 0) {
                     await _alertService.DisplayAlert("Sucesso",
-                                                     $"Proposta de Patrocínio de R$ {ValorPatrocinio} para '{NomeCampeonato}' enviada com sucesso!",
-                                                     "OK");
+                                    $"Proposta de Patrocínio de R$ {ValorPatrocinio} para '{NomeCampeonato}' enviada com sucesso!",
+                                    "OK");
 
-                    // Navega de volta para o Dashboard
-                    await Shell.Current.GoToAsync("..");
+                    // Navega de volta para o Dashboard
+                    // Shell.Current deve estar disponível (usando Microsoft.Maui.Controls)
+                    await Shell.Current.GoToAsync("..");
                 } else {
                     await _alertService.DisplayAlert("Erro", "Falha ao enviar a proposta. Verifique se você está logado.", "OK");
                 }
@@ -112,11 +134,14 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
             bool hasValue = !string.IsNullOrWhiteSpace(ValorPatrocinio);
             bool hasInternalId = _campeonatoInternalId > 0;
 
-            // CORREÇÃO 3: Adicionar Log de Debug para rastrear a habilitação do botão
-            Debug.WriteLine($"[CanExecute] Proposta: Busy={isNotBusy} | Value={hasValue} | ID={hasInternalId}. Resultado: {isNotBusy && hasValue && hasInternalId}");
+            // A DataFim deve ser maior ou igual à data atual (para que a proposta seja para o futuro/hoje)
+            bool dataIsFutureOrToday = DataFim.Date >= DateTime.Now.Date;
 
-            // Verifica se o valor do patrocínio é válido (não nulo/vazio) e se o campeonato interno foi carregado.
-            return isNotBusy && hasValue && hasInternalId;
+            // CORREÇÃO 3: Adicionar Log de Debug para rastrear a habilitação do botão
+            Debug.WriteLine($"[CanExecute] Proposta: Busy={isNotBusy} | Value={hasValue} | ID={hasInternalId} | Future={dataIsFutureOrToday}. Resultado: {isNotBusy && hasValue && hasInternalId && dataIsFutureOrToday}");
+
+            // Verifica se o valor do patrocínio é válido, o campeonato interno foi carregado e a data é válida.
+            return isNotBusy && hasValue && hasInternalId && dataIsFutureOrToday;
         }
     }
 }

@@ -1,15 +1,12 @@
 ﻿using ArenaVirtual.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Maui.Graphics; // Importação necessária para Color
-using System;
 
 namespace ArenaVirtual.ViewModels.Patrocinador {
 
-    // Novo Enum para representar o estado do patrocínio/proposta
     public enum PatrocinioStatus {
-        Disponivel, // Nenhuma ação tomada
-        Pendente,   // Proposta enviada, aguardando aprovação
-        Aceito      // Patrocínio ativo
+        Disponivel, 
+        Pendente,   
+        Aceito      
     }
 
     public partial class CampeonatoPatrocinioItemViewModel : ObservableObject {
