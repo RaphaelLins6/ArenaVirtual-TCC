@@ -36,7 +36,7 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
         [RelayCommand]
         private async Task NavegarParaBuscaCampeonatos() {
             // TODO: Implementar a navegação para a busca de campeonatos
-            await Shell.Current.GoToAsync("InscricaoCampeonatoPage");
+            await Shell.Current.GoToAsync("BuscarCampeonatosPage");
         }
 
         // Comando para Carregar as Campanhas Ativas (Substitui LoadPartidasCommand)

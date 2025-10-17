@@ -9,7 +9,7 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
 
     // Adicionado ObservableObject e atributos para roteamento (QueryProperty)
     [QueryProperty(nameof(CampeonatoId), "campeonatoId")]
-    public partial class InscricaoCampeonatoViewModel : ObservableObject {
+    public partial class PropostaCampeonatoViewModel : ObservableObject {
 
         private readonly PatrocinioService _patrocinioService;
         private readonly CampeonatoService _campeonatoService;
@@ -33,7 +33,7 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
 
         private int _campeonatoInternalId;
 
-        public InscricaoCampeonatoViewModel(
+        public PropostaCampeonatoViewModel(
             PatrocinioService patrocinioService,
             CampeonatoService campeonatoService,
             IAlertService alertService) {

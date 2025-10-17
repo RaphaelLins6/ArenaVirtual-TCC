@@ -3,9 +3,9 @@ using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.Views.Patrocinador {
 
-    public partial class InscricaoCampeonatoPage : ContentPage {
+    public partial class PropostaCampeonatoPage : ContentPage {
 
-        public InscricaoCampeonatoPage(InscricaoCampeonatoViewModel viewModel) {
+        public PropostaCampeonatoPage(PropostaCampeonatoViewModel viewModel) {
             InitializeComponent();
             BindingContext = viewModel;
         }
