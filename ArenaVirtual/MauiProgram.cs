@@ -4,12 +4,14 @@ using ArenaVirtual.ViewModels;
 using ArenaVirtual.ViewModels.Arbitro;
 using ArenaVirtual.ViewModels.Atleta;
 using ArenaVirtual.ViewModels.CampeonatoPage; 
-using ArenaVirtual.ViewModels.Organizador; 
+using ArenaVirtual.ViewModels.Organizador;
+using ArenaVirtual.ViewModels.Patrocinador;
 using ArenaVirtual.Views;
 using ArenaVirtual.Views.Arbitro;
 using ArenaVirtual.Views.Atleta;
 using ArenaVirtual.Views.CampeonatoPage; 
-using ArenaVirtual.Views.Organizador; 
+using ArenaVirtual.Views.Organizador;
+using ArenaVirtual.Views.Patrocinador;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 
@@ -46,6 +48,7 @@ public static class MauiProgram {
         builder.Services.AddSingleton(SessaoService.Instancia);
         builder.Services.AddSingleton<IJogoService, JogoService>();
         builder.Services.AddSingleton<JogoService>();
+        builder.Services.AddSingleton<PatrocinioService>();
 
         // Registre os serviços de domínio como Transients
         builder.Services.AddTransient<UsuarioService>();
@@ -74,6 +77,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<CampeonatoInscricaoViewModel>();
         builder.Services.AddTransient<ArbitrosInscritosViewModel>();
         builder.Services.AddTransient<EstatisticasPessoaisViewModel>();
+        builder.Services.AddTransient<DashboardPatrocinadorViewModel>();
 
         // Registre as Páginas e Popups como Transient
         builder.Services.AddTransient<LoginPage>();
@@ -99,6 +103,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<CampeonatoInscricao>();
         builder.Services.AddTransient<ArbitrosInscritosPage>();
         builder.Services.AddTransient<EstatisticasPessoaisPage>();
+        builder.Services.AddTransient<DashboardPatrocinadorPage>();
 
         // Registre os popups que agora recebem injeção de dependência
         builder.Services.AddTransient<AlterarImagemPopup>();

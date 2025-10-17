@@ -1,5 +1,4 @@
 ﻿using ArenaVirtual.Models;
-using ArenaVirtual.Services;
 using ArenaVirtual.Views;
 using ArenaVirtual.Views.Arbitro;
 using ArenaVirtual.Views.Atleta;
@@ -39,6 +38,7 @@ namespace ArenaVirtual {
             Routing.RegisterRoute(nameof(ArbitrosInscritosPage), typeof(ArbitrosInscritosPage));
             Routing.RegisterRoute("AtribuirArbitros", typeof(Popups.AtribuirArbitrosPopup));
             Routing.RegisterRoute(nameof(EstatisticasPessoaisPage), typeof(EstatisticasPessoaisPage));
+            Routing.RegisterRoute(nameof(DashboardPatrocinadorPage), typeof(DashboardPatrocinadorPage));
 
             CriarMenuPorPerfil(usuarioLogado);
         }
@@ -57,7 +57,6 @@ namespace ArenaVirtual {
                 }
             });
 
-            // CORREÇÃO: Usando o serviceProvider para obter a instância da PerfilPage
             this.Items.Add(new FlyoutItem {
                 Title = "Meu Perfil",
                 Route = "PerfilPage",
@@ -87,7 +86,7 @@ namespace ArenaVirtual {
                 });
             } else if (usuario.Perfil == TipoPerfil.Arbitro) {
                 this.Items.Add(new FlyoutItem {
-                    Title = "Meus Jogos",
+                    Title = "Dashboard",
                     Items = {
                         new ShellContent { Title = "Ver Jogos Atribuidos", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<DashboardArbitroPage>()) }
                     }
@@ -96,8 +95,7 @@ namespace ArenaVirtual {
                 this.Items.Add(new FlyoutItem {
                     Title = "Minhas Campanhas",
                     Items = {
-                        new ShellContent { Title = "Criar Campanha", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<PropostasPatrocinioPage>()) },
-                        new ShellContent { Title = "Ver Campanhas", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<CampanhasPage>()) }
+                        new ShellContent { Title = "Dashboard", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<DashboardPatrocinadorPage>()) }
                     }
                 });
             }

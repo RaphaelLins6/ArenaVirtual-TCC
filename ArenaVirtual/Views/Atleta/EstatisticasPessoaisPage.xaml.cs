@@ -5,7 +5,6 @@ namespace ArenaVirtual.Views.Atleta {
         public EstatisticasPessoaisPage(EstatisticasPessoaisViewModel viewModel) {
             InitializeComponent();
             BindingContext = viewModel;
-            Title = "Estatisticas Pessoais"; 
         }
     }
 }
