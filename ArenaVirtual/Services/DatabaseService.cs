@@ -303,6 +303,19 @@ namespace ArenaVirtual.Services {
         public Task InserirCampanhaAsync(CampanhaPatrocinio campanha) {
             return _database.InsertAsync(campanha);
         }
+        public Task<List<CampanhaPatrocinio>> ObterTodasCampanhasDoPatrocinadorAsync(int patrocinadorId) {
+            if (patrocinadorId <= 0) {
+                System.Diagnostics.Debug.WriteLine("[DB Patrocinio] ID do patrocinador inválido (<= 0). Retornando lista vazia.");
+                return Task.FromResult(new List<CampanhaPatrocinio>());
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[DB Patrocinio] Buscando TODAS as Campanhas para Patrocinador ID: {patrocinadorId} (Ativas e Finalizadas).");
+
+            return _database.Table<CampanhaPatrocinio>()
+                            .Where(c => c.PatrocinadorId == patrocinadorId)
+                            .OrderByDescending(c => c.Fim) // Opcional: Ordena para mostrar as mais novas/próximas
+                            .ToListAsync();
+        }
 
         // --- MÉTODOS DE Estatísticas ---
         public Task<int> InserirEstatisticaAsync(EstatisticaPartida item) => _database.InsertAsync(item);
