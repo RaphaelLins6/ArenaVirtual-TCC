@@ -8,7 +8,6 @@ using Microsoft.Maui.Storage;
 
 namespace ArenaVirtual.Popups;
 
-// A classe foi renomeada
 public partial class AlterarBannerPatrocinioPopup : ContentPage, INotifyPropertyChanged {
     public event PropertyChangedEventHandler? PropertyChanged;
     private void OnPropertyChanged(string propertyName) =>
@@ -25,8 +24,8 @@ public partial class AlterarBannerPatrocinioPopup : ContentPage, INotifyProperty
         }
     }
 
-    // O objeto de foco agora é a PropostaPatrocinio
-    private readonly PropostaPatrocinio _propostaPatrocinio;
+    // ?? CORREÇÃO 1: O objeto de foco agora é a CampanhaPatrocinio ??
+    private readonly CampanhaPatrocinio _campanhaPatrocinio;
     private readonly IAlertService _alertService;
     private readonly DatabaseService _databaseService;
     private readonly SyncService _syncService;
@@ -35,18 +34,18 @@ public partial class AlterarBannerPatrocinioPopup : ContentPage, INotifyProperty
 
     private string? _caminhoNovoBannerSelecionado;
 
-    // O construtor agora recebe PropostaPatrocinio
-    public AlterarBannerPatrocinioPopup(PropostaPatrocinio propostaPatrocinio, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
+    // ?? CORREÇÃO 2: O construtor agora recebe CampanhaPatrocinio ??
+    public AlterarBannerPatrocinioPopup(CampanhaPatrocinio campanhaPatrocinio, IAlertService alertService, DatabaseService databaseService, SyncService syncService) {
         InitializeComponent();
-        _propostaPatrocinio = propostaPatrocinio;
+        _campanhaPatrocinio = campanhaPatrocinio;
         _alertService = alertService;
         _databaseService = databaseService;
         _syncService = syncService;
 
         BindingContext = this;
-        // Usa ImagemPatrocinador em vez de BannerUrl
-        AtualizarImagemUI(_propostaPatrocinio.ImagemPatrocinador);
-        Debug.WriteLine($"[AlterarBannerPatrocinioPopup] Popup inicializado. ImagemPatrocinador recebido: '{_propostaPatrocinio.ImagemPatrocinador}'");
+        // Usa ImagemPatrocinador da Campanha
+        AtualizarImagemUI(_campanhaPatrocinio.ImagemPatrocinador);
+        Debug.WriteLine($"[AlterarBannerPatrocinioPopup] Popup inicializado. ImagemPatrocinador recebido: '{_campanhaPatrocinio.ImagemPatrocinador}'");
     }
 
     private void AtualizarImagemUI(string? caminhoImagem) {
@@ -103,8 +102,8 @@ public partial class AlterarBannerPatrocinioPopup : ContentPage, INotifyProperty
             // Lógica de copiar o arquivo local
             string diretorioImagens = FileSystem.AppDataDirectory;
             string nomeArquivo = Path.GetFileName(_caminhoNovoBannerSelecionado);
-            // Usamos o ClientAppId da Proposta para criar um nome de arquivo exclusivo
-            string caminhoFinalImagem = Path.Combine(diretorioImagens, $"{_propostaPatrocinio.ClientAppId}_{nomeArquivo}");
+            // Usamos o ClientAppId da Campanha para criar um nome de arquivo exclusivo
+            string caminhoFinalImagem = Path.Combine(diretorioImagens, $"{_campanhaPatrocinio.ClientAppId}_{nomeArquivo}");
 
             Debug.WriteLine($"[AlterarBannerPatrocinioPopup] Caminho de origem do arquivo: '{_caminhoNovoBannerSelecionado}'");
             Debug.WriteLine($"[AlterarBannerPatrocinioPopup] Caminho de destino do arquivo: '{caminhoFinalImagem}'");
@@ -117,17 +116,18 @@ public partial class AlterarBannerPatrocinioPopup : ContentPage, INotifyProperty
             File.Copy(_caminhoNovoBannerSelecionado, caminhoFinalImagem, true);
             Debug.WriteLine("[AlterarBannerPatrocinioPopup] Imagem copiada com sucesso.");
 
-            // *** MUDANÇA CRÍTICA: Atualiza o modelo PropostaPatrocinio ***
-            _propostaPatrocinio.ImagemPatrocinador = caminhoFinalImagem;
-            _propostaPatrocinio.IsSynced = false;
-            _propostaPatrocinio.UpdatedAt = DateTime.UtcNow;
+            // ?? MUDANÇA CRÍTICA: Atualiza o modelo CampanhaPatrocinio ??
+            _campanhaPatrocinio.ImagemPatrocinador = caminhoFinalImagem;
+            _campanhaPatrocinio.IsSynced = false;
+            _campanhaPatrocinio.UpdatedAt = DateTime.UtcNow;
 
-            // Chamar o serviço para atualizar a PropostaPatrocinio no banco de dados
-            await _databaseService.AtualizarPropostaPatrocinioAsync(_propostaPatrocinio);
+            // ?? CORREÇÃO 3: Chamar o serviço para atualizar a CampanhaPatrocinio no banco de dados ??
+            // Você precisará de um método 'AtualizarCampanhaPatrocinioAsync' no seu DatabaseService.
+            await _databaseService.AtualizarCampanhaPatrocinioAsync(_campanhaPatrocinio);
 
             // Disparar o evento para notificar a ViewModel principal
-            BannerAtualizado?.Invoke(this, _propostaPatrocinio.ImagemPatrocinador);
-            Debug.WriteLine($"[AlterarBannerPatrocinioPopup] Evento 'BannerAtualizado' disparado com o caminho: '{_propostaPatrocinio.ImagemPatrocinador}'");
+            BannerAtualizado?.Invoke(this, _campanhaPatrocinio.ImagemPatrocinador);
+            Debug.WriteLine($"[AlterarBannerPatrocinioPopup] Evento 'BannerAtualizado' disparado com o caminho: '{_campanhaPatrocinio.ImagemPatrocinador}'");
 
             await _alertService.DisplayAlert("Sucesso", "Banner de divulgação atualizado!", "OK");
             await Navigation.PopModalAsync();

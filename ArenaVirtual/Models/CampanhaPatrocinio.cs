@@ -5,7 +5,7 @@ namespace ArenaVirtual.Models {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
         public Guid ClientAppId { get; set; }
-
+        public string? ImagemPatrocinador { get; set; }
         public string Nome { get; set; } = string.Empty; 
         public int PatrocinadorId { get; set; }
         public int CampeonatoId { get; set; }

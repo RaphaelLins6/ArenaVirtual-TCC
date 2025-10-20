@@ -86,9 +86,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         [ObservableProperty]
         private bool isFiltroFaseVisivel = false;
-        [ObservableProperty]
 
-        private ObservableCollection<PropostaPatrocinio> patrocinadoresAtivos = new();
+        [ObservableProperty]
+        private ObservableCollection<CampanhaPatrocinio> patrocinadoresAtivos = new();
 
         [ObservableProperty]
         private string bannerDivulgacaoSource;
@@ -96,19 +96,21 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         [ObservableProperty]
         private bool isPatrocinioDivulgacaoVisible;
 
-        // Dicionários privados
+        // Campos privado
         private readonly Dictionary<int, ObservableCollection<Jogo>> _jogosPorRodada = new();
         private readonly Dictionary<string, List<Time>> _timesPorGrupo = new();
-
-        // ** ADICIONADO: Lista privada de todos os jogos para cálculo da sequência
+        private CampanhaPatrocinio? _campanhaPatrocinioAtiva;
         private List<Jogo> _todosOsJogosDoCampeonato = new();
 
-        // Serviços injetados
+        // =====================================================================================
+        // SERVIÇOS INJETADOS (INCLUSÃO DO IPATROCINIOSERVICE)
+        // =====================================================================================
         private readonly IAlertService _alertService;
-        private readonly DatabaseService _databaseService;
+        private readonly DatabaseService _databaseService; // Usando a interface para ser mais coerente
         private readonly SyncService _syncService;
         private readonly UsuarioService _usuarioService;
         private readonly IJogoService _jogoService;
+        private readonly PatrocinioService _patrocinioService;
 
         // Propriedades calculadas
         public bool IsFormatoComGrupos =>
@@ -119,8 +121,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             Campeonato?.FormatoCampeonato?.IndexOf("Pontos", StringComparison.OrdinalIgnoreCase) >= 0 ||
             IsFormatoComGrupos;
 
-        // CORREÇÃO: Removemos '|| IsFormatoHibrido' para que esta propriedade
-        // descreva o *formato base* do campeonato, e não o estado da fase atual.
         public bool IsMataMataFormat =>
             Campeonato?.FormatoCampeonato?.IndexOf("Mata-mata", StringComparison.OrdinalIgnoreCase) >= 0 ||
             Campeonato?.FormatoCampeonato?.IndexOf("Eliminação", StringComparison.OrdinalIgnoreCase) >= 0;
@@ -128,22 +128,29 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         public bool IsFaseTabelaEJogos => FaseAtual == "Tabela & Jogos";
         public bool IsFaseMataMata => FaseAtual == "Mata-Mata";
 
-        // Construtor
+        // =====================================================================================
+        // CONSTRUTOR (INCLUSÃO DO IPATROCINIOSERVICE)
+        // =====================================================================================
         public CampeonatoDetailViewModel(
             IAlertService alertService,
-            DatabaseService databaseService,
+            DatabaseService databaseService, // Assume-se que DatabaseService implementa IDatabaseService
             SyncService syncService,
             IJogoService jogoService,
-            UsuarioService usuarioService) {
+            UsuarioService usuarioService,
+            // ⭐️ PARÂMETRO NOVO: Recebendo o serviço por injeção ⭐️
+            PatrocinioService patrocinioService) {
+
             TabelaClassificacao = new ObservableCollection<Time>();
             TabelaJogos = new ObservableCollection<Jogo>();
-            EstatisticasTimes = new ObservableCollection<TimeEstatisticaViewModel>(); // Inicializa a nova propriedade
+            EstatisticasTimes = new ObservableCollection<TimeEstatisticaViewModel>();
 
             _alertService = alertService;
-            _databaseService = databaseService;
+            _databaseService = (DatabaseService)databaseService; // Pode ser necessário um cast se a interface não estiver sendo usada
             _syncService = syncService;
             _jogoService = jogoService;
             _usuarioService = usuarioService;
+            // ⭐️ ATRIBUIÇÃO NO CONSTRUTOR ⭐️
+            _patrocinioService = patrocinioService;
 
             IsDesktop = DeviceInfo.Idiom == DeviceIdiom.Desktop || DeviceInfo.Idiom == DeviceIdiom.Tablet;
             Debug.WriteLine($"[CampeonatoDetailViewModel] Device Idiom: {DeviceInfo.Idiom}. IsDesktop: {IsDesktop}");
@@ -905,21 +912,46 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         }
 
         private async Task LoadPatrocinadoresAsync() {
-            if (Campeonato == null) return;
+            // ⭐️ LOG 1: Verifica o estado inicial (Campeonato) ⭐️
+            if (Campeonato == null) {
+                System.Diagnostics.Debug.WriteLine("[LoadPatrocinadoresAsync] Campeonato é nulo. Abortando.");
+                return;
+            }
 
             try {
-                var listaPatrocinios = await _databaseService.ObterPatrociniosAtivosDoCampeonatoAsync(Campeonato.ClientAppId);
+                System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] Buscando Campanha para Campeonato ID: {Campeonato.ClientAppId}");
+
+                // Assume-se que o ViewModel tem acesso ao _patrocinioService.
+                // O service já deve aplicar a lógica de inativação por data.
+                var campanhaAtiva = await _patrocinioService.ObterCampanhaDeDivulgacaoAtivaAsync(Campeonato.ClientAppId);
+
+                // ⭐️ CORREÇÃO ESSENCIAL: Salvar a Campanha Ativa na variável usada pelo Comando de Edição ⭐️
+                // (A variável _propostaPatrocinioPrincipal é do tipo CampanhaPatrocinio, pois foi criada a partir de uma Proposta)
+                _campanhaPatrocinioAtiva = campanhaAtiva;
+
+                // ⭐️ LOG 2: Registra o valor retornado pelo Service (PONTO CRÍTICO) ⭐️
+                System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] Campanha recebida do Service: {(campanhaAtiva != null ? $"ID {campanhaAtiva.Id} | Fim: {campanhaAtiva.Fim}" : "NULA")}");
 
                 PatrocinadoresAtivos.Clear();
-                foreach (var p in listaPatrocinios) {
-                    PatrocinadoresAtivos.Add(p);
+
+                // Adiciona apenas se uma CampanhaPatrocinio não expirada foi encontrada (assumindo que o service cuida da expiração)
+                if (campanhaAtiva != null) {
+                    PatrocinadoresAtivos.Add(campanhaAtiva);
                 }
 
                 // PASSO CRÍTICO: Define a visibilidade da seção com base se a lista tem itens
                 IsPatrocinioDivulgacaoVisible = PatrocinadoresAtivos.Any();
 
+                // ⭐️ LOG 3: Registra a decisão final de visibilidade ⭐️
+                System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] IsPatrocinioDivulgacaoVisible: {IsPatrocinioDivulgacaoVisible}");
+
+
                 if (IsPatrocinioDivulgacaoVisible) {
+                    // O objeto CampanhaPatrocinio deve ter a propriedade ImagemPatrocinador
                     string? caminhoBanner = PatrocinadoresAtivos.First().ImagemPatrocinador;
+
+                    // ⭐️ LOG 4: Registra o caminho do banner antes da atribuição ⭐️
+                    System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] Caminho Banner (ImagemPatrocinador): {caminhoBanner ?? "NULO/VAZIO"}");
 
                     // Se tem patrocinador, mas não tem imagem customizada, usa o placeholder
                     if (string.IsNullOrEmpty(caminhoBanner)) {
@@ -928,12 +960,18 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                         // Usa o caminho salvo
                         BannerDivulgacaoSource = caminhoBanner;
                     }
+
+                    // ⭐️ LOG 5: Registra a Source final do Banner ⭐️
+                    System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] BannerDivulgacaoSource DEFINIDA para: {BannerDivulgacaoSource}");
+
                 } else {
                     // Se não tem patrocinador (IsPatrocinioDivulgacaoVisible = false), limpa a Source.
                     BannerDivulgacaoSource = null;
+                    System.Diagnostics.Debug.WriteLine("[LoadPatrocinadoresAsync] BannerDivulgacaoSource limpa.");
                 }
+
             } catch (Exception ex) {
-                Debug.WriteLine($"[PATROCINIO] Erro ao carregar patrocinadores: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[PATROCINIO - CRÍTICO] Erro ao carregar patrocinadores: {ex.Message}");
                 IsPatrocinioDivulgacaoVisible = false; // Garante que a seção não aparece em caso de erro
                 BannerDivulgacaoSource = null;
             }
@@ -1038,23 +1076,29 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             };
             await Shell.Current.GoToAsync(nameof(ArbitrosInscritosPage), navigationParameters);
         }
+
         [RelayCommand]
         private async Task AlterarBannerDivulgacao() {
             Debug.WriteLine("[CampeonatoDetailViewModel] Botão 'Alterar Banner Divulgação' clicado.");
-            var patrocinioPrincipal = PatrocinadoresAtivos.FirstOrDefault();
-            if (patrocinioPrincipal == null) {
+
+            // ⭐️ _propostaPatrocinioPrincipal agora contém a CampanhaPatrocinio ativa (ou null se não houver) ⭐️
+            if (_campanhaPatrocinioAtiva == null) {
+                // Se ainda for null, significa que LoadPatrocinadoresAsync não encontrou nada (expirou/erro real)
                 await _alertService.DisplayAlert("Sem Patrocínio", "Não há patrocínios ativos para alterar o banner.", "OK");
                 return;
             }
-            // NOTA: Certifique-se de que AlterarBannerPatrocinioPopup foi criado corretamente.
-            var popup = new AlterarBannerPatrocinioPopup(patrocinioPrincipal, _alertService, _databaseService, _syncService);
+
+            // Passamos a Campanha Patrocínio ativa para o pop-up, que fará o upload e atualizará o ImagemPatrocinador.
+            // É recomendável renomear a variável no ViewModel para _campanhaPatrocinioPrincipal no futuro para maior clareza.
+            var popup = new AlterarBannerPatrocinioPopup(_campanhaPatrocinioAtiva, _alertService, _databaseService, _syncService);
 
             popup.BannerAtualizado += (s, newBannerPath) => {
                 Debug.WriteLine($"[CampeonatoDetailViewModel] Evento BannerAtualizado (Patrocínio) recebido com caminho: '{newBannerPath}'");
                 MainThread.BeginInvokeOnMainThread(() => {
-                    // AQUI está o ponto: O popup já deve ter atualizado a proposta.
-                    // Apenas garantimos que o BannerDivulgacaoSource é atualizado para a UI.
-                    BannerDivulgacaoSource = newBannerPath; // Se for vazio/nulo, a lógica de carregamento irá tratá-lo.
+                    BannerDivulgacaoSource = newBannerPath;
+
+                    // Opcional, mas recomendado: Atualizar a variável de suporte para refletir o novo caminho imediatamente.
+                    _campanhaPatrocinioAtiva.ImagemPatrocinador = newBannerPath;
                 });
             };
             await Application.Current.MainPage.Navigation.PushModalAsync(popup);

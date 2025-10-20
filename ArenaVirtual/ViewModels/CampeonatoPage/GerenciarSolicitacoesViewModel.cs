@@ -397,6 +397,24 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 var propostaOriginal = solicitacaoItem.PropostaOriginal;
                 if (propostaOriginal == null) return;
 
+                // ⭐️ LÓGICA DE RESTRIÇÃO DE PATROCÍNIO ATIVO ⭐️
+                // (Assumindo que 'Campeonato' é uma propriedade no seu ViewModel)
+                bool jaTemPatrocinioAtivo = await _patrocinioService.ExisteCampanhaAtivaNoCampeonatoAsync(Campeonato.ClientAppId);
+
+                if (jaTemPatrocinioAtivo) {
+                    await _alertService.DisplayAlert(
+                        "Atenção",
+                        "Este campeonato já possui um Patrocínio Ativo. Recuse a proposta atual ou aguarde a expiração do patrocínio existente.",
+                        "OK");
+
+                    // É importante definir IsBusy como false antes de retornar
+                    IsBusy = false;
+                    return; // Impede a aceitação
+                }
+                // Fim da Lógica de Restrição ⭐️
+
+                // Se não houver patrocínio ativo, prossegue com a aceitação:
+
                 propostaOriginal.Aprovada = true; // Define como Aprovada!
                 propostaOriginal.IsSynced = false;
                 propostaOriginal.UpdatedAt = DateTime.UtcNow;
@@ -408,13 +426,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 var dataInicioProposta = propostaOriginal.DataInicio;
                 var dataFimProposta = propostaOriginal.DataFim;
 
-                // ⭐️ CORREÇÕES APLICADAS AQUI ⭐️
+                // ⭐️ CRIAÇÃO DA NOVA CAMPANHA ⭐️
                 var novaCampanha = new CampanhaPatrocinio {
                     PatrocinadorId = propostaOriginal.PatrocinadorId,
                     CampeonatoId = propostaOriginal.CampeonatoId,
 
-                    // 🎯 LINHA ESSENCIAL ADICIONADA: Transferir o valor monetário da Proposta para a Campanha
-                    // Assumindo que o campo na Campanha é 'ValorProposta' e na Proposta é 'ValorMonetario'.
+                    // 🎯 LINHA ESSENCIAL: Transferir o valor monetário da Proposta para a Campanha
                     ValorProposta = propostaOriginal.ValorMonetario,
 
                     Nome = $"Patrocínio Ativo - {solicitacaoItem.NomePatrocinador}",
@@ -423,11 +440,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 };
 
                 // 3. Insere a Campanha no DB.
-                // Chamada via PatrocinioService.
                 await _patrocinioService.InserirCampanhaAsync(novaCampanha);
 
                 Debug.WriteLine($"[Aceite] Campanha {novaCampanha.Nome} criada e inserida para Patrocinador ID {novaCampanha.PatrocinadorId}.");
-                // Fim do bloco de correção ⭐️
+                // Fim do bloco de criação da campanha ⭐️
 
                 MainThread.BeginInvokeOnMainThread(() => {
                     SolicitacoesPatrocinioPendentes.Remove(solicitacaoItem);
@@ -440,6 +456,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 Debug.WriteLine($"[AceitarPatrocinio] ERRO: {ex.Message}");
                 await _alertService.DisplayAlert("Erro", "Ocorreu um erro ao aceitar a proposta de patrocínio.", "OK");
             } finally {
+                // Garante que IsBusy será false ao final do método, a menos que retorne mais cedo no if (jaTemPatrocinioAtivo).
                 IsBusy = false;
             }
         }

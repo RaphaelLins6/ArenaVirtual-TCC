@@ -190,10 +190,51 @@ namespace ArenaVirtual.Services {
         }
 
         public Task InserirCampanhaAsync(CampanhaPatrocinio campanha) {
-            // Chama o método que você implementou no DatabaseService
-            // NOTA: Há uma duplicação aqui, pois 'CriarCampanhaAsync' já existe e faz mais (incluindo metadados e sync)
-            // Recomenda-se unificar em CriarCampanhaAsync ou renomear este método para refletir que apenas chama o DB.
             return _databaseService.InserirCampanhaAsync(campanha);
+        }
+
+        public async Task<CampanhaPatrocinio?> ObterCampanhaDeDivulgacaoAtivaAsync(Guid campeonatoClientAppId) {
+            try {
+                var todasCampanhas = await _databaseService.ListarCampanhasPatrocinioPorCampeonatoAsync(campeonatoClientAppId);
+
+                if (todasCampanhas == null) {
+                    System.Diagnostics.Debug.WriteLine($"[PatrocinioService - Rastreio] Lista de Campanhas retornada pelo DB Service é nula para o Campeonato: {campeonatoClientAppId}");
+                    return null; // Caso o DB Service retorne null (em vez de List<CampanhaPatrocinio> vazio)
+                }
+
+                System.Diagnostics.Debug.WriteLine($"[PatrocinioService - Rastreio] Total de Campanhas encontradas para {campeonatoClientAppId}: {todasCampanhas.Count}");
+
+
+                var campanhaAtiva = todasCampanhas
+                    .Where(c => c.Fim.AddDays(1) > DateTime.Now)
+                    .OrderByDescending(c => c.Fim)
+                    .FirstOrDefault();
+
+                if (campanhaAtiva != null) {
+                    System.Diagnostics.Debug.WriteLine($"[PatrocinioService - Rastreio] Campanha ATIVA encontrada. ID: {campanhaAtiva.Id}, Nome: {campanhaAtiva.Nome}");
+                } else {
+                    System.Diagnostics.Debug.WriteLine($"[PatrocinioService - Rastreio] Nenhuma Campanha ATIVA encontrada após filtro de data.");
+                }
+
+                return campanhaAtiva;
+
+            } catch (Exception ex) {
+                // Mantenha o retorno nulo no catch, mas garanta que o log é CRÍTICO.
+                System.Diagnostics.Debug.WriteLine($"[PatrocinioService - FALHA] Erro CRÍTICO ao obter campanha de divulgação ativa: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<bool> ExisteCampanhaAtivaNoCampeonatoAsync(Guid campeonatoClientAppId) {
+            try {
+                var campanhaAtiva = await ObterCampanhaDeDivulgacaoAtivaAsync(campeonatoClientAppId);
+
+                return campanhaAtiva != null;
+
+            } catch (Exception ex) {
+                Debug.WriteLine($"[PatrocinioService] Erro ao verificar campanha ativa: {ex.Message}");
+                return false;
+            }
         }
     }
 }
