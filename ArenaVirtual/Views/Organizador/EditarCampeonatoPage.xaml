@@ -3,6 +3,7 @@
     x:Class="ArenaVirtual.Views.Organizador.EditarCampeonatoPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:behaviors="clr-namespace:ArenaVirtual.Behaviors"
     xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     Title="Editar Campeonato">
 
@@ -46,7 +47,11 @@
             <Entry
                 Keyboard="Telephone"
                 Placeholder="Telefone do organizador"
-                Text="{Binding Campeonato.TelefoneOrganizador}" />
+                Text="{Binding Campeonato.TelefoneOrganizador}">
+                <Entry.Behaviors>
+                    <behaviors:MaskBehavior Mask="PHONE" />
+                </Entry.Behaviors>
+            </Entry>
 
             <Label Style="{StaticResource LabelHeaderStyle}" Text="Formato do Campeonato" />
             <Picker

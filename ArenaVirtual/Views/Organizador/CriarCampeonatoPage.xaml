@@ -3,6 +3,7 @@
     x:Class="ArenaVirtual.Views.Organizador.CriarCampeonatoPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:behaviors="clr-namespace:ArenaVirtual.Behaviors"
     xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
     Title="Criar Campeonato"
@@ -58,7 +59,11 @@
                     Keyboard="Telephone"
                     Placeholder="(XX) XXXXX-XXXX"
                     Style="{StaticResource EntryStyle}"
-                    Text="{Binding TelefoneOrganizador}" />
+                    Text="{Binding TelefoneOrganizador}">
+                    <Entry.Behaviors>
+                        <behaviors:MaskBehavior Mask="PHONE" />
+                    </Entry.Behaviors>
+                </Entry>
 
                 <Label Style="{StaticResource LabelHeaderStyle}" Text="Local do Campeonato" />
                 <Entry
