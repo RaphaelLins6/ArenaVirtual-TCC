@@ -10,6 +10,7 @@ namespace ArenaVirtual.Models {
         public string NomePatrocinador { get; set; }
         public string ImagemPatrocinador { get; set; } // O caminho/URL do banner
         public string LinkPatrocinador { get; set; }
+        public decimal ValorMonetario { get; set; } = 0.00M;
         public DateTime DataInicio { get; set; }
         public DateTime DataFim { get; set; }
         public string Mensagem { get; set; } = string.Empty; // Default value added

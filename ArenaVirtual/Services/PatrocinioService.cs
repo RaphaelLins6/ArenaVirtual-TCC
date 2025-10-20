@@ -79,7 +79,8 @@ namespace ArenaVirtual.Services {
         /// <summary>
         /// Cria e salva uma nova Proposta de Patrocínio para um Campeonato.
         /// </summary>
-        public async Task<int> CriarPropostaPatrocinioAsync(int campeonatoId, string mensagem) {
+        // ⭐️ CORREÇÃO: Adicionando o parâmetro 'valor' (decimal) ⭐️
+        public async Task<int> CriarPropostaPatrocinioAsync(int campeonatoId, decimal valor, string mensagem) {
             var usuarioAtual = _sessaoService.GetUsuarioAtual();
             if (usuarioAtual == null || usuarioAtual.Id <= 0) {
                 Debug.WriteLine("[PatrocinioService] Patrocinador não logado.");
@@ -90,6 +91,8 @@ namespace ArenaVirtual.Services {
                 PatrocinadorId = usuarioAtual.Id,
                 CampeonatoId = campeonatoId, // Note: O correto aqui seria o ClientAppId do Campeonato, dependendo da sua arquitetura
                 Mensagem = mensagem,
+                // ⭐️ CORREÇÃO: Atribuindo o valor monetário ⭐️
+                ValorMonetario = valor,
                 Aprovada = false, // Sempre começa como não aprovada
                 ClientAppId = Guid.NewGuid(),
                 IsSynced = false,
@@ -188,6 +191,8 @@ namespace ArenaVirtual.Services {
 
         public Task InserirCampanhaAsync(CampanhaPatrocinio campanha) {
             // Chama o método que você implementou no DatabaseService
+            // NOTA: Há uma duplicação aqui, pois 'CriarCampanhaAsync' já existe e faz mais (incluindo metadados e sync)
+            // Recomenda-se unificar em CriarCampanhaAsync ou renomear este método para refletir que apenas chama o DB.
             return _databaseService.InserirCampanhaAsync(campanha);
         }
     }

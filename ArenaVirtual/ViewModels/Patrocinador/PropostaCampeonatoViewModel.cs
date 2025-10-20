@@ -85,39 +85,48 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
             }
         }
 
-        // Comando principal para enviar a proposta
-        [RelayCommand(CanExecute = nameof(CanSendProposta))]
+        // Comando principal para enviar a proposta
+        [RelayCommand(CanExecute = nameof(CanSendProposta))]
         private async Task EnviarPropostaPatrocinioAsync() {
             if (!CanSendProposta()) return;
 
-            // ⭐️ VALIDAÇÃO DA DATA ⭐️
-            // Embora CanSendProposta garanta que DataFim seja >= DataAtual, esta validação checa o período
-            if (DataFim.Date < DataInicio.Date) {
+            // ⭐️ VALIDAÇÃO DA DATA ⭐️
+            if (DataFim.Date < DataInicio.Date) {
                 await _alertService.DisplayAlert("Erro de Data",
-                  "A Data Fim deve ser posterior ou igual à Data Início.", "OK");
+                    "A Data Fim deve ser posterior ou igual à Data Início.", "OK");
+                return;
+            }
+
+            // ⭐️ CORREÇÃO PRINCIPAL: Tenta converter ValorPatrocinio (string) para decimal ⭐️
+            if (!decimal.TryParse(ValorPatrocinio, System.Globalization.NumberStyles.Currency,
+                                  System.Globalization.CultureInfo.CurrentCulture, out decimal valorNumerico)) {
+                await _alertService.DisplayAlert("Erro de Valor",
+                    "O valor do patrocínio não está em um formato numérico válido.", "OK");
                 return;
             }
 
             IsBusy = true;
 
             try {
-                // ⭐️ INCLUI AS DATAS NA MENSAGEM para que o Organizador veja o período proposto ⭐️
-                string periodo = $"Período Proposto: {DataInicio:dd/MM/yyyy} a {DataFim:dd/MM/yyyy}";
+                // Inclui as datas na mensagem
+                string periodo = $"Período Proposto: {DataInicio:dd/MM/yyyy} a {DataFim:dd/MM/yyyy}";
 
-                // Concatena valor, período e mensagem adicional para a propriedade 'Mensagem'
-                string mensagemCompleta = $"PROPOSTA: R$ {ValorPatrocinio}\n{periodo}\n\nMENSAGEM: {MensagemAdicional}";
+                // Prepara a mensagem completa para o organizador
+                string mensagemCompleta = $"PERÍODO: {periodo}\n\nMENSAGEM: {MensagemAdicional}";
 
-                // Utiliza o método original, mas passando a mensagem completa com as datas.
-                int result = await _patrocinioService.CriarPropostaPatrocinioAsync(_campeonatoInternalId, mensagemCompleta);
+                // Chama o Service: (int campeonatoId, decimal valor, string mensagem)
+                int result = await _patrocinioService.CriarPropostaPatrocinioAsync(
+                    _campeonatoInternalId,
+                    valorNumerico, // <--- VARIÁVEL DECIMAL CONVERTIDA
+                    mensagemCompleta
+                );
 
                 if (result > 0) {
                     await _alertService.DisplayAlert("Sucesso",
-                                    $"Proposta de Patrocínio de R$ {ValorPatrocinio} para '{NomeCampeonato}' enviada com sucesso!",
-                                    "OK");
+                                        $"Proposta de Patrocínio de R$ {valorNumerico} para '{NomeCampeonato}' enviada com sucesso!",
+                                        "OK");
 
-                    // Navega de volta para o Dashboard
-                    // Shell.Current deve estar disponível (usando Microsoft.Maui.Controls)
-                    await Shell.Current.GoToAsync("..");
+                    await Shell.Current.GoToAsync("..");
                 } else {
                     await _alertService.DisplayAlert("Erro", "Falha ao enviar a proposta. Verifique se você está logado.", "OK");
                 }

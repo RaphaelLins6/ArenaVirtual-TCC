@@ -6,9 +6,10 @@ namespace ArenaVirtual.Models {
         public int Id { get; set; }
         public Guid ClientAppId { get; set; }
 
-        public string Nome { get; set; } = string.Empty; // Fixed: Initialized with a default value
+        public string Nome { get; set; } = string.Empty; 
         public int PatrocinadorId { get; set; }
         public int CampeonatoId { get; set; }
+        public decimal ValorProposta { get; set; }
         public DateTime Inicio { get; set; }
         public DateTime Fim { get; set; }
         public string Descricao { get; set; } = string.Empty;
