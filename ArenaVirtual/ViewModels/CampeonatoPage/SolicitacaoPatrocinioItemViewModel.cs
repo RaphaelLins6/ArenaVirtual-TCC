@@ -28,8 +28,8 @@ namespace ArenaVirtual.ViewModels.Patrocinio {
         public decimal ValorProposto { get; } // Bind: Text="{Binding ValorProposto, StringFormat='PROPOSTA: R$ {0}'}"
 
         public string FotoPatrocinadorUrl { get; }
-
-        // ⭐️ PROPRIEDADES DE DATA ADICIONADAS ⭐️
+        public string ValorPropostoFormatado { get; }
+        public decimal ValorPropostoMonetario { get; }
         public DateTime DataInicio { get; } // Propriedade do Model
         public DateTime DataFim { get; }    // Propriedade do Model
 
@@ -47,16 +47,22 @@ namespace ArenaVirtual.ViewModels.Patrocinio {
             NomePatrocinador = Patrocinador.Nome;
             NomeEmpresa = Patrocinador.NomeEmpresa;
 
-            // Assumindo que PropostaPatrocinio tem as propriedades Mensagem, Valor, DataInicio e DataFim
+            // ⭐️ ATRIBUIÇÃO DO VALOR ⭐️
+            // Assumindo que o Model PropostaPatrocinio tem a propriedade ValorMonetario
+            ValorPropostoMonetario = PropostaOriginal.ValorMonetario;
+
+            // Formatação para exibição: "R$ 5.000,00"
+            ValorPropostoFormatado = $"VALOR PROPOSTO: {ValorPropostoMonetario.ToString("C", new CultureInfo("pt-BR"))}";
+
+            // Mensagem: É apenas o texto livre (sem valor e sem período)
             DetalhesProposta = PropostaOriginal.Mensagem;
 
-            // ⭐️ ATRIBUIÇÃO DE DATAS ⭐️
+            // ATRIBUIÇÃO DE DATAS
             DataFim = proposta.DataFim;
             DataInicio = proposta.DataInicio;
 
             // Formatação do período
-            // Use esta propriedade PeriodoPropostoFormatado no XAML, em vez de deixar na DetalhesProposta.
-            PeriodoPropostoFormatado = $"Período Proposto: {DataInicio:dd/MM/yyyy} a {DataFim:dd/MM/yyyy}";
+            PeriodoPropostoFormatado = $"PERÍODO: {DataInicio:dd/MM/yyyy} a {DataFim:dd/MM/yyyy}";
 
             FotoPatrocinadorUrl = Patrocinador.ImagemPath;
         }

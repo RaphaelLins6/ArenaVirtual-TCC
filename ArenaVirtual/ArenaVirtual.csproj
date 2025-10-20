@@ -84,7 +84,7 @@
 
 	<ItemGroup>
 		<Compile Update="Views\Arbitro\LancamentoEstatisticaPage.xaml.cs">
-		  <DependentUpon>LancamentoEstatisticaPage.xaml</DependentUpon>
+			  <DependentUpon>LancamentoEstatisticaPage.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="Views\Atleta\EditarTimePage.xaml.cs">
 			<DependentUpon>EditarTimePage.xaml</DependentUpon>
@@ -96,7 +96,7 @@
 			<DependentUpon>EditarCampeonatoPage.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="Views\Patrocinador\PropostaCampeonatoPage.xaml.cs">
-		  <DependentUpon>PropostaCampeonatoPage.xaml</DependentUpon>
+			  <DependentUpon>PropostaCampeonatoPage.xaml</DependentUpon>
 		</Compile>
 		<Compile Update="Views\RegisterPage.xaml.cs">
 			<DependentUpon>RegisterPage.xaml</DependentUpon>
@@ -108,10 +108,10 @@
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Popups\AlterarBannerPatrocinioPopup.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Popups\AlterarBannerPopup.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Popups\AlterarImagemPopup.xaml">
 			<Generator></Generator>
@@ -120,13 +120,13 @@
 			<Generator></Generator>
 		</MauiXaml>
 		<MauiXaml Update="Popups\DetalhesCampanhaPopup.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Popups\EditarPerfilPopup.xaml">
 			<Generator></Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\Arbitro\CampeonatoInscricao.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\Atleta\CriarTimePage.xaml">
 			<Generator></Generator>
@@ -138,19 +138,19 @@
 			<Generator></Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\Atleta\ProcurarCampeonatosPage.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\Atleta\SolicitacaoTimePage.xaml">
 			<Generator></Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\CampeonatoPage\CampeonatoDetailPage.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\CampeonatoPage\GerenciarSolicitacoesPage.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\CampeonatoPage\TimesCadastradosPage.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\Components\CampeonatoCard.xaml">
 			<Generator></Generator>
@@ -159,10 +159,10 @@
 			<Generator>MSBuild:UpdateDesignTimeXaml</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\Patrocinador\BuscarCampeonatosPage.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\Patrocinador\PropostaCampeonatoPage.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\PerfilPage.xaml">
 			<Generator>MSBuild:UpdateDesignTimeXaml</Generator>
@@ -178,8 +178,9 @@
 		</None>
 	</ItemGroup>
 
+	<!-- ⭐️ CORREÇÃO: InvariantGlobalization definido como false ⭐️ -->
 	<PropertyGroup>
-		<InvariantGlobalization>true</InvariantGlobalization>
+		<InvariantGlobalization>false</InvariantGlobalization>
 	</PropertyGroup>
 
 </Project>

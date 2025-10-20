@@ -265,6 +265,13 @@
                                                     TextColor="Gray" />
                                             </VerticalStackLayout>
                                         </Grid>
+
+                                        <Label
+                                            Margin="0,5,0,5"
+                                            FontAttributes="Bold"
+                                            FontSize="16"
+                                            Text="{Binding ValorPropostoFormatado}"
+                                            TextColor="#FF4500" />
                                         <BoxView
                                             Margin="0,5"
                                             BackgroundColor="Gray"
