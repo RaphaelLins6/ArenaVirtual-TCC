@@ -2,11 +2,14 @@
     x:Class="ArenaVirtual.Views.PerfilPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     xmlns:viewmodels="clr-namespace:ArenaVirtual.ViewModels;assembly=ArenaVirtual"
-    Title="Meu Perfil"
-    x:DataType="viewmodels:PerfilViewModel">
+    Title="Meu Perfil">
 
     <ContentPage.Resources>
+
+        <converters:FormatConverter x:Key="FormatConverter" />
+
         <Style x:Key="CardFrameStyle" TargetType="Border">
             <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=White, Dark=#333333}" />
             <Setter Property="StrokeShape">
@@ -38,244 +41,246 @@
         </Style>
     </ContentPage.Resources>
 
-    <Grid
-        Padding="20"
-        ColumnDefinitions="*"
-        RowDefinitions="Auto, Auto, *, Auto"
-        RowSpacing="15">
+    <ScrollView Grid.Row="2">
+        <Grid
+            Padding="20"
+            ColumnDefinitions="*"
+            RowDefinitions="Auto, Auto, *, Auto"
+            RowSpacing="15">
 
-        <VerticalStackLayout
-            Grid.Row="1"
-            HorizontalOptions="Center"
-            Spacing="10">
-            <Border
-                HeightRequest="150"
-                Stroke="{StaticResource Primary}"
-                StrokeShape="RoundRectangle 75"
-                StrokeThickness="1"
-                WidthRequest="150">
-                <Image
-                    x:Name="ImagemPerfil"
-                    Aspect="AspectFill"
+            <VerticalStackLayout
+                Grid.Row="1"
+                HorizontalOptions="Center"
+                Spacing="10">
+                <Border
+                    HeightRequest="150"
+                    Stroke="{StaticResource Primary}"
+                    StrokeShape="RoundRectangle 75"
+                    StrokeThickness="1"
+                    WidthRequest="150">
+                    <Image
+                        x:Name="ImagemPerfil"
+                        Aspect="AspectFill"
+                        HorizontalOptions="Center"
+                        Source="{Binding ImagemPerfilSource}"
+                        VerticalOptions="Center" />
+                </Border>
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="22"
                     HorizontalOptions="Center"
-                    Source="{Binding ImagemPerfilSource}"
-                    VerticalOptions="Center" />
-            </Border>
-            <Label
-                FontAttributes="Bold"
-                FontSize="22"
-                HorizontalOptions="Center"
-                Text="{Binding Saudacao}"
-                TextColor="{StaticResource Primary}" />
-            <Label
-                FontSize="18"
-                HorizontalOptions="Center"
-                Style="{StaticResource LabelValorCard}"
-                Text="{Binding NomeUsuario}" />
-        </VerticalStackLayout>
-
-        <ScrollView Grid.Row="2">
-            <VerticalStackLayout Margin="0,20,0,0" Spacing="15">
-
-                <Border Style="{StaticResource CardFrameStyle}">
-                    <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                        <Image
-                            Grid.Column="0"
-                            Source="email_icon.png"
-                            Style="{StaticResource IconeCard}" />
-                        <VerticalStackLayout Grid.Column="1">
-                            <Label Style="{StaticResource LabelTituloCard}" Text="E-mail" />
-                            <Label Style="{StaticResource LabelValorCard}" Text="{Binding EmailUsuario}" />
-                        </VerticalStackLayout>
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource CardFrameStyle}">
-                    <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                        <Image
-                            Grid.Column="0"
-                            Source="profile_type_icon.png"
-                            Style="{StaticResource IconeCard}" />
-                        <VerticalStackLayout Grid.Column="1">
-                            <Label Style="{StaticResource LabelTituloCard}" Text="Tipo de Perfil" />
-                            <Label Style="{StaticResource LabelValorCard}" Text="{Binding TipoPerfilUsuario}" />
-                        </VerticalStackLayout>
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource CardFrameStyle}">
-                    <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                        <Image
-                            Grid.Column="0"
-                            Source="location_icon.png"
-                            Style="{StaticResource IconeCard}" />
-                        <VerticalStackLayout Grid.Column="1">
-                            <Label Style="{StaticResource LabelTituloCard}" Text="Localização" />
-                            <Label Style="{StaticResource LabelValorCard}" Text="{Binding LocalizacaoUsuario}" />
-                        </VerticalStackLayout>
-                    </Grid>
-                </Border>
-
-                <VerticalStackLayout IsVisible="{Binding IsAtleta}" Spacing="15">
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="icon_birthday.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="Data de Nascimento" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding UsuarioLogado.DataNascimento, StringFormat='{0:dd/MM/yyyy}'}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="icon_gender.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="Gênero" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding GeneroUsuario}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="icon_weight.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="Peso" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding PesoUsuario}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="icon_height.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="Altura" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding AlturaUsuario}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="phone_icon.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="Número de Telefone" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding TelefoneUsuario}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="social_icon.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="Rede Social" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding LinkRedeSocialUsuario}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                </VerticalStackLayout>
-
-                <VerticalStackLayout IsVisible="{Binding IsOrganizador}" Spacing="15">
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="icon_company.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="Nome da Empresa" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding NomeEmpresaUsuario}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="icon_cnpj.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="CNPJ" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding CnpjUsuario}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="phone_icon.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="Número de Telefone" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding TelefoneUsuario}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="social_icon.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="Rede Social" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding LinkRedeSocialUsuario}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                </VerticalStackLayout>
-
-                <VerticalStackLayout IsVisible="{Binding IsArbitro}" Spacing="15">
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="icon_birthday.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="Data de Nascimento" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding UsuarioLogado.DataNascimento, StringFormat='{0:dd/MM/yyyy}'}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="icon_gender.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="Gênero" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding GeneroUsuario}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="phone_icon.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="Número de Telefone" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding TelefoneUsuario}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-
-                    <Border Style="{StaticResource CardFrameStyle}">
-                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
-                            <Image Source="social_icon.png" Style="{StaticResource IconeCard}" />
-                            <VerticalStackLayout Grid.Column="1">
-                                <Label Style="{StaticResource LabelTituloCard}" Text="Rede Social" />
-                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding LinkRedeSocialUsuario}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                </VerticalStackLayout>
-
+                    Text="{Binding Saudacao}"
+                    TextColor="{StaticResource Primary}" />
+                <Label
+                    FontSize="18"
+                    HorizontalOptions="Center"
+                    Style="{StaticResource LabelValorCard}"
+                    Text="{Binding NomeUsuario}" />
             </VerticalStackLayout>
-        </ScrollView>
 
-        <VerticalStackLayout
-            Grid.Row="3"
-            Margin="0,20,0,0"
-            Spacing="10">
-            <Button
-                Command="{Binding AlterarImagemCommand}"
-                Style="{StaticResource BotaoPrincipal}"
-                Text="Alterar Imagem" />
-            <Button
-                Command="{Binding EditarPerfilCommand}"
-                Style="{StaticResource BotaoPrincipal}"
-                Text="Editar Perfil" />
-            <Button
-                Command="{Binding AlterarSenhaCommand}"
-                Style="{StaticResource BotaoPrincipal}"
-                Text="Trocar Senha" />
-        </VerticalStackLayout>
-    </Grid>
+            <ScrollView Grid.Row="2">
+                <VerticalStackLayout Margin="0,20,0,0" Spacing="15">
+
+                    <Border Style="{StaticResource CardFrameStyle}">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                            <Image
+                                Grid.Column="0"
+                                Source="email_icon.png"
+                                Style="{StaticResource IconeCard}" />
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label Style="{StaticResource LabelTituloCard}" Text="E-mail" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding EmailUsuario}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource CardFrameStyle}">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                            <Image
+                                Grid.Column="0"
+                                Source="profile_type_icon.png"
+                                Style="{StaticResource IconeCard}" />
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Tipo de Perfil" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding TipoPerfilUsuario}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource CardFrameStyle}">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                            <Image
+                                Grid.Column="0"
+                                Source="location_icon.png"
+                                Style="{StaticResource IconeCard}" />
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label Style="{StaticResource LabelTituloCard}" Text="Localização" />
+                                <Label Style="{StaticResource LabelValorCard}" Text="{Binding LocalizacaoUsuario}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+
+                    <VerticalStackLayout IsVisible="{Binding IsAtleta}" Spacing="15">
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="icon_birthday.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="Data de Nascimento" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding UsuarioLogado.DataNascimento, StringFormat='{0:dd/MM/yyyy}'}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="icon_gender.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="Gênero" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding GeneroUsuario}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="icon_weight.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="Peso" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding PesoUsuario}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="icon_height.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="Altura" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding AlturaUsuario}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="phone_icon.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="Número de Telefone" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding TelefoneUsuario, Converter={StaticResource FormatConverter}, ConverterParameter=PHONE}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="social_icon.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="Rede Social" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding LinkRedeSocialUsuario}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout IsVisible="{Binding IsOrganizador}" Spacing="15">
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="icon_company.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="Nome da Empresa" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding NomeEmpresaUsuario}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="icon_cnpj.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="CNPJ" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding CnpjUsuario, Converter={StaticResource FormatConverter}, ConverterParameter=CNPJ}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="phone_icon.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="Número de Telefone" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding TelefoneUsuario}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="social_icon.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="Rede Social" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding LinkRedeSocialUsuario}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout IsVisible="{Binding IsArbitro}" Spacing="15">
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="icon_birthday.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="Data de Nascimento" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding UsuarioLogado.DataNascimento, StringFormat='{0:dd/MM/yyyy}'}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="icon_gender.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="Gênero" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding GeneroUsuario}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="phone_icon.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="Número de Telefone" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding TelefoneUsuario}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource CardFrameStyle}">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                <Image Source="social_icon.png" Style="{StaticResource IconeCard}" />
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Style="{StaticResource LabelTituloCard}" Text="Rede Social" />
+                                    <Label Style="{StaticResource LabelValorCard}" Text="{Binding LinkRedeSocialUsuario}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <VerticalStackLayout
+                Grid.Row="3"
+                Margin="0,20,0,0"
+                Spacing="10">
+                <Button
+                    Command="{Binding AlterarImagemCommand}"
+                    Style="{StaticResource BotaoPrincipal}"
+                    Text="Alterar Imagem" />
+                <Button
+                    Command="{Binding EditarPerfilCommand}"
+                    Style="{StaticResource BotaoPrincipal}"
+                    Text="Editar Perfil" />
+                <Button
+                    Command="{Binding AlterarSenhaCommand}"
+                    Style="{StaticResource BotaoPrincipal}"
+                    Text="Trocar Senha" />
+            </VerticalStackLayout>
+        </Grid>
+    </ScrollView>
 </ContentPage>

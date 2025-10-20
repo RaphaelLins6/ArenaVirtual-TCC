@@ -1,4 +1,5 @@
-﻿using ArenaVirtual.Models;
+﻿using ArenaVirtual.ViewModels;
+using ArenaVirtual.Models;
 using ArenaVirtual.Services;
 using System;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using Microsoft.Maui.Controls;
 using System.ComponentModel;
+using System.Collections.Generic; // Adicionar para o Picker
 
 namespace ArenaVirtual.Popups;
 
@@ -15,6 +17,113 @@ public partial class EditarPerfilPopup : ContentPage, INotifyPropertyChanged {
     private void OnPropertyChanged(string propertyName) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
+    // =========================================================================
+    // PROPRIEDADES DE BINDING (Mapeamento dos dados do XAML)
+    // =========================================================================
+
+    private string _nome = string.Empty;
+    public string Nome { // Usado por: Text="{Binding Nome}"
+        get => _nome;
+        set {
+            if (_nome != value) {
+                _nome = value;
+                OnPropertyChanged(nameof(Nome));
+            }
+        }
+    }
+
+    private string _email = string.Empty;
+    public string Email { // Usado por: Text="{Binding Email}"
+        get => _email;
+        set {
+            if (_email != value) {
+                _email = value;
+                OnPropertyChanged(nameof(Email));
+            }
+        }
+    }
+
+    // ... (Repetir a estrutura acima para todos os campos comuns)
+    private string _telefone = string.Empty;
+    public string Telefone {
+        get => _telefone;
+        set {
+            if (_telefone != value) {
+                _telefone = value;
+                OnPropertyChanged(nameof(Telefone));
+            }
+        }
+    }
+
+    private string _localizacao = string.Empty;
+    public string Localizacao {
+        get => _localizacao;
+        set {
+            if (_localizacao != value) {
+                _localizacao = value;
+                OnPropertyChanged(nameof(Localizacao));
+            }
+        }
+    }
+
+    private string _linkRedeSocial = string.Empty;
+    public string LinkRedeSocial {
+        get => _linkRedeSocial;
+        set {
+            if (_linkRedeSocial != value) {
+                _linkRedeSocial = value;
+                OnPropertyChanged(nameof(LinkRedeSocial));
+            }
+        }
+    }
+
+
+    // PROPRIEDADES DE VISIBILIDADE (Usadas por IsVisible="{Binding Is...}")
+    private bool _isAtleta;
+    public bool IsAtleta {
+        get => _isAtleta;
+        set {
+            if (_isAtleta != value) {
+                _isAtleta = value;
+                OnPropertyChanged(nameof(IsAtleta));
+            }
+        }
+    }
+
+    private bool _isOrganizador;
+    public bool IsOrganizador {
+        get => _isOrganizador;
+        set {
+            if (_isOrganizador != value) {
+                _isOrganizador = value;
+                OnPropertyChanged(nameof(IsOrganizador));
+            }
+        }
+    }
+
+    private bool _isPatrocinador;
+    public bool IsPatrocinador {
+        get => _isPatrocinador;
+        set {
+            if (_isPatrocinador != value) {
+                _isPatrocinador = value;
+                OnPropertyChanged(nameof(IsPatrocinador));
+            }
+        }
+    }
+
+    private bool _isArbitro;
+    public bool IsArbitro {
+        get => _isArbitro;
+        set {
+            if (_isArbitro != value) {
+                _isArbitro = value;
+                OnPropertyChanged(nameof(IsArbitro));
+            }
+        }
+    }
+
+    // PROPRIEDADE ISBUSY
     private bool _isBusy;
     public bool IsBusy {
         get => _isBusy;
@@ -25,6 +134,137 @@ public partial class EditarPerfilPopup : ContentPage, INotifyPropertyChanged {
             }
         }
     }
+
+
+    // PROPRIEDADES ESPECÍFICAS (Organizador/Patrocinador)
+    private string _nomeEmpresa = string.Empty;
+    public string NomeEmpresa { // Usado por Organizador
+        get => _nomeEmpresa;
+        set {
+            if (_nomeEmpresa != value) {
+                _nomeEmpresa = value;
+                OnPropertyChanged(nameof(NomeEmpresa));
+            }
+        }
+    }
+
+    private string _cnpj = string.Empty;
+    public string Cnpj { // Usado por Organizador
+        get => _cnpj;
+        set {
+            if (_cnpj != value) {
+                _cnpj = value;
+                OnPropertyChanged(nameof(Cnpj));
+            }
+        }
+    }
+
+    private string _nomeEmpresaPatrocinador = string.Empty;
+    public string NomeEmpresaPatrocinador { // Usado por Patrocinador
+        get => _nomeEmpresaPatrocinador;
+        set {
+            if (_nomeEmpresaPatrocinador != value) {
+                _nomeEmpresaPatrocinador = value;
+                OnPropertyChanged(nameof(NomeEmpresaPatrocinador));
+            }
+        }
+    }
+
+    private string _cnpjCpfPatrocinador = string.Empty;
+    public string CnpjCpfPatrocinador { // Usado por Patrocinador
+        get => _cnpjCpfPatrocinador;
+        set {
+            if (_cnpjCpfPatrocinador != value) {
+                _cnpjCpfPatrocinador = value;
+                OnPropertyChanged(nameof(CnpjCpfPatrocinador));
+            }
+        }
+    }
+
+    private string _faixaOrcamentoPatrocinio = string.Empty;
+    public string FaixaOrcamentoPatrocinio { // Usado por Patrocinador
+        get => _faixaOrcamentoPatrocinio;
+        set {
+            if (_faixaOrcamentoPatrocinio != value) {
+                _faixaOrcamentoPatrocinio = value;
+                OnPropertyChanged(nameof(FaixaOrcamentoPatrocinio));
+            }
+        }
+    }
+
+    // PROPRIEDADES ESPECÍFICAS (Atleta/Arbitro)
+    private DateTime _dataNascimento = DateTime.Now;
+    public DateTime DataNascimento { // Usado por Atleta
+        get => _dataNascimento;
+        set {
+            if (_dataNascimento != value) {
+                _dataNascimento = value;
+                OnPropertyChanged(nameof(DataNascimento));
+            }
+        }
+    }
+
+    private GeneroEnum _generoSelecionado;
+    public GeneroEnum GeneroSelecionado { // Usado por Atleta
+        get => _generoSelecionado;
+        set {
+            if (_generoSelecionado != value) {
+                _generoSelecionado = value;
+                OnPropertyChanged(nameof(GeneroSelecionado));
+            }
+        }
+    }
+
+    private double? _peso;
+    public double? Peso { // Usado por Atleta
+        get => _peso;
+        set {
+            if (_peso != value) {
+                _peso = value;
+                OnPropertyChanged(nameof(Peso));
+            }
+        }
+    }
+
+    private double? _altura;
+    public double? Altura { // Usado por Atleta
+        get => _altura;
+        set {
+            if (_altura != value) {
+                _altura = value;
+                OnPropertyChanged(nameof(Altura));
+            }
+        }
+    }
+
+    private DateTime _dataNascimentoArbitro = DateTime.Now;
+    public DateTime DataNascimentoArbitro { // Usado por Arbitro
+        get => _dataNascimentoArbitro;
+        set {
+            if (_dataNascimentoArbitro != value) {
+                _dataNascimentoArbitro = value;
+                OnPropertyChanged(nameof(DataNascimentoArbitro));
+            }
+        }
+    }
+
+    private GeneroEnum _generoArbitroSelecionado;
+    public GeneroEnum GeneroArbitroSelecionado { // Usado por Arbitro
+        get => _generoArbitroSelecionado;
+        set {
+            if (_generoArbitroSelecionado != value) {
+                _generoArbitroSelecionado = value;
+                OnPropertyChanged(nameof(GeneroArbitroSelecionado));
+            }
+        }
+    }
+
+    // Propriedade para o ItemsSource do Picker
+    public List<GeneroEnum> Generos { get; } = Enum.GetValues<GeneroEnum>().Cast<GeneroEnum>().ToList();
+
+    // =========================================================================
+    // CONSTRUTOR (Mapear dados do Usuario para as Propriedades)
+    // =========================================================================
 
     private readonly Usuario _usuario;
     private readonly IAlertService _alertService;
@@ -41,42 +281,47 @@ public partial class EditarPerfilPopup : ContentPage, INotifyPropertyChanged {
         // É crucial definir o BindingContext para que o XAML "veja" as propriedades do Code-Behind.
         BindingContext = this;
 
-        // Preenche campos comuns
-        NomeEntry.Text = _usuario.Nome;
-        EmailEntry.Text = _usuario.Email;
-        TelefoneEntry.Text = _usuario.Telefone;
-        LocalizacaoEntry.Text = _usuario.Localizacao;
-        LinkRedeSocialEntry.Text = _usuario.LinkRedeSocial;
+        // Mapeamento: Usuario -> Propriedades Públicas (usadas no XAML)
+        Nome = _usuario.Nome;
+        Email = _usuario.Email;
+        Telefone = _usuario.Telefone;
+        Localizacao = _usuario.Localizacao;
+        LinkRedeSocial = _usuario.LinkRedeSocial;
 
-        // Visibilidade por perfil
-        AtletaSection.IsVisible = _usuario.Perfil == TipoPerfil.Atleta;
-        OrganizadorSection.IsVisible = _usuario.Perfil == TipoPerfil.Organizador;
-        PatrocinadorSection.IsVisible = _usuario.Perfil == TipoPerfil.Patrocinador;
-        ArbitroSection.IsVisible = _usuario.Perfil == TipoPerfil.Arbitro;
+        // Configuração de Visibilidade
+        IsAtleta = _usuario.Perfil == TipoPerfil.Atleta;
+        IsOrganizador = _usuario.Perfil == TipoPerfil.Organizador;
+        IsPatrocinador = _usuario.Perfil == TipoPerfil.Patrocinador;
+        IsArbitro = _usuario.Perfil == TipoPerfil.Arbitro;
 
-        // Campos específicos
-        if (_usuario.Perfil == TipoPerfil.Atleta) {
-            GeneroPicker.ItemsSource = Enum.GetValues<GeneroEnum>().Cast<GeneroEnum>().ToList();
-            GeneroPicker.SelectedItem = _usuario.Genero;
-            DataNascimentoPicker.Date = _usuario.DataNascimento ?? DateTime.Now;
-            PesoEntry.Text = _usuario.Peso?.ToString();
-            AlturaEntry.Text = _usuario.Altura?.ToString();
+        // Configuração de Dados Específicos
+        if (IsAtleta) {
+            GeneroSelecionado = _usuario.Genero ?? Generos.First();
+            DataNascimento = _usuario.DataNascimento ?? DateTime.Now;
+            Peso = _usuario.Peso;
+            Altura = _usuario.Altura;
         }
-        if (_usuario.Perfil == TipoPerfil.Organizador) {
-            NomeEmpresaEntry.Text = _usuario.NomeEmpresa;
-            CnpjEntry.Text = _usuario.CNPJ;
+        if (IsOrganizador) {
+            NomeEmpresa = _usuario.NomeEmpresa;
+            Cnpj = _usuario.CNPJ;
         }
-        if (_usuario.Perfil == TipoPerfil.Patrocinador) {
-            NomeEmpresaPatrocinadorEntry.Text = _usuario.NomeEmpresa;
-            CnpjCpfPatrocinadorEntry.Text = _usuario.CNPJ;
-            FaixaOrcamentoPatrocinioEntry.Text = _usuario.FaixaOrcamentoPatrocinio;
+        if (IsPatrocinador) {
+            NomeEmpresaPatrocinador = _usuario.NomeEmpresa;
+            CnpjCpfPatrocinador = _usuario.CNPJ;
+            FaixaOrcamentoPatrocinio = _usuario.FaixaOrcamentoPatrocinio;
         }
-        if (_usuario.Perfil == TipoPerfil.Arbitro) {
-            GeneroArbitroPicker.ItemsSource = Enum.GetValues<GeneroEnum>().Cast<GeneroEnum>().ToList();
-            GeneroArbitroPicker.SelectedItem = _usuario.Genero;
-            DataNascimentoPickerArbitro.Date = _usuario.DataNascimento ?? DateTime.Now;
+        if (IsArbitro) {
+            GeneroArbitroSelecionado = _usuario.Genero ?? Generos.First();
+            DataNascimentoArbitro = _usuario.DataNascimento ?? DateTime.Now;
         }
+
+        // O XAML já possui os elementos visuais definidos, agora é só garantir
+        // que o BindingContext esteja correto para que as propriedades Is... funcionem.
     }
+
+    // =========================================================================
+    // MÉTODOS CLICKED (Agora usam as propriedades mapeadas)
+    // =========================================================================
 
     private async void Cancelar_Clicked(object sender, EventArgs e) {
         await Navigation.PopModalAsync();
@@ -88,30 +333,31 @@ public partial class EditarPerfilPopup : ContentPage, INotifyPropertyChanged {
         IsBusy = true; // Ativa o indicador de carregamento.
 
         try {
-            _usuario.Nome = NomeEntry.Text?.Trim() ?? string.Empty;
-            _usuario.Email = EmailEntry.Text?.Trim() ?? string.Empty;
-            _usuario.Telefone = TelefoneEntry.Text?.Trim() ?? string.Empty;
-            _usuario.Localizacao = LocalizacaoEntry.Text?.Trim() ?? string.Empty;
-            _usuario.LinkRedeSocial = LinkRedeSocialEntry.Text?.Trim() ?? string.Empty;
+            // Mapeamento Reverso: Propriedades Públicas -> Objeto Usuario
+            _usuario.Nome = Nome;
+            _usuario.Email = Email;
+            _usuario.Telefone = Telefone;
+            _usuario.Localizacao = Localizacao;
+            _usuario.LinkRedeSocial = LinkRedeSocial;
 
-            if (_usuario.Perfil == TipoPerfil.Atleta) {
-                _usuario.DataNascimento = DataNascimentoPicker.Date;
-                _usuario.Genero = Enum.TryParse<GeneroEnum>(GeneroPicker.SelectedItem?.ToString(), out var genero) ? genero : null;
-                _usuario.Peso = double.TryParse(PesoEntry.Text, out var peso) ? peso : null;
-                _usuario.Altura = double.TryParse(AlturaEntry.Text, out var altura) ? altura : null;
+            if (IsAtleta) {
+                _usuario.DataNascimento = DataNascimento;
+                _usuario.Genero = GeneroSelecionado;
+                _usuario.Peso = Peso;
+                _usuario.Altura = Altura;
             }
-            if (_usuario.Perfil == TipoPerfil.Organizador) {
-                _usuario.NomeEmpresa = NomeEmpresaEntry.Text?.Trim() ?? string.Empty;
-                _usuario.CNPJ = CnpjEntry.Text?.Trim() ?? string.Empty;
+            if (IsOrganizador) {
+                _usuario.NomeEmpresa = NomeEmpresa;
+                _usuario.CNPJ = Cnpj;
             }
-            if (_usuario.Perfil == TipoPerfil.Patrocinador) {
-                _usuario.NomeEmpresa = NomeEmpresaPatrocinadorEntry.Text?.Trim() ?? string.Empty;
-                _usuario.CNPJ = CnpjCpfPatrocinadorEntry.Text?.Trim() ?? string.Empty;
-                _usuario.FaixaOrcamentoPatrocinio = FaixaOrcamentoPatrocinioEntry.Text?.Trim() ?? string.Empty;
+            if (IsPatrocinador) {
+                _usuario.NomeEmpresa = NomeEmpresaPatrocinador;
+                _usuario.CNPJ = CnpjCpfPatrocinador;
+                _usuario.FaixaOrcamentoPatrocinio = FaixaOrcamentoPatrocinio;
             }
-            if (_usuario.Perfil == TipoPerfil.Arbitro) {
-                _usuario.DataNascimento = DataNascimentoPickerArbitro.Date;
-                _usuario.Genero = Enum.TryParse<GeneroEnum>(GeneroArbitroPicker.SelectedItem?.ToString(), out var genero) ? genero : null;
+            if (IsArbitro) {
+                _usuario.DataNascimento = DataNascimentoArbitro;
+                _usuario.Genero = GeneroArbitroSelecionado;
             }
 
             _usuario.IsSynced = false;

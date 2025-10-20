@@ -3,160 +3,203 @@
     x:Class="ArenaVirtual.Popups.EditarPerfilPopup"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:behaviors="clr-namespace:ArenaVirtual.Behaviors"
+    xmlns:models="clr-namespace:ArenaVirtual.Models"
+    xmlns:popups="clr-namespace:ArenaVirtual.Popups"
+    xmlns:viewmodels="clr-namespace:ArenaVirtual.ViewModels"
     Padding="30"
+    x:DataType="popups:EditarPerfilPopup"
     BackgroundColor="#80000000">
 
     <Grid>
-        <Border
-            Padding="20"
-            BackgroundColor="White"
+        <ScrollView
             HorizontalOptions="Center"
             VerticalOptions="Center"
             WidthRequest="340">
 
-            <VerticalStackLayout Spacing="15">
-                <Label
-                    FontAttributes="Bold"
-                    FontSize="22"
-                    HorizontalOptions="Center"
-                    Text="Editar Perfil" />
+            <Border Padding="20" BackgroundColor="White">
 
-                <Entry
-                    x:Name="NomeEntry"
-                    Placeholder="Nome"
-                    PlaceholderColor="Black"
-                    TextColor="Black" />
-                <Entry
-                    x:Name="EmailEntry"
-                    Keyboard="Email"
-                    Placeholder="E-mail"
-                    PlaceholderColor="Black"
-                    TextColor="Black" />
-                <Entry
-                    x:Name="TelefoneEntry"
-                    Placeholder="Telefone"
-                    PlaceholderColor="Black"
-                    TextColor="Black" />
-                <Entry
-                    x:Name="LocalizacaoEntry"
-                    Placeholder="Localização"
-                    PlaceholderColor="Black"
-                    TextColor="Black" />
-                <Entry
-                    x:Name="LinkRedeSocialEntry"
-                    Placeholder="Link Rede Social"
-                    PlaceholderColor="Black"
-                    TextColor="Black" />
-
-                <VerticalStackLayout
-                    x:Name="AtletaSection"
-                    IsVisible="False"
-                    Spacing="10">
-                    <DatePicker
-                        x:Name="DataNascimentoPicker"
-                        BackgroundColor="White"
-                        TextColor="Black" />
-                    <Picker
-                        x:Name="GeneroPicker"
-                        Title="Gênero"
-                        BackgroundColor="LightGray"
-                        TextColor="Black"
-                        TitleColor="Black" />
-                    <Entry
-                        x:Name="PesoEntry"
-                        Keyboard="Numeric"
-                        Placeholder="Peso (kg)"
-                        PlaceholderColor="Black"
-                        TextColor="Black" />
-                    <Entry
-                        x:Name="AlturaEntry"
-                        Keyboard="Numeric"
-                        Placeholder="Altura (m)"
-                        PlaceholderColor="Black"
-                        TextColor="Black" />
-                </VerticalStackLayout>
-
-                <VerticalStackLayout
-                    x:Name="OrganizadorSection"
-                    IsVisible="False"
-                    Spacing="10">
-                    <Entry
-                        x:Name="NomeEmpresaEntry"
-                        Placeholder="Nome da Empresa"
-                        PlaceholderColor="Black"
-                        TextColor="Black" />
-                    <Entry
-                        x:Name="CnpjEntry"
-                        Placeholder="CNPJ"
-                        PlaceholderColor="Black"
-                        TextColor="Black" />
-                </VerticalStackLayout>
-
-                <VerticalStackLayout
-                    x:Name="PatrocinadorSection"
-                    IsVisible="False"
-                    Spacing="10">
-                    <Entry
-                        x:Name="NomeEmpresaPatrocinadorEntry"
-                        Placeholder="Nome da Empresa"
-                        PlaceholderColor="Black"
-                        TextColor="Black" />
-                    <Entry
-                        x:Name="CnpjCpfPatrocinadorEntry"
-                        Placeholder="CNPJ/CPF"
-                        PlaceholderColor="Black"
-                        TextColor="Black" />
-                    <Entry
-                        x:Name="FaixaOrcamentoPatrocinioEntry"
-                        Placeholder="Faixa de Orçamento"
-                        PlaceholderColor="Black"
-                        TextColor="Black" />
-                </VerticalStackLayout>
-
-                <VerticalStackLayout
-                    x:Name="ArbitroSection"
-                    IsVisible="False"
-                    Spacing="10">
-                    <DatePicker
-                        x:Name="DataNascimentoPickerArbitro"
-                        BackgroundColor="White"
-                        TextColor="Black" />
-                    <Picker
-                        x:Name="GeneroArbitroPicker"
-                        Title="Gênero"
-                        BackgroundColor="LightGray"
-                        TextColor="Black"
-                        TitleColor="Black" />
-                </VerticalStackLayout>
-
-                <VerticalStackLayout
-                    Margin="0,10,0,10"
-                    HorizontalOptions="FillAndExpand"
-                    Spacing="10">
-                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="15">
-                        <Button
-                            Clicked="Cancelar_Clicked"
-                            Style="{StaticResource BotaoPrincipal}"
-                            Text="Cancelar"
-                            WidthRequest="120" />
-                        <Button
-                            Clicked="Salvar_Clicked"
-                            Style="{StaticResource BotaoPrincipal}"
-                            Text="Salvar"
-                            WidthRequest="120" />
-                    </HorizontalStackLayout>
-
-                    <Button
-                        BackgroundColor="#C0392B"
-                        Clicked="ExcluirConta_Clicked"
+                <VerticalStackLayout Spacing="15">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="22"
                         HorizontalOptions="Center"
-                        Style="{StaticResource BotaoPrincipal}"
-                        Text="Excluir Conta"
-                        TextColor="White"
-                        WidthRequest="255" />
+                        Text="Editar Perfil" />
+
+                    <Entry
+                        x:Name="NomeEntry"
+                        Placeholder="Nome"
+                        PlaceholderColor="Black"
+                        Text="{Binding Nome}"
+                        TextColor="Black" />
+                    <Entry
+                        x:Name="EmailEntry"
+                        Keyboard="Email"
+                        Placeholder="E-mail"
+                        PlaceholderColor="Black"
+                        Text="{Binding Email}"
+                        TextColor="Black" />
+                    <Entry
+                        x:Name="TelefoneEntry"
+                        Keyboard="Numeric"
+                        MaxLength="15"
+                        Placeholder="Telefone"
+                        PlaceholderColor="Black"
+                        Text="{Binding Telefone}"
+                        TextColor="Black">
+                        <Entry.Behaviors>
+                            <behaviors:MaskBehavior Mask="PHONE" />
+                        </Entry.Behaviors>
+                    </Entry>
+                    <Entry
+                        x:Name="LocalizacaoEntry"
+                        Placeholder="Localização"
+                        PlaceholderColor="Black"
+                        Text="{Binding Localizacao}"
+                        TextColor="Black" />
+                    <Entry
+                        x:Name="LinkRedeSocialEntry"
+                        Placeholder="Link Rede Social"
+                        PlaceholderColor="Black"
+                        Text="{Binding LinkRedeSocial}"
+                        TextColor="Black" />
+
+                    <VerticalStackLayout
+                        x:Name="AtletaSection"
+                        IsVisible="{Binding IsAtleta}"
+                        Spacing="10">
+                        <DatePicker
+                            x:Name="DataNascimentoPicker"
+                            BackgroundColor="White"
+                            Date="{Binding DataNascimento}"
+                            TextColor="Black" />
+                        <Picker
+                            x:Name="GeneroPicker"
+                            Title="Gênero"
+                            BackgroundColor="LightGray"
+                            ItemsSource="{Binding Generos}"
+                            SelectedItem="{Binding GeneroSelecionado}"
+                            TextColor="Black"
+                            TitleColor="Black" />
+                        <Entry
+                            x:Name="PesoEntry"
+                            Keyboard="Numeric"
+                            Placeholder="Peso (kg)"
+                            PlaceholderColor="Black"
+                            Text="{Binding Peso}"
+                            TextColor="Black" />
+                        <Entry
+                            x:Name="AlturaEntry"
+                            Keyboard="Numeric"
+                            Placeholder="Altura (m)"
+                            PlaceholderColor="Black"
+                            Text="{Binding Altura}"
+                            TextColor="Black" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout
+                        x:Name="OrganizadorSection"
+                        IsVisible="{Binding IsOrganizador}"
+                        Spacing="10">
+                        <Entry
+                            x:Name="NomeEmpresaEntry"
+                            Placeholder="Nome da Empresa"
+                            PlaceholderColor="Black"
+                            Text="{Binding NomeEmpresa}"
+                            TextColor="Black" />
+                        <Entry
+                            x:Name="CnpjEntry"
+                            Keyboard="Numeric"
+                            MaxLength="18"
+                            Placeholder="CNPJ"
+                            PlaceholderColor="Black"
+                            Text="{Binding Cnpj}"
+                            TextColor="Black">
+                            <Entry.Behaviors>
+                                <behaviors:MaskBehavior Mask="CNPJ" />
+                            </Entry.Behaviors>
+                        </Entry>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout
+                        x:Name="PatrocinadorSection"
+                        IsVisible="{Binding IsPatrocinador}"
+                        Spacing="10">
+                        <Entry
+                            x:Name="NomeEmpresaPatrocinadorEntry"
+                            Placeholder="Nome da Empresa"
+                            PlaceholderColor="Black"
+                            Text="{Binding NomeEmpresaPatrocinador}"
+                            TextColor="Black" />
+                        <Entry
+                            x:Name="CnpjCpfPatrocinadorEntry"
+                            Keyboard="Numeric"
+                            MaxLength="18"
+                            Placeholder="CNPJ/CPF"
+                            PlaceholderColor="Black"
+                            Text="{Binding CnpjCpfPatrocinador}"
+                            TextColor="Black">
+                            <Entry.Behaviors>
+                                <behaviors:MaskBehavior Mask="CNPJ" />
+                            </Entry.Behaviors>
+                        </Entry>
+                        <Entry
+                            x:Name="FaixaOrcamentoPatrocinioEntry"
+                            Placeholder="Faixa de Orçamento"
+                            PlaceholderColor="Black"
+                            Text="{Binding FaixaOrcamentoPatrocinio}"
+                            TextColor="Black" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout
+                        x:Name="ArbitroSection"
+                        IsVisible="{Binding IsArbitro}"
+                        Spacing="10">
+                        <DatePicker
+                            x:Name="DataNascimentoPickerArbitro"
+                            BackgroundColor="White"
+                            Date="{Binding DataNascimentoArbitro}"
+                            TextColor="Black" />
+                        <Picker
+                            x:Name="GeneroArbitroPicker"
+                            Title="Gênero"
+                            BackgroundColor="LightGray"
+                            ItemsSource="{Binding Generos}"
+                            SelectedItem="{Binding GeneroArbitroSelecionado}"
+                            TextColor="Black"
+                            TitleColor="Black" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout
+                        Margin="0,10,0,10"
+                        HorizontalOptions="FillAndExpand"
+                        Spacing="10">
+                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="15">
+                            <Button
+                                Clicked="Cancelar_Clicked"
+                                Style="{StaticResource BotaoPrincipal}"
+                                Text="Cancelar"
+                                WidthRequest="120" />
+                            <Button
+                                Clicked="Salvar_Clicked"
+                                Style="{StaticResource BotaoPrincipal}"
+                                Text="Salvar"
+                                WidthRequest="120" />
+                        </HorizontalStackLayout>
+
+                        <Button
+                            BackgroundColor="#C0392B"
+                            Clicked="ExcluirConta_Clicked"
+                            HorizontalOptions="Center"
+                            Style="{StaticResource BotaoPrincipal}"
+                            Text="Excluir Conta"
+                            TextColor="White"
+                            WidthRequest="255" />
+
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
-            </VerticalStackLayout>
-        </Border>
+            </Border>
+        </ScrollView>
 
         <Grid
             Grid.RowSpan="2"

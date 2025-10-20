@@ -3,6 +3,7 @@
     x:Class="ArenaVirtual.Views.RegisterPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:behaviors="clr-namespace:ArenaVirtual.Behaviors"
     xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     xmlns:models="clr-namespace:ArenaVirtual.Models"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels"
@@ -13,6 +14,8 @@
         <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
         <converters:InverterBooleanConverter x:Key="InverterBooleanConverter" />
         <converters:MultiPerfilToBoolConverter x:Key="MultiPerfilToBoolConverter" />
+        <converters:PhoneConverter x:Key="PhoneConverter" />
+        <converters:CnpjConverter x:Key="CnpjConverter" />
     </ContentPage.Resources>
 
     <Grid>
@@ -29,8 +32,17 @@
                     ItemsSource="{Binding PerfisDisponiveis}"
                     SelectedItem="{Binding PerfilSelecionado}" />
 
-                <Entry Placeholder="Telefone/WhatsApp" Text="{Binding Telefone}" />
-                <Entry Placeholder="Localização (Cidade/Estado)" Text="{Binding Localizacao}" />
+                <Entry
+                    Keyboard="Numeric"
+                    MaxLength="16"
+                    Placeholder="Telefone/WhatsApp"
+                    Text="{Binding Telefone}">
+                    <Entry.Behaviors>
+                        <behaviors:MaskBehavior Mask="PHONE" />
+                    </Entry.Behaviors>
+                </Entry>
+
+                <Entry Placeholder="Cidade" Text="{Binding Localizacao}" />
                 <Entry Placeholder="Link Rede Social" Text="{Binding LinkRedeSocial}" />
                 <Entry
                     Completed="OnRegisterEnterPressed"
@@ -47,7 +59,17 @@
                     IsVisible="{Binding PerfilSelecionado, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:TipoPerfil.Patrocinador}}"
                     Spacing="10">
                     <Entry Placeholder="Nome da Empresa" Text="{Binding NomeEmpresa}" />
-                    <Entry Placeholder="CNPJ/CPF" Text="{Binding Cnpj}" />
+
+                    <Entry
+                        Keyboard="Numeric"
+                        MaxLength="18"
+                        Placeholder="CNPJ/CPF"
+                        Text="{Binding Cnpj}">
+                        <Entry.Behaviors>
+                            <behaviors:MaskBehavior Mask="CNPJ" />
+                        </Entry.Behaviors>
+                    </Entry>
+
                     <Entry Placeholder="Faixa de Orçamento para Patrocínio" Text="{Binding FaixaOrcamentoPatrocinio}" />
                 </VerticalStackLayout>
 
@@ -56,7 +78,16 @@
                     IsVisible="{Binding PerfilSelecionado, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:TipoPerfil.Organizador}}"
                     Spacing="10">
                     <Entry Placeholder="Nome da Empresa" Text="{Binding NomeEmpresa}" />
-                    <Entry Placeholder="CNPJ/CPF" Text="{Binding Cnpj}" />
+
+                    <Entry
+                        Keyboard="Numeric"
+                        MaxLength="18"
+                        Placeholder="CNPJ/CPF"
+                        Text="{Binding Cnpj}">
+                        <Entry.Behaviors>
+                            <behaviors:MaskBehavior Mask="CNPJ" />
+                        </Entry.Behaviors>
+                    </Entry>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout
