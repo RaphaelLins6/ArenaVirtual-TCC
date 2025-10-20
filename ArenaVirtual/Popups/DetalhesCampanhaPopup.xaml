@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ArenaVirtual.Popups.DetalhesCampanhaPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:ArenaVirtual.Converters"
+    xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.Patrocinador"
+    x:Name="ThisPage"
+    Padding="30"
+    x:DataType="vm:CampanhaAtivaViewModel"
+    BackgroundColor="#80000000">
+
+    <ContentPage.Resources>
+        <converters:InverterBooleanConverter x:Key="InverterBooleanConverter" />
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
+    </ContentPage.Resources>
+
+    <Grid>
+        <Border
+            Padding="20"
+            BackgroundColor="White"
+            HorizontalOptions="Center"
+            Stroke="OrangeRed"
+            StrokeThickness="1"
+            VerticalOptions="Center"
+            WidthRequest="400">
+
+            <VerticalStackLayout Spacing="15">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="22"
+                    HorizontalOptions="Center"
+                    Text="{Binding NomeCampanha}"
+                    TextColor="OrangeRed" />
+
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
+                    <Label
+                        FontAttributes="Bold"
+                        Text="Status:"
+                        TextColor="Black" />
+                    <Label Text="{Binding Status}" TextColor="{Binding Status, Converter={StaticResource StatusToColorConverter}}" />
+                </HorizontalStackLayout>
+
+                <BoxView HeightRequest="1" Color="DarkGray" />
+
+                <Label Text="Valor da Proposta (Opcional)" TextColor="Black" />
+                <Entry
+                    x:Name="ValorPropostaEntry"
+                    BackgroundColor="#F0F0F0"
+                    Keyboard="Numeric"
+                    Placeholder="R$ 0,00"
+                    PlaceholderColor="Gray"
+                    TextColor="Black" />
+
+                <Label Text="Data de Início" TextColor="Black" />
+                <DatePicker
+                    x:Name="DataInicioPicker"
+                    BackgroundColor="#F0F0F0"
+                    TextColor="Black" />
+
+                <Label Text="Data de Término" TextColor="Black" />
+                <DatePicker
+                    x:Name="DataFimPicker"
+                    BackgroundColor="#F0F0F0"
+                    TextColor="Black" />
+
+
+                <VerticalStackLayout
+                    Margin="0,20,0,0"
+                    HorizontalOptions="FillAndExpand"
+                    Spacing="10">
+
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="15">
+                        <Button
+                            BackgroundColor="DarkGray"
+                            Clicked="Cancelar_Clicked"
+                            Style="{StaticResource BotaoPrincipal}"
+                            Text="Cancelar"
+                            WidthRequest="120" />
+                        <Button
+                            BackgroundColor="OrangeRed"
+                            Clicked="Salvar_Clicked"
+                            Style="{StaticResource BotaoPrincipal}"
+                            Text="Salvar Alterações"
+                            WidthRequest="180" />
+                    </HorizontalStackLayout>
+
+                    <Button
+                        x:Name="ExcluirCampanhaButton"
+                        Margin="0,10,0,0"
+                        BackgroundColor="#C0392B"
+                        Clicked="ExcluirCampanha_Clicked"
+                        HorizontalOptions="Center"
+                        Style="{StaticResource BotaoPrincipal}"
+                        Text="Excluir Campanha"
+                        TextColor="Black"
+                        WidthRequest="255" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
+        <Grid
+            BackgroundColor="#80000000"
+            InputTransparent="{Binding IsBusy, Source={x:Reference ThisPage}, Converter={StaticResource InverterBooleanConverter}}"
+            IsVisible="{Binding IsBusy, Source={x:Reference ThisPage}}"
+            ZIndex="999">
+            <ActivityIndicator
+                HorizontalOptions="Center"
+                IsRunning="{Binding IsBusy, Source={x:Reference ThisPage}}"
+                Scale="1.5"
+                VerticalOptions="Center"
+                Color="OrangeRed" />
+        </Grid>
+    </Grid>
+</ContentPage>

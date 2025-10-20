@@ -142,27 +142,5 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
                 EstaOcupado = false;
             }
         }
-
-        // Comando para visualizar os detalhes de uma campanha
-        [RelayCommand]
-        private async Task NavegarParaDetalhesCampanha(CampanhaAtivaViewModel campanhaSelecionada) {
-            if (campanhaSelecionada == null) return;
-
-            // Você pode usar este log para ver o que está sendo clicado
-            System.Diagnostics.Debug.WriteLine($"[DASHBOARD] Clicado em Ver Detalhes. Campanha ID: {campanhaSelecionada.CampanhaId}, Status: {campanhaSelecionada.Status}");
-
-            // Próximo passo (a ser implementado por você):
-            // 1. Criar e navegar para uma página de Edição/Detalhes da Campanha
-            // Exemplo: 
-            // await Shell.Current.GoToAsync($"//DetalhesCampanhaPage", 
-            //     new Dictionary<string, object> { 
-            //         { "Campanha", campanhaSelecionada } 
-            //     });
-
-            // Ou abrir um Pop-up/Modal (depende da sua arquitetura)
-            await Shell.Current.DisplayAlert("Em Desenvolvimento",
-                                             $"Abre pop-up de edição da campanha: {campanhaSelecionada.NomeCampanha}\nStatus: {campanhaSelecionada.Status}",
-                                             "OK");
-        }
     }
 }

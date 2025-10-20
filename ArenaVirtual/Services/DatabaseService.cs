@@ -30,7 +30,11 @@ namespace ArenaVirtual.Services {
             await _database.CreateTableAsync<UsuarioCampeonatoFavorito>();
             await _database.CreateTableAsync<Convite>();
             await _database.CreateTableAsync<Inscricao>();
+
+            int deletadosTimes = await _database.ExecuteAsync("DELETE FROM Time WHERE Nome IS NULL OR Nome = '' OR ClientAppId = ?", Guid.Empty);
+            System.Diagnostics.Debug.WriteLine($"[DB CLEANUP] {deletadosTimes} times fantasmas deletados.");
         }
+        
 
         public AsyncTableQuery<T> GetTable<T>() where T : new() => _database.Table<T>();
 
@@ -316,6 +320,11 @@ namespace ArenaVirtual.Services {
                             .OrderByDescending(c => c.Fim) // Opcional: Ordena para mostrar as mais novas/próximas
                             .ToListAsync();
         }
+        public Task<CampanhaPatrocinio> GetCampanhaByIdAsync(int id) {
+            return _database.Table<CampanhaPatrocinio>()
+                            .Where(c => c.Id == id)
+                            .FirstOrDefaultAsync();
+        }
 
         // --- MÉTODOS DE Estatísticas ---
         public Task<int> InserirEstatisticaAsync(EstatisticaPartida item) => _database.InsertAsync(item);
@@ -524,12 +533,19 @@ namespace ArenaVirtual.Services {
 
         public async Task SaveDownloadedCampeonatosAsync(IEnumerable<CampeonatoDownloadDto> dtos) {
             foreach (var dto in dtos) {
+
+                if (dto.ClientAppId == Guid.Empty || string.IsNullOrWhiteSpace(dto.Nome)) {
+                    System.Diagnostics.Debug.WriteLine($"[Sync Download Campeonato] Ignorando DTO inválido: ClientAppId: {dto.ClientAppId}, Nome: {dto.Nome}");
+                    continue; 
+                }
+
                 var existing = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.ClientAppId == dto.ClientAppId);
                 bool isNew = existing == null;
                 if (isNew) {
                     existing = new Campeonato { ClientAppId = dto.ClientAppId };
                 }
 
+                // Mapeamento dos campos
                 existing.IdServidor = dto.Id;
                 existing.Nome = dto.Nome ?? string.Empty;
                 existing.Local = dto.Local;
@@ -550,12 +566,15 @@ namespace ArenaVirtual.Services {
                 existing.DataTermino = dto.DataTermino;
                 existing.NumeroEquipes = dto.NumeroEquipes ?? 0;
 
+                // Associa o Organizador
                 var organizador = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.IdServidor == dto.OrganizadorId);
                 if (organizador != null) existing.OrganizadorClientAppId = organizador.ClientAppId;
 
+                // Campos de controle de sincronização
                 existing.IsSynced = true;
                 existing.UpdatedAt = dto.UpdatedAt;
 
+                // Salva no banco de dados local
                 if (isNew) await _database.InsertAsync(existing);
                 else await _database.UpdateAsync(existing);
             }
@@ -563,12 +582,19 @@ namespace ArenaVirtual.Services {
 
         public async Task SaveDownloadedTimesAsync(IEnumerable<TimeDownloadDto> dtos) {
             foreach (var dto in dtos) {
+
+                if (dto.ClientAppId == Guid.Empty || string.IsNullOrWhiteSpace(dto.Nome)) {
+                    System.Diagnostics.Debug.WriteLine($"[Sync Download Time] Ignorando DTO inválido: ClientAppId: {dto.ClientAppId}, Nome: {dto.Nome}");
+                    continue; 
+                }
+
                 var existing = await _database.Table<Time>().FirstOrDefaultAsync(t => t.ClientAppId == dto.ClientAppId);
                 bool isNew = existing == null;
                 if (isNew) {
                     existing = new Time { ClientAppId = dto.ClientAppId };
                 }
 
+                // Mapeamento dos dados do DTO para o objeto local existente ou novo
                 existing.IdServidor = dto.Id;
                 existing.Nome = dto.Nome ?? string.Empty;
                 existing.LogoUrl = dto.LogoUrl;
@@ -580,13 +606,22 @@ namespace ArenaVirtual.Services {
                 existing.Derrotas = dto.Derrotas;
                 existing.Empates = dto.Empates;
 
+                // Lógica de FK para Campeonato
                 if (dto.CampeonatoId.HasValue && dto.CampeonatoId > 0) {
                     var camp = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.IdServidor == dto.CampeonatoId.Value);
                     if (camp != null) existing.CampeonatoClientAppId = camp.ClientAppId;
+                    else existing.CampeonatoClientAppId = Guid.Empty; 
+                } else {
+                    existing.CampeonatoClientAppId = Guid.Empty;
                 }
+
+                // Lógica de FK para Capitão
                 if (dto.CapitaoId.HasValue && dto.CapitaoId > 0) {
                     var capitao = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.IdServidor == dto.CapitaoId.Value);
                     if (capitao != null) existing.CapitaoClientAppId = capitao.ClientAppId;
+                    else existing.CapitaoClientAppId = null; // Caso o Capitão não tenha sido baixado ainda
+                } else {
+                    existing.CapitaoClientAppId = null;
                 }
 
                 existing.IsSynced = true;

@@ -107,9 +107,9 @@
                                                     Text="{Binding DataFim, StringFormat='Término: {0}'}"
                                                     TextColor="LightGray" />
                                                 <Button
+                                                    x:Name="BotaoVerDetalhes"
                                                     BackgroundColor="#2ECC71"
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardPatrocinadorViewModel}}, Path=NavegarParaDetalhesCampanhaCommand}"
-                                                    CommandParameter="{Binding .}"
+                                                    Clicked="BotaoVerDetalhes_Clicked"
                                                     FontSize="Small"
                                                     HeightRequest="35"
                                                     Style="{StaticResource BotaoPrincipal}"

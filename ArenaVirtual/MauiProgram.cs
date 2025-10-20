@@ -115,6 +115,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<EditarPerfilPopup>();
         builder.Services.AddTransient<AtribuirArbitrosPopup>();
         builder.Services.AddTransient<AlterarBannerPatrocinioPopup>();
+        builder.Services.AddTransient<DetalhesCampanhaPopup>();
 
         return builder.Build();
     }

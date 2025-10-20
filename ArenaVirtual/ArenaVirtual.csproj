@@ -119,6 +119,9 @@
 		<MauiXaml Update="Popups\AlterarSenhaPopup.xaml">
 			<Generator></Generator>
 		</MauiXaml>
+		<MauiXaml Update="Popups\DetalhesCampanhaPopup.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Popups\EditarPerfilPopup.xaml">
 			<Generator></Generator>
 		</MauiXaml>

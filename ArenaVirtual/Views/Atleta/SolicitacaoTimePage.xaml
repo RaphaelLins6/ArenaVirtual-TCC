@@ -61,6 +61,7 @@
                                     BackgroundColor="Green"
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SolicitacaoTimePageViewModel}}, Path=AceitarConviteCommand}"
                                     CommandParameter="{Binding .}"
+                                    Style="{StaticResource BotaoPrincipal}"
                                     Text="Aceitar" />
 
                                 <Button
@@ -68,6 +69,7 @@
                                     BackgroundColor="Red"
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SolicitacaoTimePageViewModel}}, Path=RecusarConviteCommand}"
                                     CommandParameter="{Binding .}"
+                                    Style="{StaticResource BotaoPrincipal}"
                                     Text="Recusar" />
                             </Grid>
                         </Frame>

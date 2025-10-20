@@ -119,6 +119,7 @@
                     CornerRadius="20"
                     HorizontalOptions="Center"
                     IsVisible="{Binding ShowButtons}"
+                    Style="{StaticResource BotaoPrincipal}"
                     Text="Criar Time"
                     TextColor="White"
                     WidthRequest="200" />
@@ -129,6 +130,7 @@
                     CornerRadius="20"
                     HorizontalOptions="Center"
                     IsVisible="{Binding ShowButtons}"
+                    Style="{StaticResource BotaoPrincipal}"
                     Text="Entrar em um Time"
                     TextColor="White"
                     WidthRequest="200" />
@@ -139,6 +141,7 @@
                     CornerRadius="20"
                     HorizontalOptions="Center"
                     IsVisible="{Binding MostraBotaoCancelar}"
+                    Style="{StaticResource BotaoPrincipal}"
                     Text="Cancelar Solicitação"
                     TextColor="White"
                     WidthRequest="200" />
