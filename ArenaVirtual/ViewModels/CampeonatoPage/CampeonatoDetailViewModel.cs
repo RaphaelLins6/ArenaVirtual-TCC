@@ -37,9 +37,26 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         [ObservableProperty]
         private ObservableCollection<Jogo> tabelaJogos;
 
-        // NOVO: Propriedade para as estatísticas agregadas
         [ObservableProperty]
         private ObservableCollection<TimeEstatisticaViewModel> estatisticasTimes;
+
+        // NOVO: Propriedade para a lista de líderes de jogadores
+        [ObservableProperty]
+        private ObservableCollection<JogadorEstatisticaViewModel> lideresEstatisticas = new();
+
+        // NOVO: Propriedade para o filtro de estatística (o que está selecionado)
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ItensEstatisticas))]
+        private string estatisticaSelecionada = "Pontos"; // Padrão: Pontos
+
+        // NOVO: Coleção com as estatísticas disponíveis para o filtro
+        [ObservableProperty]
+        private ObservableCollection<string> tiposEstatisticas = new()
+        {
+            "Pontos", "Assistências", "Rebotes", "Roubos", "Bloqueios",
+            "Turnovers", "Faltas", "2 Pontos %", "3 Pontos %", "Lance Livre %"
+        };
+
 
         [ObservableProperty]
         private ObservableCollection<RodadaGrouping> jogosMataMata = new();
@@ -127,6 +144,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         public bool IsFaseTabelaEJogos => FaseAtual == "Tabela & Jogos";
         public bool IsFaseMataMata => FaseAtual == "Mata-Mata";
 
+        // NOVO: Propriedade para o CollectionView, filtrada e ordenada com base no 'EstatisticaSelecionada'
+        public ObservableCollection<JogadorEstatisticaViewModel> ItensEstatisticas =>
+            GetItensEstatisticasOrdenados(EstatisticaSelecionada);
+
         // =====================================================================================
         // CONSTRUTOR (INCLUSÃO DO IPATROCINIOSERVICE)
         // =====================================================================================
@@ -196,8 +217,8 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 if (IsMataMataFormat || IsFormatoHibrido)
                     _ = GerarJogosMataMata();
 
-                // NOVO: Carregar Patrocínios após a atualização do jogo
                 _ = LoadPatrocinadoresAsync();
+                _ = LoadLideresEstatisticasAsync();
 
                 Debug.WriteLine($"[DEBUG-ATTRIBUTES] Recarga completa do Campeonato após atualização do Jogo ID {jogoAtualizado.Id}.");
                 return;
@@ -217,8 +238,8 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                                 _ = GerarJogosMataMata();
                         }, TaskScheduler.FromCurrentSynchronizationContext());
 
-                    // NOVO: Carregar Patrocínios após a atualização de times
                     _ = LoadPatrocinadoresAsync();
+                    _ = LoadLideresEstatisticasAsync();
                 }
                 return;
             }
@@ -243,10 +264,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 // CARREGAR PATROCINADORES E BANNER DE DIVULGAÇÃO COM FALLBACK
                 // ----------------------------------------------------
                 if (Campeonato != null) {
-                    // Chamada ÚNICA para o método refatorado que contém a lógica do placeholder
                     _ = LoadPatrocinadoresAsync();
+                    _ = LoadLideresEstatisticasAsync();
                 }
             }
+            query.Clear();
         }
 
         private async Task RecarregarJogosESelecaoAsync() {
@@ -1027,6 +1049,211 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 IsPatrocinioDivulgacaoVisible = false; // Garante que a seção não aparece em caso de erro
                 BannerDivulgacaoSource = null;
             }
+        }
+
+        // NOVO: Método para carregar as estatísticas dos jogadores
+        private async Task LoadLideresEstatisticasAsync() {
+            Debug.WriteLine($"[DEBUG-STATS] ⭐️ Iniciando LoadLideresEstatisticasAsync ⭐️");
+            if (Campeonato == null) {
+                Debug.WriteLine("[DEBUG-STATS] Campeonato nulo. Abortando carregamento.");
+                return;
+            }
+
+            try {
+                // 1️⃣ OBTENÇÃO DOS TIMES
+                Debug.WriteLine($"[DEBUG-STATS-STEP] Buscando times aceitos...");
+                var todosOsTimes = await _databaseService.ObterTimesAceitosAsync(Campeonato.Id);
+                Debug.WriteLine($"[DEBUG-STATS-STEP] Total de times obtidos: {todosOsTimes.Count}");
+
+                // 2️⃣ CRIAÇÃO DO MAPA DE TIMES
+                var timesMap = new Dictionary<Guid, Time>();
+                foreach (var t in todosOsTimes) {
+                    if (!timesMap.ContainsKey(t.ClientAppId))
+                        timesMap[t.ClientAppId] = t;
+                    else
+                        Debug.WriteLine($"[WARN-STATS] Time duplicado ignorado: {t.Nome} ({t.ClientAppId})");
+                }
+
+                // 3️⃣ OBTENÇÃO DOS JOGADORES
+                Debug.WriteLine($"[DEBUG-STATS-STEP] Buscando jogadores do campeonato...");
+                var todosOsJogadores = await _databaseService.ObterJogadoresPorCampeonatoAsync(Campeonato.ClientAppId);
+                Debug.WriteLine($"[DEBUG-STATS-STEP] Total de jogadores obtidos: {todosOsJogadores.Count}");
+
+                if (!todosOsJogadores.Any()) {
+                    Debug.WriteLine("[DEBUG-STATS] Nenhum jogador encontrado. Limpando lista.");
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        LideresEstatisticas.Clear();
+                    });
+                    return;
+                }
+
+                // 4️⃣ OBTENÇÃO DAS ESTATÍSTICAS AGREGADAS
+                Debug.WriteLine($"[DEBUG-STATS-STEP] Buscando estatísticas agregadas...");
+                var todasAsEstatisticasAgregadas = await _databaseService.GetEstatisticasDeJogadorByCampeonatoIdAsync(Campeonato.Id);
+                Debug.WriteLine($"[DEBUG-STATS-STEP] Total de estatísticas agregadas obtidas: {todasAsEstatisticasAgregadas.Count}");
+
+                // 5️⃣ CRIAÇÃO DO MAPA DE ESTATÍSTICAS
+                var statsMap = new Dictionary<int, EstatisticaAgregadaJogador>();
+                foreach (var e in todasAsEstatisticasAgregadas) {
+                    if (!statsMap.ContainsKey(e.UsuarioId))
+                        statsMap[e.UsuarioId] = e;
+                    else
+                        Debug.WriteLine($"[WARN-STATS] Estatística duplicada ignorada para Usuário ID: {e.UsuarioId}");
+                }
+
+                // 6️⃣ PROCESSAMENTO DOS JOGADORES
+                var listaTempLideres = new List<JogadorEstatisticaViewModel>();
+
+                foreach (var jogador in todosOsJogadores) {
+                    // Lookup do Time
+                    Time? timeDoJogador = null;
+                    if (jogador.TimeClientAppId.HasValue)
+                        timesMap.TryGetValue(jogador.TimeClientAppId.Value, out timeDoJogador);
+
+                    // Lookup das Estatísticas Agregadas
+                    statsMap.TryGetValue(jogador.Id, out var statsAgregadas);
+
+                    // Criação do ViewModel do jogador
+                    var statsJogador = new JogadorEstatisticaViewModel {
+                        Id = jogador.Id,
+                        NomeJogador = jogador.Nome,
+                        FotoUrl = jogador.ImagemPath,
+                        NomeTime = timeDoJogador?.Nome,
+                        LogoTimeUrl = timeDoJogador?.LogoUrl
+                    };
+
+                    // Atribuição das Estatísticas Agregadas
+                    if (statsAgregadas != null) {
+                        Debug.WriteLine($"[DEBUG-STATS] Jogador: {jogador.Nome}, Pontos: {statsAgregadas.TotalPontos}");
+                        statsJogador.Pontos = (int)statsAgregadas.TotalPontos;
+                        statsJogador.Assistencias = (int)statsAgregadas.TotalAssistencias;
+                        statsJogador.Rebotes = (int)statsAgregadas.TotalRebotes;
+                        statsJogador.Roubos = (int)statsAgregadas.TotalRoubos;
+                        statsJogador.Bloqueios = (int)statsAgregadas.TotalBloqueios;
+                        statsJogador.Turnovers = (int)statsAgregadas.TotalTurnovers;
+                        statsJogador.Faltas = (int)statsAgregadas.TotalFaltas;
+                        statsJogador.Arremessos2PontosConvertidos = (int)statsAgregadas.Arremessos2PontosConvertidos;
+                        statsJogador.Arremessos2PontosTentados = (int)statsAgregadas.Arremessos2PontosTentados;
+                        statsJogador.Arremessos3PontosConvertidos = (int)statsAgregadas.Arremessos3PontosConvertidos;
+                        statsJogador.Arremessos3PontosTentados = (int)statsAgregadas.Arremessos3PontosTentados;
+                        statsJogador.LancesLivresConvertidos = (int)statsAgregadas.LancesLivresConvertidos;
+                        statsJogador.LancesLivresTentados = (int)statsAgregadas.LancesLivresTentados;
+                    } else {
+                        Debug.WriteLine($"[DEBUG-STATS] Jogador: {jogador.Nome} - sem estatísticas registradas.");
+                    }
+
+                    listaTempLideres.Add(statsJogador);
+                }
+
+                // 7️⃣ ATUALIZAÇÃO NA MAIN THREAD
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    LideresEstatisticas.Clear();
+                    foreach (var item in listaTempLideres)
+                        LideresEstatisticas.Add(item);
+
+                    OnPropertyChanged(nameof(ItensEstatisticas));
+
+                    Debug.WriteLine($"[DEBUG-OUTPUT] ItensEstatisticas Count: {ItensEstatisticas?.Count ?? 0}");
+                    Debug.WriteLine($"[DEBUG-OUTPUT] Primeiro item: Nome={ItensEstatisticas.FirstOrDefault()?.NomeJogador}, Valor={ItensEstatisticas.FirstOrDefault()?.ValorEstatisticaPrincipal}");
+                    Debug.WriteLine($"[DEBUG-LEADERS] Total de líderes carregados: {LideresEstatisticas.Count}");
+                });
+            } catch (Exception ex) {
+                Debug.WriteLine($"[FATAL CRASH] Ocorreu uma exceção crítica em LoadLideresEstatisticasAsync: {ex.Message}");
+                Debug.WriteLine($"[FATAL CRASH] StackTrace: {ex.StackTrace}");
+            }
+        }
+
+        // NOVO: Método auxiliar para ordenar e filtrar os itens de estatísticas
+        private ObservableCollection<JogadorEstatisticaViewModel> GetItensEstatisticasOrdenados(string estatistica) {
+            IEnumerable<JogadorEstatisticaViewModel> orderedList = LideresEstatisticas;
+
+            // A. LÓGICA DE ORDENAÇÃO (SUA VERSÃO ORIGINAL)
+            switch (estatistica) {
+                case "Pontos":
+                    orderedList = orderedList.OrderByDescending(j => j.Pontos);
+                    break;
+                case "Assistências":
+                    orderedList = orderedList.OrderByDescending(j => j.Assistencias);
+                    break;
+                case "Rebotes":
+                    orderedList = orderedList.OrderByDescending(j => j.Rebotes);
+                    break;
+                case "Roubos":
+                    orderedList = orderedList.OrderByDescending(j => j.Roubos);
+                    break;
+                case "Bloqueios":
+                    orderedList = orderedList.OrderByDescending(j => j.Bloqueios);
+                    break;
+                case "Turnovers":
+                    orderedList = orderedList.OrderBy(j => j.Turnovers); // Menor é melhor
+                    break;
+                case "Faltas":
+                    orderedList = orderedList.OrderBy(j => j.Faltas); // Menor é melhor
+                    break;
+                case "2 Pontos %":
+                    orderedList = orderedList.OrderByDescending(j => j.Percentual2Pontos);
+                    break;
+                case "3 Pontos %":
+                    orderedList = orderedList.OrderByDescending(j => j.Percentual3Pontos);
+                    break;
+                case "Lance Livre %":
+                    orderedList = orderedList.OrderByDescending(j => j.PercentualLancesLivres);
+                    break;
+                default:
+                    orderedList = orderedList.OrderByDescending(j => j.Pontos);
+                    break;
+            }
+
+            // B. FILTRO TOP 5 E ATRIBUIÇÃO DE RANK
+
+            // ⭐️ CORREÇÃO PRINCIPAL: Aplica o filtro TOP 5 após a ordenação
+            var top5List = orderedList.Take(5);
+
+            // Atribuir posição (rank) e formatar o ValorEstatisticaPrincipal
+            var rankedList = new List<JogadorEstatisticaViewModel>();
+            int rank = 1;
+
+            // Itera apenas sobre os 5 melhores
+            foreach (var item in top5List) {
+                // 1. Atribui a posição (1º, 2º, etc.)
+                item.Posicao = rank++;
+
+                // 2. Formata o valor de exibição (ex: 50 ou 45%)
+                item.ValorEstatisticaPrincipal = GetFormattedEstatisticaValue(item, estatistica);
+
+                rankedList.Add(item);
+            }
+
+            return new ObservableCollection<JogadorEstatisticaViewModel>(rankedList);
+        }
+
+        // NOVO: Método auxiliar para formatar o valor da estatística
+        private string GetFormattedEstatisticaValue(JogadorEstatisticaViewModel jogadorStats, string estatistica) {
+            switch (estatistica) {
+                case "Pontos": return jogadorStats.Pontos.ToString();
+                case "Assistências": return jogadorStats.Assistencias.ToString();
+                case "Rebotes": return jogadorStats.Rebotes.ToString();
+                case "Roubos": return jogadorStats.Roubos.ToString();
+                case "Bloqueios": return jogadorStats.Bloqueios.ToString();
+                case "Turnovers": return jogadorStats.Turnovers.ToString();
+                case "Faltas": return jogadorStats.Faltas.ToString();
+                case "2 Pontos %": return $"{jogadorStats.Percentual2Pontos:P0}"; // Formato percentual
+                case "3 Pontos %": return $"{jogadorStats.Percentual3Pontos:P0}"; // Formato percentual
+                case "Lance Livre %": return $"{jogadorStats.PercentualLancesLivres:P0}"; // Formato percentual
+                default: return jogadorStats.Pontos.ToString();
+            }
+        }
+
+        public void MudarEstatisticaLogic(string estatistica) // Renomeei para evitar conflito com o antigo Command
+{
+            if (EstatisticaSelecionada == estatistica)
+                return;
+
+            EstatisticaSelecionada = estatistica;
+
+            Debug.WriteLine($"[DEBUG-STATS-LOGIC] Nova Estatística selecionada (Code-Behind): {EstatisticaSelecionada}.");
         }
 
         // =====================================================================================

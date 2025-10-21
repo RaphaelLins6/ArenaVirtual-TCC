@@ -123,6 +123,34 @@ namespace ArenaVirtual.Services {
         public Task<Usuario?> ObterUsuarioPorIdAsync(int id) =>
             _database.Table<Usuario>().Where(u => u.Id == id).FirstOrDefaultAsync();
 
+        // --- MÉTODOS DE JOGADOR ---
+        public async Task<List<Usuario>> ObterJogadoresPorCampeonatoAsync(Guid campeonatoClientAppId) {
+            // 1️⃣ Obter o campeonato
+            var campeonato = await _database.Table<Campeonato>()
+                                            .Where(c => c.ClientAppId == campeonatoClientAppId)
+                                            .FirstOrDefaultAsync();
+            if (campeonato == null) return new List<Usuario>();
+
+            // 2️⃣ Obter os times aceitos
+            var timesAceitos = await ObterTimesAceitosAsync(campeonato.Id);
+            if (!timesAceitos.Any()) return new List<Usuario>();
+
+            var timeClientAppIds = timesAceitos.Select(t => t.ClientAppId).ToHashSet();
+
+            // 3️⃣ Obter todos os jogadores do DB (filtrando apenas por Perfil) — Carregar em memória
+            var todosJogadores = await _database.Table<Usuario>()
+                                                .Where(u => u.Perfil == TipoPerfil.Atleta)
+                                                .ToListAsync();
+
+            // 4️⃣ Filtrar em memória pelos times aceitos
+            var atletas = todosJogadores
+                          .Where(u => u.TimeClientAppId.HasValue && timeClientAppIds.Contains(u.TimeClientAppId.Value))
+                          .ToList();
+
+            Console.WriteLine($"[DEBUG-JOGADOR] Total de jogadores encontrados: {atletas.Count}");
+            return atletas;
+        }
+
         // --- MÉTODOS DE CAMPEONATO ---
         public async Task<int> InserirCampeonatoAsync(Campeonato campeonato) => await _database.Table<Campeonato>().Where(c => c.Nome == campeonato.Nome && c.DataInicio == campeonato.DataInicio).CountAsync() > 0 ? 0 : await _database.InsertAsync(campeonato);
         public Task<List<Campeonato>> ListarCampeonatosAsync() => _database.Table<Campeonato>().ToListAsync();
@@ -399,6 +427,53 @@ namespace ArenaVirtual.Services {
             string idsString = string.Join(",", jogoIds);
             string query = $"SELECT * FROM {nameof(EstatisticaPartida)} WHERE {nameof(EstatisticaPartida.JogoId)} IN ({idsString})";
             return await _database.QueryAsync<EstatisticaPartida>(query);
+        }
+        public async Task<List<EstatisticaAgregadaJogador>> GetEstatisticasDeJogadorByCampeonatoIdAsync(int campeonatoId) {
+            // CORREÇÃO: Usar um QueryAsync simples para contornar a limitação do Select no AsyncTableQuery
+            // 1. Encontrar todos os IDs de Jogo (JogoId) para o Campeonato
+            var jogosIds = await _database.QueryAsync<int>("SELECT Id FROM Jogo WHERE CampeonatoId = ?", campeonatoId);
+
+            if (jogosIds == null || jogosIds.Count == 0) {
+                return new List<EstatisticaAgregadaJogador>();
+            }
+
+            string jogosIdsCsv = string.Join(",", jogosIds);
+
+            // 2. Query SQL para AGREGAR as estatísticas
+            string sql = $@"
+                SELECT
+                T1.UsuarioId,
+                T4.Nome AS {nameof(EstatisticaAgregadaJogador.NomeJogador)},
+                T4.ImagemPath AS {nameof(EstatisticaAgregadaJogador.ImagemPath)}, -- CORRIGIDO: Usa ImagemPath
+                T3.Nome AS {nameof(EstatisticaAgregadaJogador.NomeTime)},
+                T3.LogoUrl AS {nameof(EstatisticaAgregadaJogador.LogoTimeUrl)},
+            
+                COUNT(DISTINCT T1.JogoId) AS {nameof(EstatisticaAgregadaJogador.JogosDisputados)},
+            
+                SUM(T1.Pontos) AS {nameof(EstatisticaAgregadaJogador.TotalPontos)},
+                SUM(T1.Rebotes) AS {nameof(EstatisticaAgregadaJogador.TotalRebotes)},
+                SUM(T1.Assistencias) AS {nameof(EstatisticaAgregadaJogador.TotalAssistencias)},
+                SUM(T1.Roubos) AS {nameof(EstatisticaAgregadaJogador.TotalRoubos)},
+                SUM(T1.Bloqueios) AS {nameof(EstatisticaAgregadaJogador.TotalBloqueios)},
+                SUM(T1.Turnovers) AS {nameof(EstatisticaAgregadaJogador.TotalTurnovers)},
+                SUM(T1.Faltas) AS {nameof(EstatisticaAgregadaJogador.TotalFaltas)},
+
+                SUM(T1.Arremessos2PontosConvertidos) AS {nameof(EstatisticaAgregadaJogador.Arremessos2PontosConvertidos)},
+                SUM(T1.Arremessos2PontosTentados) AS {nameof(EstatisticaAgregadaJogador.Arremessos2PontosTentados)},
+                SUM(T1.Arremessos3PontosConvertidos) AS {nameof(EstatisticaAgregadaJogador.Arremessos3PontosConvertidos)},
+                SUM(T1.Arremessos3PontosTentados) AS {nameof(EstatisticaAgregadaJogador.Arremessos3PontosTentados)},
+                SUM(T1.LancesLivresConvertidos) AS {nameof(EstatisticaAgregadaJogador.LancesLivresConvertidos)},
+                SUM(T1.LancesLivresTentados) AS {nameof(EstatisticaAgregadaJogador.LancesLivresTentados)}
+                FROM EstatisticaPartida T1
+                INNER JOIN Usuario T4 ON T1.UsuarioId = T4.Id 
+                INNER JOIN Time T3 ON T4.TimeClientAppId = T3.ClientAppId 
+                WHERE T1.JogoId IN ({jogosIdsCsv})
+                GROUP BY T1.UsuarioId, T4.Nome, T4.ImagemPath, T3.Nome, T3.LogoUrl
+                ORDER BY TotalPontos DESC;
+            ";
+
+            var resultados = await _database.QueryAsync<EstatisticaAgregadaJogador>(sql);
+            return resultados;
         }
 
         // --- MÉTODOS DE JOGOS ---

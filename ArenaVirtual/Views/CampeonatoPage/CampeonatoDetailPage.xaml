@@ -13,7 +13,8 @@
     <ContentPage.Resources>
         <converters:IntToPhaseNameConverter x:Key="PhaseNameConverter" />
         <converters:IntToBracketMarginConverter x:Key="BracketMarginConverter" />
-
+        <converters:SelectedStatConverter x:Key="SelectedStatConverter" />
+        <converters:SelectedStatTextConverter x:Key="SelectedStatTextConverter" />
         <converters:SequenciaToColorConverter x:Key="SequenciaToColorConverter" />
     </ContentPage.Resources>
 
@@ -826,6 +827,157 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
                 </VerticalStackLayout>
+
+                <VerticalStackLayout Padding="0" Spacing="0">
+
+                    <!--  Título  -->
+                    <Label
+                        Margin="15,10,15,5"
+                        FontAttributes="Bold"
+                        FontSize="20"
+                        HorizontalOptions="Center"
+                        Text="Estatísticas dos Jogadores"
+                        TextColor="White" />
+
+                    <!--  Seleção de tipos de estatísticas  -->
+                    <ScrollView HorizontalScrollBarVisibility="Never" Orientation="Horizontal">
+                        <FlexLayout
+                            Margin="15,0,15,10"
+                            AlignContent="Start"
+                            AlignItems="Start"
+                            Direction="Row"
+                            JustifyContent="Start"
+                            Wrap="NoWrap">
+
+                            <BindableLayout.ItemsSource>
+                                <Binding Path="TiposEstatisticas" />
+                            </BindableLayout.ItemsSource>
+
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Frame
+                                        Margin="0,0,10,0"
+                                        Padding="10,5"
+                                        CornerRadius="15"
+                                        HasShadow="False">
+                                        <Frame.GestureRecognizers>
+                                            <TapGestureRecognizer CommandParameter="{Binding .}" Tapped="OnEstatisticaTapped" />
+                                        </Frame.GestureRecognizers>
+
+                                        <Label
+                                            x:Name="StatLabel"
+                                            FontSize="14"
+                                            Text="{Binding .}">
+                                            <VisualStateManager.VisualStateGroups>
+                                                <VisualStateGroup x:Name="CommonStates">
+                                                    <VisualState x:Name="Normal">
+                                                        <VisualState.Setters>
+                                                            <Setter Property="TextColor" Value="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=EstatisticaSelecionada, Converter={StaticResource SelectedStatTextConverter}, ConverterParameter={Binding .}}" />
+                                                        </VisualState.Setters>
+                                                    </VisualState>
+
+                                                    <VisualState x:Name="PointerOver">
+                                                        <VisualState.Setters>
+                                                            <Setter Property="TextColor" Value="Black" />
+                                                        </VisualState.Setters>
+                                                    </VisualState>
+                                                </VisualStateGroup>
+                                            </VisualStateManager.VisualStateGroups>
+                                        </Label>
+
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=EstatisticaSelecionada, Converter={StaticResource SelectedStatConverter}, ConverterParameter={Binding .}}" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+
+                                                <VisualState x:Name="PointerOver">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="#FFA500" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+                                    </Frame>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
+                    </ScrollView>
+
+                    <!--  Lista de estatísticas dos jogadores  -->
+                    <CollectionView Margin="15,0" ItemsSource="{Binding ItensEstatisticas}">
+                        <CollectionView.ItemTemplate>
+                            <!--  Tipo do item é JogadorEstatisticaViewModel  -->
+                            <DataTemplate x:DataType="vm:JogadorEstatisticaViewModel">
+                                <Grid Padding="0,8" ColumnDefinitions="30, 40, *, Auto">
+
+                                    <!--  Posição  -->
+                                    <Label
+                                        Grid.Column="0"
+                                        FontAttributes="Bold"
+                                        HorizontalOptions="Center"
+                                        Text="{Binding Posicao}"
+                                        TextColor="White"
+                                        VerticalOptions="Center" />
+
+                                    <!--  Foto do jogador  -->
+                                    <Border
+                                        Grid.Column="1"
+                                        Padding="0"
+                                        HeightRequest="40"
+                                        HorizontalOptions="Center"
+                                        StrokeShape="RoundRectangle 20"
+                                        StrokeThickness="0"
+                                        VerticalOptions="Center"
+                                        WidthRequest="40">
+                                        <Image
+                                            Aspect="AspectFill"
+                                            HeightRequest="40"
+                                            Source="{Binding FotoUrl}"
+                                            WidthRequest="40" />
+                                    </Border>
+
+                                    <!--  Nome do jogador e time  -->
+                                    <VerticalStackLayout
+                                        Grid.Column="2"
+                                        Margin="10,0,0,0"
+                                        Spacing="0"
+                                        VerticalOptions="Center">
+                                        <Label
+                                            FontAttributes="Bold"
+                                            FontSize="16"
+                                            Text="{Binding NomeJogador}"
+                                            TextColor="White" />
+                                        <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                                            <Image
+                                                HeightRequest="15"
+                                                Source="{Binding LogoTimeUrl}"
+                                                WidthRequest="15" />
+                                            <Label
+                                                FontSize="12"
+                                                Text="{Binding NomeTime}"
+                                                TextColor="#AAAAAA" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+
+                                    <!--  Valor da estatística  -->
+                                    <Label
+                                        Grid.Column="3"
+                                        FontAttributes="Bold"
+                                        FontSize="16"
+                                        HorizontalOptions="End"
+                                        Text="{Binding ValorEstatisticaPrincipal}"
+                                        TextColor="White"
+                                        VerticalOptions="Center" />
+
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
 
             </VerticalStackLayout>
         </ScrollView>

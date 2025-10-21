@@ -36,5 +36,24 @@ namespace ArenaVirtual.Views.CampeonatoPage {
             }
             await viewModel.AnexarArbitros(jogo);
         }
+
+        private void OnEstatisticaTapped(object sender, TappedEventArgs e) {
+            // 1. Obtém o nome da estatística do CommandParameter
+            if (e.Parameter is not string estatistica) {
+                Debug.WriteLine("[DEBUG-CLICK-ERROR] Nome da estatística não pôde ser recuperado do CommandParameter.");
+                return;
+            }
+
+            // 2. Chama o método do ViewModel diretamente
+            if (BindingContext is CampeonatoDetailViewModel viewModel) {
+                // A lógica de filtragem e atualização da lista é movida para um método público
+                // no ViewModel que substitui o antigo RelayCommand.
+                viewModel.MudarEstatisticaLogic(estatistica);
+                // Nota: O método no ViewModel DEVE ser público agora.
+            } else {
+                Debug.WriteLine("[DEBUG-CLICK-ERROR] ViewModel não encontrado para processar o clique.");
+            }
+        }
+
     }
 }
