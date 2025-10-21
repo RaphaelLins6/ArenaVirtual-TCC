@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace ArenaVirtual.ViewModels.CampeonatoPage {
@@ -17,12 +18,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 this.Items.Add(item);
         }
     }
-    public class RodadaGrouping : Grouping<int, Jogo> {
-        public RodadaGrouping(int key, IEnumerable<Jogo> items) : base(key, items) { }
+    public class RodadaGrouping : Grouping<string, Jogo> {
+        public RodadaGrouping(string key, IEnumerable<Jogo> items) : base(key, items) { }
+        public string NomeRodada => Key;
     }
-
-    // Incluir o TimeEstatisticaViewModel aqui, ou em seu próprio arquivo
-    // (A definição completa está no bloco anterior, assumindo um arquivo separado ou incluído no mesmo namespace)
 
     public partial class CampeonatoDetailViewModel : ObservableObject, IQueryAttributable {
 
@@ -354,6 +353,33 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             }
         }
 
+        // Assumindo que esta é uma função membro da sua classe (ex: ViewModel)
+        private string GetNomeRodada(int rodadaAtual, int totalRodadas) {
+            // A Final é sempre a rodada com o maior número.
+            // A contagem reversa (1 = Final, 2 = Semi, 3 = Quartas...) simplifica o mapeamento.
+            int rodadaContagemReversa = totalRodadas - rodadaAtual + 1;
+
+            // Mapeamento padrão, funciona para 4, 8, 16, 32... times
+            switch (rodadaContagemReversa) {
+                case 1:
+                    return "FINAL";
+                case 2:
+                    return "Semi-Final";
+                case 3:
+                    return "Quartas de Final";
+                case 4:
+                    return "Oitavas de Final";
+                case 5:
+                    return "16 avos de Final";
+                case 6:
+                    return "32 avos de Final";
+                default:
+                    // Para rodadas preliminares muito grandes (ex: 64 avos), ou casos não mapeados
+                    return $"Rodada {rodadaAtual} (Preliminar)";
+            }
+        }
+
+
         private async Task GerarJogosMataMata() {
             if (!IsMataMataFormat && !IsFormatoHibrido || Campeonato is null) return;
 
@@ -361,8 +387,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 JogosMataMata.Clear();
             });
 
-            // Usamos TabelaClassificacao (que já é carregada no LoadTabelaClassificacaoAsync)
-            // para obter os times que avançaram (todos, neste mock)
             var timesAceitos = TabelaClassificacao.OrderByDescending(t => t.PontuacaoTotal).ToList();
 
             if (timesAceitos.Count < 2) {
@@ -372,16 +396,23 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             int mockIdCounter = -1;
             var mockJogosFlat = new List<Jogo>();
+            int totalRodadas = 0; // Variável para armazenar o total de rodadas geradas
 
-            // Lógica de Geração de Bracket (Mock) - Mantida a lógica original
+            // ===================================================================
+            // LÓGICA DE GERAÇÃO E CÁLCULO DE TOTAL DE RODADAS
+            // ===================================================================
+
             if (timesAceitos.Count == 2) {
+                // Apenas Final
+                totalRodadas = 1;
+
                 var jogoFinal = new Jogo {
                     Id = mockIdCounter--,
                     TimeA = timesAceitos[0],
                     TimeAId = timesAceitos[0].Id,
                     TimeB = timesAceitos[1],
                     TimeBId = timesAceitos[1].Id,
-                    Rodada = 1,
+                    Rodada = 1, // Rodada 1
                     IsOrganizador = IsOrganizador,
                     NomeArbitro = string.Empty,
                     Local = "A Definir",
@@ -390,6 +421,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 Debug.WriteLine("[MATA-MATA] Bracket de 2 times (Final) gerado.");
 
             } else if (timesAceitos.Count == 3) {
+                // Semi (Rodada 1) e Final (Rodada 2)
+                totalRodadas = 2;
+
+                // Jogo da Semifinal (Times 2 vs 3)
                 var jogoSemi1 = new Jogo {
                     Id = mockIdCounter--,
                     TimeA = timesAceitos[1],
@@ -403,12 +438,19 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 };
                 mockJogosFlat.Add(jogoSemi1);
 
+                // Jogo da Final (Time 1 (Bye) vs Vencedor Jogo 1)
+                var vencedorPlaceholder = new Time {
+                    Nome = $"Vencedor Jogo {Math.Abs(jogoSemi1.Id)}",
+                    LogoUrl = "default_logo.png",
+                    Id = jogoSemi1.Id
+                };
+
                 var jogoFinal = new Jogo {
                     Id = mockIdCounter--,
                     TimeA = timesAceitos[0], // Time que ganhou o Bye
                     TimeAId = timesAceitos[0].Id,
-                    TimeB = new Time { Nome = "Vencedor Jogo 1", LogoUrl = "default_logo.png", Id = mockIdCounter-- },
-                    TimeBId = jogoSemi1.Id,
+                    TimeB = vencedorPlaceholder,
+                    TimeBId = jogoSemi1.Id, // Referência ao ID do Jogo de Semifinal
                     Rodada = 2,
                     IsOrganizador = IsOrganizador,
                     NomeArbitro = string.Empty,
@@ -418,59 +460,83 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 Debug.WriteLine("[MATA-MATA] Bracket de 3 times gerado (Semi + Final com Bye).");
 
             } else if (timesAceitos.Count >= 4) {
-                // Primeira Rodada (Quartas, se houver 4)
-                for (int i = 0; i < timesAceitos.Count; i += 2) {
-                    if (i + 1 < timesAceitos.Count) {
-                        mockJogosFlat.Add(new Jogo {
+                // Geração de Bracket Completo (N >= 4)
+
+                var mockTimeBye = new Time { Nome = "BYE", LogoUrl = "default_logo.png", Id = mockIdCounter-- };
+                var participantesRodadaAtual = timesAceitos.ToList();
+                int rodadaAtual = 1;
+
+                // Variável de controle (para calcular totalRodadas após o loop)
+                // O total de rodadas será (rodadaAtual - 1) após o loop.
+
+                while (participantesRodadaAtual.Count > 1) {
+                    var participantesProximaRodada = new List<Time>();
+                    int numJogosRodada = (int)Math.Ceiling(participantesRodadaAtual.Count / 2.0);
+
+                    Debug.WriteLine($"[MATA-MATA] Gerando Rodada {rodadaAtual}. Número de times: {participantesRodadaAtual.Count}. Jogos: {numJogosRodada}");
+
+                    // Emparelhamento dos times na rodada atual
+                    for (int i = 0; i < numJogosRodada; i++) {
+                        Time timeA = participantesRodadaAtual[i * 2];
+                        Time timeB;
+
+                        int indexB = i * 2 + 1;
+
+                        if (indexB < participantesRodadaAtual.Count) {
+                            timeB = participantesRodadaAtual[indexB];
+                        } else {
+                            timeB = mockTimeBye;
+                        }
+
+                        var novoJogo = new Jogo {
                             Id = mockIdCounter--,
-                            TimeA = timesAceitos[i],
-                            TimeAId = timesAceitos[i].Id,
-                            TimeB = timesAceitos[i + 1],
-                            TimeBId = timesAceitos[i + 1].Id,
-                            Rodada = 1,
+                            TimeA = timeA,
+                            TimeAId = timeA.Id,
+                            TimeB = timeB,
+                            TimeBId = timeB.Id,
+                            Rodada = rodadaAtual,
                             IsOrganizador = IsOrganizador,
                             NomeArbitro = string.Empty,
                             Local = "A Definir",
-                        });
-                    }
-                }
+                        };
+                        mockJogosFlat.Add(novoJogo);
 
-                // Simulação da próxima rodada (Semi)
-                if (mockJogosFlat.Count >= 2) {
-                    var vencedoresMock = new List<Time>();
-                    for (int i = 0; i < mockJogosFlat.Count; i += 2) {
-                        var jogo1 = mockJogosFlat[i];
-                        var jogo2 = i + 1 < mockJogosFlat.Count ? mockJogosFlat[i + 1] : null;
-
-                        var vencedor1 = new Time { Nome = $"Vencedor Jogo {i + 1}", LogoUrl = "default_logo.png", Id = mockIdCounter-- };
-                        var vencedor2 = jogo2 != null ? new Time { Nome = $"Vencedor Jogo {i + 2}", LogoUrl = "default_logo.png", Id = mockIdCounter-- } : null;
-
-                        if (jogo2 != null) {
-                            var jogoProximaRodada = new Jogo {
-                                Id = mockIdCounter--,
-                                TimeA = vencedor1,
-                                TimeAId = jogo1.Id, // Referência ao Jogo anterior
-                                TimeB = vencedor2,
-                                TimeBId = jogo2.Id, // Referência ao Jogo anterior
-                                Rodada = 2,
-                                IsOrganizador = IsOrganizador,
-                                NomeArbitro = string.Empty,
-                                Local = "A Definir",
+                        // Adiciona o placeholder do vencedor para a próxima rodada
+                        if (timeB.Nome == "BYE") {
+                            participantesProximaRodada.Add(timeA);
+                        } else {
+                            var vencedorPlaceholder = new Time {
+                                Nome = $"Vencedor Jogo {Math.Abs(novoJogo.Id)}",
+                                LogoUrl = "default_logo.png",
+                                Id = novoJogo.Id
                             };
-                            mockJogosFlat.Add(jogoProximaRodada);
+                            participantesProximaRodada.Add(vencedorPlaceholder);
                         }
                     }
+
+                    // Prepara para a próxima iteração
+                    participantesRodadaAtual = participantesProximaRodada;
+                    rodadaAtual++;
                 }
 
-                Debug.WriteLine("[MATA-MATA] Bracket de 4+ times gerado (Rodadas simuladas).");
+                // O número total de rodadas é a última rodada gerada
+                totalRodadas = rodadaAtual - 1;
+
+                Debug.WriteLine($"[MATA-MATA] Bracket de Múltiplas Rodadas gerado. Total de Rodadas: {totalRodadas}");
             }
+
+            // ===================================================================
+            // AGRUPAMENTO E USO DA FUNÇÃO DE NOMENCLATURA
+            // ===================================================================
 
             Debug.WriteLine($"[MATA-MATA] Total de jogos planos gerados: {mockJogosFlat.Count}");
 
+            // Agrupamento final por número da rodada e conversão para nome
             var groupedJogos = mockJogosFlat
                 .OrderBy(j => j.Rodada)
                 .GroupBy(j => j.Rodada)
-                .Select(g => new RodadaGrouping(g.Key, g))
+                // AQUI USAMOS A FUNÇÃO DE NOMENCLATURA!
+                .Select(g => new RodadaGrouping(GetNomeRodada(g.Key, totalRodadas), g))
                 .ToList();
 
             Debug.WriteLine($"[MATA-MATA] Total de grupos (Rodadas) gerados: {groupedJogos.Count}");
@@ -483,20 +549,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 }
                 Debug.WriteLine($"[MATA-MATA] Total de grupos adicionados: {JogosMataMata.Count}");
             });
-        }
-
-        public string ObterNomeDaRodada(int rodada, int totalJogos) {
-            int divisor = (int)Math.Pow(2, rodada - 1);
-            if (divisor == 0) return $"Rodada {rodada}";
-
-            int jogosNaRodada = totalJogos / Math.Max(1, divisor);
-
-            if (jogosNaRodada == 1) return "FINAL";
-            if (jogosNaRodada == 2) return "Semifinal";
-            if (jogosNaRodada == 4) return "Quartas de Final";
-            if (jogosNaRodada == 8) return "Oitavas de Final";
-
-            return $"Rodada {rodada}";
         }
 
         private void LoadImageSources() {
