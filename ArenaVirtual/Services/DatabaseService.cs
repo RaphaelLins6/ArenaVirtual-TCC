@@ -545,9 +545,14 @@ namespace ArenaVirtual.Services {
             return _database.Table<Time>().Where(t => t.Id == id).FirstOrDefaultAsync();
         }
         public Task<List<Jogo>> ObterJogosPorArbitroAsync(Guid arbitroClientAppId) {
+            var limiteData = DateTime.Now.AddDays(-30);
+
             return _database.Table<Jogo>()
-                            .Where(j => j.ArbitroId == arbitroClientAppId)
-                            .OrderBy(j => j.DataHora) 
+                            .Where(j => j.ArbitroId == arbitroClientAppId &&
+                                       (j.Status != JogoStatus.Finalizado && j.DataHora >= DateTime.Now.AddHours(-1)) || 
+                                       (j.Status == JogoStatus.Finalizado && j.DataHora >= limiteData) 
+                                  )
+                            .OrderBy(j => j.DataHora)
                             .ToListAsync();
         }
         public Task<int> DesvincularArbitroDosJogosAsync(Guid campeonatoClientAppId, Guid arbitroClientAppId) {

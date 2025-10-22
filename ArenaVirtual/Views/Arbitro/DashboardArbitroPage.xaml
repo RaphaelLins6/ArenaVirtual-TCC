@@ -3,22 +3,17 @@
     x:Class="ArenaVirtual.Views.Arbitro.DashboardArbitroPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:ArenaVirtual.Views.Arbitro"
     xmlns:models="clr-namespace:ArenaVirtual.Models.ViewModels.Shared"
-    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.Arbitro"
     Title="Dashboard"
     x:DataType="vm:DashboardArbitroViewModel"
     Shell.NavBarIsVisible="True">
 
-    <ContentPage.Behaviors>
-        <toolkit:EventToCommandBehavior Command="{Binding LoadPartidasCommand}" EventName="Appearing" />
-    </ContentPage.Behaviors>
-
     <ContentPage.Content>
-        <StackLayout Padding="20">
+        <Grid Padding="20" RowDefinitions="Auto, Auto, *, Auto, *">
 
             <Button
+                Grid.Row="0"
                 Margin="0,0,0,15"
                 BackgroundColor="#007ACC"
                 Command="{Binding NavigateToInscricoesCommand}"
@@ -27,21 +22,28 @@
                 TextColor="White" />
 
             <Label
-                Margin="0,0,0,15"
+                Grid.Row="1"
+                Margin="0,0,0,10"
                 FontAttributes="Bold"
                 FontSize="24"
-                Text="Minhas Partidas Designadas"
+                Text="Partidas para Lançamento"
                 TextColor="#FFA500" />
 
-            <RefreshView Command="{Binding LoadPartidasCommand}" IsRefreshing="{Binding EstaOcupado}">
+            <RefreshView
+                Grid.Row="2"
+                Command="{Binding LoadPartidasCommand}"
+                IsRefreshing="{Binding EstaOcupado}">
 
-                <CollectionView ItemsSource="{Binding MinhasPartidas}" SelectionMode="None">
+                <CollectionView ItemsSource="{Binding JogosParaLancamento}" SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
+                    </CollectionView.ItemsLayout>
 
                     <CollectionView.EmptyView>
                         <StackLayout Padding="20">
                             <Label
                                 HorizontalOptions="Center"
-                                Text="Você não tem partidas designadas."
+                                Text="Você não tem partidas pendentes."
                                 TextColor="Orange"
                                 VerticalOptions="Center" />
                         </StackLayout>
@@ -66,7 +68,6 @@
                                         TextColor="#FF9800" />
 
                                     <Grid Padding="5" ColumnDefinitions="*,Auto,*">
-
                                         <StackLayout Grid.Column="0" HorizontalOptions="Start">
                                             <Image
                                                 HeightRequest="40"
@@ -78,7 +79,6 @@
                                                 HorizontalOptions="Center"
                                                 Text="{Binding NomeTimeA}" />
                                         </StackLayout>
-
                                         <StackLayout
                                             Grid.Column="1"
                                             HorizontalOptions="Center"
@@ -100,7 +100,6 @@
                                                 HorizontalTextAlignment="Center"
                                                 Text="{Binding Jogo.Rodada, StringFormat='Rodada {0}'}" />
                                         </StackLayout>
-
                                         <StackLayout Grid.Column="2" HorizontalOptions="End">
                                             <Image
                                                 HeightRequest="40"
@@ -112,7 +111,6 @@
                                                 HorizontalOptions="Center"
                                                 Text="{Binding NomeTimeB}" />
                                         </StackLayout>
-
                                     </Grid>
 
                                     <Button
@@ -124,13 +122,97 @@
                                         Style="{StaticResource BotaoPrincipal}"
                                         Text="Lançar Estatísticas"
                                         TextColor="Black" />
-
                                 </StackLayout>
                             </Frame>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
             </RefreshView>
-        </StackLayout>
+
+            <Label
+                Grid.Row="3"
+                Margin="0,20,0,10"
+                FontAttributes="Bold"
+                FontSize="20"
+                IsVisible="{Binding IsJogosLancadosVisivel}"
+                Text="Partidas Lançadas Recentemente"
+                TextColor="#3CB371" />
+
+            <CollectionView
+                Grid.Row="4"
+                ItemsSource="{Binding JogosLancados}"
+                SelectionMode="None">
+
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:JogoDetalheViewModel">
+                        <Frame
+                            Margin="0,5"
+                            Padding="10"
+                            BackgroundColor="#1E1E1E"
+                            CornerRadius="8"
+                            HasShadow="True">
+                            <StackLayout>
+                                <Label
+                                    Margin="0,0,0,5"
+                                    FontAttributes="Italic"
+                                    FontSize="Small"
+                                    HorizontalOptions="Center"
+                                    Text="{Binding NomeCampeonato}"
+                                    TextColor="#FF9800" />
+                                <Grid Padding="5" ColumnDefinitions="*,Auto,*">
+                                    <StackLayout Grid.Column="0" HorizontalOptions="Start">
+                                        <Image
+                                            HeightRequest="40"
+                                            HorizontalOptions="Center"
+                                            Source="{Binding Jogo.TimeA.LogoUrl}"
+                                            WidthRequest="40" />
+                                        <Label
+                                            FontAttributes="Bold"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding NomeTimeA}" />
+                                    </StackLayout>
+                                    <StackLayout
+                                        Grid.Column="1"
+                                        HorizontalOptions="Center"
+                                        Spacing="2">
+                                        <Label
+                                            FontAttributes="Bold"
+                                            FontSize="18"
+                                            HorizontalTextAlignment="Center"
+                                            Text="ESTATÍSTICAS LANÇADAS"
+                                            TextColor="#3CB371" />
+                                        <Label
+                                            FontAttributes="Bold"
+                                            FontSize="16"
+                                            HorizontalTextAlignment="Center"
+                                            Text="{Binding PlacarFinal}" />
+                                        <Label
+                                            FontSize="12"
+                                            HorizontalTextAlignment="Center"
+                                            Text="{Binding DataHora, StringFormat='{0:dd/MM - HH:mm}'}" />
+                                    </StackLayout>
+                                    <StackLayout Grid.Column="2" HorizontalOptions="End">
+                                        <Image
+                                            HeightRequest="40"
+                                            HorizontalOptions="Center"
+                                            Source="{Binding Jogo.TimeB.LogoUrl}"
+                                            WidthRequest="40" />
+                                        <Label
+                                            FontAttributes="Bold"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding NomeTimeB}" />
+                                    </StackLayout>
+                                </Grid>
+                            </StackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </Grid>
     </ContentPage.Content>
 </ContentPage>

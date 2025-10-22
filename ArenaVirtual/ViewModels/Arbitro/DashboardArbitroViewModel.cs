@@ -19,6 +19,13 @@ namespace ArenaVirtual.ViewModels.Arbitro {
         private bool _estaOcupado;
 
         public ObservableCollection<JogoDetalheViewModel> MinhasPartidas { get; } = new();
+        public ObservableCollection<JogoDetalheViewModel> JogosParaLancamento { get; } = new();
+        public ObservableCollection<JogoDetalheViewModel> JogosLancados { get; } = new();
+
+        [ObservableProperty]
+        private bool _isJogosLancadosVisivel;
+        [ObservableProperty]
+        private bool _isJogosParaLancamentoVisivel;
 
         public DashboardArbitroViewModel(DatabaseService databaseService, SessaoService sessaoService) {
             _databaseService = databaseService;
@@ -51,48 +58,51 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                     return;
                 }
 
-                Debug.WriteLine($"[DEBUG 1] Árbitro ID utilizado na busca: {_arbitroIdLogado}");
+                // 🛑 LIMPEZA DAS DUAS COLEÇÕES
+                JogosParaLancamento.Clear();
+                JogosLancados.Clear();
 
-                MinhasPartidas.Clear();
-
-                // 1. CHAMA O NOVO MÉTODO (OU O MÉTODO QUE VOCÊ JÁ TEM QUE BUSCA JOGOS POR ARBITRO ID)
+                // 1. CHAMA O MÉTODO ATUALIZADO (que filtra jogos muito antigos no DB Service)
+                // Note: Se o _databaseService ainda não faz o filtro de data, ele retornará todos.
+                // A filtragem de data é feita no DatabaseService (ver item C).
                 var jogosDoArbitro = await _databaseService.ObterJogosPorArbitroAsync(_arbitroIdLogado);
-
-                Debug.WriteLine($"[DEBUG 2] Jogos encontrados no DB para o árbitro: {jogosDoArbitro?.Count ?? 0}");
 
                 // 2. HIDRATAÇÃO CENTRALIZADA
                 if (jogosDoArbitro != null) {
-                    await HidratarJogos(jogosDoArbitro); // Chamada para a nova função auxiliar
+                    await HidratarJogos(jogosDoArbitro);
                 }
 
-                // 3. MAPEAMENTO PARA VIEW MODEL
-                int jogosMapeados = 0;
+                // 3. SEPARAÇÃO E MAPEAMENTO PARA VIEW MODEL
                 if (jogosDoArbitro != null) {
-                    foreach (var jogo in jogosDoArbitro) {
+                    foreach (var jogo in jogosDoArbitro.OrderBy(j => j.DataHora)) { // Ordenar por data
                         if (jogo.TimeA != null && jogo.TimeB != null && jogo.Campeonato != null) {
                             var detalhe = new JogoDetalheViewModel(
                                 jogo,
-                                jogo.TimeA.Nome, // 2ª string
-                                jogo.TimeB.Nome, // 3ª string
-                                jogo.Campeonato.Nome // 4ª string
+                                jogo.TimeA.Nome,
+                                jogo.TimeB.Nome,
+                                jogo.Campeonato.Nome
                             );
-                            MinhasPartidas.Add(detalhe);
-                            jogosMapeados++;
+
+                            // LÓGICA DE SEPARAÇÃO DOS CARDS: Usando a propriedade 'Status' (do tipo JogoStatus)
+                            if (jogo.Status == JogoStatus.Finalizado) {
+                                // Se o jogo está Finalizado, ele vai para Lançados.
+                                // Ele só veio do banco de dados porque estava dentro do período de 7 dias.
+                                JogosLancados.Add(detalhe);
+                            } else {
+                                // Se o jogo não está Finalizado (Pendente, Agendado, etc.), ele vai para Para Lançamento.
+                                JogosParaLancamento.Add(detalhe);
+                            }
                         } else {
-                            // NOVO DEBUG AQUI: O Jogo está sendo descartado!
-                            Debug.WriteLine($"[DEBUG 3] Jogo descartado (ID: {jogo.Id}): TimeA: {jogo.TimeA == null}, TimeB: {jogo.TimeB == null}, Campeonato: {jogo.Campeonato == null}");
+                            Debug.WriteLine($"[DEBUG 3] Jogo descartado (ID: {jogo.Id}): Falta dados (TimeA/B/Campeonato).");
                         }
                     }
                 }
-                Debug.WriteLine($"[DEBUG 4] Total de partidas adicionadas à UI: {jogosMapeados}");
 
+                // ATUALIZA A VISIBILIDADE DOS TÍTULOS
+                IsJogosParaLancamentoVisivel = JogosParaLancamento.Any();
+                IsJogosLancadosVisivel = JogosLancados.Any();
 
-                // Opcional: ordenar as próximas partidas para a UI, mesmo que já ordenado na query
-                var proximasPartidas = MinhasPartidas.OrderBy(p => p.DataHora).ToList();
-                MinhasPartidas.Clear();
-                foreach (var partida in proximasPartidas) {
-                    MinhasPartidas.Add(partida);
-                }
+                Debug.WriteLine($"[DEBUG 4] Para Lançamento: {JogosParaLancamento.Count}, Lançados: {JogosLancados.Count}");
 
             } catch (Exception ex) {
                 Debug.WriteLine($"Erro ao carregar partidas do árbitro: {ex.Message}");
@@ -153,9 +163,9 @@ namespace ArenaVirtual.ViewModels.Arbitro {
             // Isso garante que o IQueryAttributable seja acionado corretamente.
             var navigationParameters = new Dictionary<string, object>
             {
-        // A chave "JogoId" deve ser a mesma chave usada no ApplyQueryAttributes
-        { "JogoId", partidaDetalhe.Jogo.Id }
-    };
+                // A chave "JogoId" deve ser a mesma chave usada no ApplyQueryAttributes
+                { "JogoId", partidaDetalhe.Jogo.Id }
+            };
 
             Debug.WriteLine($"[COMMAND LOG] Tentando navegar para Jogo ID: {partidaDetalhe.Jogo.Id} usando Dictionary.");
 
@@ -166,8 +176,7 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                 Debug.WriteLine("[COMMAND LOG] Navegação solicitada com sucesso (via Dictionary).");
             } catch (Exception ex) {
                 Debug.WriteLine($"[COMMAND LOG ERROR] FALHA NA NAVEGAÇÃO: {ex.Message}");
-                await Shell.Current.DisplayAlert("Erro de Navegação",
-                                                 "Não foi possível abrir a tela de estatísticas. Verifique a rota no AppShell.", "OK");
+                await Shell.Current.DisplayAlert("Erro de Navegação", "Não foi possível abrir a tela de estatísticas. Verifique a rota no AppShell.", "OK");
             }
         }
     }
