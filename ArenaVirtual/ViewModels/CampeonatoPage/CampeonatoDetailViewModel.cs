@@ -755,7 +755,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             // 2. Filtrar apenas jogos que foram FINALIZADOS para contar os "Jogos Disputados"
             var jogosFinalizados = todosOsJogosDoCampeonato
-                .Where(j => j.PlacarTimeAInt >= 0 && j.PlacarTimeBInt >= 0)
+                .Where(j =>
+                    j.PlacarTimeAInt >= 0 && j.PlacarTimeBInt >= 0 &&
+                    !(j.PlacarTimeAInt == 0 && j.PlacarTimeBInt == 0) // <--- CORREÇÃO AQUI
+                )
                 .ToList();
 
             // 3. Processar cada time
