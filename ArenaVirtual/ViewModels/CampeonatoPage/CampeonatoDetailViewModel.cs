@@ -409,6 +409,38 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 JogosMataMata.Clear();
             });
 
+            // ===================================================================
+            // ETAPA 1: CARREGAR JOGOS SALVOS E PERSISTÊNCIA (ÁRBITROS)
+            // ===================================================================
+            var jogosMataMataSalvos = await _jogoService.ObterJogosMataMataPorCampeonatoAsync(Campeonato.ClientAppId);
+            if (jogosMataMataSalvos == null) jogosMataMataSalvos = new List<Jogo>();
+
+            // Mapeamento de árbitros (Reutilizando a lógica do GerarTabelaJogosAsync):
+            var todosOsArbitrosIds = jogosMataMataSalvos
+                .Select(j => j.ArbitroId)
+                .Where(id => id.HasValue && id.Value != Guid.Empty)
+                .Select(id => id.Value)
+                .Distinct()
+                .ToList();
+
+            var arbitrosMap = await _usuarioService.ObterNomesUsuariosPorIdsAsync(todosOsArbitrosIds);
+            if (arbitrosMap == null) arbitrosMap = new Dictionary<Guid, string>();
+
+            // Garante que os jogos carregados tenham o NomeArbitro preenchido
+            bool isOrganizador = this.IsOrganizador;
+            foreach (var jogoSalvo in jogosMataMataSalvos) {
+                jogoSalvo.IsOrganizador = isOrganizador;
+                if (jogoSalvo.ArbitroId.HasValue && arbitrosMap.TryGetValue(jogoSalvo.ArbitroId.Value, out var nome))
+                    jogoSalvo.NomeArbitro = nome;
+                else
+                    jogoSalvo.NomeArbitro = string.Empty;
+
+                // Notifica a UI caso o objeto Jogo carregado já esteja em alguma coleção
+                jogoSalvo.NotifyArbitroStatusChanged();
+            }
+            // ===================================================================
+
+
             var timesAceitos = TabelaClassificacao.OrderByDescending(t => t.PontuacaoTotal).ToList();
 
             if (timesAceitos.Count < 2) {
@@ -418,46 +450,54 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             int mockIdCounter = -1;
             var mockJogosFlat = new List<Jogo>();
-            int totalRodadas = 0; // Variável para armazenar o total de rodadas geradas
+            int totalRodadas = 0;
+
+            // Função auxiliar para encontrar o jogo salvo ou criar um mock
+            Jogo EncontrarOuCriarJogo(Time tA, Time tB, int rodada) {
+                // 1. Tenta encontrar o jogo salvo (match pelos IDs dos times e rodada)
+                // A lógica de busca precisa ser simétrica (A vs B é o mesmo que B vs A)
+                var jogoExistente = jogosMataMataSalvos
+                    .FirstOrDefault(j => j.Rodada == rodada &&
+                                        ((j.TimeAId == tA.Id && j.TimeBId == tB.Id) ||
+                                         (j.TimeAId == tB.Id && j.TimeBId == tA.Id)));
+
+                if (jogoExistente != null) {
+                    Debug.WriteLine($"[MATA-MATA] Jogo Real Encontrado. Rodada {rodada}. ID: {jogoExistente.Id}. Árbitro: {jogoExistente.NomeArbitro}");
+                    return jogoExistente; // Retorna o jogo real (com árbitro persistido)
+                }
+
+                // 2. Cria um novo Mock
+                var novoJogo = new Jogo {
+                    Id = mockIdCounter--, // ID de mock
+                    TimeA = tA,
+                    TimeAId = tA.Id,
+                    TimeB = tB,
+                    TimeBId = tB.Id,
+                    Rodada = rodada,
+                    IsOrganizador = IsOrganizador,
+                    NomeArbitro = string.Empty, // Árbitro vazio para mock
+                    Local = "A Definir",
+                };
+                Debug.WriteLine($"[MATA-MATA] Jogo Mock Gerado. Rodada {rodada}. ID: {novoJogo.Id}.");
+                return novoJogo;
+            }
 
             // ===================================================================
-            // LÓGICA DE GERAÇÃO E CÁLCULO DE TOTAL DE RODADAS
+            // LÓGICA DE GERAÇÃO E CÁLCULO DE TOTAL DE RODADAS (APLICANDO CORREÇÃO)
             // ===================================================================
 
             if (timesAceitos.Count == 2) {
                 // Apenas Final
                 totalRodadas = 1;
-
-                var jogoFinal = new Jogo {
-                    Id = mockIdCounter--,
-                    TimeA = timesAceitos[0],
-                    TimeAId = timesAceitos[0].Id,
-                    TimeB = timesAceitos[1],
-                    TimeBId = timesAceitos[1].Id,
-                    Rodada = 1, // Rodada 1
-                    IsOrganizador = IsOrganizador,
-                    NomeArbitro = string.Empty,
-                    Local = "A Definir",
-                };
+                var jogoFinal = EncontrarOuCriarJogo(timesAceitos[0], timesAceitos[1], 1);
                 mockJogosFlat.Add(jogoFinal);
-                Debug.WriteLine("[MATA-MATA] Bracket de 2 times (Final) gerado.");
 
             } else if (timesAceitos.Count == 3) {
                 // Semi (Rodada 1) e Final (Rodada 2)
                 totalRodadas = 2;
 
                 // Jogo da Semifinal (Times 2 vs 3)
-                var jogoSemi1 = new Jogo {
-                    Id = mockIdCounter--,
-                    TimeA = timesAceitos[1],
-                    TimeAId = timesAceitos[1].Id,
-                    TimeB = timesAceitos[2],
-                    TimeBId = timesAceitos[2].Id,
-                    Rodada = 1,
-                    IsOrganizador = IsOrganizador,
-                    NomeArbitro = string.Empty,
-                    Local = "A Definir",
-                };
+                var jogoSemi1 = EncontrarOuCriarJogo(timesAceitos[1], timesAceitos[2], 1);
                 mockJogosFlat.Add(jogoSemi1);
 
                 // Jogo da Final (Time 1 (Bye) vs Vencedor Jogo 1)
@@ -467,19 +507,26 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     Id = jogoSemi1.Id
                 };
 
+                // Final é um jogo futuro com placeholder, então EncontrarOuCriarJogo não funcionará 
+                // para encontrar os times, mas podemos usá-lo para a estrutura do mock.
+                // No entanto, para simplificar e garantir a correspondência de IDs para jogos futuros
+                // (que não terão árbitro), vamos manter a criação do objeto direto aqui.
+
                 var jogoFinal = new Jogo {
                     Id = mockIdCounter--,
-                    TimeA = timesAceitos[0], // Time que ganhou o Bye
+                    TimeA = timesAceitos[0],
                     TimeAId = timesAceitos[0].Id,
                     TimeB = vencedorPlaceholder,
-                    TimeBId = jogoSemi1.Id, // Referência ao ID do Jogo de Semifinal
+                    TimeBId = jogoSemi1.Id,
                     Rodada = 2,
                     IsOrganizador = IsOrganizador,
                     NomeArbitro = string.Empty,
                     Local = "A Definir",
                 };
+                // Para jogos futuros (onde TimeBId é a referência a outro jogo) 
+                // a chance de ele estar salvo é baixa, a não ser que você salve os mocks também.
+                // Por segurança, mantemos como mock.
                 mockJogosFlat.Add(jogoFinal);
-                Debug.WriteLine("[MATA-MATA] Bracket de 3 times gerado (Semi + Final com Bye).");
 
             } else if (timesAceitos.Count >= 4) {
                 // Geração de Bracket Completo (N >= 4)
@@ -488,16 +535,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 var participantesRodadaAtual = timesAceitos.ToList();
                 int rodadaAtual = 1;
 
-                // Variável de controle (para calcular totalRodadas após o loop)
-                // O total de rodadas será (rodadaAtual - 1) após o loop.
-
                 while (participantesRodadaAtual.Count > 1) {
                     var participantesProximaRodada = new List<Time>();
                     int numJogosRodada = (int)Math.Ceiling(participantesRodadaAtual.Count / 2.0);
 
                     Debug.WriteLine($"[MATA-MATA] Gerando Rodada {rodadaAtual}. Número de times: {participantesRodadaAtual.Count}. Jogos: {numJogosRodada}");
 
-                    // Emparelhamento dos times na rodada atual
                     for (int i = 0; i < numJogosRodada; i++) {
                         Time timeA = participantesRodadaAtual[i * 2];
                         Time timeB;
@@ -507,30 +550,43 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                         if (indexB < participantesRodadaAtual.Count) {
                             timeB = participantesRodadaAtual[indexB];
                         } else {
+                            // Cuidado: aqui TimeB é mockTimeBye (ID negativo)
                             timeB = mockTimeBye;
                         }
 
-                        var novoJogo = new Jogo {
-                            Id = mockIdCounter--,
-                            TimeA = timeA,
-                            TimeAId = timeA.Id,
-                            TimeB = timeB,
-                            TimeBId = timeB.Id,
-                            Rodada = rodadaAtual,
-                            IsOrganizador = IsOrganizador,
-                            NomeArbitro = string.Empty,
-                            Local = "A Definir",
-                        };
-                        mockJogosFlat.Add(novoJogo);
+                        Jogo jogoParaAdicionar;
+
+                        if (timeA.Id < 0 || timeB.Id < 0) {
+                            // Se algum dos times for um placeholder (ID negativo), 
+                            // a correspondência no DB por IDs é inválida. 
+                            // Tratamos como um mock que ainda não foi salvo.
+                            jogoParaAdicionar = new Jogo {
+                                Id = mockIdCounter--,
+                                TimeA = timeA,
+                                TimeAId = timeA.Id,
+                                TimeB = timeB,
+                                TimeBId = timeB.Id,
+                                Rodada = rodadaAtual,
+                                IsOrganizador = IsOrganizador,
+                                NomeArbitro = string.Empty,
+                                Local = "A Definir",
+                            };
+                            Debug.WriteLine($"[MATA-MATA] Jogo Futuro/Mock criado. ID: {jogoParaAdicionar.Id}.");
+                        } else {
+                            // Tenta encontrar o jogo real (apenas para a primeira rodada com times reais)
+                            jogoParaAdicionar = EncontrarOuCriarJogo(timeA, timeB, rodadaAtual);
+                        }
+
+                        mockJogosFlat.Add(jogoParaAdicionar);
 
                         // Adiciona o placeholder do vencedor para a próxima rodada
                         if (timeB.Nome == "BYE") {
                             participantesProximaRodada.Add(timeA);
                         } else {
                             var vencedorPlaceholder = new Time {
-                                Nome = $"Vencedor Jogo {Math.Abs(novoJogo.Id)}",
+                                Nome = $"Vencedor Jogo {Math.Abs(jogoParaAdicionar.Id)}",
                                 LogoUrl = "default_logo.png",
-                                Id = novoJogo.Id
+                                Id = jogoParaAdicionar.Id
                             };
                             participantesProximaRodada.Add(vencedorPlaceholder);
                         }
@@ -543,12 +599,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
                 // O número total de rodadas é a última rodada gerada
                 totalRodadas = rodadaAtual - 1;
-
-                Debug.WriteLine($"[MATA-MATA] Bracket de Múltiplas Rodadas gerado. Total de Rodadas: {totalRodadas}");
             }
 
             // ===================================================================
-            // AGRUPAMENTO E USO DA FUNÇÃO DE NOMENCLATURA
+            // AGRUPAMENTO E USO DA FUNÇÃO DE NOMENCLATURA (RESTANTE DO CÓDIGO)
             // ===================================================================
 
             Debug.WriteLine($"[MATA-MATA] Total de jogos planos gerados: {mockJogosFlat.Count}");

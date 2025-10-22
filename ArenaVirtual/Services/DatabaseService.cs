@@ -546,15 +546,27 @@ namespace ArenaVirtual.Services {
         }
         public Task<List<Jogo>> ObterJogosPorArbitroAsync(Guid arbitroClientAppId) {
             var limiteData = DateTime.Now.AddDays(-30);
+            // Para simplificar, vamos garantir que o árbitro apareça em todos os jogos, 
+            // e depois usamos a lógica de status e data.
 
             return _database.Table<Jogo>()
-                            .Where(j => j.ArbitroId == arbitroClientAppId &&
-                                       (j.Status != JogoStatus.Finalizado && j.DataHora >= DateTime.Now.AddHours(-1)) || 
-                                       (j.Status == JogoStatus.Finalizado && j.DataHora >= limiteData) 
-                                  )
+                            .Where(j => j.ArbitroId == arbitroClientAppId) // Filtra APENAS pelo Árbitro Logado
+                            .Where(j =>
+                                // Condição A: Jogos que AINDA NÃO FORAM FINALIZADOS
+                                // Traz todos os jogos não finalizados (futuros e recentes)
+                                (j.Status != JogoStatus.Finalizado)
+
+                                // OU
+                                ||
+
+                                // Condição B: Jogos que JÁ FORAM FINALIZADOS
+                                // Traz jogos finalizados, mas apenas nos últimos 30 dias
+                                (j.Status == JogoStatus.Finalizado && j.DataHora >= limiteData)
+                            )
                             .OrderBy(j => j.DataHora)
                             .ToListAsync();
         }
+
         public Task<int> DesvincularArbitroDosJogosAsync(Guid campeonatoClientAppId, Guid arbitroClientAppId) {
             string sql = @"
                 UPDATE Jogo 

@@ -228,5 +228,34 @@ namespace ArenaVirtual.Services {
             // Assumindo que você criará o método no DatabaseService:
             await _databaseService.DeletarJogosECascataPorCampeonatoAsync(campeonatoClientAppId);
         }
+
+        public async Task<List<Jogo>> ObterJogosMataMataPorCampeonatoAsync(Guid campeonatoClientAppId) {
+            Debug.WriteLine($"[JOGO SERVICE] Buscando jogos de Mata-Mata para o campeonato GUID: {campeonatoClientAppId}");
+
+            // 1. CHAMA O BANCO DE DADOS (Você precisa criar esse método no DatabaseService)
+            // Este método no DatabaseService deve retornar *todos* os jogos
+            // do campeonato especificado, possivelmente filtrando jogos de mata-mata
+            // se houver um campo (ex: Fase) no modelo Jogo.
+            // **Atenção:** Se o campo 'Fase' não existir, retorne todos os jogos
+            // e o ViewModel se encarrega da distinção. Para a Mata-Mata, é melhor
+            // o DB retornar todos os jogos salvos para o Campeonato.
+
+            // Supondo que o mesmo método de busca de jogos de tabela (Pontos Corridos) é usado,
+            // o ViewModel fará a distinção.
+            var jogosSalvos = await _databaseService.ObterJogosPorCampeonatoAsync(campeonatoClientAppId);
+
+            if (jogosSalvos == null || !jogosSalvos.Any()) {
+                Debug.WriteLine("[JOGO SERVICE] Nenhum jogo de Mata-Mata encontrado no DB.");
+                return new List<Jogo>();
+            }
+
+            // 2. HIDRATAR (Preencher as propriedades TimeA e TimeB)
+            await HidratarJogosComTimes(jogosSalvos);
+
+            Debug.WriteLine($"[JOGO SERVICE] {jogosSalvos.Count} jogos de Mata-Mata carregados e hidratados.");
+
+            // 3. RETORNA A LISTA PLANA DE JOGOS
+            return jogosSalvos;
+        }
     }
 }
