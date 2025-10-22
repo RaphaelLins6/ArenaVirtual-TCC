@@ -429,27 +429,44 @@ namespace ArenaVirtual.Services {
             string query = $"SELECT * FROM {nameof(EstatisticaPartida)} WHERE {nameof(EstatisticaPartida.JogoId)} IN ({idsString})";
             return await _database.QueryAsync<EstatisticaPartida>(query);
         }
+        // Adicione esta classe auxiliar dentro do seu DatabaseService.cs
+        private class JogoIdWrapper {
+            // Certifique-se de que o tipo é o mesmo do Id da tabela Jogo (geralmente int ou long)
+            public int Id { get; set; }
+        }
+
+        // Este é o método corrigido para substituir o seu código
         public async Task<List<EstatisticaAgregadaJogador>> GetEstatisticasDeJogadorByCampeonatoIdAsync(Guid campeonatoId) {
             // 1. Encontrar todos os IDs de Jogo (JogoId) para o Campeonato
-            var jogosIds = await _database.QueryAsync<int>("SELECT Id FROM Jogo WHERE CampeonatoClientAppId = ?", campeonatoId);
-            
-            if (jogosIds == null || jogosIds.Count == 0) {
+            // Usamos o Wrapper para garantir o mapeamento correto do Id do jogo
+            var jogosIdWrappers = await _database.QueryAsync<JogoIdWrapper>(
+                "SELECT Id FROM Jogo WHERE CampeonatoClientAppId = ?",
+                campeonatoId);
+
+            // Convertemos a lista de wrappers para uma lista de inteiros puros
+            var jogosIds = jogosIdWrappers?.Select(j => j.Id).ToList();
+
+            if (jogosIds == null || jogosIds.Count == 0 || jogosIds.All(id => id == 0)) {
+                // Se a query de IDs falhar (retornar 0) ou for vazia, retorne vazio.
+                // O log deve mostrar esta falha.
+                Debug.WriteLine($"[DB-STATS] Falha ao obter IDs de Jogo para o Campeonato {campeonatoId}. IDs retornados: {string.Join(",", jogosIds ?? new List<int>())}");
                 return new List<EstatisticaAgregadaJogador>();
             }
 
+            // CRÍTICO: Agora jogosIdsCsv deve ser '21,22,23,...' (se o Id for INT no DB)
             string jogosIdsCsv = string.Join(",", jogosIds);
 
             // 2. Query SQL para AGREGAR as estatísticas
             string sql = $@"
-                SELECT
+            SELECT
                 T1.UsuarioId,
                 T4.Nome AS {nameof(EstatisticaAgregadaJogador.NomeJogador)},
-                T4.ImagemPath AS {nameof(EstatisticaAgregadaJogador.ImagemPath)}, -- CORRIGIDO: Usa ImagemPath
+                T4.ImagemPath AS {nameof(EstatisticaAgregadaJogador.ImagemPath)},
                 T3.Nome AS {nameof(EstatisticaAgregadaJogador.NomeTime)},
                 T3.LogoUrl AS {nameof(EstatisticaAgregadaJogador.LogoTimeUrl)},
-            
+        
                 COUNT(DISTINCT T1.JogoId) AS {nameof(EstatisticaAgregadaJogador.JogosDisputados)},
-            
+        
                 SUM(T1.Pontos) AS {nameof(EstatisticaAgregadaJogador.TotalPontos)},
                 SUM(T1.Rebotes) AS {nameof(EstatisticaAgregadaJogador.TotalRebotes)},
                 SUM(T1.Assistencias) AS {nameof(EstatisticaAgregadaJogador.TotalAssistencias)},
