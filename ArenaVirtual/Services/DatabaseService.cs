@@ -368,7 +368,7 @@ namespace ArenaVirtual.Services {
                                   .ToListAsync();
         }
 
-        // --- MÉTODOS DE Estatísticas ---
+        // --- MÉTODOS DE ESTATÍSTICAS ---
         public Task<int> InserirEstatisticaAsync(EstatisticaPartida item) => _database.InsertAsync(item);
         public Task<List<EstatisticaPartida>> ListarEstatisticasAsync() => _database.Table<EstatisticaPartida>().ToListAsync();
         public Task<int> AtualizarEstatisticaAsync(EstatisticaPartida item) => _database.UpdateAsync(item);
@@ -395,6 +395,7 @@ namespace ArenaVirtual.Services {
                 int estatisticasInseridas = await InsertAllAsync(estatisticas);
 
                 if (estatisticasInseridas == countEsperado) {
+                    System.Diagnostics.Debug.WriteLine($"[DB SERVICE - STATS] SUCESSO! {estatisticasInseridas} estatísticas inseridas para o Jogo ID {jogo.Id}.");
                     return true;
                 } else {
                     System.Diagnostics.Debug.WriteLine($"[DB SERVICE] Inserção de estatísticas incompleta: {estatisticasInseridas} de {countEsperado}.");
@@ -428,11 +429,10 @@ namespace ArenaVirtual.Services {
             string query = $"SELECT * FROM {nameof(EstatisticaPartida)} WHERE {nameof(EstatisticaPartida.JogoId)} IN ({idsString})";
             return await _database.QueryAsync<EstatisticaPartida>(query);
         }
-        public async Task<List<EstatisticaAgregadaJogador>> GetEstatisticasDeJogadorByCampeonatoIdAsync(int campeonatoId) {
-            // CORREÇÃO: Usar um QueryAsync simples para contornar a limitação do Select no AsyncTableQuery
+        public async Task<List<EstatisticaAgregadaJogador>> GetEstatisticasDeJogadorByCampeonatoIdAsync(Guid campeonatoId) {
             // 1. Encontrar todos os IDs de Jogo (JogoId) para o Campeonato
-            var jogosIds = await _database.QueryAsync<int>("SELECT Id FROM Jogo WHERE CampeonatoId = ?", campeonatoId);
-
+            var jogosIds = await _database.QueryAsync<int>("SELECT Id FROM Jogo WHERE CampeonatoClientAppId = ?", campeonatoId);
+            
             if (jogosIds == null || jogosIds.Count == 0) {
                 return new List<EstatisticaAgregadaJogador>();
             }

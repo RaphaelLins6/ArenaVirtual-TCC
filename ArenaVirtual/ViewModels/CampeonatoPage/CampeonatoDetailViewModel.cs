@@ -1091,7 +1091,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
                 // 4️⃣ OBTENÇÃO DAS ESTATÍSTICAS AGREGADAS
                 Debug.WriteLine($"[DEBUG-STATS-STEP] Buscando estatísticas agregadas...");
-                var todasAsEstatisticasAgregadas = await _databaseService.GetEstatisticasDeJogadorByCampeonatoIdAsync(Campeonato.Id);
+                var todasAsEstatisticasAgregadas = await _databaseService.GetEstatisticasDeJogadorByCampeonatoIdAsync(Campeonato.ClientAppId);
                 Debug.WriteLine($"[DEBUG-STATS-STEP] Total de estatísticas agregadas obtidas: {todasAsEstatisticasAgregadas.Count}");
 
                 // 5️⃣ CRIAÇÃO DO MAPA DE ESTATÍSTICAS
@@ -1127,19 +1127,21 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     // Atribuição das Estatísticas Agregadas
                     if (statsAgregadas != null) {
                         Debug.WriteLine($"[DEBUG-STATS] Jogador: {jogador.Nome}, Pontos: {statsAgregadas.TotalPontos}");
-                        statsJogador.Pontos = (int)statsAgregadas.TotalPontos;
-                        statsJogador.Assistencias = (int)statsAgregadas.TotalAssistencias;
-                        statsJogador.Rebotes = (int)statsAgregadas.TotalRebotes;
-                        statsJogador.Roubos = (int)statsAgregadas.TotalRoubos;
-                        statsJogador.Bloqueios = (int)statsAgregadas.TotalBloqueios;
-                        statsJogador.Turnovers = (int)statsAgregadas.TotalTurnovers;
-                        statsJogador.Faltas = (int)statsAgregadas.TotalFaltas;
-                        statsJogador.Arremessos2PontosConvertidos = (int)statsAgregadas.Arremessos2PontosConvertidos;
-                        statsJogador.Arremessos2PontosTentados = (int)statsAgregadas.Arremessos2PontosTentados;
-                        statsJogador.Arremessos3PontosConvertidos = (int)statsAgregadas.Arremessos3PontosConvertidos;
-                        statsJogador.Arremessos3PontosTentados = (int)statsAgregadas.Arremessos3PontosTentados;
-                        statsJogador.LancesLivresConvertidos = (int)statsAgregadas.LancesLivresConvertidos;
-                        statsJogador.LancesLivresTentados = (int)statsAgregadas.LancesLivresTentados;
+
+                        // CORREÇÃO: Removendo o cast (int)
+                        statsJogador.Pontos = statsAgregadas.TotalPontos;
+                        statsJogador.Assistencias = statsAgregadas.TotalAssistencias;
+                        statsJogador.Rebotes = statsAgregadas.TotalRebotes;
+                        statsJogador.Roubos = statsAgregadas.TotalRoubos;
+                        statsJogador.Bloqueios = statsAgregadas.TotalBloqueios;
+                        statsJogador.Turnovers = statsAgregadas.TotalTurnovers;
+                        statsJogador.Faltas = statsAgregadas.TotalFaltas;
+                        statsJogador.Arremessos2PontosConvertidos = statsAgregadas.Arremessos2PontosConvertidos;
+                        statsJogador.Arremessos2PontosTentados = statsAgregadas.Arremessos2PontosTentados;
+                        statsJogador.Arremessos3PontosConvertidos = statsAgregadas.Arremessos3PontosConvertidos;
+                        statsJogador.Arremessos3PontosTentados = statsAgregadas.Arremessos3PontosTentados;
+                        statsJogador.LancesLivresConvertidos = statsAgregadas.LancesLivresConvertidos;
+                        statsJogador.LancesLivresTentados = statsAgregadas.LancesLivresTentados;
                     } else {
                         Debug.WriteLine($"[DEBUG-STATS] Jogador: {jogador.Nome} - sem estatísticas registradas.");
                     }
@@ -1153,9 +1155,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     LideresEstatisticas.Clear();
                     foreach (var item in listaTempLideres)
                         LideresEstatisticas.Add(item);
-
-                    OnPropertyChanged(nameof(ItensEstatisticas));
-
+                    var valorAtual = EstatisticaSelecionada;
+                    EstatisticaSelecionada = "Turnovers";
+                    EstatisticaSelecionada = valorAtual;
                     Debug.WriteLine($"[DEBUG-OUTPUT] ItensEstatisticas Count: {ItensEstatisticas?.Count ?? 0}");
                     Debug.WriteLine($"[DEBUG-OUTPUT] Primeiro item: Nome={ItensEstatisticas.FirstOrDefault()?.NomeJogador}, Valor={ItensEstatisticas.FirstOrDefault()?.ValorEstatisticaPrincipal}");
                     Debug.WriteLine($"[DEBUG-LEADERS] Total de líderes carregados: {LideresEstatisticas.Count}");
