@@ -100,7 +100,10 @@ namespace ArenaVirtual.ViewModels.Arbitro {
 
                 // ATUALIZA A VISIBILIDADE DOS TÍTULOS
                 IsJogosParaLancamentoVisivel = JogosParaLancamento.Any();
-                IsJogosLancadosVisivel = JogosLancados.Any();
+
+                // CORREÇÃO: Define IsJogosLancadosVisivel como TRUE para manter a sessão visível
+                // Ocultará apenas o conteúdo interno se a coleção estiver vazia.
+                IsJogosLancadosVisivel = true;
 
                 Debug.WriteLine($"[DEBUG 4] Para Lançamento: {JogosParaLancamento.Count}, Lançados: {JogosLancados.Count}");
 
