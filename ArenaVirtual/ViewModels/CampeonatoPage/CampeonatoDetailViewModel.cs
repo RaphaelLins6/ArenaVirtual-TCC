@@ -861,12 +861,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             // 2. Inicializar as estatísticas de todos os times para zero
             foreach (var time in times) {
-                // Zera APENAS as propriedades que existem no Time.cs
-                time.PontuacaoTotal = 0;
                 time.Vitorias = 0;
                 time.Derrotas = 0;
                 time.Empates = 0;
-                // Nota: O seu modelo Time não possui PontosFeitos/Sofridos.
             }
 
             // Usar um Dictionary para fácil acesso, usando o ID inteiro (Time.Id)
@@ -874,10 +871,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             // 3. Processar cada jogo finalizado
             foreach (var jogo in todosOsJogos) {
-                // Só processa jogos com placar lançado (indicando que foi finalizado)
-                if (jogo.PlacarTimeAInt >= 0 && jogo.PlacarTimeBInt >= 0) {
 
-                    // CORREÇÃO: Tentando obter os times usando Jogo.TimeAId e Jogo.TimeBId (IDs inteiros)
+                bool placarAZero = jogo.PlacarTimeAInt == 0;
+                bool placarBZero = jogo.PlacarTimeBInt == 0;
+
+                if (jogo.PlacarTimeAInt >= 0 && jogo.PlacarTimeBInt >= 0 && !(placarAZero && placarBZero)) {
+
                     if (timesMap.TryGetValue(jogo.TimeAId, out var timeA) &&
                         timesMap.TryGetValue(jogo.TimeBId, out var timeB)) {
 
@@ -885,22 +884,21 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                             // Time A Venceu
                             timeA.Vitorias++;
                             timeB.Derrotas++;
-                            timeA.PontuacaoTotal += 3; // 3 pontos por vitória (mantido para a lógica de Pontos Ganhos)
+                            timeA.PontuacaoTotal += 1;
                         } else if (jogo.PlacarTimeBInt > jogo.PlacarTimeAInt) {
                             // Time B Venceu
                             timeB.Vitorias++;
                             timeA.Derrotas++;
-                            timeB.PontuacaoTotal += 3; // 3 pontos por vitória (mantido para a lógica de Pontos Ganhos)
-                        } else if (jogo.PlacarTimeAInt == jogo.PlacarTimeBInt) {
-                            // Empate 
-                            timeA.Empates++;
-                            timeB.Empates++;
-                            timeA.PontuacaoTotal += 1; // 1 ponto por empate (mantido para a lógica de Pontos Ganhos)
                             timeB.PontuacaoTotal += 1;
                         }
                     }
                 }
             }
+
+            foreach (var time in times) {
+                Debug.WriteLine($"[STATS-DEBUG] Time: {time.Nome} | V: {time.Vitorias} | D: {time.Derrotas} | E: {time.Empates}");
+            }
+
         }
 
         private void LoadTabelaClassificacaoPorGrupo(string grupo) {
@@ -1246,12 +1244,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             }
         }
 
-        public void MudarEstatisticaLogic(string estatistica) // Renomeei para evitar conflito com o antigo Command
-{
+        public void MudarEstatisticaLogic(string estatistica) {
             if (EstatisticaSelecionada == estatistica)
                 return;
 
-            EstatisticaSelecionada = estatistica;
+            EstatisticaSelecionada = estatistica; // ⭐️ Esta atualização já dispara a UI
 
             Debug.WriteLine($"[DEBUG-STATS-LOGIC] Nova Estatística selecionada (Code-Behind): {EstatisticaSelecionada}.");
         }
@@ -1382,5 +1379,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             };
             await Application.Current.MainPage.Navigation.PushModalAsync(popup);
         }
+
     }
 }

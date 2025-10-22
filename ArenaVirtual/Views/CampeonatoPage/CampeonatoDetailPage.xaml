@@ -839,7 +839,6 @@
                         Text="Estatísticas dos Jogadores"
                         TextColor="White" />
 
-                    <!--  Seleção de tipos de estatísticas  -->
                     <ScrollView HorizontalScrollBarVisibility="Never" Orientation="Horizontal">
                         <FlexLayout
                             Margin="15,0,15,10"
@@ -855,52 +854,43 @@
 
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="x:String">
-                                    <Frame
+
+                                    <Button
                                         Margin="0,0,10,0"
                                         Padding="10,5"
+                                        Clicked="OnEstatisticaClicked"
+                                        CommandParameter="{Binding .}"
                                         CornerRadius="15"
-                                        HasShadow="False">
-                                        <Frame.GestureRecognizers>
-                                            <TapGestureRecognizer CommandParameter="{Binding .}" Tapped="OnEstatisticaTapped" />
-                                        </Frame.GestureRecognizers>
-
-                                        <Label
-                                            x:Name="StatLabel"
-                                            FontSize="14"
-                                            Text="{Binding .}">
-                                            <VisualStateManager.VisualStateGroups>
-                                                <VisualStateGroup x:Name="CommonStates">
-                                                    <VisualState x:Name="Normal">
-                                                        <VisualState.Setters>
-                                                            <Setter Property="TextColor" Value="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=EstatisticaSelecionada, Converter={StaticResource SelectedStatTextConverter}, ConverterParameter={Binding .}}" />
-                                                        </VisualState.Setters>
-                                                    </VisualState>
-
-                                                    <VisualState x:Name="PointerOver">
-                                                        <VisualState.Setters>
-                                                            <Setter Property="TextColor" Value="Black" />
-                                                        </VisualState.Setters>
-                                                    </VisualState>
-                                                </VisualStateGroup>
-                                            </VisualStateManager.VisualStateGroups>
-                                        </Label>
-
+                                        FontSize="14"
+                                        Style="{StaticResource BotaoPrincipal}"
+                                        Text="{Binding .}">
                                         <VisualStateManager.VisualStateGroups>
                                             <VisualStateGroup x:Name="CommonStates">
+
                                                 <VisualState x:Name="Normal">
                                                     <VisualState.Setters>
                                                         <Setter Property="BackgroundColor" Value="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=EstatisticaSelecionada, Converter={StaticResource SelectedStatConverter}, ConverterParameter={Binding .}}" />
+                                                        <Setter Property="TextColor" Value="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=EstatisticaSelecionada, Converter={StaticResource SelectedStatTextConverter}, ConverterParameter={Binding .}}" />
                                                     </VisualState.Setters>
                                                 </VisualState>
 
                                                 <VisualState x:Name="PointerOver">
                                                     <VisualState.Setters>
                                                         <Setter Property="BackgroundColor" Value="#FFA500" />
+                                                        <Setter Property="TextColor" Value="Black" />
                                                     </VisualState.Setters>
                                                 </VisualState>
+
+                                                <VisualState x:Name="Pressed">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="#FF6600" />
+                                                        <Setter Property="TextColor" Value="White" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+
                                             </VisualStateGroup>
                                         </VisualStateManager.VisualStateGroups>
-                                    </Frame>
+                                    </Button>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </FlexLayout>
