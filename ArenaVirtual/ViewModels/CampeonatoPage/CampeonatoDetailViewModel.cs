@@ -692,9 +692,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 // --- Fim da Lógica de grupos ---
 
                 MainThread.BeginInvokeOnMainThread(() => {
+                    // CORREÇÃO: Limpeza re-forçada na Main Thread para garantir atomicidade.
+                    GruposDisponiveis.Clear();
+
                     foreach (var group in grupos) {
                         GruposDisponiveis.Add(group.Key);
-                        // Adiciona a lista de times com estatísticas JÁ ATUALIZADAS
                         _timesPorGrupo[group.Key] = group.ToList();
                     }
 
@@ -704,9 +706,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
                         IsFiltroGrupoVisivel = IsFaseTabelaEJogos;
 
-                        // Chama LoadTabelaClassificacaoPorGrupo para processar a tabela do grupo
-                        // (Este método deve ordenar e processar a lista _timesPorGrupo[GrupoSelecionado]
-                        // que já contém as estatísticas recalculadas)
                         LoadTabelaClassificacaoPorGrupo(GrupoSelecionado);
 
                     } else {
@@ -716,12 +715,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 });
 
             } else {
-                // Sem grupos - Os objetos Time já contêm as estatísticas recalculadas
+                // Código para 'Sem grupos' (mantido inalterado, pois o problema era na seção acima)
                 var timesOrdenados = todosOsTimes
-                    // ** ALTERADO: Prioriza Vitórias, depois PorcentagemVitoria
                     .OrderByDescending(t => t.Vitorias)
                     .ThenByDescending(t => t.PorcentagemVitoria)
-                    // ... (outros critérios de desempate, se houver)
                     .ToList();
 
                 MainThread.BeginInvokeOnMainThread(() => {
@@ -731,11 +728,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     for (int i = 0; i < timesOrdenados.Count; i++) {
                         var time = timesOrdenados[i];
                         time.Posicao = i + 1;
-                        int totalJogosJogados = time.Vitorias + time.Derrotas + time.Empates; // Corrigido para incluir Empates
-                        // ** Proteção 2.A: Garantida a divisão segura
+                        int totalJogosJogados = time.Vitorias + time.Derrotas + time.Empates;
                         time.PorcentagemVitoria = (totalJogosJogados > 0) ? (double)time.Vitorias / totalJogosJogados : 0.0;
-                        time.JogosAtras = 0; // Valor a ser recalculado se necessário ou mantido 0
-                        // time.Sequencia e os SequenciaChar já foram calculados no CalcularSequenciaDeJogos(todosOsTimes)
+                        time.JogosAtras = 0;
 
                         TabelaClassificacao.Add(time);
                     }
