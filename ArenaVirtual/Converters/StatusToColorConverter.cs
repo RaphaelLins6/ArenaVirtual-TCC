@@ -7,22 +7,16 @@ namespace ArenaVirtual.Converters {
     public class StatusToColorConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             if (value is string statusString) {
-                // Converte a string para minúsculas para comparação case-insensitive
                 string status = statusString.ToLowerInvariant().Trim();
 
-                // Define as cores com base no status (você pode ajustar as cores)
                 if (status == "ativa") {
-                    // Verde para Status Ativo
-                    return Color.FromArgb("#2ECC71"); // Verde esmeralda
+                    return Color.FromArgb("#2ECC71"); 
                 } else if (status == "finalizada" || status == "inativa") {
-                    // Cinza para Status Finalizado/Inativo
-                    return Color.FromArgb("#95A5A6"); // Cinza claro
+                    return Color.FromArgb("#95A5A6"); 
                 } else if (status == "pendente") {
-                    // Laranja/Amarelo para Status Pendente
-                    return Color.FromArgb("#F39C12"); // Laranja
+                    return Color.FromArgb("#F39C12"); 
                 }
 
-                // Cor padrão para qualquer outro status
                 return Colors.Black;
             }
 
@@ -30,8 +24,6 @@ namespace ArenaVirtual.Converters {
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {
-            // A conversão de volta geralmente não é usada para conversores de cor, 
-            // mas é exigida pela interface.
             return null;
         }
     }

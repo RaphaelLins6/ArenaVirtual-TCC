@@ -15,18 +15,18 @@ namespace ArenaVirtual.Converters {
                 resultado = c;
             }
             else {
-                return Color.FromArgb("#9E9E9E"); // Cinza
+                return Color.FromArgb("#9E9E9E"); 
             }
 
             char cUpper = char.ToUpper(resultado);
 
             return cUpper switch {
-                'V' => Color.FromArgb("#4CAF50"), // Verde (Vitória)
-                'D' => Color.FromArgb("#F44336"), // Vermelho (Derrota)
-                'E' => Color.FromArgb("#FFC107"), // Amarelo (Empate)
-                'N' => Color.FromArgb("#9E9E9E"), // Cinza (Não Disputado/Nulo)
-                '-' => Color.FromArgb("#9E9E9E"), // Cinza (Não Disputado)
-                _ => Color.FromArgb("#9E9E9E"), // Cinza
+                'V' => Color.FromArgb("#4CAF50"), 
+                'D' => Color.FromArgb("#F44336"), 
+                'E' => Color.FromArgb("#FFC107"), 
+                'N' => Color.FromArgb("#9E9E9E"), 
+                '-' => Color.FromArgb("#9E9E9E"), 
+                _ => Color.FromArgb("#9E9E9E"), 
             };
         }
 

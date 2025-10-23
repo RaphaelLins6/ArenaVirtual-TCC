@@ -6,7 +6,6 @@
         public string NomeTime { get; set; }
         public string LogoTimeUrl { get; set; }
 
-        // CORREÇÃO: Mudar de double para INT
         public int JogosDisputados { get; set; }
         public int TotalPontos { get; set; }
         public int TotalAssistencias { get; set; }
@@ -16,7 +15,6 @@
         public int TotalTurnovers { get; set; }
         public int TotalFaltas { get; set; }
 
-        // Arremessos Detalhados
         public int Arremessos2PontosConvertidos { get; set; }
         public int Arremessos2PontosTentados { get; set; }
         public int Arremessos3PontosConvertidos { get; set; }

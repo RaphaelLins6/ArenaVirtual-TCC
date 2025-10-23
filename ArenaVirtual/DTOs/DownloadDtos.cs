@@ -2,8 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace ArenaVirtual.DTOs {
-    // DTOs de download, com o Id sendo do tipo int
-    // pois é o que a API envia.
 
     public class JogoDownloadDto {
         public int Id { get; set; }
@@ -27,7 +25,7 @@ namespace ArenaVirtual.DTOs {
         public string? Local { get; set; }
         public DateTime DataInicio { get; set; }
         public DateTime DataFim { get; set; }
-        public int OrganizadorId { get; set; } // O Id do organizador no servidor
+        public int OrganizadorId { get; set; } 
         public string? LogoUrl { get; set; }
         public string? NomeOrganizador { get; set; }
         public string? EmailOrganizador { get; set; }
@@ -73,7 +71,7 @@ namespace ArenaVirtual.DTOs {
         public Guid ClientAppId { get; set; }
         public string? Nome { get; set; }
         public string? LogoUrl { get; set; }
-        public int? CampeonatoId { get; set; } // O Id do campeonato no servidor
+        public int? CampeonatoId { get; set; } 
         public string? Descricao { get; set; }
         public DateTime DataCriacao { get; set; }
         public string? Regiao { get; set; }
@@ -81,7 +79,7 @@ namespace ArenaVirtual.DTOs {
         public int Vitorias { get; set; }
         public int Derrotas { get; set; }
         public int Empates { get; set; }
-        public int? CapitaoId { get; set; } // O Id do capitão no servidor
+        public int? CapitaoId { get; set; } 
         public DateTime UpdatedAt { get; set; }
         public bool IsSynced { get; set; }
     }
@@ -91,8 +89,8 @@ namespace ArenaVirtual.DTOs {
         public Guid ClientAppId { get; set; }
         public string? ConvidadoEmail { get; set; }
         public DateTime DataEnvio { get; set; }
-        public int IdSolicitanteId { get; set; } // O Id do solicitante no servidor
-        public int TimeId { get; set; } // O Id do time no servidor
+        public int IdSolicitanteId { get; set; } 
+        public int TimeId { get; set; } 
         public StatusConvite Status { get; set; }
         public DateTime UpdatedAt { get; set; }
         public bool IsSynced { get; set; }
@@ -101,8 +99,8 @@ namespace ArenaVirtual.DTOs {
     public class UsuarioCampeonatoFavoritoDownloadDto {
         public int Id { get; set; }
         public Guid ClientAppId { get; set; }
-        public int UsuarioId { get; set; } // O Id do usuário no servidor
-        public int CampeonatoId { get; set; } // O Id do campeonato no servidor
+        public int UsuarioId { get; set; } 
+        public int CampeonatoId { get; set; } 
         public DateTime UpdatedAt { get; set; }
         public bool IsSynced { get; set; }
     }

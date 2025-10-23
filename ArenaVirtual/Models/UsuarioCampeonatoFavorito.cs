@@ -7,13 +7,10 @@ namespace ArenaVirtual.Models {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
 
-        // Chave de sincronização
         public Guid ClientAppId { get; set; } = Guid.NewGuid();
 
-        // Propriedade IdServidor adicionada para a sincronização
         public int? IdServidor { get; set; }
 
-        // Referências a outras entidades usando a chave universal
         [Indexed]
         public Guid UsuarioClientAppId { get; set; }
         [Indexed]

@@ -20,7 +20,6 @@ namespace ArenaVirtual.Models {
 
     public partial class Usuario : INotifyPropertyChanged, ISyncable {
 
-        // Campos de Suporte (Backing Fields)
         private string _nome = string.Empty;
         private string _email = string.Empty;
         private string _senhaHash = string.Empty;
@@ -40,7 +39,6 @@ namespace ArenaVirtual.Models {
         private bool _isSynced;
         private DateTime _updatedAt;
 
-        // Propriedades usando SetProperty
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
 
@@ -118,13 +116,11 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref _faixaOrcamentoPatrocinio, value);
         }
 
-        // Relacionamento com Time usando a chave universal
         public Guid? TimeClientAppId {
             get => _timeClientAppId;
             set => SetProperty(ref _timeClientAppId, value);
         }
 
-        // As propriedades de sincronização que não usam SetProperty
         public bool IsSynced {
             get => _isSynced;
             set => _isSynced = value;
@@ -135,25 +131,20 @@ namespace ArenaVirtual.Models {
             set => _updatedAt = value;
         }
 
-        // A propriedade SenhaHash não deve ser sincronizada,
-        // então ela é gerenciada fora da lógica de SetProperty.
         public string SenhaHash {
             get => _senhaHash;
             set => _senhaHash = value;
         }
 
-        // --- CORREÇÃO DE LÓGICA: SOBRECARGA PARA COMPARAÇÃO POR ID (CRUCIAL) ---
 
         public override bool Equals(object obj) {
             if (obj is Usuario other) {
-                // A comparação é feita pela chave única
                 return this.ClientAppId.Equals(other.ClientAppId);
             }
             return false;
         }
 
         public override int GetHashCode() {
-            // Usa o hash da ID única
             return ClientAppId.GetHashCode();
         }
 

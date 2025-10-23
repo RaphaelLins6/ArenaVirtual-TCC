@@ -101,25 +101,22 @@ namespace ArenaVirtual.Models {
 
         [Ignore]
         public Time? TimeCasa {
-            get => TimeA; // Retorna o objeto TimeA (Tipo Time?)
-            set => TimeA = value; // Define o objeto TimeA (Tipo Time?)
+            get => TimeA; 
+            set => TimeA = value; 
         }
 
-        // CORREÇÃO: TimeFora deve ser alias do objeto TimeB
         [Ignore]
         public Time? TimeFora {
-            get => TimeB; // Retorna o objeto TimeB (Tipo Time?)
-            set => TimeB = value; // Define o objeto TimeB (Tipo Time?)
+            get => TimeB; 
+            set => TimeB = value; 
         }
 
         partial void OnTimeAChanged(Time? value) {
-            // Se o objeto TimeA muda, atualizamos a string do nome.
             TimeANome = value?.Nome;
             OnPropertyChanged(nameof(TimeCasa));
         }
 
         partial void OnTimeBChanged(Time? value) {
-            // Se o objeto TimeB muda, atualizamos a string do nome.
             TimeBNome = value?.Nome;
             OnPropertyChanged(nameof(TimeFora));
         }
@@ -141,12 +138,9 @@ namespace ArenaVirtual.Models {
         [Ignore]
         public string PlacarParaExibir {
             get {
-                // Usa a propriedade de Status (que é do tipo JogoStatus)
                 if (Status == JogoStatus.Finalizado) {
-                    // Usa as propriedades PlacarTimeAInt e PlacarTimeBInt, que são inteiros
                     return $"{PlacarTimeAInt} - vs - {PlacarTimeBInt}";
                 }
-                // Retorna o marcador X - vs - Y para jogos não concluídos/agendados
                 return "X - vs - Y";
             }
         }

@@ -34,19 +34,16 @@ namespace ArenaVirtual.Models {
         private bool isSynced;
         private DateTime updatedAt;
 
-        // Novas propriedades que foram adicionadas
         private string? corUniforme;
         private string? corSecundaria;
         private Guid adminClientAppId;
         private string? nomeResponsavel;
         private string? telefoneResponsavel;
 
-        // Propriedades adicionadas para simulação no ViewModel
         private double _porcentagemVitoria;
         private int _jogosAtras;
         private string? _sequencia;
 
-        // Adicione as backing fields privadas
         private string? sequenciaChar1;
         private string? sequenciaChar2;
         private string? sequenciaChar3;
@@ -167,7 +164,6 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref telefoneResponsavel, value);
         }
 
-        // Adicionando a propriedade Posicao para a UI
         [Ignore]
         public int Posicao {
             get => posicao;
@@ -175,7 +171,7 @@ namespace ArenaVirtual.Models {
         }
 
         [Ignore]
-        public int PosicaoNoGrupo { // [NOVO] Posição usada para o Bracket
+        public int PosicaoNoGrupo { 
             get => posicaoNoGrupo;
             set => SetProperty(ref posicaoNoGrupo, value);
         }
@@ -183,7 +179,7 @@ namespace ArenaVirtual.Models {
         [Ignore]
         public int JogosDisputados {
             get => Vitorias + Derrotas + Empates;
-            set { } // Set vazio para não haver erro de compilação
+            set { } 
         }
 
         [ForeignKey("CapitaoId")]
@@ -202,7 +198,6 @@ namespace ArenaVirtual.Models {
             set => updatedAt = value;
         }
 
-        // Propriedades de simulação
         [Ignore]
         public double PorcentagemVitoria {
             get => _porcentagemVitoria;
@@ -221,7 +216,6 @@ namespace ArenaVirtual.Models {
             set => SetProperty(ref _sequencia, value);
         }
 
-        // Adicione as propriedades públicas
         [Ignore]
         public string? SequenciaChar1 {
             get => sequenciaChar1;

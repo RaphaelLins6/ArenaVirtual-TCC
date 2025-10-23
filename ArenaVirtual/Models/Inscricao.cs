@@ -1,5 +1,4 @@
-﻿// Exemplo de como a classe Inscricao deve ser (no arquivo Models/Inscricao.cs)
-using SQLite;
+﻿using SQLite;
 using System;
 
 namespace ArenaVirtual.Models {
@@ -9,10 +8,10 @@ namespace ArenaVirtual.Models {
         public Guid ClientAppId { get; set; } = Guid.NewGuid();
         public Guid TimeClientAppId { get; set; }
         public Guid CampeonatoClientAppId { get; set; }
-        public string? Status { get; set; } // "Pendente", "Aceita", "Recusada"
+        public string? Status { get; set; } 
         public bool IsSynced { get; set; }
         public DateTime UpdatedAt { get; set; }
         [Ignore]
-        public Time? Time { get; set; } // Propriedade de navegação para carregar dados do time
+        public Time? Time { get; set; } 
     }
 }

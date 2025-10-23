@@ -13,11 +13,10 @@ namespace ArenaVirtual.DTOs {
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }
 
-        // As FKs devem ser Guid ClientAppIds
         public Guid TimeAClientAppId { get; set; }
         public Guid TimeBClientAppId { get; set; }
         public Guid CampeonatoClientAppId { get; set; }
-        public Guid? ArbitroClientAppId { get; set; } // O foco da correção
+        public Guid? ArbitroClientAppId { get; set; } 
 
         public string? Local { get; set; }
         public DateTime DataHora { get; set; }
@@ -37,7 +36,7 @@ namespace ArenaVirtual.DTOs {
         public Guid IdSolicitanteClientAppId { get; set; }
         public Guid TimeClientAppId { get; set; }
         public StatusConvite Status { get; set; }
-        public DateTime UpdatedAt { get; set; } // Corrigido aqui
+        public DateTime UpdatedAt { get; set; } 
         public bool IsSynced { get; set; }
     }
 
@@ -120,13 +119,10 @@ namespace ArenaVirtual.DTOs {
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }
 
-        // FK para o time que fez a solicitação
         public Guid TimeClientAppId { get; set; }
 
-        // FK para o campeonato que o time quer entrar
         public Guid CampeonatoClientAppId { get; set; }
 
-        // FK do usuário que fez a solicitação
         public Guid UsuarioClientAppId { get; set; }
 
         public DateTime DataSolicitacao { get; set; }

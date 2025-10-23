@@ -1,5 +1,4 @@
-﻿// Arquivo: Converters/BoolToColorConverter.cs
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace ArenaVirtual.Converters {
     public class BoolToColorConverter : IValueConverter {
