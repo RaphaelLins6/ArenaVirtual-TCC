@@ -38,7 +38,6 @@ public partial class AlterarSenhaPopup : ContentPage, INotifyPropertyChanged {
         _databaseService = databaseService;
         _syncService = syncService;
 
-        // É crucial definir o BindingContext para que o XAML "veja" as propriedades do Code-Behind.
         BindingContext = this;
     }
 
@@ -70,7 +69,7 @@ public partial class AlterarSenhaPopup : ContentPage, INotifyPropertyChanged {
             return;
         }
 
-        IsBusy = true; // Ativa o indicador de carregamento.
+        IsBusy = true; 
 
         try {
             _usuario.SenhaHash = UsuarioService.GerarHash(novaSenha);
@@ -85,7 +84,7 @@ public partial class AlterarSenhaPopup : ContentPage, INotifyPropertyChanged {
                     App.CurrentUser.SenhaHash = _usuario.SenhaHash;
                 }
 
-                Debug.WriteLine("[AlterarSenhaPopup] Senha do usuário atualizada localmente. Disparando sincronização...");
+                //Debug.WriteLine("[AlterarSenhaPopup] Senha do usuário atualizada localmente. Disparando sincronização...");
 
                 await _syncService.SyncAsync(new Progress<string>());
 
@@ -97,7 +96,7 @@ public partial class AlterarSenhaPopup : ContentPage, INotifyPropertyChanged {
         } catch (Exception ex) {
             await _alertService.DisplayAlert("Erro", $"Ocorreu um erro ao salvar a senha: {ex.Message}", "OK");
         } finally {
-            IsBusy = false; // Desativa o indicador de carregamento.
+            IsBusy = false; 
         }
     }
 }

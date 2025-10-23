@@ -21,7 +21,7 @@ public partial class DetalhesCampanhaPopup : ContentPage, INotifyPropertyChanged
         set {
             if (_isBusy != value) {
                 _isBusy = value;
-                System.Diagnostics.Debug.WriteLine($"[POPUP-ISBUSY] NOVO VALOR: {_isBusy}");
+                //System.Diagnostics.Debug.WriteLine($"[POPUP-ISBUSY] NOVO VALOR: {_isBusy}");
                 OnPropertyChanged(nameof(IsBusy));
             }
         }
@@ -39,57 +39,56 @@ public partial class DetalhesCampanhaPopup : ContentPage, INotifyPropertyChanged
         _alertService = alertService;
 
         BindingContext = _campanhaVM;
-        System.Diagnostics.Debug.WriteLine("[POPUP] Construtor DetalhesCampanhaPopup finalizado.");
+        //System.Diagnostics.Debug.WriteLine("[POPUP] Construtor DetalhesCampanhaPopup finalizado.");
     }
 
     protected override async void OnAppearing() {
         base.OnAppearing();
-        System.Diagnostics.Debug.WriteLine("[POPUP] OnAppearing iniciado.");
+        //System.Diagnostics.Debug.WriteLine("[POPUP] OnAppearing iniciado.");
         await CarregarDadosCampanhaAsync();
     }
 
     private async Task CarregarDadosCampanhaAsync() {
-        System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-1] CarregarDadosCampanhaAsync iniciado.");
+        //System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-1] CarregarDadosCampanhaAsync iniciado.");
 
         if (_campanhaVM.CampanhaId <= 0) return;
 
         IsBusy = true;
-        System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-2] IsBusy = True.");
+        //System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-2] IsBusy = True.");
 
         CampanhaPatrocinio? campanhaModel = null;
         try {
-            System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-3] Chamando GetCampanhaByIdAsync...");
+            //System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-3] Chamando GetCampanhaByIdAsync...");
             campanhaModel = await _databaseService.GetCampanhaByIdAsync(_campanhaVM.CampanhaId);
-            System.Diagnostics.Debug.WriteLine($"[POPUP-ASYNC-4] GetCampanhaByIdAsync retornado. Modelo é nulo? {campanhaModel == null}");
+            //System.Diagnostics.Debug.WriteLine($"[POPUP-ASYNC-4] GetCampanhaByIdAsync retornado. Modelo é nulo? {campanhaModel == null}");
 
         } catch (Exception ex) {
-            System.Diagnostics.Debug.WriteLine($"[POPUP-ASYNC-ERROR] Erro ao carregar dados: {ex.Message}");
+            //System.Diagnostics.Debug.WriteLine($"[POPUP-ASYNC-ERROR] Erro ao carregar dados: {ex.Message}");
             await _alertService.DisplayAlert("Erro de Carregamento", "Não foi possível buscar os dados completos da campanha.", "OK");
             return;
         } finally {
             IsBusy = false;
-            System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-5] IsBusy = False (Finally).");
+            //System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-5] IsBusy = False (Finally).");
         }
 
         if (campanhaModel != null) {
-            System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-6] Atribuindo dados aos controles.");
+            //System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-6] Atribuindo dados aos controles.");
 
             ValorPropostaEntry.Text = campanhaModel.ValorProposta.ToString("N2", CultureInfo.CurrentCulture);
 
-            // Datas
             DataInicioPicker.Date = campanhaModel.Inicio;
             DataFimPicker.Date = campanhaModel.Fim;
         }
 
         if (_campanhaVM.Status == "Finalizada") {
-            System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-7] Desabilitando controles (Status: Finalizada).");
+            //System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-7] Desabilitando controles (Status: Finalizada).");
             ValorPropostaEntry.IsEnabled = false;
             DataInicioPicker.IsEnabled = false;
             DataFimPicker.IsEnabled = false;
             ExcluirCampanhaButton.IsVisible = false;
         }
 
-        System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-8] CarregarDadosCampanhaAsync finalizado com sucesso.");
+        //System.Diagnostics.Debug.WriteLine("[POPUP-ASYNC-8] CarregarDadosCampanhaAsync finalizado com sucesso.");
     }
 
     private async void Cancelar_Clicked(object sender, EventArgs e) {
@@ -130,7 +129,7 @@ public partial class DetalhesCampanhaPopup : ContentPage, INotifyPropertyChanged
             await Navigation.PopModalAsync();
 
         } catch (Exception ex) {
-            Debug.WriteLine($"[DETALHES POPUP] Erro ao salvar campanha: {ex.Message}");
+            //Debug.WriteLine($"[DETALHES POPUP] Erro ao salvar campanha: {ex.Message}");
             await _alertService.DisplayAlert("Erro", $"Ocorreu um erro ao salvar a campanha: {ex.Message}", "OK");
         } finally {
             IsBusy = false;
@@ -166,7 +165,7 @@ public partial class DetalhesCampanhaPopup : ContentPage, INotifyPropertyChanged
             await Navigation.PopModalAsync();
 
         } catch (Exception ex) {
-            Debug.WriteLine($"[DETALHES POPUP] Erro ao excluir campanha: {ex.Message}");
+            //Debug.WriteLine($"[DETALHES POPUP] Erro ao excluir campanha: {ex.Message}");
             await _alertService.DisplayAlert("Erro", $"Ocorreu um erro ao excluir a campanha: {ex.Message}", "OK");
         } finally {
             IsBusy = false;

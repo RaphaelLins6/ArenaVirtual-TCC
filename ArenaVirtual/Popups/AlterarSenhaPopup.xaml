@@ -7,7 +7,6 @@
     BackgroundColor="#80000000">
 
     <Grid>
-        <!--  Conteúdo do Popup  -->
         <Border
             Padding="20"
             BackgroundColor="White"
@@ -54,7 +53,6 @@
             </VerticalStackLayout>
         </Border>
 
-        <!--  Indicador de Carregamento  -->
         <Grid
             Grid.RowSpan="2"
             BackgroundColor="#000000"
