@@ -8,7 +8,6 @@ using System.Linq;
 using SQLite;
 
 namespace ArenaVirtual.Services {
-    // Usando a sintaxe de construtor primário do C# 12 para UsuarioService
     public class UsuarioService(DatabaseService databaseService, SyncService syncService) {
         private readonly DatabaseService _databaseService = databaseService;
         private readonly SyncService _syncService = syncService;
@@ -16,7 +15,7 @@ namespace ArenaVirtual.Services {
         public async Task<Usuario?> Cadastrar(Usuario usuario) {
             bool emailExiste = await _databaseService.EmailExisteAsync(usuario.Email);
             if (emailExiste) {
-                Debug.WriteLine("Email já existe.");
+                //Debug.WriteLine("Email já existe.");
                 return null;
             }
 
@@ -24,22 +23,22 @@ namespace ArenaVirtual.Services {
             usuario.UpdatedAt = DateTime.UtcNow;
 
             int result = await _databaseService.InserirUsuarioAsync(usuario);
-            Debug.WriteLine($"Resultado da inserção: {result}");
+            //Debug.WriteLine($"Resultado da inserção: {result}");
 
             if (result > 0) {
-                Debug.WriteLine("[UsuarioService] Novo usuário salvo localmente. Disparando sincronização...");
+                //Debug.WriteLine("[UsuarioService] Novo usuário salvo localmente. Disparando sincronização...");
                 await _syncService.SyncAsync(new Progress<string>());
 
                 var usuarioRetornado = await _databaseService.ObterUsuarioPorClientAppIdAsync(usuario.ClientAppId);
 
                 if (usuarioRetornado != null)
-                    Debug.WriteLine($"Usuário cadastrado e retornado: {usuarioRetornado.Nome}");
-                else
-                    Debug.WriteLine("Usuário não encontrado após cadastro (problema de sincronização ou ID).");
+                    //Debug.WriteLine($"Usuário cadastrado e retornado: {usuarioRetornado.Nome}");
+                //else
+                    //Debug.WriteLine("Usuário não encontrado após cadastro (problema de sincronização ou ID).");
 
                 return usuarioRetornado;
             }
-            Debug.WriteLine("Falha ao inserir usuário.");
+            //Debug.WriteLine("Falha ao inserir usuário.");
             return null;
         }
 
@@ -62,14 +61,14 @@ namespace ArenaVirtual.Services {
                 var usuario = await _databaseService.ObterUsuarioPorEmailAsync(email);
 
                 if (usuario != null && BCrypt.Net.BCrypt.Verify(senha, usuario.SenhaHash)) {
-                    Debug.WriteLine($"[UsuarioService] Autenticação offline bem-sucedida para o usuário: {email}");
+                    //Debug.WriteLine($"[UsuarioService] Autenticação offline bem-sucedida para o usuário: {email}");
                     return usuario;
                 } else {
-                    Debug.WriteLine($"[UsuarioService] Falha na autenticação offline para o usuário: {email}");
+                    //Debug.WriteLine($"[UsuarioService] Falha na autenticação offline para o usuário: {email}");
                     return null;
                 }
             } catch (Exception ex) {
-                Debug.WriteLine($"[UsuarioService] Erro ao autenticar offline: {ex.Message}");
+                //Debug.WriteLine($"[UsuarioService] Erro ao autenticar offline: {ex.Message}");
                 return null;
             }
         }
@@ -97,7 +96,6 @@ namespace ArenaVirtual.Services {
         }
 
         public Task<Usuario?> ObterUsuarioPorClientAppIdAsync(Guid clientAppId) {
-            // Repassa a chamada para o DatabaseService
             return _databaseService.ObterUsuarioPorClientAppIdAsync(clientAppId);
         }
 
@@ -107,10 +105,8 @@ namespace ArenaVirtual.Services {
                 return new Dictionary<Guid, string>();
             }
 
-            // Chama o método de busca em lote no DatabaseService
             var usuarios = await _databaseService.ObterUsuariosPorIdsAsync(userIds);
 
-            // Converte a lista de usuários para um Dicionário (ClientAppId -> Nome)
             var arbitrosMap = usuarios.ToDictionary(u => u.ClientAppId, u => u.Nome);
 
             return arbitrosMap;

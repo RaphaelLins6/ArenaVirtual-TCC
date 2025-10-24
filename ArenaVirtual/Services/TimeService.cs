@@ -27,7 +27,7 @@ namespace ArenaVirtual.Services {
             int resultado = await _db.InserirTimeAsync(novoTime);
 
             if (resultado > 0) {
-                Debug.WriteLine("[TimeService] Novo time salvo localmente. Disparando sincronização...");
+                //Debug.WriteLine("[TimeService] Novo time salvo localmente. Disparando sincronização...");
                 await _syncService.SyncAsync(new Progress<string>());
 
                 usuario.TimeClientAppId = novoTime.ClientAppId;
@@ -41,7 +41,6 @@ namespace ArenaVirtual.Services {
             return resultado;
         }
 
-        // 🚨 CORRIGIDO: Não associar direto. Criar uma solicitação (Convite).
         public async Task<int> SolicitarEntradaNoTimeAsync(Time time) {
             var usuario = SessaoService.Instancia.GetUsuarioAtual() ?? throw new Exception("Usuário não logado");
 
@@ -59,7 +58,7 @@ namespace ArenaVirtual.Services {
             int resultado = await _db.InserirConviteAsync(convite);
 
             if (resultado > 0) {
-                Debug.WriteLine("[TimeService] Solicitação de entrada enviada. Disparando sincronização...");
+                //Debug.WriteLine("[TimeService] Solicitação de entrada enviada. Disparando sincronização...");
                 await _syncService.SyncAsync(new Progress<string>());
             }
             return resultado;
@@ -69,7 +68,7 @@ namespace ArenaVirtual.Services {
             time.IsSynced = false;
             time.UpdatedAt = DateTime.UtcNow;
             await _db.AtualizarTimeAsync(time);
-            Debug.WriteLine("[TimeService] Time atualizado. Disparando sincronização...");
+            //Debug.WriteLine("[TimeService] Time atualizado. Disparando sincronização...");
             await _syncService.SyncAsync(new Progress<string>());
         }
 

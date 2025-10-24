@@ -2,8 +2,6 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-
-// Adicionei estas bibliotecas necessárias
 using System;
 using System.Collections.Generic;
 
@@ -52,11 +50,11 @@ namespace ArenaVirtual.Services {
             try {
                 var times = await _databaseService.ObterTimesAceitosAsync(campeonatoId);
 
-                Debug.WriteLine($"[CampeonatoService] Encontrados {times.Count} times aceitos para o campeonato ID {campeonatoId}.");
+                //Debug.WriteLine($"[CampeonatoService] Encontrados {times.Count} times aceitos para o campeonato ID {campeonatoId}.");
 
                 return times;
             } catch (Exception ex) {
-                Debug.WriteLine($"[CampeonatoService] ERRO ao obter times aceitos: {ex.Message}");
+                //Debug.WriteLine($"[CampeonatoService] ERRO ao obter times aceitos: {ex.Message}");
                 return new List<Time>();
             }
         }
@@ -67,7 +65,7 @@ namespace ArenaVirtual.Services {
             int result = await _databaseService.InserirCampeonatoAsync(campeonato);
 
             if (result > 0) {
-                Debug.WriteLine("[CampeonatoService] Campeonato adicionado localmente. Agendando sincronização...");
+                //Debug.WriteLine("[CampeonatoService] Campeonato adicionado localmente. Agendando sincronização...");
                 _syncService.ScheduleSync();
             }
             return result;
@@ -79,7 +77,7 @@ namespace ArenaVirtual.Services {
             int result = await _databaseService.AtualizarCampeonatoAsync(campeonato);
 
             if (result > 0) {
-                Debug.WriteLine("[CampeonatoService] Campeonato atualizado localmente. Agendando sincronização...");
+                //Debug.WriteLine("[CampeonatoService] Campeonato atualizado localmente. Agendando sincronização...");
                 _syncService.ScheduleSync();
             }
             return result;
@@ -91,19 +89,19 @@ namespace ArenaVirtual.Services {
 
         public async Task<bool> RemoverArbitroDoCampeonatoAsync(Guid campeonatoClientAppId, Guid arbitroClientAppId) {
             try {
-                Debug.WriteLine($"[CampeonatoService] Tentando remover árbitro {arbitroClientAppId} do campeonato {campeonatoClientAppId}...");
+                //Debug.WriteLine($"[CampeonatoService] Tentando remover árbitro {arbitroClientAppId} do campeonato {campeonatoClientAppId}...");
                 int jogosAtualizados = await _databaseService.DesvincularArbitroDosJogosAsync(campeonatoClientAppId, arbitroClientAppId);
-                Debug.WriteLine($"[CampeonatoService] Árbitro desvinculado de {jogosAtualizados} jogo(s).");
+                //Debug.WriteLine($"[CampeonatoService] Árbitro desvinculado de {jogosAtualizados} jogo(s).");
                 int result = await _databaseService.DeletarConviteArbitroAceitoAsync(campeonatoClientAppId, arbitroClientAppId);
                 if (result > 0) {
-                    Debug.WriteLine($"[CampeonatoService] Convite de árbitro deletado com sucesso. {result} registro(s) afetado(s).");
+                    //Debug.WriteLine($"[CampeonatoService] Convite de árbitro deletado com sucesso. {result} registro(s) afetado(s).");
                     _syncService.ScheduleSync();
                     return true;
                 }
-                Debug.WriteLine($"[CampeonatoService] Nenhum registro de convite de árbitro encontrado/deletado. Resultado: {result}");
+                //Debug.WriteLine($"[CampeonatoService] Nenhum registro de convite de árbitro encontrado/deletado. Resultado: {result}");
                 return false;
             } catch (Exception ex) {
-                Debug.WriteLine($"[CampeonatoService] ERRO ao remover árbitro: {ex.Message}");
+                //Debug.WriteLine($"[CampeonatoService] ERRO ao remover árbitro: {ex.Message}");
                 return false;
             }
         }
@@ -123,26 +121,21 @@ namespace ArenaVirtual.Services {
         }
 
         public async Task RecalcularEGerarJogosAsync(Guid campeonatoClientAppId) {
-            Debug.WriteLine($"[CampeonatoService] Iniciando recalculo para o campeonato: {campeonatoClientAppId}");
+            //Debug.WriteLine($"[CampeonatoService] Iniciando recalculo para o campeonato: {campeonatoClientAppId}");
 
-            // 1. Encontrar o Campeonato (Usando o novo método ObterCampeonatoPorClientAppIdAsync)
             var campeonato = await _databaseService.ObterCampeonatoPorClientAppIdAsync(campeonatoClientAppId);
 
             if (campeonato == null) return;
 
-            // 2. EXCLUIR TODOS OS JOGOS ANTIGOS (Usando o novo método com cascade no DatabaseService)
             await _databaseService.DeletarJogosECascataPorCampeonatoAsync(campeonatoClientAppId);
 
-            // 3. Obter a lista ATUALIZADA de times (Usando o Campeonato.Id - int)
             var times = await GetTimesAceitos(campeonato.Id);
 
-            // 4. Gerar e salvar os novos jogos
             if (times.Count >= 2) {
-                // Chama o GerarTabelaJogosAsync do JogoService (que deve gerar a tabela e salvar)
                 await _jogoService.GerarTabelaJogosAsync(campeonato, times);
-                Debug.WriteLine($"[CampeonatoService] {times.Count} times encontrados. Tabela de jogos regenerada.");
+                //Debug.WriteLine($"[CampeonatoService] {times.Count} times encontrados. Tabela de jogos regenerada.");
             } else {
-                Debug.WriteLine($"[CampeonatoService] Não há times suficientes ({times.Count}) para gerar jogos.");
+                //Debug.WriteLine($"[CampeonatoService] Não há times suficientes ({times.Count}) para gerar jogos.");
             }
 
             _syncService.ScheduleSync();

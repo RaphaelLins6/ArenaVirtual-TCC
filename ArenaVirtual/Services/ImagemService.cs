@@ -1,6 +1,4 @@
-﻿
-
-namespace ArenaVirtual.Services;
+﻿namespace ArenaVirtual.Services;
 
 public class ImagemService
 {
