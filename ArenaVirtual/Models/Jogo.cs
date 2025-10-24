@@ -6,8 +6,6 @@ namespace ArenaVirtual.Models {
 
     public partial class Jogo : ObservableObject, ISyncable {
 
-        // --- Propriedades Persistentes (salvas no SQLite) ---
-
         [ObservableProperty]
         [property: PrimaryKey, AutoIncrement]
         private int id;
@@ -59,8 +57,6 @@ namespace ArenaVirtual.Models {
         [ObservableProperty]
         private int placarTimeBInt;
 
-        // --- Propriedades Ignoradas pelo SQLite (usadas apenas na UI) ---
-
         [ObservableProperty]
         [property: Ignore]
         private Time? timeA;
@@ -81,7 +77,6 @@ namespace ArenaVirtual.Models {
         [property: Ignore]
         private bool isOrganizador;
 
-        // --- Outras Propriedades (não persistidas automaticamente) ---
         public int IdServidor { get; set; }
         public int Rodada { get; set; }
         public string NomeCampeonato { get; set; } = string.Empty;
@@ -96,8 +91,6 @@ namespace ArenaVirtual.Models {
             Status = JogoStatus.Agendado;
             IsOrganizador = false;
         }
-
-        // --- Propriedades Calculadas (para a UI) ---
 
         [Ignore]
         public Time? TimeCasa {
@@ -148,22 +141,20 @@ namespace ArenaVirtual.Models {
         [Ignore]
         public bool BotaoArbitroDesabilitado => !BotaoArbitroHabilitado;
 
-        // --- Callbacks automáticos do MVVM Toolkit (CRÍTICO para a persistência) ---
-
         partial void OnArbitroIdChanged(Guid? value) {
-            Debug.WriteLine($"[JOGO MODEL] ArbitroId alterado -> {value}");
+            //Debug.WriteLine($"[JOGO MODEL] ArbitroId alterado -> {value}");
             UpdatedAt = DateTime.UtcNow;
             IsSynced = false;
             NotifyArbitroStatusChanged();
         }
 
         partial void OnNomeArbitroChanged(string value) {
-            Debug.WriteLine($"[JOGO MODEL] NomeArbitro alterado -> {value}");
+            //Debug.WriteLine($"[JOGO MODEL] NomeArbitro alterado -> {value}");
             NotifyArbitroStatusChanged();
         }
 
         partial void OnIsOrganizadorChanged(bool value) {
-            Debug.WriteLine($"[JOGO MODEL] IsOrganizador alterado -> {value}");
+            //Debug.WriteLine($"[JOGO MODEL] IsOrganizador alterado -> {value}");
             NotifyArbitroStatusChanged();
         }
 
@@ -179,8 +170,6 @@ namespace ArenaVirtual.Models {
             OnPropertyChanged(nameof(PlacarParaExibir)); 
         }
 
-        // --- Notificação manual para a UI ---
-
         public void NotifyArbitroStatusChanged() {
             OnPropertyChanged(nameof(TextoBotaoArbitro));
             OnPropertyChanged(nameof(BotaoArbitroHabilitado));
@@ -188,7 +177,7 @@ namespace ArenaVirtual.Models {
             OnPropertyChanged(nameof(ArbitroId));
             OnPropertyChanged(nameof(NomeArbitro));
 
-            Debug.WriteLine($"[JOGO MODEL] UI atualizada → Árbitro: {NomeArbitro}, Habilitado: {BotaoArbitroHabilitado}");
+            //Debug.WriteLine($"[JOGO MODEL] UI atualizada → Árbitro: {NomeArbitro}, Habilitado: {BotaoArbitroHabilitado}");
         }
     }
 }
