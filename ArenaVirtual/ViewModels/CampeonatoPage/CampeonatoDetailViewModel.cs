@@ -25,9 +25,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
     public partial class CampeonatoDetailViewModel : ObservableObject, IQueryAttributable {
 
-        // =====================================================================================
-        // PROPRIEDADES OBSERVÁVEIS
-        // =====================================================================================
         [ObservableProperty]
         private Campeonato campeonato;
 
@@ -40,16 +37,13 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         [ObservableProperty]
         private ObservableCollection<TimeEstatisticaViewModel> estatisticasTimes;
 
-        // NOVO: Propriedade para a lista de líderes de jogadores
         [ObservableProperty]
         private ObservableCollection<JogadorEstatisticaViewModel> lideresEstatisticas = new();
 
-        // NOVO: Propriedade para o filtro de estatística (o que está selecionado)
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ItensEstatisticas))]
-        private string estatisticaSelecionada = "Pontos"; // Padrão: Pontos
+        private string estatisticaSelecionada = "Pontos"; 
 
-        // NOVO: Coleção com as estatísticas disponíveis para o filtro
         [ObservableProperty]
         private ObservableCollection<string> tiposEstatisticas = new()
         {
@@ -85,7 +79,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         [ObservableProperty]
         private string? grupoSelecionado;
 
-        // PROPRIEDADES DE CONTROLE DE FASE
         [ObservableProperty]
         private bool isFormatoHibrido = false;
 
@@ -112,15 +105,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         [ObservableProperty]
         private bool isPatrocinioDivulgacaoVisible;
 
-        // Campos privado
         private readonly Dictionary<int, ObservableCollection<Jogo>> _jogosPorRodada = new();
         private readonly Dictionary<string, List<Time>> _timesPorGrupo = new();
         private CampanhaPatrocinio? _campanhaPatrocinioAtiva;
         private List<Jogo> _todosOsJogosDoCampeonato = new();
 
-        // =====================================================================================
-        // SERVIÇOS INJETADOS (INCLUSÃO DO IPATROCINIOSERVICE)
-        // =====================================================================================
         private readonly IAlertService _alertService;
         private readonly DatabaseService _databaseService; // Usando a interface para ser mais coerente
         private readonly SyncService _syncService;
@@ -128,7 +117,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         private readonly IJogoService _jogoService;
         private readonly PatrocinioService _patrocinioService;
 
-        // Propriedades calculadas
         public bool IsFormatoComGrupos =>
             Campeonato?.FormatoCampeonato?.IndexOf("Grupos", StringComparison.OrdinalIgnoreCase) >= 0 ||
             Campeonato?.FormatoCampeonato?.IndexOf("Fase de Grupos", StringComparison.OrdinalIgnoreCase) >= 0;
@@ -144,20 +132,15 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         public bool IsFaseTabelaEJogos => FaseAtual == "Tabela & Jogos";
         public bool IsFaseMataMata => FaseAtual == "Mata-Mata";
 
-        // NOVO: Propriedade para o CollectionView, filtrada e ordenada com base no 'EstatisticaSelecionada'
         public ObservableCollection<JogadorEstatisticaViewModel> ItensEstatisticas =>
             GetItensEstatisticasOrdenados(EstatisticaSelecionada);
 
-        // =====================================================================================
-        // CONSTRUTOR (INCLUSÃO DO IPATROCINIOSERVICE)
-        // =====================================================================================
         public CampeonatoDetailViewModel(
             IAlertService alertService,
-            DatabaseService databaseService, // Assume-se que DatabaseService implementa IDatabaseService
+            DatabaseService databaseService, 
             SyncService syncService,
             IJogoService jogoService,
             UsuarioService usuarioService,
-            // ⭐️ PARÂMETRO NOVO: Recebendo o serviço por injeção ⭐️
             PatrocinioService patrocinioService) {
 
             TabelaClassificacao = new ObservableCollection<Time>();
@@ -165,15 +148,14 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             EstatisticasTimes = new ObservableCollection<TimeEstatisticaViewModel>();
 
             _alertService = alertService;
-            _databaseService = (DatabaseService)databaseService; // Pode ser necessário um cast se a interface não estiver sendo usada
+            _databaseService = (DatabaseService)databaseService; 
             _syncService = syncService;
             _jogoService = jogoService;
             _usuarioService = usuarioService;
-            // ⭐️ ATRIBUIÇÃO NO CONSTRUTOR ⭐️
             _patrocinioService = patrocinioService;
 
             IsDesktop = DeviceInfo.Idiom == DeviceIdiom.Desktop || DeviceInfo.Idiom == DeviceIdiom.Tablet;
-            Debug.WriteLine($"[CampeonatoDetailViewModel] Device Idiom: {DeviceInfo.Idiom}. IsDesktop: {IsDesktop}");
+            //Debug.WriteLine($"[CampeonatoDetailViewModel] Device Idiom: {DeviceInfo.Idiom}. IsDesktop: {IsDesktop}");
         }
 
         partial void OnGrupoSelecionadoChanged(string? value) {
@@ -189,7 +171,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         }
 
         private async Task ExecuteOnFaseAtualChangedAsync(string newValue) {
-            Debug.WriteLine($"[DEBUG-FASES] Nova fase selecionada: {newValue}");
+            //Debug.WriteLine($"[DEBUG-FASES] Nova fase selecionada: {newValue}");
 
             if (newValue == "Mata-Mata") {
                 IsFiltroGrupoVisivel = false;
@@ -204,11 +186,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         }
 
         public async void ApplyQueryAttributes(IDictionary<string, object> query) {
-            Debug.WriteLine("[DEBUG-ATTRIBUTES] ApplyQueryAttributes chamado.");
+            //Debug.WriteLine("[DEBUG-ATTRIBUTES] ApplyQueryAttributes chamado.");
 
-            // 1. Atualização de Jogo (Árbitro) ou Jogo (Placar/Outros)
             if (query.TryGetValue("jogoAtualizado", out object jogoObj) && jogoObj is Jogo jogoAtualizado) {
-                Debug.WriteLine($"[DEBUG-ATTRIBUTES] Jogo ID {jogoAtualizado.Id} foi atualizado.");
+                //Debug.WriteLine($"[DEBUG-ATTRIBUTES] Jogo ID {jogoAtualizado.Id} foi atualizado.");
                 query.Remove("jogoAtualizado");
 
                 _ = LoadTabelaClassificacaoAsync();
@@ -220,13 +201,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 _ = LoadPatrocinadoresAsync();
                 _ = LoadLideresEstatisticasAsync();
 
-                Debug.WriteLine($"[DEBUG-ATTRIBUTES] Recarga completa do Campeonato após atualização do Jogo ID {jogoAtualizado.Id}.");
+                //Debug.WriteLine($"[DEBUG-ATTRIBUTES] Recarga completa do Campeonato após atualização do Jogo ID {jogoAtualizado.Id}.");
                 return;
             }
 
-            // 2. Atualização de Times (Inscrição)
             if (query.ContainsKey("TimesAtualizados")) {
-                Debug.WriteLine("[DEBUG-ATTRIBUTES] Lista de Times foi atualizada. Recarregando Classificação e Jogos.");
+                //Debug.WriteLine("[DEBUG-ATTRIBUTES] Lista de Times foi atualizada. Recarregando Classificação e Jogos.");
                 query.Remove("TimesAtualizados");
 
                 if (Campeonato != null) {
@@ -244,7 +224,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 return;
             }
 
-            // 3. Carregamento Inicial do Campeonato
             if (query.ContainsKey("Campeonato")) {
                 var campeonatoRecebido = query["Campeonato"] as Campeonato;
                 if (campeonatoRecebido == null) return;
@@ -257,12 +236,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     OnPropertyChanged(nameof(IsTabelaFormat));
                     OnPropertyChanged(nameof(IsMataMataFormat));
                     AtualizarFormatoCampeonato();
-                    Debug.WriteLine("[DEBUG-ATTRIBUTES] ApplyQueryAttributes ignorou LoadCampeonato (Campeonato já carregado).");
+                    //Debug.WriteLine("[DEBUG-ATTRIBUTES] ApplyQueryAttributes ignorou LoadCampeonato (Campeonato já carregado).");
                 }
 
-                // ----------------------------------------------------
-                // CARREGAR PATROCINADORES E BANNER DE DIVULGAÇÃO COM FALLBACK
-                // ----------------------------------------------------
                 if (Campeonato != null) {
                     _ = LoadPatrocinadoresAsync();
                     _ = LoadLideresEstatisticasAsync();
@@ -273,28 +249,28 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         private async Task RecarregarJogosESelecaoAsync() {
             if (Campeonato == null || !IsTabelaFormat) return;
-            Debug.WriteLine("[DEBUG-RELOAD] Iniciando RecarregarJogosESelecaoAsync.");
+            //Debug.WriteLine("[DEBUG-RELOAD] Iniciando RecarregarJogosESelecaoAsync.");
 
             await GerarTabelaJogosAsync(Campeonato);
-            Debug.WriteLine($"[DEBUG-RELOAD] GerarTabelaJogosAsync concluído. RodadaAtual: {RodadaAtual}");
+            //Debug.WriteLine($"[DEBUG-RELOAD] GerarTabelaJogosAsync concluído. RodadaAtual: {RodadaAtual}");
             if (RodadaAtual > 0) {
                 MainThread.BeginInvokeOnMainThread(() => {
-                    Debug.WriteLine($"[DEBUG-RELOAD] Chamando LoadRodada({RodadaAtual}) na MainThread.");
+                    //Debug.WriteLine($"[DEBUG-RELOAD] Chamando LoadRodada({RodadaAtual}) na MainThread.");
                     LoadRodada(RodadaAtual);
                 });
             }
 
-            Debug.WriteLine("[DEBUG-RELOAD] Finalizando RecarregarJogosESelecaoAsync.");
+            //Debug.WriteLine("[DEBUG-RELOAD] Finalizando RecarregarJogosESelecaoAsync.");
         }
 
         public async Task LoadCampeonato(Campeonato campeonato) {
-            Debug.WriteLine("[CampeonatoDetailViewModel] LoadCampeonato chamado.");
+            //Debug.WriteLine("[CampeonatoDetailViewModel] LoadCampeonato chamado.");
             if (IsBusy) return;
 
             try {
                 IsBusy = true;
                 if (campeonato == null) {
-                    Debug.WriteLine("[CampeonatoDetailViewModel] Campeonato é nulo, retornando.");
+                    //Debug.WriteLine("[CampeonatoDetailViewModel] Campeonato é nulo, retornando.");
                     return;
                 }
 
@@ -307,11 +283,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
                 var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
                 IsOrganizador = (campeonato.OrganizadorId == usuarioAtual?.Id);
-                Debug.WriteLine($"[CampeonatoDetailViewModel] É organizador? {IsOrganizador}. Formato Tabela: {IsTabelaFormat}, Mata-Mata: {IsMataMataFormat}, Híbrido: {IsFormatoHibrido}");
+                //Debug.WriteLine($"[CampeonatoDetailViewModel] É organizador? {IsOrganizador}. Formato Tabela: {IsTabelaFormat}, Mata-Mata: {IsMataMataFormat}, Híbrido: {IsFormatoHibrido}");
 
                 await LoadTabelaClassificacaoAsync();
 
-                // 4.1.a - Exibir jogos conforme formato base
                 if (IsTabelaFormat) {
                     await GerarTabelaJogosAsync(campeonato);
                     RodadaAtual = _jogosPorRodada.Keys.Any() ? _jogosPorRodada.Keys.Min() : 0;
@@ -325,7 +300,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
                 LoadImageSources();
             } catch (Exception ex) {
-                Debug.WriteLine($"[ERRO CRÍTICO] LoadCampeonato falhou: {ex.Message}");
+                //Debug.WriteLine($"[ERRO CRÍTICO] LoadCampeonato falhou: {ex.Message}");
                 await _alertService.DisplayAlert("Erro de Carregamento", "Ocorreu um erro ao carregar os detalhes do campeonato. Tente novamente.", "OK");
             } finally {
                 IsBusy = false;
@@ -335,7 +310,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         private void AtualizarFormatoCampeonato() {
             if (Campeonato is null) return;
 
-            Debug.WriteLine($"[DEBUG-FORMATO] Valor de FormatoCampeonato: '{Campeonato.FormatoCampeonato}'");
+            //Debug.WriteLine($"[DEBUG-FORMATO] Valor de FormatoCampeonato: '{Campeonato.FormatoCampeonato}'");
 
             bool isPontosMaisEliminatoria = Campeonato.FormatoCampeonato.IndexOf("Pontos + Eliminatórias", StringComparison.OrdinalIgnoreCase) >= 0;
             bool isGruposMaisEliminatoria = Campeonato.FormatoCampeonato.IndexOf("Grupos + Eliminatórias", StringComparison.OrdinalIgnoreCase) >= 0;
@@ -343,10 +318,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             IsFormatoHibrido = isPontosMaisEliminatoria || isGruposMaisEliminatoria || isMaisEliminatoria;
 
-            // Filtro de fases visível apenas em híbridos
             IsFiltroFaseVisivel = IsFormatoHibrido;
 
-            Debug.WriteLine($"[DEBUG-FORMATO] IsFormatoHibrido set to: {IsFormatoHibrido}. IsFiltroFaseVisivel: {IsFiltroFaseVisivel}");
+            //Debug.WriteLine($"[DEBUG-FORMATO] IsFormatoHibrido set to: {IsFormatoHibrido}. IsFiltroFaseVisivel: {IsFiltroFaseVisivel}");
 
             FasesDisponiveis.Clear(); // Limpar a lista para reconstruir
 
@@ -355,33 +329,24 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 FasesDisponiveis.Add("Mata-Mata");
                 FaseAtual = "Tabela & Jogos"; // Padrão
             } else {
-                // Em não híbridos, define a FaseAtual com base no formato principal.
                 if (IsMataMataFormat)
                     FaseAtual = "Mata-Mata";
                 else
                     FaseAtual = "Tabela & Jogos";
 
-                // CORREÇÃO CRÍTICA: Adiciona a fase única para evitar problemas de binding
-                // em componentes que esperam um item na lista de fases disponíveis.
                 FasesDisponiveis.Add(FaseAtual);
             }
 
-            // Garante que o filtro de grupo esteja visível na fase "Tabela & Jogos" se houver grupos
             if (IsFaseTabelaEJogos) {
-                // A visibilidade do filtro de grupo só afeta a UI do filtro, não o conteúdo
                 IsFiltroGrupoVisivel = IsFormatoComGrupos && GruposDisponiveis.Any();
             } else {
                 IsFiltroGrupoVisivel = false;
             }
         }
 
-        // Assumindo que esta é uma função membro da sua classe (ex: ViewModel)
         private string GetNomeRodada(int rodadaAtual, int totalRodadas) {
-            // A Final é sempre a rodada com o maior número.
-            // A contagem reversa (1 = Final, 2 = Semi, 3 = Quartas...) simplifica o mapeamento.
             int rodadaContagemReversa = totalRodadas - rodadaAtual + 1;
 
-            // Mapeamento padrão, funciona para 4, 8, 16, 32... times
             switch (rodadaContagemReversa) {
                 case 1:
                     return "FINAL";
@@ -396,7 +361,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 case 6:
                     return "32 avos de Final";
                 default:
-                    // Para rodadas preliminares muito grandes (ex: 64 avos), ou casos não mapeados
                     return $"Rodada {rodadaAtual} (Preliminar)";
             }
         }
@@ -409,13 +373,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 JogosMataMata.Clear();
             });
 
-            // ===================================================================
-            // ETAPA 1: CARREGAR JOGOS SALVOS E PERSISTÊNCIA (ÁRBITROS)
-            // ===================================================================
             var jogosMataMataSalvos = await _jogoService.ObterJogosMataMataPorCampeonatoAsync(Campeonato.ClientAppId);
             if (jogosMataMataSalvos == null) jogosMataMataSalvos = new List<Jogo>();
 
-            // Mapeamento de árbitros (Reutilizando a lógica do GerarTabelaJogosAsync):
             var todosOsArbitrosIds = jogosMataMataSalvos
                 .Select(j => j.ArbitroId)
                 .Where(id => id.HasValue && id.Value != Guid.Empty)
@@ -426,7 +386,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             var arbitrosMap = await _usuarioService.ObterNomesUsuariosPorIdsAsync(todosOsArbitrosIds);
             if (arbitrosMap == null) arbitrosMap = new Dictionary<Guid, string>();
 
-            // Garante que os jogos carregados tenham o NomeArbitro preenchido
             bool isOrganizador = this.IsOrganizador;
             foreach (var jogoSalvo in jogosMataMataSalvos) {
                 jogoSalvo.IsOrganizador = isOrganizador;
@@ -435,16 +394,14 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 else
                     jogoSalvo.NomeArbitro = string.Empty;
 
-                // Notifica a UI caso o objeto Jogo carregado já esteja em alguma coleção
                 jogoSalvo.NotifyArbitroStatusChanged();
             }
-            // ===================================================================
 
 
             var timesAceitos = TabelaClassificacao.OrderByDescending(t => t.PontuacaoTotal).ToList();
 
             if (timesAceitos.Count < 2) {
-                Debug.WriteLine("[MATA-MATA] Não há times suficientes para gerar o bracket.");
+                //Debug.WriteLine("[MATA-MATA] Não há times suficientes para gerar o bracket.");
                 return;
             }
 
@@ -452,21 +409,17 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             var mockJogosFlat = new List<Jogo>();
             int totalRodadas = 0;
 
-            // Função auxiliar para encontrar o jogo salvo ou criar um mock
             Jogo EncontrarOuCriarJogo(Time tA, Time tB, int rodada) {
-                // 1. Tenta encontrar o jogo salvo (match pelos IDs dos times e rodada)
-                // A lógica de busca precisa ser simétrica (A vs B é o mesmo que B vs A)
                 var jogoExistente = jogosMataMataSalvos
                     .FirstOrDefault(j => j.Rodada == rodada &&
                                         ((j.TimeAId == tA.Id && j.TimeBId == tB.Id) ||
                                          (j.TimeAId == tB.Id && j.TimeBId == tA.Id)));
 
                 if (jogoExistente != null) {
-                    Debug.WriteLine($"[MATA-MATA] Jogo Real Encontrado. Rodada {rodada}. ID: {jogoExistente.Id}. Árbitro: {jogoExistente.NomeArbitro}");
+                    //Debug.WriteLine($"[MATA-MATA] Jogo Real Encontrado. Rodada {rodada}. ID: {jogoExistente.Id}. Árbitro: {jogoExistente.NomeArbitro}");
                     return jogoExistente; // Retorna o jogo real (com árbitro persistido)
                 }
 
-                // 2. Cria um novo Mock
                 var novoJogo = new Jogo {
                     Id = mockIdCounter--, // ID de mock
                     TimeA = tA,
@@ -475,42 +428,29 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     TimeBId = tB.Id,
                     Rodada = rodada,
                     IsOrganizador = IsOrganizador,
-                    NomeArbitro = string.Empty, // Árbitro vazio para mock
+                    NomeArbitro = string.Empty, 
                     Local = "A Definir",
                 };
-                Debug.WriteLine($"[MATA-MATA] Jogo Mock Gerado. Rodada {rodada}. ID: {novoJogo.Id}.");
+                //Debug.WriteLine($"[MATA-MATA] Jogo Mock Gerado. Rodada {rodada}. ID: {novoJogo.Id}.");
                 return novoJogo;
             }
 
-            // ===================================================================
-            // LÓGICA DE GERAÇÃO E CÁLCULO DE TOTAL DE RODADAS (APLICANDO CORREÇÃO)
-            // ===================================================================
-
             if (timesAceitos.Count == 2) {
-                // Apenas Final
                 totalRodadas = 1;
                 var jogoFinal = EncontrarOuCriarJogo(timesAceitos[0], timesAceitos[1], 1);
                 mockJogosFlat.Add(jogoFinal);
 
             } else if (timesAceitos.Count == 3) {
-                // Semi (Rodada 1) e Final (Rodada 2)
                 totalRodadas = 2;
 
-                // Jogo da Semifinal (Times 2 vs 3)
                 var jogoSemi1 = EncontrarOuCriarJogo(timesAceitos[1], timesAceitos[2], 1);
                 mockJogosFlat.Add(jogoSemi1);
 
-                // Jogo da Final (Time 1 (Bye) vs Vencedor Jogo 1)
                 var vencedorPlaceholder = new Time {
                     Nome = $"Vencedor Jogo {Math.Abs(jogoSemi1.Id)}",
                     LogoUrl = "default_logo.png",
                     Id = jogoSemi1.Id
                 };
-
-                // Final é um jogo futuro com placeholder, então EncontrarOuCriarJogo não funcionará 
-                // para encontrar os times, mas podemos usá-lo para a estrutura do mock.
-                // No entanto, para simplificar e garantir a correspondência de IDs para jogos futuros
-                // (que não terão árbitro), vamos manter a criação do objeto direto aqui.
 
                 var jogoFinal = new Jogo {
                     Id = mockIdCounter--,
@@ -523,13 +463,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     NomeArbitro = string.Empty,
                     Local = "A Definir",
                 };
-                // Para jogos futuros (onde TimeBId é a referência a outro jogo) 
-                // a chance de ele estar salvo é baixa, a não ser que você salve os mocks também.
-                // Por segurança, mantemos como mock.
                 mockJogosFlat.Add(jogoFinal);
 
             } else if (timesAceitos.Count >= 4) {
-                // Geração de Bracket Completo (N >= 4)
 
                 var mockTimeBye = new Time { Nome = "BYE", LogoUrl = "default_logo.png", Id = mockIdCounter-- };
                 var participantesRodadaAtual = timesAceitos.ToList();
@@ -539,7 +475,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     var participantesProximaRodada = new List<Time>();
                     int numJogosRodada = (int)Math.Ceiling(participantesRodadaAtual.Count / 2.0);
 
-                    Debug.WriteLine($"[MATA-MATA] Gerando Rodada {rodadaAtual}. Número de times: {participantesRodadaAtual.Count}. Jogos: {numJogosRodada}");
+                    //Debug.WriteLine($"[MATA-MATA] Gerando Rodada {rodadaAtual}. Número de times: {participantesRodadaAtual.Count}. Jogos: {numJogosRodada}");
 
                     for (int i = 0; i < numJogosRodada; i++) {
                         Time timeA = participantesRodadaAtual[i * 2];
@@ -550,16 +486,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                         if (indexB < participantesRodadaAtual.Count) {
                             timeB = participantesRodadaAtual[indexB];
                         } else {
-                            // Cuidado: aqui TimeB é mockTimeBye (ID negativo)
                             timeB = mockTimeBye;
                         }
 
                         Jogo jogoParaAdicionar;
 
                         if (timeA.Id < 0 || timeB.Id < 0) {
-                            // Se algum dos times for um placeholder (ID negativo), 
-                            // a correspondência no DB por IDs é inválida. 
-                            // Tratamos como um mock que ainda não foi salvo.
                             jogoParaAdicionar = new Jogo {
                                 Id = mockIdCounter--,
                                 TimeA = timeA,
@@ -571,15 +503,13 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                                 NomeArbitro = string.Empty,
                                 Local = "A Definir",
                             };
-                            Debug.WriteLine($"[MATA-MATA] Jogo Futuro/Mock criado. ID: {jogoParaAdicionar.Id}.");
+                            //Debug.WriteLine($"[MATA-MATA] Jogo Futuro/Mock criado. ID: {jogoParaAdicionar.Id}.");
                         } else {
-                            // Tenta encontrar o jogo real (apenas para a primeira rodada com times reais)
                             jogoParaAdicionar = EncontrarOuCriarJogo(timeA, timeB, rodadaAtual);
                         }
 
                         mockJogosFlat.Add(jogoParaAdicionar);
 
-                        // Adiciona o placeholder do vencedor para a próxima rodada
                         if (timeB.Nome == "BYE") {
                             participantesProximaRodada.Add(timeA);
                         } else {
@@ -591,31 +521,21 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                             participantesProximaRodada.Add(vencedorPlaceholder);
                         }
                     }
-
-                    // Prepara para a próxima iteração
                     participantesRodadaAtual = participantesProximaRodada;
                     rodadaAtual++;
                 }
-
-                // O número total de rodadas é a última rodada gerada
                 totalRodadas = rodadaAtual - 1;
             }
 
-            // ===================================================================
-            // AGRUPAMENTO E USO DA FUNÇÃO DE NOMENCLATURA (RESTANTE DO CÓDIGO)
-            // ===================================================================
+            //Debug.WriteLine($"[MATA-MATA] Total de jogos planos gerados: {mockJogosFlat.Count}");
 
-            Debug.WriteLine($"[MATA-MATA] Total de jogos planos gerados: {mockJogosFlat.Count}");
-
-            // Agrupamento final por número da rodada e conversão para nome
             var groupedJogos = mockJogosFlat
                 .OrderBy(j => j.Rodada)
                 .GroupBy(j => j.Rodada)
-                // AQUI USAMOS A FUNÇÃO DE NOMENCLATURA!
                 .Select(g => new RodadaGrouping(GetNomeRodada(g.Key, totalRodadas), g))
                 .ToList();
 
-            Debug.WriteLine($"[MATA-MATA] Total de grupos (Rodadas) gerados: {groupedJogos.Count}");
+            //Debug.WriteLine($"[MATA-MATA] Total de grupos (Rodadas) gerados: {groupedJogos.Count}");
 
 
             MainThread.BeginInvokeOnMainThread(() => {
@@ -623,13 +543,13 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 foreach (var group in groupedJogos) {
                     JogosMataMata.Add(group);
                 }
-                Debug.WriteLine($"[MATA-MATA] Total de grupos adicionados: {JogosMataMata.Count}");
+                //Debug.WriteLine($"[MATA-MATA] Total de grupos adicionados: {JogosMataMata.Count}");
             });
         }
 
         private void LoadImageSources() {
             try {
-                Debug.WriteLine($"[DEBUG-IMAGEM] BannerUrl: {Campeonato?.BannerUrl}");
+                //Debug.WriteLine($"[DEBUG-IMAGEM] BannerUrl: {Campeonato?.BannerUrl}");
                 if (!string.IsNullOrEmpty(Campeonato?.BannerUrl)) {
                     if (File.Exists(Campeonato.BannerUrl))
                         BannerSource = ImageSource.FromFile(Campeonato.BannerUrl);
@@ -652,7 +572,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     LogoSource = ImageSource.FromFile("default_logo.png");
                 }
             } catch (Exception ex) {
-                Debug.WriteLine($"[ERRO-IMAGEM-ISOLADO] Falha ao carregar imagens: {ex.Message}");
+                //Debug.WriteLine($"[ERRO-IMAGEM-ISOLADO] Falha ao carregar imagens: {ex.Message}");
                 BannerSource = ImageSource.FromFile("default_banner.png");
                 LogoSource = ImageSource.FromFile("default_logo.png");
             }
@@ -661,11 +581,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         private async Task LoadTabelaClassificacaoAsync() {
             if (Campeonato is null) return;
 
-            // Limpeza inicial (manter do código atual)
             _timesPorGrupo.Clear();
             GruposDisponiveis.Clear();
 
-            // 1. Obter Times
             var todosOsTimes = await _databaseService.ObterTimesAceitosAsync(Campeonato.Id) ?? new List<Time>();
 
             if (!todosOsTimes.Any()) {
@@ -677,27 +595,19 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 return;
             }
 
-            // 2. Obter Jogos e Estatísticas
             _todosOsJogosDoCampeonato = await _databaseService.ObterJogosPorCampeonatoAsync(Campeonato.ClientAppId);
 
-            // CRÍTICO: Recalcular as estatísticas totais (Pontos, Vitórias, etc.)
             await RecalcularEstatisticasDosTimesAsync(todosOsTimes);
 
-            // ** NOVO: 3. Calcular a sequência V/D/E/-
             CalcularSequenciaDeJogos(todosOsTimes, _todosOsJogosDoCampeonato);
 
-            // ** NOVO: 4. Calcular estatísticas de agregação (média de pontos, rebotes, etc.)
-            // Chamada do novo método
             await CalcularEstatisticasGeraisAsync(todosOsTimes, _todosOsJogosDoCampeonato);
 
-            // 5. Processamento de Grupos e Visualização
             if (IsFormatoComGrupos) {
 
-                // --- Lógica de atribuição/organização de grupos (mantida do código original) ---
                 int numTimes = todosOsTimes.Count;
                 int numGruposNecessarios = 1;
 
-                // Lógica de atribuição de grupos mantida (simplificada)
                 if (numTimes > 0) {
                     if (numTimes % 3 == 0 && numTimes / 3 >= 1)
                         numGruposNecessarios = numTimes / 3;
@@ -730,7 +640,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     }
                 }
 
-                // Garante que todos os times tenham um grupo (mock)
                 for (int i = 0; i < numTimes; i++) {
                     var time = todosOsTimes[i];
                     if (string.IsNullOrEmpty(time.Grupo)) {
@@ -743,10 +652,8 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     .Where(t => !string.IsNullOrEmpty(t.Grupo))
                     .GroupBy(t => t.Grupo)
                     .OrderBy(g => g.Key);
-                // --- Fim da Lógica de grupos ---
 
                 MainThread.BeginInvokeOnMainThread(() => {
-                    // CORREÇÃO: Limpeza re-forçada na Main Thread para garantir atomicidade.
                     GruposDisponiveis.Clear();
 
                     foreach (var group in grupos) {
@@ -769,7 +676,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 });
 
             } else {
-                // Código para 'Sem grupos' (mantido inalterado, pois o problema era na seção acima)
                 var timesOrdenados = todosOsTimes
                     .OrderByDescending(t => t.Vitorias)
                     .ThenByDescending(t => t.PorcentagemVitoria)
@@ -789,7 +695,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                         TabelaClassificacao.Add(time);
                     }
 
-                    Debug.WriteLine($"[DEBUG-LOAD] Tabela de Classificação recarregada (Geral). Total: {TabelaClassificacao.Count}");
+                    //Debug.WriteLine($"[DEBUG-LOAD] Tabela de Classificação recarregada (Geral). Total: {TabelaClassificacao.Count}");
                 });
             }
         }
@@ -798,32 +704,25 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             var listaEstatisticas = new List<TimeEstatisticaViewModel>();
 
-            // 1. Obter todas as estatísticas de partida para o campeonato
-            // (Assumindo que o GetEstatisticasByCampeonatoIdAsync existe no DatabaseService)
             var todasAsEstatisticasDoCampeonato = await _databaseService.GetEstatisticasByCampeonatoIdAsync(Campeonato.Id);
 
-            // 2. Filtrar apenas jogos que foram FINALIZADOS para contar os "Jogos Disputados"
             var jogosFinalizados = todosOsJogosDoCampeonato
                 .Where(j =>
                     j.PlacarTimeAInt >= 0 && j.PlacarTimeBInt >= 0 &&
-                    !(j.PlacarTimeAInt == 0 && j.PlacarTimeBInt == 0) // <--- CORREÇÃO AQUI
+                    !(j.PlacarTimeAInt == 0 && j.PlacarTimeBInt == 0) 
                 )
                 .ToList();
 
-            // 3. Processar cada time
             foreach (var time in times) {
                 var statsViewModel = new TimeEstatisticaViewModel(time);
 
-                // A. Calcular Jogos Disputados (necessário para a média)
                 statsViewModel.JogosDisputados = jogosFinalizados
                     .Count(j => j.TimeAId == time.Id || j.TimeBId == time.Id);
 
-                // B. Somar as Estatísticas por Jogador para este Time
                 var estatisticasDoTime = todasAsEstatisticasDoCampeonato
                     .Where(e => e.TimeId == time.Id)
                     .ToList();
 
-                // C. Agregação - COMPLETANDO OS DEMAIS CAMPOS
                 statsViewModel.TotalPontos = estatisticasDoTime.Sum(e => e.Pontos);
                 statsViewModel.TotalRebotes = estatisticasDoTime.Sum(e => e.Rebotes);
                 statsViewModel.TotalAssistencias = estatisticasDoTime.Sum(e => e.Assistencias);
@@ -832,23 +731,18 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 statsViewModel.TotalTurnovers = estatisticasDoTime.Sum(e => e.Turnovers);
                 statsViewModel.TotalFaltas = estatisticasDoTime.Sum(e => e.Faltas);
 
-                // Agregação de Arremessos 2 Pontos
                 statsViewModel.TotalArremessos2PontosConvertidos = estatisticasDoTime.Sum(e => e.Arremessos2PontosConvertidos);
                 statsViewModel.TotalArremessos2PontosTentados = estatisticasDoTime.Sum(e => e.Arremessos2PontosTentados);
 
-                // Agregação de Arremessos 3 Pontos
                 statsViewModel.TotalArremessos3PontosConvertidos = estatisticasDoTime.Sum(e => e.Arremessos3PontosConvertidos);
                 statsViewModel.TotalArremessos3PontosTentados = estatisticasDoTime.Sum(e => e.Arremessos3PontosTentados);
 
-                // Agregação de Lances Livres
                 statsViewModel.TotalLancesLivresConvertidos = estatisticasDoTime.Sum(e => e.LancesLivresConvertidos);
                 statsViewModel.TotalLancesLivresTentados = estatisticasDoTime.Sum(e => e.LancesLivresTentados);
 
                 listaEstatisticas.Add(statsViewModel);
             }
 
-            // 4. Ordenar a lista pela métrica principal (MediaPontos)
-            // A ordenação é feita pela propriedade calculada MediaPontos
             EstatisticasTimes = new ObservableCollection<TimeEstatisticaViewModel>(
                 listaEstatisticas.OrderByDescending(t => t.MediaPontos)
             );
@@ -907,21 +801,16 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         private async Task RecalcularEstatisticasDosTimesAsync(List<Time> times) {
             if (Campeonato is null) return;
 
-            // 1. Obter todos os jogos do campeonato usando CampeonatoClientAppId (Guid)
-            // Já carregado em _todosOsJogosDoCampeonato no LoadTabelaClassificacaoAsync
             var todosOsJogos = _todosOsJogosDoCampeonato;
 
-            // 2. Inicializar as estatísticas de todos os times para zero
             foreach (var time in times) {
                 time.Vitorias = 0;
                 time.Derrotas = 0;
                 time.Empates = 0;
             }
 
-            // Usar um Dictionary para fácil acesso, usando o ID inteiro (Time.Id)
             var timesMap = times.ToDictionary(t => t.Id);
 
-            // 3. Processar cada jogo finalizado
             foreach (var jogo in todosOsJogos) {
 
                 bool placarAZero = jogo.PlacarTimeAInt == 0;
@@ -933,12 +822,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                         timesMap.TryGetValue(jogo.TimeBId, out var timeB)) {
 
                         if (jogo.PlacarTimeAInt > jogo.PlacarTimeBInt) {
-                            // Time A Venceu
                             timeA.Vitorias++;
                             timeB.Derrotas++;
                             timeA.PontuacaoTotal += 1;
                         } else if (jogo.PlacarTimeBInt > jogo.PlacarTimeAInt) {
-                            // Time B Venceu
                             timeB.Vitorias++;
                             timeA.Derrotas++;
                             timeB.PontuacaoTotal += 1;
@@ -948,7 +835,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             }
 
             foreach (var time in times) {
-                Debug.WriteLine($"[STATS-DEBUG] Time: {time.Nome} | V: {time.Vitorias} | D: {time.Derrotas} | E: {time.Empates}");
+                //Debug.WriteLine($"[STATS-DEBUG] Time: {time.Nome} | V: {time.Vitorias} | D: {time.Derrotas} | E: {time.Empates}");
             }
 
         }
@@ -956,7 +843,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         private void LoadTabelaClassificacaoPorGrupo(string grupo) {
             if (_timesPorGrupo.TryGetValue(grupo, out var timesDoGrupo)) {
                 var timesOrdenados = timesDoGrupo
-                    // ** ALTERADO: Prioriza Vitórias, depois PorcentagemVitoria
                     .OrderByDescending(t => t.Vitorias)
                     .ThenByDescending(t => t.PorcentagemVitoria)
                     .ToList();
@@ -967,21 +853,19 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                         var time = timesOrdenados[i];
                         time.Posicao = i + 1;
                         int totalJogosJogados = time.Vitorias + time.Derrotas + time.Empates; // Corrigido para incluir Empates
-                        // ** Proteção 2.A: Garantida a divisão segura
                         time.PorcentagemVitoria = (totalJogosJogados > 0) ? (double)time.Vitorias / totalJogosJogados : 0.0;
                         time.JogosAtras = 0;
-                        // time.Sequencia e os SequenciaChar já foram calculados no CalcularSequenciaDeJogos(todosOsTimes)
 
                         TabelaClassificacao.Add(time);
                     }
 
-                    Debug.WriteLine($"[DEBUG-LOAD] Tabela de Classificação recarregada (Grupo {grupo}). Total: {TabelaClassificacao.Count}");
+                    //Debug.WriteLine($"[DEBUG-LOAD] Tabela de Classificação recarregada (Grupo {grupo}). Total: {TabelaClassificacao.Count}");
                 });
             }
         }
 
         private async Task GerarTabelaJogosAsync(Campeonato campeonato) {
-            Debug.WriteLine("[DEBUG-JOGOS] Iniciando GerarTabelaJogosAsync.");
+            //Debug.WriteLine("[DEBUG-JOGOS] Iniciando GerarTabelaJogosAsync.");
             _jogosPorRodada.Clear();
 
             var times = TabelaClassificacao.ToList();
@@ -1015,11 +899,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 _jogosPorRodada[rodadaEntry.Key] = rodadaJogos;
             }
 
-            Debug.WriteLine($"[DEBUG-JOGOS] Tabela de Jogos recarregada. Total de Rodadas: {_jogosPorRodada.Count}");
+            //Debug.WriteLine($"[DEBUG-JOGOS] Tabela de Jogos recarregada. Total de Rodadas: {_jogosPorRodada.Count}");
         }
 
         private void LoadRodada(int rodada) {
-            Debug.WriteLine($"[DEBUG-LOADRODADA] Iniciando LoadRodada({rodada}).");
+            //Debug.WriteLine($"[DEBUG-LOADRODADA] Iniciando LoadRodada({rodada}).");
             if (_jogosPorRodada.ContainsKey(rodada)) {
                 var jogosDaRodada = _jogosPorRodada[rodada];
                 MainThread.BeginInvokeOnMainThread(() => {
@@ -1027,110 +911,91 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     foreach (var jogo in jogosDaRodada)
                         TabelaJogos.Add(jogo);
 
-                    Debug.WriteLine($"[DEBUG-LOADRODADA] Rodada {rodada} carregada com {TabelaJogos.Count} jogos.");
+                    //Debug.WriteLine($"[DEBUG-LOADRODADA] Rodada {rodada} carregada com {TabelaJogos.Count} jogos.");
                 });
             } else {
                 MainThread.BeginInvokeOnMainThread(() => TabelaJogos.Clear());
-                Debug.WriteLine($"[DEBUG-LOADRODADA] Rodada {rodada} não encontrada. TabelaJogos limpa.");
+                //Debug.WriteLine($"[DEBUG-LOADRODADA] Rodada {rodada} não encontrada. TabelaJogos limpa.");
             }
         }
 
         private async Task LoadPatrocinadoresAsync() {
-            // ⭐️ LOG 1: Verifica o estado inicial (Campeonato) ⭐️
             if (Campeonato == null) {
-                System.Diagnostics.Debug.WriteLine("[LoadPatrocinadoresAsync] Campeonato é nulo. Abortando.");
+                //System.Diagnostics.Debug.WriteLine("[LoadPatrocinadoresAsync] Campeonato é nulo. Abortando.");
                 return;
             }
 
             try {
-                System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] Buscando Campanha para Campeonato ID: {Campeonato.ClientAppId}");
+                //System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] Buscando Campanha para Campeonato ID: {Campeonato.ClientAppId}");
 
-                // Assume-se que o ViewModel tem acesso ao _patrocinioService.
-                // O service já deve aplicar a lógica de inativação por data.
                 var campanhaAtiva = await _patrocinioService.ObterCampanhaDeDivulgacaoAtivaAsync(Campeonato.ClientAppId);
 
-                // ⭐️ CORREÇÃO ESSENCIAL: Salvar a Campanha Ativa na variável usada pelo Comando de Edição ⭐️
-                // (A variável _propostaPatrocinioPrincipal é do tipo CampanhaPatrocinio, pois foi criada a partir de uma Proposta)
                 _campanhaPatrocinioAtiva = campanhaAtiva;
 
-                // ⭐️ LOG 2: Registra o valor retornado pelo Service (PONTO CRÍTICO) ⭐️
-                System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] Campanha recebida do Service: {(campanhaAtiva != null ? $"ID {campanhaAtiva.Id} | Fim: {campanhaAtiva.Fim}" : "NULA")}");
+                //System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] Campanha recebida do Service: {(campanhaAtiva != null ? $"ID {campanhaAtiva.Id} | Fim: {campanhaAtiva.Fim}" : "NULA")}");
 
                 PatrocinadoresAtivos.Clear();
 
-                // Adiciona apenas se uma CampanhaPatrocinio não expirada foi encontrada (assumindo que o service cuida da expiração)
                 if (campanhaAtiva != null) {
                     PatrocinadoresAtivos.Add(campanhaAtiva);
                 }
 
-                // PASSO CRÍTICO: Define a visibilidade da seção com base se a lista tem itens
                 IsPatrocinioDivulgacaoVisible = PatrocinadoresAtivos.Any();
 
-                // ⭐️ LOG 3: Registra a decisão final de visibilidade ⭐️
-                System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] IsPatrocinioDivulgacaoVisible: {IsPatrocinioDivulgacaoVisible}");
+                //System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] IsPatrocinioDivulgacaoVisible: {IsPatrocinioDivulgacaoVisible}");
 
 
                 if (IsPatrocinioDivulgacaoVisible) {
-                    // O objeto CampanhaPatrocinio deve ter a propriedade ImagemPatrocinador
                     string? caminhoBanner = PatrocinadoresAtivos.First().ImagemPatrocinador;
 
-                    // ⭐️ LOG 4: Registra o caminho do banner antes da atribuição ⭐️
-                    System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] Caminho Banner (ImagemPatrocinador): {caminhoBanner ?? "NULO/VAZIO"}");
+                    //System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] Caminho Banner (ImagemPatrocinador): {caminhoBanner ?? "NULO/VAZIO"}");
 
-                    // Se tem patrocinador, mas não tem imagem customizada, usa o placeholder
                     if (string.IsNullOrEmpty(caminhoBanner)) {
                         BannerDivulgacaoSource = "placeholder.png";
                     } else {
-                        // Usa o caminho salvo
                         BannerDivulgacaoSource = caminhoBanner;
                     }
 
-                    // ⭐️ LOG 5: Registra a Source final do Banner ⭐️
-                    System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] BannerDivulgacaoSource DEFINIDA para: {BannerDivulgacaoSource}");
+                    //System.Diagnostics.Debug.WriteLine($"[LoadPatrocinadoresAsync] BannerDivulgacaoSource DEFINIDA para: {BannerDivulgacaoSource}");
 
                 } else {
-                    // Se não tem patrocinador (IsPatrocinioDivulgacaoVisible = false), limpa a Source.
                     BannerDivulgacaoSource = null;
-                    System.Diagnostics.Debug.WriteLine("[LoadPatrocinadoresAsync] BannerDivulgacaoSource limpa.");
+                    //System.Diagnostics.Debug.WriteLine("[LoadPatrocinadoresAsync] BannerDivulgacaoSource limpa.");
                 }
 
             } catch (Exception ex) {
-                System.Diagnostics.Debug.WriteLine($"[PATROCINIO - CRÍTICO] Erro ao carregar patrocinadores: {ex.Message}");
+                //System.Diagnostics.Debug.WriteLine($"[PATROCINIO - CRÍTICO] Erro ao carregar patrocinadores: {ex.Message}");
                 IsPatrocinioDivulgacaoVisible = false; // Garante que a seção não aparece em caso de erro
                 BannerDivulgacaoSource = null;
             }
         }
 
-        // NOVO: Método para carregar as estatísticas dos jogadores
         private async Task LoadLideresEstatisticasAsync() {
-            Debug.WriteLine($"[DEBUG-STATS] ⭐️ Iniciando LoadLideresEstatisticasAsync ⭐️");
+            //Debug.WriteLine($"[DEBUG-STATS] ⭐️ Iniciando LoadLideresEstatisticasAsync ⭐️");
             if (Campeonato == null) {
-                Debug.WriteLine("[DEBUG-STATS] Campeonato nulo. Abortando carregamento.");
+                //Debug.WriteLine("[DEBUG-STATS] Campeonato nulo. Abortando carregamento.");
                 return;
             }
 
             try {
-                // 1️⃣ OBTENÇÃO DOS TIMES
-                Debug.WriteLine($"[DEBUG-STATS-STEP] Buscando times aceitos...");
+                //Debug.WriteLine($"[DEBUG-STATS-STEP] Buscando times aceitos...");
                 var todosOsTimes = await _databaseService.ObterTimesAceitosAsync(Campeonato.Id);
-                Debug.WriteLine($"[DEBUG-STATS-STEP] Total de times obtidos: {todosOsTimes.Count}");
+                //Debug.WriteLine($"[DEBUG-STATS-STEP] Total de times obtidos: {todosOsTimes.Count}");
 
-                // 2️⃣ CRIAÇÃO DO MAPA DE TIMES
                 var timesMap = new Dictionary<Guid, Time>();
                 foreach (var t in todosOsTimes) {
                     if (!timesMap.ContainsKey(t.ClientAppId))
                         timesMap[t.ClientAppId] = t;
-                    else
-                        Debug.WriteLine($"[WARN-STATS] Time duplicado ignorado: {t.Nome} ({t.ClientAppId})");
+                    //else
+                        //Debug.WriteLine($"[WARN-STATS] Time duplicado ignorado: {t.Nome} ({t.ClientAppId})");
                 }
 
-                // 3️⃣ OBTENÇÃO DOS JOGADORES
-                Debug.WriteLine($"[DEBUG-STATS-STEP] Buscando jogadores do campeonato...");
+                //Debug.WriteLine($"[DEBUG-STATS-STEP] Buscando jogadores do campeonato...");
                 var todosOsJogadores = await _databaseService.ObterJogadoresPorCampeonatoAsync(Campeonato.ClientAppId);
-                Debug.WriteLine($"[DEBUG-STATS-STEP] Total de jogadores obtidos: {todosOsJogadores.Count}");
+                //Debug.WriteLine($"[DEBUG-STATS-STEP] Total de jogadores obtidos: {todosOsJogadores.Count}");
 
                 if (!todosOsJogadores.Any()) {
-                    Debug.WriteLine("[DEBUG-STATS] Nenhum jogador encontrado. Limpando lista.");
+                    //Debug.WriteLine("[DEBUG-STATS] Nenhum jogador encontrado. Limpando lista.");
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
                         LideresEstatisticas.Clear();
@@ -1138,33 +1003,27 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     return;
                 }
 
-                // 4️⃣ OBTENÇÃO DAS ESTATÍSTICAS AGREGADAS
-                Debug.WriteLine($"[DEBUG-STATS-STEP] Buscando estatísticas agregadas...");
+                //Debug.WriteLine($"[DEBUG-STATS-STEP] Buscando estatísticas agregadas...");
                 var todasAsEstatisticasAgregadas = await _databaseService.GetEstatisticasDeJogadorByCampeonatoIdAsync(Campeonato.ClientAppId);
-                Debug.WriteLine($"[DEBUG-STATS-STEP] Total de estatísticas agregadas obtidas: {todasAsEstatisticasAgregadas.Count}");
+                //Debug.WriteLine($"[DEBUG-STATS-STEP] Total de estatísticas agregadas obtidas: {todasAsEstatisticasAgregadas.Count}");
 
-                // 5️⃣ CRIAÇÃO DO MAPA DE ESTATÍSTICAS
                 var statsMap = new Dictionary<int, EstatisticaAgregadaJogador>();
                 foreach (var e in todasAsEstatisticasAgregadas) {
                     if (!statsMap.ContainsKey(e.UsuarioId))
                         statsMap[e.UsuarioId] = e;
-                    else
-                        Debug.WriteLine($"[WARN-STATS] Estatística duplicada ignorada para Usuário ID: {e.UsuarioId}");
+                    //else
+                        //Debug.WriteLine($"[WARN-STATS] Estatística duplicada ignorada para Usuário ID: {e.UsuarioId}");
                 }
 
-                // 6️⃣ PROCESSAMENTO DOS JOGADORES
                 var listaTempLideres = new List<JogadorEstatisticaViewModel>();
 
                 foreach (var jogador in todosOsJogadores) {
-                    // Lookup do Time
                     Time? timeDoJogador = null;
                     if (jogador.TimeClientAppId.HasValue)
                         timesMap.TryGetValue(jogador.TimeClientAppId.Value, out timeDoJogador);
 
-                    // Lookup das Estatísticas Agregadas
                     statsMap.TryGetValue(jogador.Id, out var statsAgregadas);
 
-                    // Criação do ViewModel do jogador
                     var statsJogador = new JogadorEstatisticaViewModel {
                         Id = jogador.Id,
                         NomeJogador = jogador.Nome,
@@ -1173,11 +1032,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                         LogoTimeUrl = timeDoJogador?.LogoUrl
                     };
 
-                    // Atribuição das Estatísticas Agregadas
                     if (statsAgregadas != null) {
-                        Debug.WriteLine($"[DEBUG-STATS] Jogador: {jogador.Nome}, Pontos: {statsAgregadas.TotalPontos}");
+                        //Debug.WriteLine($"[DEBUG-STATS] Jogador: {jogador.Nome}, Pontos: {statsAgregadas.TotalPontos}");
 
-                        // CORREÇÃO: Removendo o cast (int)
                         statsJogador.Pontos = statsAgregadas.TotalPontos;
                         statsJogador.Assistencias = statsAgregadas.TotalAssistencias;
                         statsJogador.Rebotes = statsAgregadas.TotalRebotes;
@@ -1192,13 +1049,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                         statsJogador.LancesLivresConvertidos = statsAgregadas.LancesLivresConvertidos;
                         statsJogador.LancesLivresTentados = statsAgregadas.LancesLivresTentados;
                     } else {
-                        Debug.WriteLine($"[DEBUG-STATS] Jogador: {jogador.Nome} - sem estatísticas registradas.");
+                        //Debug.WriteLine($"[DEBUG-STATS] Jogador: {jogador.Nome} - sem estatísticas registradas.");
                     }
 
                     listaTempLideres.Add(statsJogador);
                 }
 
-                // 7️⃣ ATUALIZAÇÃO NA MAIN THREAD
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
                     LideresEstatisticas.Clear();
@@ -1207,21 +1063,19 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     var valorAtual = EstatisticaSelecionada;
                     EstatisticaSelecionada = "Turnovers";
                     EstatisticaSelecionada = valorAtual;
-                    Debug.WriteLine($"[DEBUG-OUTPUT] ItensEstatisticas Count: {ItensEstatisticas?.Count ?? 0}");
-                    Debug.WriteLine($"[DEBUG-OUTPUT] Primeiro item: Nome={ItensEstatisticas.FirstOrDefault()?.NomeJogador}, Valor={ItensEstatisticas.FirstOrDefault()?.ValorEstatisticaPrincipal}");
-                    Debug.WriteLine($"[DEBUG-LEADERS] Total de líderes carregados: {LideresEstatisticas.Count}");
+                    //Debug.WriteLine($"[DEBUG-OUTPUT] ItensEstatisticas Count: {ItensEstatisticas?.Count ?? 0}");
+                    //Debug.WriteLine($"[DEBUG-OUTPUT] Primeiro item: Nome={ItensEstatisticas.FirstOrDefault()?.NomeJogador}, Valor={ItensEstatisticas.FirstOrDefault()?.ValorEstatisticaPrincipal}");
+                    //Debug.WriteLine($"[DEBUG-LEADERS] Total de líderes carregados: {LideresEstatisticas.Count}");
                 });
             } catch (Exception ex) {
-                Debug.WriteLine($"[FATAL CRASH] Ocorreu uma exceção crítica em LoadLideresEstatisticasAsync: {ex.Message}");
-                Debug.WriteLine($"[FATAL CRASH] StackTrace: {ex.StackTrace}");
+                //Debug.WriteLine($"[FATAL CRASH] Ocorreu uma exceção crítica em LoadLideresEstatisticasAsync: {ex.Message}");
+                //Debug.WriteLine($"[FATAL CRASH] StackTrace: {ex.StackTrace}");
             }
         }
 
-        // NOVO: Método auxiliar para ordenar e filtrar os itens de estatísticas
         private ObservableCollection<JogadorEstatisticaViewModel> GetItensEstatisticasOrdenados(string estatistica) {
             IEnumerable<JogadorEstatisticaViewModel> orderedList = LideresEstatisticas;
 
-            // A. LÓGICA DE ORDENAÇÃO (SUA VERSÃO ORIGINAL)
             switch (estatistica) {
                 case "Pontos":
                     orderedList = orderedList.OrderByDescending(j => j.Pontos);
@@ -1258,21 +1112,15 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     break;
             }
 
-            // B. FILTRO TOP 5 E ATRIBUIÇÃO DE RANK
 
-            // ⭐️ CORREÇÃO PRINCIPAL: Aplica o filtro TOP 5 após a ordenação
             var top5List = orderedList.Take(5);
 
-            // Atribuir posição (rank) e formatar o ValorEstatisticaPrincipal
             var rankedList = new List<JogadorEstatisticaViewModel>();
             int rank = 1;
 
-            // Itera apenas sobre os 5 melhores
             foreach (var item in top5List) {
-                // 1. Atribui a posição (1º, 2º, etc.)
                 item.Posicao = rank++;
 
-                // 2. Formata o valor de exibição (ex: 50 ou 45%)
                 item.ValorEstatisticaPrincipal = GetFormattedEstatisticaValue(item, estatistica);
 
                 rankedList.Add(item);
@@ -1281,7 +1129,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             return new ObservableCollection<JogadorEstatisticaViewModel>(rankedList);
         }
 
-        // NOVO: Método auxiliar para formatar o valor da estatística
         private string GetFormattedEstatisticaValue(JogadorEstatisticaViewModel jogadorStats, string estatistica) {
             switch (estatistica) {
                 case "Pontos": return jogadorStats.Pontos.ToString();
@@ -1291,9 +1138,9 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 case "Bloqueios": return jogadorStats.Bloqueios.ToString();
                 case "Turnovers": return jogadorStats.Turnovers.ToString();
                 case "Faltas": return jogadorStats.Faltas.ToString();
-                case "2 Pontos %": return $"{jogadorStats.Percentual2Pontos:P0}"; // Formato percentual
-                case "3 Pontos %": return $"{jogadorStats.Percentual3Pontos:P0}"; // Formato percentual
-                case "Lance Livre %": return $"{jogadorStats.PercentualLancesLivres:P0}"; // Formato percentual
+                case "2 Pontos %": return $"{jogadorStats.Percentual2Pontos:P0}"; 
+                case "3 Pontos %": return $"{jogadorStats.Percentual3Pontos:P0}"; 
+                case "Lance Livre %": return $"{jogadorStats.PercentualLancesLivres:P0}"; 
                 default: return jogadorStats.Pontos.ToString();
             }
         }
@@ -1302,22 +1149,19 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             if (EstatisticaSelecionada == estatistica)
                 return;
 
-            EstatisticaSelecionada = estatistica; // ⭐️ Esta atualização já dispara a UI
+            EstatisticaSelecionada = estatistica; 
 
-            Debug.WriteLine($"[DEBUG-STATS-LOGIC] Nova Estatística selecionada (Code-Behind): {EstatisticaSelecionada}.");
+            //Debug.WriteLine($"[DEBUG-STATS-LOGIC] Nova Estatística selecionada (Code-Behind): {EstatisticaSelecionada}.");
         }
 
-        // =====================================================================================
-        // COMANDOS (RelayCommand)
-        // =====================================================================================
 
         [RelayCommand]
         private async Task AlterarBanner() {
-            Debug.WriteLine("[CampeonatoDetailViewModel] Botão 'Alterar Banner' clicado.");
+            //Debug.WriteLine("[CampeonatoDetailViewModel] Botão 'Alterar Banner' clicado.");
             var popup = new AlterarBannerPopup(Campeonato, _alertService, _databaseService, _syncService);
 
             popup.BannerAtualizado += (s, newBannerPath) => {
-                Debug.WriteLine($"[CampeonatoDetailViewModel] Evento BannerAtualizado recebido com caminho: '{newBannerPath}'");
+                //Debug.WriteLine($"[CampeonatoDetailViewModel] Evento BannerAtualizado recebido com caminho: '{newBannerPath}'");
                 MainThread.BeginInvokeOnMainThread(() => {
                     if (!string.IsNullOrEmpty(newBannerPath)) {
                         if (File.Exists(newBannerPath)) {
@@ -1325,7 +1169,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                         } else if (Uri.IsWellFormedUriString(newBannerPath, UriKind.Absolute)) {
                             BannerSource = ImageSource.FromUri(new Uri(newBannerPath));
                         } else {
-                            Debug.WriteLine("[CampeonatoDetailViewModel] Caminho/URL do novo banner é inválida ou arquivo não encontrado.");
+                            //Debug.WriteLine("[CampeonatoDetailViewModel] Caminho/URL do novo banner é inválida ou arquivo não encontrado.");
                         }
                     }
                 });
@@ -1370,7 +1214,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 };
                 await Shell.Current.GoToAsync("AtribuirArbitros", navigationParameters);
             } catch (Exception ex) {
-                Debug.WriteLine($"[DEBUG-CLIQUE] ERRO CRÍTICO: {ex.Message}");
+                //Debug.WriteLine($"[DEBUG-CLIQUE] ERRO CRÍTICO: {ex.Message}");
                 await _alertService.DisplayAlert("Erro de Navegação", $"Não foi possível abrir a tela de árbitros: {ex.Message}", "OK");
             }
         }
@@ -1390,7 +1234,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             if (Campeonato is null) return;
             var navigationParameters = new ShellNavigationQueryParameters
             {
-                // Passando Campeonato.Id (int)
                 { "CampeonatoId", Campeonato.Id }
             };
             await Shell.Current.GoToAsync(nameof(TimesCadastradosPage), navigationParameters);
@@ -1401,7 +1244,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             if (Campeonato is null) return;
             var navigationParameters = new ShellNavigationQueryParameters
             {
-                // Passando Campeonato.ClientAppId (int)
                 { "CampeonatoId", Campeonato.ClientAppId }
             };
             await Shell.Current.GoToAsync(nameof(ArbitrosInscritosPage), navigationParameters);
@@ -1409,25 +1251,20 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         [RelayCommand]
         private async Task AlterarBannerDivulgacao() {
-            Debug.WriteLine("[CampeonatoDetailViewModel] Botão 'Alterar Banner Divulgação' clicado.");
+            //Debug.WriteLine("[CampeonatoDetailViewModel] Botão 'Alterar Banner Divulgação' clicado.");
 
-            // ⭐️ _propostaPatrocinioPrincipal agora contém a CampanhaPatrocinio ativa (ou null se não houver) ⭐️
             if (_campanhaPatrocinioAtiva == null) {
-                // Se ainda for null, significa que LoadPatrocinadoresAsync não encontrou nada (expirou/erro real)
                 await _alertService.DisplayAlert("Sem Patrocínio", "Não há patrocínios ativos para alterar o banner.", "OK");
                 return;
             }
 
-            // Passamos a Campanha Patrocínio ativa para o pop-up, que fará o upload e atualizará o ImagemPatrocinador.
-            // É recomendável renomear a variável no ViewModel para _campanhaPatrocinioPrincipal no futuro para maior clareza.
             var popup = new AlterarBannerPatrocinioPopup(_campanhaPatrocinioAtiva, _alertService, _databaseService, _syncService);
 
             popup.BannerAtualizado += (s, newBannerPath) => {
-                Debug.WriteLine($"[CampeonatoDetailViewModel] Evento BannerAtualizado (Patrocínio) recebido com caminho: '{newBannerPath}'");
+                //Debug.WriteLine($"[CampeonatoDetailViewModel] Evento BannerAtualizado (Patrocínio) recebido com caminho: '{newBannerPath}'");
                 MainThread.BeginInvokeOnMainThread(() => {
                     BannerDivulgacaoSource = newBannerPath;
 
-                    // Opcional, mas recomendado: Atualizar a variável de suporte para refletir o novo caminho imediatamente.
                     _campanhaPatrocinioAtiva.ImagemPatrocinador = newBannerPath;
                 });
             };

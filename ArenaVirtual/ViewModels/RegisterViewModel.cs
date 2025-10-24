@@ -7,7 +7,6 @@ using ArenaVirtual.Views;
 using System.Diagnostics;
 
 namespace ArenaVirtual.ViewModels {
-    // Adicione IServiceProvider ao construtor primário para injetá-lo automaticamente
     public partial class RegisterViewModel(IAlertService alertService, UsuarioService usuarioService, SyncService syncService, IServiceProvider serviceProvider) : ObservableObject {
 
         [ObservableProperty]
@@ -141,18 +140,17 @@ namespace ArenaVirtual.ViewModels {
                     GeneroSelecionado = null;
 
                     SessaoService.Instancia.Login(usuarioCadastrado);
-                    System.Diagnostics.Debug.WriteLine($"[RegisterViewModel] SessaoService.Instancia.Login() chamado para ID: {usuarioCadastrado.Id}, Email: {usuarioCadastrado.Email}");
+                    //System.Diagnostics.Debug.WriteLine($"[RegisterViewModel] SessaoService.Instancia.Login() chamado para ID: {usuarioCadastrado.Id}, Email: {usuarioCadastrado.Email}");
 
-                    Debug.WriteLine("[RegisterViewModel] Usuário registrado e logado. Disparando sincronização inicial completa.");
+                    //Debug.WriteLine("[RegisterViewModel] Usuário registrado e logado. Disparando sincronização inicial completa.");
                     try {
                         await _syncService.SyncAsync(new Progress<string>());
                     } catch (Exception ex) {
-                        Debug.WriteLine($"[RegisterViewModel] Erro na sincronização pós-registro: {ex.Message}");
+                        //Debug.WriteLine($"[RegisterViewModel] Erro na sincronização pós-registro: {ex.Message}");
                     }
 
                     MainThread.BeginInvokeOnMainThread(() => {
                         if (Application.Current?.Windows.Count > 0) {
-                            // Passe o serviceProvider para o construtor do AppShell
                             Application.Current.Windows[0].Page = new AppShell(usuarioCadastrado, serviceProvider);
                         }
                     });

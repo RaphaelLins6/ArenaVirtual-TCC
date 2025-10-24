@@ -15,7 +15,6 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
         public string Descricao => Campeonato?.Descricao;
         public string LogoUrl => Campeonato?.LogoUrl;
 
-        // NOVO: Status que define a aparência do botão
         [ObservableProperty]
         private PatrocinioStatus statusAtual = PatrocinioStatus.Disponivel;
 
@@ -25,7 +24,6 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
         [ObservableProperty]
         private bool isButtonEnabled = true;
 
-        // Cor base: Laranja principal
         [ObservableProperty]
         private Color buttonColor = Color.FromArgb("#FFA500");
 
@@ -33,23 +31,22 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
             Campeonato = campeonato;
         }
 
-        // Lógica para atualizar texto, cor e estado ao mudar o StatusAtual
         partial void OnStatusAtualChanged(PatrocinioStatus value) {
             switch (value) {
                 case PatrocinioStatus.Pendente:
                     ButtonText = "Proposta Pendente";
-                    ButtonColor = Color.FromArgb("#808080"); // Cinza (como solicitado)
-                    IsButtonEnabled = false; // Desabilita o botão para não enviar duas vezes
+                    ButtonColor = Color.FromArgb("#808080"); 
+                    IsButtonEnabled = false; 
                     break;
                 case PatrocinioStatus.Aceito:
                     ButtonText = "Patrocínio Ativo";
-                    ButtonColor = Color.FromArgb("#008000"); // Verde (Exemplo de Aceito)
+                    ButtonColor = Color.FromArgb("#008000"); 
                     IsButtonEnabled = false;
                     break;
                 case PatrocinioStatus.Disponivel:
                 default:
                     ButtonText = "Propor Patrocínio";
-                    ButtonColor = Color.FromArgb("#FFA500"); // Laranja principal
+                    ButtonColor = Color.FromArgb("#FFA500"); 
                     IsButtonEnabled = true;
                     break;
             }

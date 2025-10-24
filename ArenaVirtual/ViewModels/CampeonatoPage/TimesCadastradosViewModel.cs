@@ -3,7 +3,7 @@ using ArenaVirtual.Models;
 using ArenaVirtual.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Diagnostics; // Adicionado para Debug.WriteLine
+using System.Diagnostics; 
 
 namespace ArenaVirtual.ViewModels.CampeonatoPage {
     public partial class TimesCadastradosViewModel : ObservableObject, IQueryAttributable {
@@ -15,7 +15,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         private int _campeonatoId;
 
-        // NOVO: Propriedade para armazenar o GUID CORRETO do Campeonato
         private Guid _campeonatoClientAppId;
 
         public bool HasTimes => Times?.Count > 0;
@@ -38,13 +37,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             try {
                 Times.Clear();
 
-                // 1. OBTÉM O CAMPEONATO PARA PEGAR O CLIENTAPPID (GUID)
                 var campeonato = await _campeonatoService.ObterPorIdAsync(_campeonatoId);
                 if (campeonato == null) return;
 
-                // ARMAZENA O GUID CORRETO DO CAMPEONATO
                 _campeonatoClientAppId = campeonato.ClientAppId;
-                Debug.WriteLine($"[DEBUG LOAD] CampeonatoClientAppId carregado: {_campeonatoClientAppId}");
+                //Debug.WriteLine($"[DEBUG LOAD] CampeonatoClientAppId carregado: {_campeonatoClientAppId}");
 
                 var timesAceitos = await _campeonatoService.GetTimesAceitos(_campeonatoId);
 
@@ -52,7 +49,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     Times.Add(time);
                 }
             } catch (Exception ex) {
-                Debug.WriteLine($"Erro ao carregar times: {ex.Message}");
+                //Debug.WriteLine($"Erro ao carregar times: {ex.Message}");
             }
         }
 
@@ -60,35 +57,31 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         private async Task RemoverTime(Time timeParaRemover) {
             if (timeParaRemover == null) return;
 
-            // Usa o GUID do ViewModel (que foi carregado corretamente)
             Guid campClientAppIdParaDelecao = _campeonatoClientAppId;
 
-            // Verifica se o GUID foi carregado (deve ser o caso)
             if (campClientAppIdParaDelecao == Guid.Empty) {
-                Debug.WriteLine("[DEBUG REMOCAO] ERRO: CampeonatoClientAppId do VM está vazio. Não é possível remover.");
+                //Debug.WriteLine("[DEBUG REMOCAO] ERRO: CampeonatoClientAppId do VM está vazio. Não é possível remover.");
                 await Application.Current.MainPage.DisplayAlert("Erro", "Falha ao obter o identificador do campeonato.", "OK");
                 return;
             }
 
-            // --- DEBUG 1: Valores Passados ---
-            Debug.WriteLine($"[DEBUG REMOCAO] Tentando remover Time ID: {timeParaRemover.Id}");
-            Debug.WriteLine($"[DEBUG REMOCAO] TimeClientAppId: {timeParaRemover.ClientAppId}");
-            Debug.WriteLine($"[DEBUG REMOCAO] CampeonatoClientAppId **CORRETO** USADO: {campClientAppIdParaDelecao}");
+            //Debug.WriteLine($"[DEBUG REMOCAO] Tentando remover Time ID: {timeParaRemover.Id}");
+            //Debug.WriteLine($"[DEBUG REMOCAO] TimeClientAppId: {timeParaRemover.ClientAppId}");
+            //Debug.WriteLine($"[DEBUG REMOCAO] CampeonatoClientAppId **CORRETO** USADO: {campClientAppIdParaDelecao}");
 
             try {
                 await _campeonatoService.RemoverTimeDoCampeonato(
                     _campeonatoId,
                     timeParaRemover.Id,
                     timeParaRemover.ClientAppId,
-                    // 2. PASSA O GUID CORRETO OBTIDO NO LOADTIMESASYNC
                     campClientAppIdParaDelecao
                 );
 
                 Times.Remove(timeParaRemover);
-                Debug.WriteLine($"Time {timeParaRemover.Nome} removido com sucesso!");
+                //Debug.WriteLine($"Time {timeParaRemover.Nome} removido com sucesso!");
 
             } catch (Exception ex) {
-                Debug.WriteLine($"Erro ao remover time: {ex.Message}");
+                //Debug.WriteLine($"Erro ao remover time: {ex.Message}");
                 await Application.Current.MainPage.DisplayAlert("Erro", "Não foi possível remover o time.", "OK");
             }
         }

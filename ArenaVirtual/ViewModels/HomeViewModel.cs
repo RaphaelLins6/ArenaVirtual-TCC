@@ -14,7 +14,6 @@ using Microsoft.Maui.Controls;
 using ArenaVirtual.Views.CampeonatoPage;
 
 namespace ArenaVirtual.ViewModels {
-    // Usando o construtor primário para a injeção de dependência.
     public partial class HomeViewModel(DatabaseService databaseService, SyncService syncService, ConnectivityService connectivityService) : ObservableObject {
 
         [ObservableProperty]
@@ -34,7 +33,6 @@ namespace ArenaVirtual.ViewModels {
         private readonly ConnectivityService _connectivityService = connectivityService;
         private readonly SemaphoreSlim _syncSemaphore = new(1, 1);
 
-        // Construtor sem parâmetros para a visualização em design-time.
         public HomeViewModel() : this(null!, null!, null!) {
             _connectivityService.ConnectivityChanged += OnConnectivityChanged;
             UpdateConnectivityStatus();
@@ -62,12 +60,12 @@ namespace ArenaVirtual.ViewModels {
 
         [RelayCommand]
         private async Task Sincronizar() {
-            Debug.WriteLine("[HomeViewModel] Comando Sincronizar acionado.");
+            //Debug.WriteLine("[HomeViewModel] Comando Sincronizar acionado.");
             await SincronizarAsync();
         }
 
         public async Task OnAppearingAsync() {
-            Debug.WriteLine("[HomeViewModel] OnAppearingAsync chamado.");
+            //Debug.WriteLine("[HomeViewModel] OnAppearingAsync chamado.");
             UpdateConnectivityStatus();
             await _syncSemaphore.WaitAsync();
             try {
@@ -75,7 +73,7 @@ namespace ArenaVirtual.ViewModels {
                 await _syncService.SyncAsync(new Progress<string>());
                 await CarregarTodosCampeonatos();
             } catch (Exception ex) {
-                Debug.WriteLine($"[HomeViewModel] Erro em OnAppearingAsync: {ex.Message}");
+                //Debug.WriteLine($"[HomeViewModel] Erro em OnAppearingAsync: {ex.Message}");
             } finally {
                 IsBusy = false;
                 _syncSemaphore.Release();
@@ -90,7 +88,7 @@ namespace ArenaVirtual.ViewModels {
                 await _syncService.SyncAsync(new Progress<string>());
                 await CarregarTodosCampeonatos();
             } catch (Exception ex) {
-                Debug.WriteLine($"[HomeViewModel] Erro na sincronização: {ex.Message}");
+                //Debug.WriteLine($"[HomeViewModel] Erro na sincronização: {ex.Message}");
             } finally {
                 IsBusy = false;
                 _syncSemaphore.Release();
@@ -102,16 +100,16 @@ namespace ArenaVirtual.ViewModels {
                 var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
 
                 if (usuarioAtual == null) {
-                    Debug.WriteLine("[HomeViewModel] SessaoService.GetUsuarioAtual() retornou NULL em CarregarTodosCampeonatos.");
+                    //Debug.WriteLine("[HomeViewModel] SessaoService.GetUsuarioAtual() retornou NULL em CarregarTodosCampeonatos.");
                     return;
                 }
 
                 if (usuarioAtual.ClientAppId == Guid.Empty) {
-                    Debug.WriteLine("[HomeViewModel] usuarioAtual.ClientAppId está vazio (Guid.Empty) em CarregarTodosCampeonatos.");
+                    //Debug.WriteLine("[HomeViewModel] usuarioAtual.ClientAppId está vazio (Guid.Empty) em CarregarTodosCampeonatos.");
                     return;
                 }
 
-                Debug.WriteLine($"[HomeViewModel] Usuário atual OK em CarregarTodosCampeonatos: {usuarioAtual.Nome} | ID: {usuarioAtual.ClientAppId}");
+                //Debug.WriteLine($"[HomeViewModel] Usuário atual OK em CarregarTodosCampeonatos: {usuarioAtual.Nome} | ID: {usuarioAtual.ClientAppId}");
 
                 var todosCampeonatos = await _databaseService.ListarCampeonatosAsync() ?? new List<Campeonato>();
                 var favoritosDoUsuario = await _databaseService.ListarFavoritosPorUsuarioAsync(usuarioAtual.ClientAppId);
@@ -129,7 +127,7 @@ namespace ArenaVirtual.ViewModels {
                     }
                 });
             } catch (Exception ex) {
-                Debug.WriteLine($"[HomeViewModel] Erro ao carregar campeonatos: {ex.Message}");
+                //Debug.WriteLine($"[HomeViewModel] Erro ao carregar campeonatos: {ex.Message}");
             }
         }
 
@@ -151,7 +149,7 @@ namespace ArenaVirtual.ViewModels {
                     }
                 });
             } catch (Exception ex) {
-                Debug.WriteLine($"Erro ao carregar favoritos: {ex.Message}");
+                //Debug.WriteLine($"Erro ao carregar favoritos: {ex.Message}");
             }
         }
 
@@ -187,19 +185,16 @@ namespace ArenaVirtual.ViewModels {
         }
 
         private async Task VerCampeonatoAsync(Campeonato campeonato) {
-            Debug.WriteLine($"[HomeViewModel] VerCampeonatoAsync chamado. Campeonato: {campeonato?.Nome ?? "NULO"}, ID: {campeonato?.Id ?? 0}");
+            //Debug.WriteLine($"[HomeViewModel] VerCampeonatoAsync chamado. Campeonato: {campeonato?.Nome ?? "NULO"}, ID: {campeonato?.Id ?? 0}");
             if (campeonato == null) {
-                Debug.WriteLine("[DEBUG] VerCampeonatoCommand acionado, mas campeonato é nulo.");
+                //Debug.WriteLine("[DEBUG] VerCampeonatoCommand acionado, mas campeonato é nulo.");
                 return;
             }
 
-            // Usando o roteamento do Shell para navegar e passar o objeto
             var navigationParameter = new Dictionary<string, object> {
-        { "Campeonato", campeonato }
-    };
+                { "Campeonato", campeonato }
+            };
 
-            // A rota deve ser a mesma que você registrou no AppShell.xaml.cs
-            // Agora usando nameof() para garantir a consistência
             await Shell.Current.GoToAsync(nameof(CampeonatoDetailPage), navigationParameter);
         }
     }

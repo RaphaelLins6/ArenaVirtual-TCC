@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using System.Threading.Tasks;
 using System.Linq;
-using Microsoft.Maui.Controls; // Adicionar para Application e Shell
+using Microsoft.Maui.Controls; 
 
 namespace ArenaVirtual.ViewModels.Atleta {
     public class SolicitacaoTimePageViewModel : BaseViewModel {
@@ -39,7 +39,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     return;
                 }
 
-                // CORREÇÃO: Usar o método que recebe um Guid
                 var timeDoUsuario = await _timeService.ObterPorClientAppIdAsync(usuarioAtual.TimeClientAppId.Value);
                 if (timeDoUsuario == null || timeDoUsuario.CapitaoClientAppId != usuarioAtual.ClientAppId) {
                     await Application.Current.MainPage.DisplayAlert("Aviso", "Você não é o capitão do seu time para gerenciar solicitações.", "OK");
@@ -49,14 +48,11 @@ namespace ArenaVirtual.ViewModels.Atleta {
 
                 ConvitesPendentes.Clear();
 
-                // CORREÇÃO: Passar o ClientAppId do Time para buscar convites
                 var convites = await _databaseService.ListarConvitesPendentesAsync(timeDoUsuario.ClientAppId);
 
-                // OTIMIZAÇÃO: Carregar usuários em paralelo usando Task.WhenAll
                 var tarefas = convites.Select(convite => _databaseService.ObterUsuarioPorClientAppIdAsync(convite.SolicitanteClientAppId)).ToList();
                 var usuarios = await Task.WhenAll(tarefas);
 
-                // Popular a coleção de convites
                 for (int i = 0; i < convites.Count; i++) {
                     var solicitante = usuarios[i];
                     if (solicitante != null) {
@@ -79,7 +75,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 await _databaseService.AtualizarConviteAsync(convite);
 
                 if (usuarioSolicitante != null) {
-                    // CORREÇÃO: Associar o TimeClientAppId do convite ao usuário solicitante
                     usuarioSolicitante.TimeClientAppId = convite.TimeClientAppId;
                     await _databaseService.AtualizarUsuarioAsync(usuarioSolicitante);
                 }

@@ -29,9 +29,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
         [RelayCommand]
         public async Task LoadDataAsync() {
             var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
-            // CORREÇÃO: Usar a propriedade correta 'TimeClientAppId'
             if (usuarioAtual?.TimeClientAppId != null) {
-                // CORREÇÃO: Usar o método de busca por ClientAppId
                 _time = await _timeService.ObterPorClientAppIdAsync(usuarioAtual.TimeClientAppId.Value);
                 if (_time != null) {
                     NomeTime = _time.Nome;
@@ -77,7 +75,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
         public async Task ExcluirTime() {
             bool confirm = await Shell.Current.DisplayAlert("Atenção", "Tem certeza que deseja excluir o time? Essa ação é irreversível.", "Sim", "Não");
             if (confirm && _time != null) {
-                // CORREÇÃO: Usar _time.ClientAppId que é do tipo Guid
                 await _timeService.ExcluirTimeAsync(_time.ClientAppId);
                 await Shell.Current.GoToAsync("//MeusTimesPage");
             }

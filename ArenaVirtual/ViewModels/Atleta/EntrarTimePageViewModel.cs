@@ -72,7 +72,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
 
                 TimesDisponiveis.Clear();
                 foreach (var time in timesFiltrados) {
-                    // Corrigido: Usar ClientAppId (Guid) em vez de Id (int)
                     var conviteExistente = await _databaseService.ObterConvitePorUsuarioETimeAsync(usuarioAtual.ClientAppId, time.ClientAppId);
 
                     string buttonText = "Solicitar Entrada";
@@ -104,7 +103,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     return;
                 }
 
-                // Corrigido: Usar ClientAppId (Guid) em vez de Id (int)
                 var conviteExistente = await _databaseService.ObterConvitePorUsuarioETimeAsync(usuarioAtual.ClientAppId, timeItemVM.Time.ClientAppId);
 
                 if (conviteExistente != null) {
@@ -130,7 +128,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 }
 
                 var novoConvite = new Convite {
-                    // Corrigido: Usar ClientAppId (Guid) em vez de Id (int) e a propriedade correta
                     SolicitanteClientAppId = usuarioAtual.ClientAppId,
                     TimeClientAppId = timeItemVM.Time.ClientAppId,
                     DataEnvio = DateTime.UtcNow,

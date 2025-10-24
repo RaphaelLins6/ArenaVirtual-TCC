@@ -38,15 +38,13 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     }
                 });
             } catch (Exception ex) {
-                Debug.WriteLine($"[ProcurarTimesPageViewModel] Erro ao carregar times: {ex.Message}");
+                //Debug.WriteLine($"[ProcurarTimesPageViewModel] Erro ao carregar times: {ex.Message}");
             } finally {
                 IsBusy = false;
             }
         }
 
         [RelayCommand]
-        // O método deve ser público para que o comando seja acessível
-        // ou o atributo RelayCommand deve ser público
         public async Task EntrarNoTimeAsync(Time time) {
             if (time == null)
                 return;
@@ -56,7 +54,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 await Application.Current.MainPage?.DisplayAlert("Sucesso", $"Você entrou no time {time.Nome}", "OK");
                 await Shell.Current.GoToAsync("..");
             } catch (Exception ex) {
-                Debug.WriteLine($"[ProcurarTimesPageViewModel] Erro ao entrar no time: {ex.Message}");
+                //Debug.WriteLine($"[ProcurarTimesPageViewModel] Erro ao entrar no time: {ex.Message}");
                 await Application.Current.MainPage?.DisplayAlert("Erro", "Não foi possível entrar no time. Tente novamente.", "OK");
             }
         }

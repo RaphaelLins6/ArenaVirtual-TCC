@@ -106,17 +106,15 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 }
                 MembrosDoTime = membrosCarregados;
 
-                // Lógica de visibilidade dos botões.
                 UsuarioEhCapitao = usuarioAtual.ClientAppId == Time.CapitaoClientAppId;
 
-                // Botão de solicitações aparece se, e somente se, o usuário for o capitão.
                 MostraBotaoVerSolicitacoes = UsuarioEhCapitao;
 
                 SetVinculadoState();
 
             } catch (Exception ex) {
                 SetNaoVinculadoState("Erro", "Não foi possível carregar os dados do time.");
-                Debug.WriteLine($"[ERRO GERAL] Falha ao carregar dados do time: {ex.Message}");
+                //Debug.WriteLine($"[ERRO GERAL] Falha ao carregar dados do time: {ex.Message}");
             }
         }
 
@@ -156,7 +154,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     await LoadDataAsync();
                 }
             } catch (Exception ex) {
-                Debug.WriteLine($"[ERRO DE CANCELAMENTO] Falha ao cancelar a solicitação: {ex.Message}");
+                //Debug.WriteLine($"[ERRO DE CANCELAMENTO] Falha ao cancelar a solicitação: {ex.Message}");
                 await Application.Current.MainPage.DisplayAlert("Erro", "Não foi possível cancelar a solicitação. Tente novamente mais tarde.", "OK");
             }
         }
@@ -168,7 +166,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
             try {
                 return ImageSource.FromStream(() => File.OpenRead(filePath));
             } catch (Exception ex) {
-                Debug.WriteLine($"[ERRO DE CARREGAMENTO] Falha ao carregar imagem: {ex.Message}");
+                //Debug.WriteLine($"[ERRO DE CARREGAMENTO] Falha ao carregar imagem: {ex.Message}");
                 return ImageSource.FromFile("placeholder.png");
             }
         }
@@ -180,9 +178,8 @@ namespace ArenaVirtual.ViewModels.Atleta {
             StatusMessageDescription = description;
             ShowButtons = true;
             MostraBotaoCancelar = false;
-            // Garante que as propriedades de estado sejam atualizadas.
             UsuarioEhCapitao = false;
-            MostraBotaoVerSolicitacoes = false; // Garante que esteja false
+            MostraBotaoVerSolicitacoes = false; 
             OnPropertyChanged(nameof(VinculadoATime));
             OnPropertyChanged(nameof(NaoVinculadoATime));
         }
@@ -194,9 +191,8 @@ namespace ArenaVirtual.ViewModels.Atleta {
             : "Sua solicitação para entrar em um time foi enviada. Aguarde a resposta do capitão.";
             ShowButtons = false;
             MostraBotaoCancelar = true;
-            // Garante que as propriedades de estado sejam atualizadas.
             UsuarioEhCapitao = false;
-            MostraBotaoVerSolicitacoes = false; // Garante que esteja false
+            MostraBotaoVerSolicitacoes = false; 
             OnPropertyChanged(nameof(VinculadoATime));
             OnPropertyChanged(nameof(NaoVinculadoATime));
         }
@@ -206,7 +202,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
             StatusMessageDescription = string.Empty;
             ShowButtons = false;
             MostraBotaoCancelar = false;
-            // A visibilidade dos botões de capitão é definida em LoadDataAsync
             OnPropertyChanged(nameof(VinculadoATime));
             OnPropertyChanged(nameof(NaoVinculadoATime));
         }

@@ -62,38 +62,38 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         }
 
         public async void ApplyQueryAttributes(IDictionary<string, object> query) {
-            Debug.WriteLine($"[Arbitros VM] ApplyQueryAttributes chamado. Keys: {string.Join(", ", query.Keys)}");
+            //Debug.WriteLine($"[Arbitros VM] ApplyQueryAttributes chamado. Keys: {string.Join(", ", query.Keys)}");
 
             const string CampeonatoIdKey = "CampeonatoId";
 
             if (query.TryGetValue(CampeonatoIdKey, out object value)) {
 
-                Debug.WriteLine($"[Arbitros VM] Valor recebido é do Tipo: {value?.GetType().FullName ?? "NULO"}");
+                //Debug.WriteLine($"[Arbitros VM] Valor recebido é do Tipo: {value?.GetType().FullName ?? "NULO"}");
 
                 Guid campeonatoId = Guid.Empty;
 
                 if (value is Guid guidId) {
                     campeonatoId = guidId;
-                    Debug.WriteLine($"[Arbitros VM] Conversão SUCESSO (Guid direto).");
+                    //Debug.WriteLine($"[Arbitros VM] Conversão SUCESSO (Guid direto).");
                 } else if (value is string stringId && Guid.TryParse(stringId, out Guid parsedId)) {
                     campeonatoId = parsedId;
-                    Debug.WriteLine($"[Arbitros VM] Conversão SUCESSO (String parseada).");
+                    //Debug.WriteLine($"[Arbitros VM] Conversão SUCESSO (String parseada).");
                 } else if (value is Campeonato campeonato) {
                     campeonatoId = campeonato.ClientAppId;
-                    Debug.WriteLine($"[Arbitros VM] Conversão SUCESSO (Objeto Campeonato).");
+                    //Debug.WriteLine($"[Arbitros VM] Conversão SUCESSO (Objeto Campeonato).");
                 }
                 
                 _campeonatoClientAppId = campeonatoId;
 
                 if (_campeonatoClientAppId != Guid.Empty) {
-                    Debug.WriteLine($"[Arbitros VM] ID Final: {_campeonatoClientAppId}. Chamando LoadArbitrosAsync.");
+                    //Debug.WriteLine($"[Arbitros VM] ID Final: {_campeonatoClientAppId}. Chamando LoadArbitrosAsync.");
                     await LoadArbitrosAsync();
                 } else {
-                    Debug.WriteLine("[Arbitros VM] ERRO: ID do Campeonato não pôde ser atribuída/parseada. Checar tipo logado acima.");
+                    //Debug.WriteLine("[Arbitros VM] ERRO: ID do Campeonato não pôde ser atribuída/parseada. Checar tipo logado acima.");
                 }
 
             } else {
-                Debug.WriteLine($"[Arbitros VM] ERRO: Nenhuma chave de campeonato ({CampeonatoIdKey}) encontrada na navegação.");
+                //Debug.WriteLine($"[Arbitros VM] ERRO: Nenhuma chave de campeonato ({CampeonatoIdKey}) encontrada na navegação.");
             }
         }
 
@@ -116,7 +116,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
         }
 
         public async Task LoadArbitrosAsync() {
-            Debug.WriteLine($"[Arbitros VM] LoadArbitrosAsync INICIADO. ID: {_campeonatoClientAppId}, Busy: {IsBusy}");
+            //Debug.WriteLine($"[Arbitros VM] LoadArbitrosAsync INICIADO. ID: {_campeonatoClientAppId}, Busy: {IsBusy}");
 
             if (_campeonatoClientAppId == Guid.Empty || IsBusy) return;
 
@@ -128,24 +128,24 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 var convitesAceitos = await _databaseService
                      .ObterConvitesAceitosPorCampeonatoAsync(_campeonatoClientAppId);
 
-                Debug.WriteLine($"\n--- INÍCIO DEBUG ÁRBITROS INSCRITOS ---");
-                Debug.WriteLine($"[Arbitros VM] Convites aceitos brutos retornados: {convitesAceitos?.Count() ?? 0}");
+                //Debug.WriteLine($"\n--- INÍCIO DEBUG ÁRBITROS INSCRITOS ---");
+                //Debug.WriteLine($"[Arbitros VM] Convites aceitos brutos retornados: {convitesAceitos?.Count() ?? 0}");
 
                 if (convitesAceitos == null || !convitesAceitos.Any()) {
                     UpdateIsListEmpty();
                     return;
                 }
 
-                Debug.WriteLine($"[Arbitros VM] Detalhes dos Convites:");
+                //Debug.WriteLine($"[Arbitros VM] Detalhes dos Convites:");
                 foreach (var convite in convitesAceitos) {
-                    Debug.WriteLine($"[DEBUG CONVITE] {GetConviteDebugString(convite)} | Time ID: {convite.TimeClientAppId}");
+                    //Debug.WriteLine($"[DEBUG CONVITE] {GetConviteDebugString(convite)} | Time ID: {convite.TimeClientAppId}");
                 }
 
                 var arbitroClientAppIds = convitesAceitos
                     .Where(c => c.TimeClientAppId == Guid.Empty) 
                     .Select(c => c.UsuarioClientAppId).ToList();
 
-                Debug.WriteLine($"[Arbitros VM] Árbitros após filtro (Sem Time): {arbitroClientAppIds?.Count ?? 0}");
+                //Debug.WriteLine($"[Arbitros VM] Árbitros após filtro (Sem Time): {arbitroClientAppIds?.Count ?? 0}");
 
                 if (arbitroClientAppIds.Any()) {
 
@@ -160,18 +160,18 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                             ArbitrosInscritos.Add(new SolicitacaoArbitroItemViewModel(arbitro));
                         }
                         UpdateIsListEmpty();
-                        Debug.WriteLine($"[Arbitros VM] Total de itens na lista: {ArbitrosInscritos.Count}");
+                        //Debug.WriteLine($"[Arbitros VM] Total de itens na lista: {ArbitrosInscritos.Count}");
                     });
                 } else {
                     UpdateIsListEmpty();
                 }
 
             } catch (Exception ex) {
-                Debug.WriteLine($"[Arbitros VM] ERRO FATAL ao carregar árbitros: {ex.Message}");
+                //Debug.WriteLine($"[Arbitros VM] ERRO FATAL ao carregar árbitros: {ex.Message}");
                 await _alertService.DisplayAlert("Erro", "Ocorreu um erro ao carregar a lista de árbitros.", "OK");
             } finally {
                 IsBusy = false;
-                Debug.WriteLine($"--- FIM DEBUG ÁRBITROS INSCRITOS ---\n");
+                //Debug.WriteLine($"--- FIM DEBUG ÁRBITROS INSCRITOS ---\n");
             }
         }
 
@@ -181,66 +181,56 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
         private async Task RemoverArbitroAsync(SolicitacaoArbitroItemViewModel arbitroViewModel) {
 
-            // DEBUG 1: Confirma que o comando foi chamado
-            Debug.WriteLine($"[Arbitros VM - Comando] CLIQUE: Tentativa de remover árbitro.");
+            //Debug.WriteLine($"[Arbitros VM - Comando] CLIQUE: Tentativa de remover árbitro.");
 
             if (arbitroViewModel == null) {
-                // DEBUG 2: Verifica se o parâmetro está nulo (o que pode ser um problema de CommandParameter no XAML)
-                Debug.WriteLine($"[Arbitros VM - Comando] ERRO: arbitroViewModel é nulo. (Problema de binding)");
+                //Debug.WriteLine($"[Arbitros VM - Comando] ERRO: arbitroViewModel é nulo. (Problema de binding)");
                 return;
             }
 
-            Debug.WriteLine($"[Arbitros VM - Comando] Árbitro selecionado: {arbitroViewModel.NomeArbitro} ({arbitroViewModel.ArbitroSolicitante.ClientAppId})");
+            //Debug.WriteLine($"[Arbitros VM - Comando] Árbitro selecionado: {arbitroViewModel.NomeArbitro} ({arbitroViewModel.ArbitroSolicitante.ClientAppId})");
 
-            // 1. Confirmação do Usuário
             var confirmou = await _alertService.DisplayAlert(
                 "Confirmar Remoção",
                 $"Tem certeza que deseja remover o árbitro {arbitroViewModel.NomeArbitro}?",
                 "Sim",
                 "Não");
 
-            // DEBUG 3: Rastreia a resposta do usuário
-            Debug.WriteLine($"[Arbitros VM - Comando] Confirmação do usuário: {confirmou}");
+            //Debug.WriteLine($"[Arbitros VM - Comando] Confirmação do usuário: {confirmou}");
 
             if (!confirmou) {
-                Debug.WriteLine($"[Arbitros VM - Comando] Remoção cancelada pelo usuário.");
+                //Debug.WriteLine($"[Arbitros VM - Comando] Remoção cancelada pelo usuário.");
                 return;
             }
 
-            IsBusy = true; // Bloqueia a UI enquanto processa
+            IsBusy = true; 
 
             try {
-                // DEBUG 4: Indica que a chamada de serviço será feita
-                Debug.WriteLine($"[Arbitros VM - Comando] Chamando serviço de remoção...");
+                //Debug.WriteLine($"[Arbitros VM - Comando] Chamando serviço de remoção...");
 
-                // 2. Chamar o serviço para remover a inscrição/solicitação do árbitro
                 var success = await _campeonatoService.RemoverArbitroDoCampeonatoAsync(
                     _campeonatoClientAppId,
                     arbitroViewModel.ArbitroSolicitante.ClientAppId);
 
-                // DEBUG 5: Resultado da chamada do serviço
-                Debug.WriteLine($"[Arbitros VM - Comando] Resultado do serviço: {success}");
+                //Debug.WriteLine($"[Arbitros VM - Comando] Resultado do serviço: {success}");
 
                 if (success) {
-                    // 3. Atualizar a lista na UI se a remoção foi bem-sucedida
                     MainThread.BeginInvokeOnMainThread(() => {
                         ArbitrosInscritos.Remove(arbitroViewModel);
                         UpdateIsListEmpty();
-                        Debug.WriteLine($"[Arbitros VM] Árbitro {arbitroViewModel.NomeArbitro} removido com sucesso da lista local.");
+                        //Debug.WriteLine($"[Arbitros VM] Árbitro {arbitroViewModel.NomeArbitro} removido com sucesso da lista local.");
                     });
                 } else {
-                    Debug.WriteLine($"[Arbitros VM - Comando] Falha na remoção do serviço. Exibindo alerta.");
+                    //Debug.WriteLine($"[Arbitros VM - Comando] Falha na remoção do serviço. Exibindo alerta.");
                     await _alertService.DisplayAlert("Erro", "Falha ao remover o árbitro. Tente novamente.", "OK");
                 }
 
             } catch (Exception ex) {
-                // DEBUG 6: Captura qualquer erro fatal
-                Debug.WriteLine($"[Arbitros VM] ERRO FATAL ao remover árbitro: {ex.Message}");
+                //Debug.WriteLine($"[Arbitros VM] ERRO FATAL ao remover árbitro: {ex.Message}");
                 await _alertService.DisplayAlert("Erro", "Ocorreu um erro ao processar a remoção.", "OK");
             } finally {
                 IsBusy = false; // Desbloqueia a UI
-                // DEBUG 7: Fim da operação
-                Debug.WriteLine($"[Arbitros VM - Comando] FIM da operação de remoção.");
+                //Debug.WriteLine($"[Arbitros VM - Comando] FIM da operação de remoção.");
             }
         }
     }

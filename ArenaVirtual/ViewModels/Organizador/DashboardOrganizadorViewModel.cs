@@ -47,7 +47,6 @@ namespace ArenaVirtual.ViewModels.Organizador {
         }
 
         private async Task RemoverCampeonatoAsync(Campeonato campeonato) {
-            // Exibe alerta de confirmação
             bool confirmar = await Shell.Current.DisplayAlert(
                 "Excluir Campeonato",
                 $"Deseja realmente excluir o campeonato \"{campeonato.Nome}\"?",

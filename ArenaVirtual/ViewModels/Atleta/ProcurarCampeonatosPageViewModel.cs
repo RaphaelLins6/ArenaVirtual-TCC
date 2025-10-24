@@ -62,7 +62,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
         }
 
         public async Task OnAppearingAsync() {
-            Debug.WriteLine("[ProcurarCampeonatosViewModel] OnAppearingAsync chamado.");
+            //Debug.WriteLine("[ProcurarCampeonatosViewModel] OnAppearingAsync chamado.");
             await PesquisarCampeonatosAsync(string.Empty);
         }
 
@@ -86,7 +86,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     ? todosCampeonatos
                     : todosCampeonatos.Where(c => c.Nome.ToLower().Contains(query.ToLower())).ToList();
 
-                var novosItens = new List<CampeonatoItemViewModel>(); // Lista temporária para novos itens
+                var novosItens = new List<CampeonatoItemViewModel>(); 
 
                 foreach (var campeonato in campeonatosFiltrados) {
                     var timesAceitos = await _databaseService.ObterTimesAceitosAsync(campeonato.Id);
@@ -122,7 +122,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 });
 
             } catch (Exception ex) {
-                Debug.WriteLine($"[PesquisarCampeonatosAsync] ERRO CRÍTICO: {ex.Message}");
+                //Debug.WriteLine($"[PesquisarCampeonatosAsync] ERRO CRÍTICO: {ex.Message}");
             } finally {
                 IsBusy = false;
             }
@@ -135,16 +135,14 @@ namespace ArenaVirtual.ViewModels.Atleta {
             try {
                 var timeAtual = await _sessaoService.GetTimeAtualAsync();
                 if (timeAtual == null) {
-                    Debug.WriteLine("[SolicitarInscricao] Time atual não encontrado.");
+                    //Debug.WriteLine("[SolicitarInscricao] Time atual não encontrado.");
                     await _alertService.DisplayAlert("Atenção", "Você precisa pertencer a um time para solicitar a inscrição em um campeonato.", "OK");
                     return;
                 }
 
-                // CRUCIAL: Re-checar as vagas antes de solicitar, caso a lista tenha sido atualizada recentemente.
                 var timesAceitos = await _databaseService.ObterTimesAceitosAsync(campeonatoItemVM.Campeonato.Id);
                 if (timesAceitos.Count >= campeonatoItemVM.Campeonato.NumeroMaximoEquipes) {
                     await _alertService.DisplayAlert("Atenção", "As vagas para este campeonato foram esgotadas.", "OK");
-                    // Atualiza a UI para refletir o status de esgotado imediatamente
                     MainThread.BeginInvokeOnMainThread(() => {
                         campeonatoItemVM.ButtonText = "Vagas Esgotadas";
                         campeonatoItemVM.IsButtonEnabled = false;
@@ -153,7 +151,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     return;
                 }
 
-                // Criação da solicitação
                 var solicitacao = new Convite {
                     ClientAppId = Guid.NewGuid(),
                     TimeClientAppId = timeAtual.ClientAppId,
@@ -163,18 +160,15 @@ namespace ArenaVirtual.ViewModels.Atleta {
                     DataCriacao = DateTime.UtcNow
                 };
 
-                // Inserir a solicitação no banco de dados local
                 await _databaseService.InserirConviteAsync(solicitacao);
 
-                Debug.WriteLine($"[SolicitarInscricao] Solicitação criada para o time {timeAtual.Nome} no campeonato {campeonatoItemVM.Nome}.");
+                //Debug.WriteLine($"[SolicitarInscricao] Solicitação criada para o time {timeAtual.Nome} no campeonato {campeonatoItemVM.Nome}.");
 
-                // ⚡️ Exibir a mensagem de sucesso usando o serviço de alerta
                 await _alertService.DisplayAlert(
                     "Sucesso",
                     $"Sua solicitação de inscrição no campeonato '{campeonatoItemVM.Nome}' foi enviada com sucesso e agora está pendente.",
                     "OK");
 
-                // Atualizar a UI
                 MainThread.BeginInvokeOnMainThread(() => {
                     campeonatoItemVM.ButtonText = "Pendente";
                     campeonatoItemVM.IsButtonEnabled = false;
@@ -182,8 +176,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 });
 
             } catch (Exception ex) {
-                Debug.WriteLine($"Erro ao solicitar inscrição: {ex.Message}");
-                // ⚡️ Exibir um alerta de erro caso algo dê errado
+                //Debug.WriteLine($"Erro ao solicitar inscrição: {ex.Message}");
                 await _alertService.DisplayAlert(
                     "Erro",
                     "Ocorreu um erro ao enviar sua solicitação. Por favor, tente novamente.",

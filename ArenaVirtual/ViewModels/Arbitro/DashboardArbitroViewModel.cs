@@ -38,11 +38,11 @@ namespace ArenaVirtual.ViewModels.Arbitro {
             if (arbitro != null) {
                 _arbitroIdLogado = arbitro.ClientAppId;
 
-                Debug.WriteLine($"[DashboardArbitroViewModel] Árbitro logado ID: {_arbitroIdLogado}");
+                //Debug.WriteLine($"[DashboardArbitroViewModel] Árbitro logado ID: {_arbitroIdLogado}");
                 return true;
             } else {
                 _arbitroIdLogado = Guid.Empty;
-                Debug.WriteLine("[DashboardArbitroViewModel] Nenhum árbitro logado encontrado.");
+                //Debug.WriteLine("[DashboardArbitroViewModel] Nenhum árbitro logado encontrado.");
                 return false;
             }
         }
@@ -54,25 +54,19 @@ namespace ArenaVirtual.ViewModels.Arbitro {
 
             try {
                 if (!await ObterArbitroIdLogadoAsync() || _arbitroIdLogado == Guid.Empty) {
-                    Debug.WriteLine("[DashboardArbitroViewModel] Não foi possível carregar as partidas: Árbitro não logado.");
+                    //Debug.WriteLine("[DashboardArbitroViewModel] Não foi possível carregar as partidas: Árbitro não logado.");
                     return;
                 }
 
-                // 🛑 LIMPEZA DAS DUAS COLEÇÕES
                 JogosParaLancamento.Clear();
                 JogosLancados.Clear();
 
-                // 1. CHAMA O MÉTODO ATUALIZADO (que filtra jogos muito antigos no DB Service)
-                // Note: Se o _databaseService ainda não faz o filtro de data, ele retornará todos.
-                // A filtragem de data é feita no DatabaseService (ver item C).
                 var jogosDoArbitro = await _databaseService.ObterJogosPorArbitroAsync(_arbitroIdLogado);
 
-                // 2. HIDRATAÇÃO CENTRALIZADA
                 if (jogosDoArbitro != null) {
                     await HidratarJogos(jogosDoArbitro);
                 }
 
-                // 3. SEPARAÇÃO E MAPEAMENTO PARA VIEW MODEL
                 if (jogosDoArbitro != null) {
                     foreach (var jogo in jogosDoArbitro.OrderBy(j => j.DataHora)) { // Ordenar por data
                         if (jogo.TimeA != null && jogo.TimeB != null && jogo.Campeonato != null) {
@@ -83,32 +77,24 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                                 jogo.Campeonato.Nome
                             );
 
-                            // LÓGICA DE SEPARAÇÃO DOS CARDS: Usando a propriedade 'Status' (do tipo JogoStatus)
                             if (jogo.Status == JogoStatus.Finalizado) {
-                                // Se o jogo está Finalizado, ele vai para Lançados.
-                                // Ele só veio do banco de dados porque estava dentro do período de 7 dias.
                                 JogosLancados.Add(detalhe);
                             } else {
-                                // Se o jogo não está Finalizado (Pendente, Agendado, etc.), ele vai para Para Lançamento.
                                 JogosParaLancamento.Add(detalhe);
                             }
                         } else {
-                            Debug.WriteLine($"[DEBUG 3] Jogo descartado (ID: {jogo.Id}): Falta dados (TimeA/B/Campeonato).");
+                            //Debug.WriteLine($"[DEBUG 3] Jogo descartado (ID: {jogo.Id}): Falta dados (TimeA/B/Campeonato).");
                         }
                     }
                 }
 
-                // ATUALIZA A VISIBILIDADE DOS TÍTULOS
                 IsJogosParaLancamentoVisivel = JogosParaLancamento.Any();
-
-                // CORREÇÃO: Define IsJogosLancadosVisivel como TRUE para manter a sessão visível
-                // Ocultará apenas o conteúdo interno se a coleção estiver vazia.
                 IsJogosLancadosVisivel = true;
 
-                Debug.WriteLine($"[DEBUG 4] Para Lançamento: {JogosParaLancamento.Count}, Lançados: {JogosLancados.Count}");
+                //Debug.WriteLine($"[DEBUG 4] Para Lançamento: {JogosParaLancamento.Count}, Lançados: {JogosLancados.Count}");
 
             } catch (Exception ex) {
-                Debug.WriteLine($"Erro ao carregar partidas do árbitro: {ex.Message}");
+                //Debug.WriteLine($"Erro ao carregar partidas do árbitro: {ex.Message}");
             } finally {
                 EstaOcupado = false;
             }
@@ -136,9 +122,8 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                 // Campeonato
                 if (campeonatos.TryGetValue(jogo.CampeonatoClientAppId, out var campeonato)) jogo.Campeonato = campeonato;
 
-                // Trata Folga
-                if (jogo.TimeAId == -1) jogo.TimeA = new Time { Nome = "Folga", LogoUrl = "url_padrao_folga" }; // Adicione LogoUrl se necessário
-                if (jogo.TimeBId == -1) jogo.TimeB = new Time { Nome = "Folga", LogoUrl = "url_padrao_folga" }; // Adicione LogoUrl se necessário
+                if (jogo.TimeAId == -1) jogo.TimeA = new Time { Nome = "Folga", LogoUrl = "url_padrao_folga" }; 
+                if (jogo.TimeBId == -1) jogo.TimeB = new Time { Nome = "Folga", LogoUrl = "url_padrao_folga" }; 
             }
         }
 
@@ -150,35 +135,30 @@ namespace ArenaVirtual.ViewModels.Arbitro {
         [RelayCommand]
         private async Task PartidaSelecionadaAsync(JogoDetalheViewModel partidaDetalhe) {
 
-            Debug.WriteLine("[COMMAND LOG] PartidaSelecionadaAsync: Comando acionado.");
+            //Debug.WriteLine("[COMMAND LOG] PartidaSelecionadaAsync: Comando acionado.");
 
             if (partidaDetalhe == null) {
-                Debug.WriteLine("[COMMAND LOG] PartidaDetalhe é NULO.");
+                //Debug.WriteLine("[COMMAND LOG] PartidaDetalhe é NULO.");
                 return;
             }
 
             if (!partidaDetalhe.PodeLancarEstatisticas) {
-                Debug.WriteLine($"[COMMAND LOG] Jogo ID {partidaDetalhe.Jogo.Id}: Lançamento de estatísticas não habilitado. Saindo.");
+                //Debug.WriteLine($"[COMMAND LOG] Jogo ID {partidaDetalhe.Jogo.Id}: Lançamento de estatísticas não habilitado. Saindo.");
                 return;
             }
 
-            // MUDANÇA PRINCIPAL: Use um Dictionary para passar parâmetros.
-            // Isso garante que o IQueryAttributable seja acionado corretamente.
             var navigationParameters = new Dictionary<string, object>
             {
-                // A chave "JogoId" deve ser a mesma chave usada no ApplyQueryAttributes
                 { "JogoId", partidaDetalhe.Jogo.Id }
             };
 
-            Debug.WriteLine($"[COMMAND LOG] Tentando navegar para Jogo ID: {partidaDetalhe.Jogo.Id} usando Dictionary.");
+            //Debug.WriteLine($"[COMMAND LOG] Tentando navegar para Jogo ID: {partidaDetalhe.Jogo.Id} usando Dictionary.");
 
             try {
-                // A rota deve ser o nome exato do Shell Route que você registrou.
-                // É recomendável usar "./" para navegação relativa ou "///" para navegação absoluta.
                 await Shell.Current.GoToAsync("LancamentoEstatisticaPage", navigationParameters);
-                Debug.WriteLine("[COMMAND LOG] Navegação solicitada com sucesso (via Dictionary).");
+                //Debug.WriteLine("[COMMAND LOG] Navegação solicitada com sucesso (via Dictionary).");
             } catch (Exception ex) {
-                Debug.WriteLine($"[COMMAND LOG ERROR] FALHA NA NAVEGAÇÃO: {ex.Message}");
+               //Debug.WriteLine($"[COMMAND LOG ERROR] FALHA NA NAVEGAÇÃO: {ex.Message}");
                 await Shell.Current.DisplayAlert("Erro de Navegação", "Não foi possível abrir a tela de estatísticas. Verifique a rota no AppShell.", "OK");
             }
         }

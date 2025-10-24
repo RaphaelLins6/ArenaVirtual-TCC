@@ -146,9 +146,9 @@ namespace ArenaVirtual.ViewModels {
                 try {
                     byte[] imageBytes = File.ReadAllBytes(caminhoDaImagem);
                     ImagemPerfilSource = ImageSource.FromStream(() => new MemoryStream(imageBytes));
-                    System.Diagnostics.Debug.WriteLine($"[PerfilViewModel] Imagem carregada via FromStream de: {caminhoDaImagem}");
+                    //System.Diagnostics.Debug.WriteLine($"[PerfilViewModel] Imagem carregada via FromStream de: {caminhoDaImagem}");
                 } catch (Exception ex) {
-                    System.Diagnostics.Debug.WriteLine($"[PerfilViewModel] ERRO ao carregar imagem: {ex.Message}");
+                    //System.Diagnostics.Debug.WriteLine($"[PerfilViewModel] ERRO ao carregar imagem: {ex.Message}");
                     ImagemPerfilSource = "placeholder.png";
                 }
             } else {
@@ -194,10 +194,6 @@ namespace ArenaVirtual.ViewModels {
                 SessaoService.Instancia.SetUsuarioAtual(UsuarioLogado);
 
                 await _syncService.SyncAsync(new Progress<string>());
-
-                // AQUI ESTÁ A CORREÇÃO: Chamar o método para atualizar a imagem na UI
-                // Esta chamada garante que o PerfilViewModel, que está ligado à tela
-                // principal, vai atualizar a propriedade ImagemPerfilSource.
                 AtualizarImagemSource();
 
                 await _alertService.DisplayAlert("Sucesso", "Imagem de perfil atualizada!", "OK");
@@ -212,7 +208,6 @@ namespace ArenaVirtual.ViewModels {
 
         [RelayCommand]
         private async Task Cancelar() {
-            // Este comando agora está na ViewModel para maior coesão
             await Shell.Current.Navigation.PopModalAsync();
         }
     }

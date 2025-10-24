@@ -17,7 +17,6 @@ using Microsoft.Maui.Controls; // Para IQueryAttributable
 namespace ArenaVirtual.ViewModels.Arbitro {
 
     public partial class AtletaEstatisticaItem : ObservableObject {
-        // Campos de referência para o Atleta e Time
         public Usuario Atleta { get; }
         public Time TimeDoAtleta { get; }
         public string NomeAtleta => Atleta.Nome;
@@ -28,7 +27,6 @@ namespace ArenaVirtual.ViewModels.Arbitro {
             TimeDoAtleta = time;
         }
 
-        // Propriedades para input do Árbitro
         [ObservableProperty] private int pontos;
         [ObservableProperty] private int rebotes;
         [ObservableProperty] private int assistencias;
@@ -37,7 +35,6 @@ namespace ArenaVirtual.ViewModels.Arbitro {
         [ObservableProperty] private int faltas;
         [ObservableProperty] private int turnovers;
 
-        // Campos detalhados
         [ObservableProperty] private int arremessos2PontosConvertidos;
         [ObservableProperty] private int arremessos2PontosTentados;
         [ObservableProperty] private int arremessos3PontosConvertidos;
@@ -45,14 +42,12 @@ namespace ArenaVirtual.ViewModels.Arbitro {
         [ObservableProperty] private int lancesLivresConvertidos;
         [ObservableProperty] private int lancesLivresTentados;
 
-        // Método para gerar o Model de EstatísticaPartida
         public EstatisticaPartida ToEstatisticaPartidaModel(int jogoId) {
             return new EstatisticaPartida {
                 JogoId = jogoId,
                 TimeId = TimeDoAtleta.Id,
                 UsuarioId = Atleta.Id,
 
-                // Campos básicos
                 Pontos = Pontos,
                 Rebotes = Rebotes,
                 Assistencias = Assistencias,
@@ -60,8 +55,6 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                 Bloqueios = Bloqueios,
                 Faltas = Faltas,
                 Turnovers = Turnovers,
-
-                // Campos detalhados
                 Arremessos2PontosConvertidos = Arremessos2PontosConvertidos,
                 Arremessos2PontosTentados = Arremessos2PontosTentados,
                 Arremessos3PontosConvertidos = Arremessos3PontosConvertidos,
@@ -105,14 +98,10 @@ namespace ArenaVirtual.ViewModels.Arbitro {
             EstaOcupado = true;
 
             try {
-                // 1. Atualiza os placares no objeto Jogo em memória
                 Jogo.PlacarTimeAInt = PlacarTimeA;
                 Jogo.PlacarTimeBInt = PlacarTimeB;
 
-                // 🏆 CORREÇÃO CRÍTICA: Força o Status do Jogo para FINALIZADO (2)
-                // Isso garante que o jogo será incluído na Tabela de Classificação
                 if (Jogo.Status != JogoStatus.Finalizado) {
-                    // Presumindo que o enum JogoStatus.Finalizado está acessível e tem valor 2
                     Jogo.Status = JogoStatus.Finalizado;
                 }
 
@@ -121,7 +110,6 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                     .Select(item => item.ToEstatisticaPartidaModel(Jogo.Id))
                     .ToList();
 
-                // 2. Chama o Service para salvar o Jogo atualizado (com o novo Status) e as Estatísticas
                 bool sucesso = await _databaseService.SalvarEstatisticasDoJogoAsync(Jogo, estatisticasParaSalvar);
 
                 if (sucesso) {
@@ -135,7 +123,7 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                 }
 
             } catch (Exception ex) {
-                Debug.WriteLine($"Erro ao salvar estatísticas: {ex.Message}");
+                //Debug.WriteLine($"Erro ao salvar estatísticas: {ex.Message}");
                 await Shell.Current.DisplayAlert("Erro", "Ocorreu um erro inesperado ao salvar. Detalhes: " + ex.Message, "OK");
             } finally {
                 EstaOcupado = false;
@@ -147,7 +135,6 @@ namespace ArenaVirtual.ViewModels.Arbitro {
 
             EstaOcupado = true;
             try {
-                // 1. Obter o Jogo
                 var jogo = await _databaseService.GetTable<Jogo>().Where(j => j.Id == jogoId).FirstOrDefaultAsync();
                 if (jogo == null) {
                     await Shell.Current.DisplayAlert("Erro", "Jogo não encontrado.", "OK");
@@ -155,7 +142,6 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                     return;
                 }
 
-                // 2. Obter os Times
                 var timeA = await _databaseService.GetTimeByIdAsync(jogo.TimeAId);
                 var timeB = await _databaseService.GetTimeByIdAsync(jogo.TimeBId);
 
@@ -164,34 +150,27 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                     return;
                 }
 
-                // Atribuir os objetos Time diretamente ao Jogo
                 jogo.TimeA = timeA;
                 jogo.TimeB = timeB;
 
                 Jogo = jogo;
 
-                // Inicializa o placar com os valores do jogo (se existirem)
                 PlacarTimeA = Jogo.PlacarTimeAInt;
                 PlacarTimeB = Jogo.PlacarTimeBInt;
 
 
-                // 3. Obter os Atletas (Elenco)
                 var atletasA = await _databaseService.GetMembrosByTimeClientAppIdAsync(jogo.TimeA.ClientAppId);
                 var atletasB = await _databaseService.GetMembrosByTimeClientAppIdAsync(jogo.TimeB.ClientAppId);
 
-                // 4. Obter estatísticas existentes
                 var estatisticasSalvas = await _databaseService.GetEstatisticasPorJogoIdAsync(jogo.Id);
 
 
-                // 5. Preencher a lista de Estatísticas do Time A
                 EstatisticasTimeA.Clear();
                 foreach (var atleta in atletasA) {
                     var item = new AtletaEstatisticaItem(atleta, timeA);
 
-                    // CRÍTICO: Pré-preencher com estatísticas salvas
                     var statsDoAtleta = estatisticasSalvas.FirstOrDefault(s => s.UsuarioId == atleta.Id);
                     if (statsDoAtleta != null) {
-                        // Mapear todos os campos salvos para o ViewModel
                         item.Pontos = statsDoAtleta.Pontos;
                         item.Rebotes = statsDoAtleta.Rebotes;
                         item.Assistencias = statsDoAtleta.Assistencias;
@@ -206,21 +185,18 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                         item.LancesLivresConvertidos = statsDoAtleta.LancesLivresConvertidos;
                         item.LancesLivresTentados = statsDoAtleta.LancesLivresTentados;
 
-                        Debug.WriteLine($"[DEBUG-RECARGA] Estatísticas do Atleta {atleta.Nome} (Time A) carregadas (Pontos: {item.Pontos})");
+                        //Debug.WriteLine($"[DEBUG-RECARGA] Estatísticas do Atleta {atleta.Nome} (Time A) carregadas (Pontos: {item.Pontos})");
                     }
 
                     EstatisticasTimeA.Add(item);
                 }
 
-                // 6. Preencher a lista de Estatísticas do Time B
                 EstatisticasTimeB.Clear();
                 foreach (var atleta in atletasB) {
                     var item = new AtletaEstatisticaItem(atleta, timeB);
 
-                    // CRÍTICO: Pré-preencher com estatísticas salvas
                     var statsDoAtleta = estatisticasSalvas.FirstOrDefault(s => s.UsuarioId == atleta.Id);
                     if (statsDoAtleta != null) {
-                        // Mapear todos os campos salvos para o ViewModel
                         item.Pontos = statsDoAtleta.Pontos;
                         item.Rebotes = statsDoAtleta.Rebotes;
                         item.Assistencias = statsDoAtleta.Assistencias;
@@ -235,16 +211,16 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                         item.LancesLivresConvertidos = statsDoAtleta.LancesLivresConvertidos;
                         item.LancesLivresTentados = statsDoAtleta.LancesLivresTentados;
 
-                        Debug.WriteLine($"[DEBUG-RECARGA] Estatísticas do Atleta {atleta.Nome} (Time B) carregadas (Pontos: {item.Pontos})");
+                        //Debug.WriteLine($"[DEBUG-RECARGA] Estatísticas do Atleta {atleta.Nome} (Time B) carregadas (Pontos: {item.Pontos})");
                     }
 
                     EstatisticasTimeB.Add(item);
                 }
 
-                Debug.WriteLine($"Elenco do Time A carregado: {EstatisticasTimeA.Count} atletas.");
-                Debug.WriteLine($"Elenco do Time B carregado: {EstatisticasTimeB.Count} atletas.");
+                //Debug.WriteLine($"Elenco do Time A carregado: {EstatisticasTimeA.Count} atletas.");
+                //Debug.WriteLine($"Elenco do Time B carregado: {EstatisticasTimeB.Count} atletas.");
             } catch (Exception ex) {
-                Debug.WriteLine($"Erro ao carregar dados do jogo/elencos: {ex.Message}");
+                //Debug.WriteLine($"Erro ao carregar dados do jogo/elencos: {ex.Message}");
                 await Shell.Current.DisplayAlert("Erro", "Não foi possível carregar os dados do jogo.", "OK");
             } finally {
                 EstaOcupado = false;

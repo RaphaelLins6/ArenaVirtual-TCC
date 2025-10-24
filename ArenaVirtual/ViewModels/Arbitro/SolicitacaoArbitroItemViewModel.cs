@@ -18,7 +18,7 @@ namespace ArenaVirtual.ViewModels.Arbitro {
         }
 
         public SolicitacaoArbitroItemViewModel(Usuario arbitro) {
-            SolicitacaoOriginal = null; // Não precisamos do Convite para árbitros já inscritos
+            SolicitacaoOriginal = null; s
             ArbitroSolicitante = arbitro ?? throw new ArgumentNullException(nameof(arbitro));
         }
     }

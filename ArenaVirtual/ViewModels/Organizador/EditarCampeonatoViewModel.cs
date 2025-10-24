@@ -6,8 +6,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-
-// Adicionado para suportar ImageSource
 using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.ViewModels.Organizador;
@@ -46,11 +44,9 @@ public partial class EditarCampeonatoViewModel : ObservableObject {
         _syncService = syncService;
         Campeonato = campeonato;
 
-        // Inicializa as propriedades de texto (Entries) com os dados existentes
         NumeroMaximoEquipesText = Campeonato.NumeroMaximoEquipes.ToString();
         ValorTaxaInscricaoText = Campeonato.ValorTaxaInscricao.ToString();
 
-        // SalvarCommand agora usa CanExecuteSalvar
         SalvarCommand = new AsyncRelayCommand(SalvarAsync, CanExecuteSalvar);
         SelecionarLogoCommand = new AsyncRelayCommand(SelecionarLogoAsync);
 
@@ -117,7 +113,7 @@ public partial class EditarCampeonatoViewModel : ObservableObject {
             await Shell.Current.GoToAsync("..");
 
         } catch (Exception ex) {
-            Debug.WriteLine($"[EditarCampeonatoViewModel] Erro ao salvar campeonato: {ex.Message}");
+            //Debug.WriteLine($"[EditarCampeonatoViewModel] Erro ao salvar campeonato: {ex.Message}");
             await Application.Current.MainPage.DisplayAlert("Erro", $"Falha ao salvar o campeonato: {ex.Message}", "OK");
         } finally {
             IsBusy = false;
@@ -143,7 +139,7 @@ public partial class EditarCampeonatoViewModel : ObservableObject {
                 Campeonato.LogoUrl = newFilePath;
             }
         } catch (Exception ex) {
-            Debug.WriteLine($"Erro ao selecionar logo: {ex.Message}");
+            //Debug.WriteLine($"Erro ao selecionar logo: {ex.Message}");
             await Application.Current.MainPage.DisplayAlert("Erro", $"Falha ao selecionar imagem: {ex.Message}", "OK");
         }
     }

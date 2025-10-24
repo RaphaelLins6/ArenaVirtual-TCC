@@ -14,7 +14,7 @@ namespace ArenaVirtual.ViewModels.Atleta {
         [ObservableProperty]
         private AtletaEstatisticaViewModel estatisticasAtleta = new();
         [ObservableProperty]
-        private string fotoAtletaSource; // Propriedade FotoAtletaSource gerada pelo Toolkit
+        private string fotoAtletaSource; 
         [ObservableProperty]
         private bool estaCarregando = true;
 
@@ -40,16 +40,13 @@ namespace ArenaVirtual.ViewModels.Atleta {
 
             FotoAtletaSource = usuarioAtual.ImagemPath;
 
-            // 1. Obter todas as estatísticas de partida do atleta
             List<EstatisticaPartida> todasEstatisticas = await _databaseService.ObterEstatisticasPorAtletaAsync(usuarioAtual.Id);
 
-            // 2. Calcular o número de jogos jogados 
             int totalJogos = todasEstatisticas
                 .Select(e => e.JogoId)
                 .Distinct()
                 .Count();
 
-            // 3. Agrupar as estatísticas por JogoId 
             var estatisticasValidas = todasEstatisticas.Where(e => e.JogoId > 0).ToList();
 
             if (totalJogos == 0) {
@@ -58,7 +55,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 return;
             }
 
-            // 4. Calcular os Totais Agregados
             double totalPontos = estatisticasValidas.Sum(e => e.Pontos);
             double totalRebotes = estatisticasValidas.Sum(e => e.Rebotes);
             double totalAssistencias = estatisticasValidas.Sum(e => e.Assistencias);
@@ -67,7 +63,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
             double totalFaltas = estatisticasValidas.Sum(e => e.Faltas);
             double totalTurnovers = estatisticasValidas.Sum(e => e.Turnovers);
 
-            // Totais para Percentuais
             double total2PC = estatisticasValidas.Sum(e => e.Arremessos2PontosConvertidos);
             double total2PT = estatisticasValidas.Sum(e => e.Arremessos2PontosTentados);
             double total3PC = estatisticasValidas.Sum(e => e.Arremessos3PontosConvertidos);
@@ -76,7 +71,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
             double totalLLT = estatisticasValidas.Sum(e => e.LancesLivresTentados);
 
 
-            // 5. Atualizar o ViewModel com as Médias
             EstatisticasAtleta.NomeAtleta = usuarioAtual.Nome;
 
             EstatisticasAtleta.MediaPontos = totalPontos / totalJogos;
@@ -87,7 +81,6 @@ namespace ArenaVirtual.ViewModels.Atleta {
             EstatisticasAtleta.MediaFaltas = totalFaltas / totalJogos;
             EstatisticasAtleta.MediaTurnovers = totalTurnovers / totalJogos;
 
-            // Cálculo dos Percentuais 
             EstatisticasAtleta.Percentual2P = total2PT > 0 ? (total2PC / total2PT) * 100 : 0.0;
             EstatisticasAtleta.Percentual3P = total3PT > 0 ? (total3PC / total3PT) * 100 : 0.0;
             EstatisticasAtleta.PercentualLancesLivres = totalLLT > 0 ? (totalLLC / totalLLT) * 100 : 0.0;

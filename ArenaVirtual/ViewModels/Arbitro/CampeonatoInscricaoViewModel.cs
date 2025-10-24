@@ -55,22 +55,22 @@ namespace ArenaVirtual.ViewModels.Arbitro {
             _sessaoService = sessaoService;
             _alertService = alertService;
 
-            Debug.WriteLine("[CampeonatoInscricaoViewModel] ViewModel inicializada.");
+            //Debug.WriteLine("[CampeonatoInscricaoViewModel] ViewModel inicializada.");
 
             CampeonatosDisponiveis = new ObservableCollection<CampeonatoItemViewModel>();
         }
 
         public async Task OnAppearingAsync() {
-            Debug.WriteLine("[CampeonatoInscricaoViewModel] OnAppearingAsync chamado. Iniciando CarregarCampeonatosAsync.");
+            //Debug.WriteLine("[CampeonatoInscricaoViewModel] OnAppearingAsync chamado. Iniciando CarregarCampeonatosAsync.");
             await CarregarCampeonatosAsync(string.Empty);
         }
 
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
         public async Task CarregarCampeonatosAsync(string query) {
-            Debug.WriteLine($"[CarregarCampeonatosAsync] INÍCIO. IsBusy={IsBusy}. Query: '{query}'");
+            //Debug.WriteLine($"[CarregarCampeonatosAsync] INÍCIO. IsBusy={IsBusy}. Query: '{query}'");
 
             if (IsBusy) {
-                Debug.WriteLine("[CarregarCampeonatosAsync] Já está ocupado. Saindo.");
+                //Debug.WriteLine("[CarregarCampeonatosAsync] Já está ocupado. Saindo.");
                 return;
             }
 
@@ -78,13 +78,13 @@ namespace ArenaVirtual.ViewModels.Arbitro {
 
             try {
                 var todosCampeonatos = await _campeonatoService.ObterTodosAsync();
-                Debug.WriteLine($"[CarregarCampeonatosAsync] Campeonatos obtidos do serviço: {todosCampeonatos?.Count() ?? 0}");
+                //Debug.WriteLine($"[CarregarCampeonatosAsync] Campeonatos obtidos do serviço: {todosCampeonatos?.Count() ?? 0}");
 
                 var arbitroAtual = await _sessaoService.GetArbitroAtualAsync();
-                Debug.WriteLine($"[CarregarCampeonatosAsync] Árbitro logado? {(arbitroAtual != null ? $"SIM, ID: {arbitroAtual.ClientAppId}" : "NÃO")}");
+                //Debug.WriteLine($"[CarregarCampeonatosAsync] Árbitro logado? {(arbitroAtual != null ? $"SIM, ID: {arbitroAtual.ClientAppId}" : "NÃO")}");
 
                 if (arbitroAtual == null) {
-                    Debug.WriteLine("[CarregarCampeonatosAsync] Falha na sessão. Limpando lista.");
+                    //Debug.WriteLine("[CarregarCampeonatosAsync] Falha na sessão. Limpando lista.");
                     CampeonatosDisponiveis.Clear();
                     await _alertService.DisplayAlert("Atenção", "Você precisa estar logado como Árbitro para solicitar arbitragem.", "OK");
                     return;
@@ -96,7 +96,7 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                   ? todosCampeonatos
                   : todosCampeonatos.Where(c => c.Nome.ToLower().Contains(query.ToLower())).ToList();
 
-                Debug.WriteLine($"[CarregarCampeonatosAsync] Após filtro ('{query}'), Total: {campeonatosFiltrados.Count}");
+                //Debug.WriteLine($"[CarregarCampeonatosAsync] Após filtro ('{query}'), Total: {campeonatosFiltrados.Count}");
 
                 var novosItens = new List<CampeonatoItemViewModel>();
 
@@ -106,7 +106,7 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                     campeonato.ClientAppId.ToString(),
                     TipoConvite.InscricaoArbitro);
 
-                    Debug.WriteLine($"[CarregarCampeonatosAsync] Processando '{campeonato.Nome}'. Status: {(solicitacaoExistente != null ? solicitacaoExistente.Status.ToString() : "NENHUMA")}");
+                    //Debug.WriteLine($"[CarregarCampeonatosAsync] Processando '{campeonato.Nome}'. Status: {(solicitacaoExistente != null ? solicitacaoExistente.Status.ToString() : "NENHUMA")}");
 
                     string buttonText = "Solicitar Arbitragem";
                     bool isEnabled = true;
@@ -125,10 +125,10 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                     novosItens.Add(new CampeonatoItemViewModel(campeonato, buttonText, isEnabled, buttonColor));
                 }
 
-                Debug.WriteLine($"[CarregarCampeonatosAsync] Total de ViewModels criadas: {novosItens.Count}. Movendo para a MainThread.");
+                //Debug.WriteLine($"[CarregarCampeonatosAsync] Total de ViewModels criadas: {novosItens.Count}. Movendo para a MainThread.");
 
                 MainThread.BeginInvokeOnMainThread(() => {
-                    Debug.WriteLine($"[MainThread] Limpando CampeonatosDisponiveis. Contagem inicial: {CampeonatosDisponiveis.Count}");
+                    //Debug.WriteLine($"[MainThread] Limpando CampeonatosDisponiveis. Contagem inicial: {CampeonatosDisponiveis.Count}");
 
                     CampeonatosDisponiveis.Clear();
 
@@ -138,21 +138,21 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                         itensAdicionados++;
                     }
 
-                    Debug.WriteLine($"[MainThread] Itens adicionados: {itensAdicionados}. Contagem final de CampeonatosDisponiveis: {CampeonatosDisponiveis.Count}");
+                    //Debug.WriteLine($"[MainThread] Itens adicionados: {itensAdicionados}. Contagem final de CampeonatosDisponiveis: {CampeonatosDisponiveis.Count}");
 
                 });
 
             } catch (Exception ex) {
-                Debug.WriteLine($"[CarregarCampeonatosAsync] ERRO CRÍTICO: {ex.Message} \n {ex.StackTrace}");
+                //Debug.WriteLine($"[CarregarCampeonatosAsync] ERRO CRÍTICO: {ex.Message} \n {ex.StackTrace}");
             } finally {
-                Debug.WriteLine("[CarregarCampeonatosAsync] FIM. Definindo IsBusy=False.");
+                //Debug.WriteLine("[CarregarCampeonatosAsync] FIM. Definindo IsBusy=False.");
                 IsBusy = false;
             }
         }
 
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
         public async Task SolicitarArbitragemAsync(CampeonatoItemViewModel campeonatoItemVM) {
-            Debug.WriteLine($"[SolicitarArbitragemAsync] INÍCIO. Solicitando para: {campeonatoItemVM?.Nome ?? "NULO"}");
+            //Debug.WriteLine($"[SolicitarArbitragemAsync] INÍCIO. Solicitando para: {campeonatoItemVM?.Nome ?? "NULO"}");
             if (campeonatoItemVM == null) return;
 
             IsBusy = true;
@@ -185,14 +185,14 @@ namespace ArenaVirtual.ViewModels.Arbitro {
                     campeonatoItemVM.ButtonColor = Color.FromArgb("#9E9E9E");
                 });
 
-                Debug.WriteLine("[SolicitarArbitragemAsync] Solicitação concluída e item da UI atualizado.");
+                //Debug.WriteLine("[SolicitarArbitragemAsync] Solicitação concluída e item da UI atualizado.");
 
             } catch (Exception ex) {
-                Debug.WriteLine($"[SolicitarArbitragemAsync] ERRO: {ex.Message}");
+                //Debug.WriteLine($"[SolicitarArbitragemAsync] ERRO: {ex.Message}");
                 await _alertService.DisplayAlert("Erro", "Ocorreu um erro ao enviar sua solicitação.", "OK");
             } finally {
                 IsBusy = false;
-                Debug.WriteLine("[SolicitarArbitragemAsync] FIM.");
+                //Debug.WriteLine("[SolicitarArbitragemAsync] FIM.");
             }
         }
     }

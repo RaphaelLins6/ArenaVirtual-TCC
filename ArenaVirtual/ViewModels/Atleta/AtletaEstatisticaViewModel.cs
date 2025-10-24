@@ -2,35 +2,31 @@
 using System;
 
 namespace ArenaVirtual.ViewModels.Atleta {
-    // Classe para representar as estatísticas agregadas (médias por jogo) de um jogador
     public partial class AtletaEstatisticaViewModel : ObservableObject {
         [ObservableProperty]
         private string nomeAtleta = "Carregando...";
 
-        // Métricas básicas
         [ObservableProperty]
-        private double mediaPontos = 0.0; // P/J
+        private double mediaPontos = 0.0; 
         [ObservableProperty]
-        private double mediaRebotes = 0.0; // RBT/J
+        private double mediaRebotes = 0.0; 
         [ObservableProperty]
-        private double mediaAssistencias = 0.0; // AST/J
+        private double mediaAssistencias = 0.0; 
 
-        // Novas Métricas (Médias por Jogo)
         [ObservableProperty]
-        private double mediaRoubos = 0.0; // ROU/J
+        private double mediaRoubos = 0.0; 
         [ObservableProperty]
-        private double mediaBloqueios = 0.0; // BLO/J
+        private double mediaBloqueios = 0.0; 
         [ObservableProperty]
-        private double mediaFaltas = 0.0; // F/J
+        private double mediaFaltas = 0.0; 
         [ObservableProperty]
-        private double mediaTurnovers = 0.0; // T/J
+        private double mediaTurnovers = 0.0; 
 
-        // Percentuais (Formatados para exibição)
         [ObservableProperty]
-        private double percentual2P = 0.0; // 2P%
+        private double percentual2P = 0.0; 
         [ObservableProperty]
-        private double percentual3P = 0.0; // 3P%
+        private double percentual3P = 0.0; 
         [ObservableProperty]
-        private double percentualLancesLivres = 0.0; // LL%
+        private double percentualLancesLivres = 0.0; 
     }
 }
