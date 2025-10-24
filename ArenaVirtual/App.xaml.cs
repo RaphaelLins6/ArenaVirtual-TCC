@@ -38,18 +38,18 @@ public partial class App : Application {
 
                     if (windowServiceProvider != null) {
                         var databaseService = windowServiceProvider.GetRequiredService<DatabaseService>();
-                        System.Diagnostics.Debug.WriteLine("Iniciando inicialização do DatabaseService...");
+                        //System.Diagnostics.Debug.WriteLine("Iniciando inicialização do DatabaseService...");
                         await databaseService.InitializeAsync();
-                        System.Diagnostics.Debug.WriteLine("DatabaseService inicializado com sucesso.");
+                        //System.Diagnostics.Debug.WriteLine("DatabaseService inicializado com sucesso.");
 
                         var syncService = windowServiceProvider.GetRequiredService<SyncService>();
                         await syncService.SyncAsync(new Progress<string>(status => System.Diagnostics.Debug.WriteLine($"[SyncStatus] {status}")));
 
                     } else {
-                        System.Diagnostics.Debug.WriteLine("Erro: ServiceProvider da janela não pôde ser obtido para inicialização do DatabaseService.");
+                        //System.Diagnostics.Debug.WriteLine("Erro: ServiceProvider da janela não pôde ser obtido para inicialização do DatabaseService.");
                     }
                 } catch (Exception ex) {
-                    System.Diagnostics.Debug.WriteLine($"Erro na inicialização/sincronização inicial: {ex.Message}");
+                    //System.Diagnostics.Debug.WriteLine($"Erro na inicialização/sincronização inicial: {ex.Message}");
                 }
             }
         };

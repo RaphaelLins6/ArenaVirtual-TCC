@@ -1,4 +1,3 @@
-// Em ArenaVirtual/Views/Atleta/ProcurarCampeonatosPage.xaml.cs
 using ArenaVirtual.ViewModels.Atleta;
 
 namespace ArenaVirtual.Views.Atleta {

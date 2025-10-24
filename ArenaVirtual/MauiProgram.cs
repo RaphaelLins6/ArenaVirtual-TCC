@@ -31,14 +31,9 @@ public static class MauiProgram {
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
-        // Registro de serviços como Singletons ou Transients para injeção de dependência.
-        // Singleton é usado para serviços que persistem durante toda a vida do app (ex: bancos de dados, sincronização).
-        // Transient é usado para serviços ou páginas que podem ser criados e descartados (ex: ViewModels).
-
-        // Adicione o serviço de alerta como Transient.
+        
         builder.Services.AddTransient<IAlertService, AlertService>();
 
-        // Registre os serviços de dados e sincronização como Singletons.
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "arenavirtual.db3");
         builder.Services.AddSingleton(new DatabaseService(dbPath));
         builder.Services.AddSingleton<ApiService>();
@@ -50,11 +45,9 @@ public static class MauiProgram {
         builder.Services.AddSingleton<JogoService>();
         builder.Services.AddSingleton<PatrocinioService>();
 
-        // Registre os serviços de domínio como Transients
         builder.Services.AddTransient<UsuarioService>();
         builder.Services.AddTransient<TimeService>();
 
-        // Registre todos os ViewModels como Transient
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<RegisterViewModel>();
         builder.Services.AddTransient<PerfilViewModel>();
@@ -81,7 +74,6 @@ public static class MauiProgram {
         builder.Services.AddTransient<PropostaCampeonatoViewModel>();
         builder.Services.AddTransient<BuscarCampeonatosViewModel>();
 
-        // Registre as Páginas e Popups como Transient
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<RegisterPage>();
         builder.Services.AddTransient<PerfilPage>();
@@ -109,7 +101,6 @@ public static class MauiProgram {
         builder.Services.AddTransient<PropostaCampeonatoPage>();
         builder.Services.AddTransient<BuscarCampeonatosPage>();
 
-        // Registre os popups que agora recebem injeção de dependência
         builder.Services.AddTransient<AlterarImagemPopup>();
         builder.Services.AddTransient<AlterarSenhaPopup>();
         builder.Services.AddTransient<EditarPerfilPopup>();

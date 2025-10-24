@@ -45,15 +45,15 @@ namespace ArenaVirtual.Views.Components {
 
         public CampeonatoCard() {
             InitializeComponent();
-            Debug.WriteLine($"[CampeonatoCard] Instanciado. BindingContext inicial: {this.BindingContext?.GetType().Name ?? "Nulo"}");
+            //Debug.WriteLine($"[CampeonatoCard] Instanciado. BindingContext inicial: {this.BindingContext?.GetType().Name ?? "Nulo"}");
         }
 
         protected override void OnBindingContextChanged() {
             base.OnBindingContextChanged();
             if (this.BindingContext is Campeonato camp) {
-                Debug.WriteLine($"[CampeonatoCard] BindingContext alterado para Campeonato: {camp.Nome ?? "N/A"}, ID: {camp.Id}");
+                //Debug.WriteLine($"[CampeonatoCard] BindingContext alterado para Campeonato: {camp.Nome ?? "N/A"}, ID: {camp.Id}");
             } else {
-                Debug.WriteLine($"[CampeonatoCard] BindingContext alterado para tipo: {this.BindingContext?.GetType().Name ?? "Nulo"}");
+                //Debug.WriteLine($"[CampeonatoCard] BindingContext alterado para tipo: {this.BindingContext?.GetType().Name ?? "Nulo"}");
             }
         }
     }

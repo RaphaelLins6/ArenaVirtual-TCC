@@ -110,7 +110,7 @@ namespace ArenaVirtual {
                         if (loginPage != null) {
                             Application.Current.MainPage = loginPage;
                         } else {
-                            Debug.WriteLine("Erro: LoginPage não pôde ser resolvido pelo ServiceProvider.");
+                            //Debug.WriteLine("Erro: LoginPage não pôde ser resolvido pelo ServiceProvider.");
                         }
                     });
                 })

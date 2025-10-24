@@ -19,37 +19,34 @@ namespace ArenaVirtual.Views.CampeonatoPage {
         protected override void OnAppearing() {
             base.OnAppearing();
             if (Campeonato != null) {
-                Debug.WriteLine($"[CampeonatoDetailPage] ViewModel.IsOrganizador no OnAppearing: {_viewModel.IsOrganizador}");
-                Debug.WriteLine($"[CampeonatoDetailPage] Dados do campeonato recebidos: {Campeonato?.Nome}");
+                //Debug.WriteLine($"[CampeonatoDetailPage] ViewModel.IsOrganizador no OnAppearing: {_viewModel.IsOrganizador}");
+                //Debug.WriteLine($"[CampeonatoDetailPage] Dados do campeonato recebidos: {Campeonato?.Nome}");
             }
         }
 
         private async void OnAnexarArbitrosClicked(object sender, EventArgs e) {
             var button = sender as Button;
             if (button?.CommandParameter is not ArenaVirtual.Models.Jogo jogo) {
-                System.Diagnostics.Debug.WriteLine("[DEBUG-CLICK-ERROR] Jogo não pôde ser recuperado do CommandParameter.");
+                //System.Diagnostics.Debug.WriteLine("[DEBUG-CLICK-ERROR] Jogo não pôde ser recuperado do CommandParameter.");
                 return;
             }
             if (BindingContext is not ArenaVirtual.ViewModels.CampeonatoPage.CampeonatoDetailViewModel viewModel) {
-                System.Diagnostics.Debug.WriteLine("[DEBUG-CLICK-ERROR] ViewModel não encontrado.");
+                //System.Diagnostics.Debug.WriteLine("[DEBUG-CLICK-ERROR] ViewModel não encontrado.");
                 return;
             }
             await viewModel.AnexarArbitros(jogo);
         }
 
         private void OnEstatisticaClicked(object sender, EventArgs e) {
-            // 1. Obtém o nome da estatística (o CommandParameter) a partir do Button
             if (sender is Button button && button.CommandParameter is string estatistica) {
-                // 2. Chama o método do ViewModel
                 if (BindingContext is CampeonatoDetailViewModel viewModel) {
-                    // O método MudarEstatisticaLogic deve ser público no ViewModel
                     viewModel.MudarEstatisticaLogic(estatistica);
-                    Debug.WriteLine($"[DEBUG-CLICK] Estatística selecionada (Code-Behind): {estatistica}");
+                    //Debug.WriteLine($"[DEBUG-CLICK] Estatística selecionada (Code-Behind): {estatistica}");
                 } else {
-                    Debug.WriteLine("[DEBUG-CLICK-ERROR] ViewModel não encontrado.");
+                    //Debug.WriteLine("[DEBUG-CLICK-ERROR] ViewModel não encontrado.");
                 }
             } else {
-                Debug.WriteLine("[DEBUG-CLICK-ERROR] Nome da estatística não pôde ser recuperado do CommandParameter/Sender.");
+                //Debug.WriteLine("[DEBUG-CLICK-ERROR] Nome da estatística não pôde ser recuperado do CommandParameter/Sender.");
             }
         }
     }

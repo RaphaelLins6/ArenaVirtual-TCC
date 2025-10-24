@@ -16,7 +16,6 @@ namespace ArenaVirtual.Views.Patrocinador {
 
         protected override async void OnAppearing() {
             base.OnAppearing();
-            // Carrega os campeonatos assim que a página é exibida
             await _viewModel.OnAppearingAsync();
         }
 
@@ -27,7 +26,7 @@ namespace ArenaVirtual.Views.Patrocinador {
             var itemViewModel = button.BindingContext as CampeonatoPatrocinioItemViewModel;
 
             if (itemViewModel == null) {
-                Debug.WriteLine("[Clicked] ERRO: Não foi possível obter o ItemViewModel.");
+                //Debug.WriteLine("[Clicked] ERRO: Não foi possível obter o ItemViewModel.");
                 return;
             }
 

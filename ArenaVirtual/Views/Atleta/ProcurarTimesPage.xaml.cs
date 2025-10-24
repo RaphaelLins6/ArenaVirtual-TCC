@@ -8,7 +8,6 @@ namespace ArenaVirtual.Views.Atleta {
             BindingContext = viewModel;
         }
 
-        // Use OnAppearing para carregar os dados
         protected override async void OnAppearing() {
             base.OnAppearing();
             if (BindingContext is ProcurarTimesPageViewModel vm) {
