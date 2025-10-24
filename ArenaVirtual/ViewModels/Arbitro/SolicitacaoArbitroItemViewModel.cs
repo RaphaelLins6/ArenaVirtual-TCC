@@ -18,7 +18,7 @@ namespace ArenaVirtual.ViewModels.Arbitro {
         }
 
         public SolicitacaoArbitroItemViewModel(Usuario arbitro) {
-            SolicitacaoOriginal = null; s
+            SolicitacaoOriginal = null; 
             ArbitroSolicitante = arbitro ?? throw new ArgumentNullException(nameof(arbitro));
         }
     }
