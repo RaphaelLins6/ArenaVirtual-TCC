@@ -26,6 +26,7 @@ builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 
+// CORREÇÃO: AddSwaggerGen está correto no ConfigureServices
 builder.Services.AddSwaggerGen(c => {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "ArenaVirtualAPI", Version = "v1" });
 });
@@ -57,14 +58,18 @@ builder.Services.AddScoped<BackendSyncService>();
 
 var app = builder.Build();
 
+// CORREÇÃO: Movemos o Swagger para fora da condição IsDevelopment.
+// Isso permite que o Visual Studio acesse o endpoint do Swagger JSON durante o deploy no Azure (Produção).
+app.UseSwagger();
+app.UseSwaggerUI(c => {
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ArenaVirtualAPI v1");
+});
+
 // Configura o pipeline HTTP
 if (app.Environment.IsDevelopment()) {
     app.UseDeveloperExceptionPage();
-    app.UseSwagger();
-    app.UseSwaggerUI(c => {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ArenaVirtualAPI v1");
-    });
 } else {
+    // Mantemos a garantia de redirecionamento HTTPS no ambiente de Produção do Azure
     app.UseHttpsRedirection();
 }
 

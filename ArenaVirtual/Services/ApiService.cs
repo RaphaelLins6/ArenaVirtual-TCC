@@ -7,29 +7,23 @@ namespace ArenaVirtual.Services {
     public class ApiService {
         private readonly HttpClient _httpClient;
 
+        // NOVO: A URL base é fixada para o endereço público do Azure
+        private const string AzureBaseUrl = "https://arenavirtualapi-cvghgbcgdqfbdhha.canadacentral-01.azurewebsites.net/";
+
         public ApiService() {
-#if ANDROID
-                Console.WriteLine("[ApiService] Ambiente Android detectado → usando 10.0.2.2");
-
-                var handler = new HttpClientHandler {
-                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-                };
-
-                var baseUrl = "http://192.168.15.10:5067/";
-                
-                _httpClient = new HttpClient(handler) {
-                    BaseAddress = new Uri(baseUrl)
-                };
-#else
-            Console.WriteLine("[ApiService] Ambiente Desktop detectado → usando localhost");
+            Console.WriteLine($"[ApiService] Ambiente Nuvem detectado → usando Azure: {AzureBaseUrl}");
 
             var handler = new HttpClientHandler();
-            var baseUrl = "http://localhost:5067/";
+
+            // O Azure usa HTTPS, mas se houver algum problema de certificado no MAUI durante o DEBUG
+            // você pode precisar habilitar o ServerCertificateCustomValidationCallback
+            // #if DEBUG
+            // handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
+            // #endif
 
             _httpClient = new HttpClient(handler) {
-                BaseAddress = new Uri(baseUrl)
+                BaseAddress = new Uri(AzureBaseUrl)
             };
-#endif
 
             Console.WriteLine($"[ApiService] Base URL configurada: {_httpClient.BaseAddress}");
         }
