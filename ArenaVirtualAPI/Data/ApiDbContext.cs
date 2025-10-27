@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ArenaVirtualAPI.Models; 
+using ArenaVirtualAPI.Models;
 
 namespace ArenaVirtualAPI.Data {
     public class ApiDbContext : DbContext {
@@ -12,6 +12,7 @@ namespace ArenaVirtualAPI.Data {
         public DbSet<Convite> Convites { get; set; }
         public DbSet<Jogo> Jogos { get; set; }
         public DbSet<UsuarioCampeonatoFavorito> UsuarioCampeonatoFavoritos { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             modelBuilder.Entity<Campeonato>()
                 .Property(c => c.ValorTaxaInscricao)
@@ -36,6 +37,22 @@ namespace ArenaVirtualAPI.Data {
                 .WithMany(c => c.Times)
                 .HasForeignKey(t => t.CampeonatoId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // --- CORREÇÃO DO ERRO DE CHAVE ESTRANGEIRA (Ciclo de Exclusão) ---
+            modelBuilder.Entity<Jogo>()
+                // Relação com Time A: CASCADE
+                .HasOne(j => j.TimeA)
+                .WithMany()
+                .HasForeignKey(j => j.TimeAId)
+                .OnDelete(DeleteBehavior.Cascade); // Se o Time A for deletado, o Jogo é deletado.
+
+            modelBuilder.Entity<Jogo>()
+                // Relação com Time B: NO ACTION (Para quebrar o ciclo)
+                .HasOne(j => j.TimeB)
+                .WithMany()
+                .HasForeignKey(j => j.TimeBId)
+                .OnDelete(DeleteBehavior.NoAction); // ESSENCIAL: Impede o erro 1785.
+            // -----------------------------------------------------------------
 
             modelBuilder.Entity<UsuarioCampeonatoFavorito>()
                 .HasIndex(ucf => new { ucf.UsuarioId, ucf.CampeonatoId })

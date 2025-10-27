@@ -10,9 +10,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Adiciona serviços ao contêiner
 builder.Services.AddControllers();
 
-// Adiciona o DbContext com SQL Server
+// Adiciona o DbContext com SQL Server E RESILIÊNCIA DE CONEXÃO
 builder.Services.AddDbContext<ApiDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => {
+            // Habilita a Resiliência de Conexão para Azure SQL (Trata erros transientes como 40613)
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null);
+        }));
 
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
