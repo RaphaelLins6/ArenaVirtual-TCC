@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using ArenaVirtualAPI.Models;
 using System.Text.Json;
+using ArenaVirtualAPI.Models;
 
 namespace ArenaVirtualAPI.DTOs {
     public interface ISyncableDto {
@@ -114,4 +114,129 @@ namespace ArenaVirtualAPI.DTOs {
         public bool IsSynced { get; set; }
     }
 
+    public class RodadaDeJogosSyncDto : ISyncableDto {
+        public Guid ClientAppId { get; set; }
+        public int Id { get; set; }
+        public string NomeRodada { get; set; } = string.Empty;
+        public DateTime UpdatedAt { get; set; }
+        public bool IsSynced { get; set; }
+    }
+
+    public class InscricaoSyncDto : ISyncableDto {
+        public Guid ClientAppId { get; set; }
+        public int Id { get; set; }
+
+        // Chaves estrangeiras usando Guid ClientAppIds
+        public Guid TimeClientAppId { get; set; }
+        public Guid CampeonatoClientAppId { get; set; }
+
+        public string? Status { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public bool IsSynced { get; set; }
+    }
+
+    public class EstatisticaPartidaSyncDto : ISyncableDto {
+        public Guid ClientAppId { get; set; }
+        public int Id { get; set; }
+
+        // Chaves estrangeiras usando ClientAppId do Usuário, Jogo e Time
+        public Guid UsuarioClientAppId { get; set; }
+        public Guid JogoClientAppId { get; set; }
+        public Guid TimeClientAppId { get; set; }
+
+        public int Pontos { get; set; }
+        public int Rebotes { get; set; }
+        public int Assistencias { get; set; }
+        public int Roubos { get; set; }
+        public int Bloqueios { get; set; }
+        public int Faltas { get; set; }
+        public int Turnovers { get; set; }
+        public int Arremessos2PontosConvertidos { get; set; }
+        public int Arremessos2PontosTentados { get; set; }
+        public int Arremessos3PontosConvertidos { get; set; }
+        public int Arremessos3PontosTentados { get; set; }
+        public int LancesLivresConvertidos { get; set; }
+        public int LancesLivresTentados { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
+        public bool IsSynced { get; set; }
+    }
+
+    public class AvaliacaoArbitroSyncDto : ISyncableDto {
+        public Guid ClientAppId { get; set; }
+        public int Id { get; set; }
+
+        // Chaves estrangeiras usando ClientAppId do Arbitro (Usuário) e Jogo
+        public Guid ArbitroClientAppId { get; set; }
+        public Guid JogoClientAppId { get; set; }
+
+        public string Comentarios { get; set; } = string.Empty;
+        public int Nota { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
+        public bool IsSynced { get; set; }
+    }
+
+    public class CampanhaPatrocinioSyncDto : ISyncableDto {
+        public Guid ClientAppId { get; set; }
+        public int Id { get; set; }
+
+        public string? ImagemPatrocinador { get; set; }
+        public string Nome { get; set; } = string.Empty;
+
+        // Chaves estrangeiras usando ClientAppId do Patrocinador (Usuário) e Campeonato
+        public Guid PatrocinadorClientAppId { get; set; }
+        public Guid CampeonatoClientAppId { get; set; }
+
+        public decimal ValorProposta { get; set; }
+        public DateTime Inicio { get; set; }
+        public DateTime Fim { get; set; }
+        public string Descricao { get; set; } = string.Empty;
+
+        public DateTime UpdatedAt { get; set; }
+        public bool IsSynced { get; set; }
+    }
+
+    public class PropostaPatrocinioSyncDto : ISyncableDto {
+        public Guid ClientAppId { get; set; }
+        public int Id { get; set; }
+
+        // Chaves estrangeiras usando ClientAppId do Patrocinador (Usuário) e Campeonato
+        public Guid PatrocinadorClientAppId { get; set; }
+        public Guid CampeonatoClientAppId { get; set; }
+
+        public string NomePatrocinador { get; set; } = string.Empty;
+        public string ImagemPatrocinador { get; set; } = string.Empty;
+        public string LinkPatrocinador { get; set; } = string.Empty;
+        public decimal ValorMonetario { get; set; }
+        public DateTime DataInicio { get; set; }
+        public DateTime DataFim { get; set; }
+        public string Mensagem { get; set; } = string.Empty;
+        public bool Aprovada { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
+        public bool IsSynced { get; set; }
+    }
+
+    public class PatrocinioDetalheSyncDto : ISyncableDto {
+        public int Id { get; set; } 
+        public Guid ClientAppId { get; set; } 
+        public DateTime UpdatedAt { get; set; } 
+        public bool IsSynced { get; set; }
+        public decimal ValorMonetario { get; set; }
+        public DateTime DataInicio { get; set; }
+        public DateTime DataFim { get; set; }
+        public string Mensagem { get; set; } = string.Empty;
+        public bool Aprovada { get; set; }
+        public Guid PatrocinadorClientAppId { get; set; }
+        public Guid CampeonatoClientAppId { get; set; }
+        public string NomePatrocinador { get; set; } = string.Empty;
+        public string ImagemPatrocinador { get; set; } = string.Empty;
+        public Guid? CampanhaClientAppId { get; set; }
+        public string? CampanhaNome { get; set; }
+        public decimal? CampanhaValorProposta { get; set; }
+        public DateTime? CampanhaInicio { get; set; }
+        public DateTime? CampanhaFim { get; set; }
+        public string? CampanhaDescricao { get; set; }
+    }
 }

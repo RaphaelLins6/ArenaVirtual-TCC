@@ -14,7 +14,7 @@ public class Time : ISyncable {
     [Required]
     public Guid ClientAppId { get; set; }
 
-    public int CampeonatoId { get; set; }
+    public int? CampeonatoId { get; set; }
 
     [Required, MaxLength(100)]
     public string Nome { get; set; } = string.Empty;

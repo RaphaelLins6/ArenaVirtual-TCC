@@ -1,5 +1,4 @@
 ﻿using ArenaVirtualAPI.DTOs;
-using ArenaVirtualAPI.Models;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -7,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
+using ArenaVirtualAPI.Models;
 
 namespace ArenaVirtualAPI.Services {
     public class BackendSyncServiceFactory : IBackendSyncServiceFactory {
@@ -20,7 +20,14 @@ namespace ArenaVirtualAPI.Services {
             { "Time", (typeof(TimeSyncDto), typeof(Time)) },
             { "Jogo", (typeof(JogoSyncDto), typeof(Jogo)) },
             { "Convite", (typeof(ConviteSyncDto), typeof(Convite)) },
-            { "UsuarioCampeonatoFavorito", (typeof(UsuarioCampeonatoFavoritoSyncDto), typeof(UsuarioCampeonatoFavorito)) }
+            { "UsuarioCampeonatoFavorito", (typeof(UsuarioCampeonatoFavoritoSyncDto), typeof(UsuarioCampeonatoFavorito)) },
+            { "RodadaDeJogos", (typeof(RodadaDeJogosSyncDto), typeof(RodadaDeJogos)) },
+            { "PropostaPatrocinio", (typeof(PropostaPatrocinioSyncDto), typeof(PropostaPatrocinio)) },
+            { "PatrocinioDetalhe", (typeof(PatrocinioDetalheSyncDto), typeof(PatrocinioDetalhe)) },
+            { "Inscricao", (typeof(InscricaoSyncDto), typeof(Inscricao)) },
+            { "EstatisticaPartida", (typeof(EstatisticaPartidaSyncDto), typeof(EstatisticaPartida)) },
+            { "CampanhaPatrocinio", (typeof(CampanhaPatrocinioSyncDto), typeof(CampanhaPatrocinio)) },
+            { "AvaliacaoArbitro", (typeof(AvaliacaoArbitroSyncDto), typeof(AvaliacaoArbitro)) }
         };
 
         public BackendSyncServiceFactory(IServiceProvider serviceProvider, ILogger<BackendSyncServiceFactory> logger) {

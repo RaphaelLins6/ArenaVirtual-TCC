@@ -1,9 +1,9 @@
 ﻿using ArenaVirtualAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using ArenaVirtualAPI.Services;
-using ArenaVirtualAPI.Models;
 using ArenaVirtualAPI.DTOs;
 using Microsoft.OpenApi.Models;
+using ArenaVirtualAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +46,11 @@ builder.Services.AddScoped<IBackendService<Campeonato, CampeonatoSyncDto>, Campe
 builder.Services.AddScoped<IBackendService<Time, TimeSyncDto>, TimeService>();
 builder.Services.AddScoped<IBackendService<Convite, ConviteSyncDto>, ConviteService>();
 builder.Services.AddScoped<IBackendService<Jogo, JogoSyncDto>, JogoService>();
+builder.Services.AddScoped<IPatrocinioDetalheService, PatrocinioDetalheService>();
+builder.Services.AddScoped<IInscricaoService, InscricaoService>();
+builder.Services.AddScoped<IAvaliacaoArbitroService, AvaliacaoArbitroService>();
+builder.Services.AddScoped<IEstatisticaPartidaService, EstatisticaPartidaService>();
+builder.Services.AddScoped<ICampanhaPatrocinioService, CampanhaPatrocinioService>();
 
 // Registro corrigido para UsuarioCampeonatoFavoritoService
 builder.Services.AddScoped<UsuarioCampeonatoFavoritoService>();

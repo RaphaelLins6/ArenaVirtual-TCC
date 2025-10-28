@@ -2,8 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ArenaVirtualAPI.Models // Namespace corrigido para API
-{
+namespace ArenaVirtualAPI.Models {
     // Removido 'ObservableObject' - esta é uma Entidade EF Core, não um ViewModel
     public class EstatisticaPartida : ISyncable {
         [Key]
@@ -17,17 +16,17 @@ namespace ArenaVirtualAPI.Models // Namespace corrigido para API
 
         // Relacionamento com Usuário (o jogador)
         public int UsuarioId { get; set; }
-        [ForeignKey("UsuarioId")]
+        // [ForeignKey("UsuarioId")] <-- REMOVIDO!
         public virtual Usuario? Usuario { get; set; }
 
         // Relacionamento com Jogo (a partida)
         public int JogoId { get; set; }
-        [ForeignKey("JogoId")]
+        // [ForeignKey("JogoId")] <-- REMOVIDO!
         public virtual Jogo? Jogo { get; set; }
 
         // Relacionamento com Time
         public int TimeId { get; set; }
-        [ForeignKey("TimeId")]
+        // [ForeignKey("TimeId")] <-- REMOVIDO!
         public virtual Time? Time { get; set; }
 
         // --- Estatísticas (Manter como int, assumindo que não serão nulas) ---

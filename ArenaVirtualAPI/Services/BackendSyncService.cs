@@ -28,13 +28,18 @@ namespace ArenaVirtualAPI.Services {
 
             var mainEntitiesOrder = new List<string>
             {
-                // Nível 0: Entidades que não dependem de outras do seu modelo.
                 "Campeonato",
                 "Usuario",
-                // Nível 1: Entidades que dependem das anteriores.
-                "Time",      // Time pode depender de Campeonato e é referenciado por Usuario e Convite.
-                "Jogo",      // Jogo depende de Time e Campeonato.
-                "Convite"    // Convite depende de Time e/ou Usuario.
+                "RodadaDeJogos",                
+                "Time",
+                "PropostaPatrocinio",
+                "PatrocinioDetalhe",
+                "Inscricao",
+                "EstatisticaPartida",
+                "CampanhaPatrocinio",
+                "AvaliacaoArbitro",
+                "Jogo",      
+                "Convite",
             };
 
             var relationshipEntitiesOrder = new List<string>

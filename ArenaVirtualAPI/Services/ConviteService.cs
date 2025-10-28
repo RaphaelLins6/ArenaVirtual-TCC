@@ -1,11 +1,11 @@
 ﻿using ArenaVirtualAPI.Data;
-using ArenaVirtualAPI.Models;
 using ArenaVirtualAPI.DTOs;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
+using ArenaVirtualAPI.Models;
 
 namespace ArenaVirtualAPI.Services {
     public class ConviteService : IBackendService<Convite, ConviteSyncDto> {

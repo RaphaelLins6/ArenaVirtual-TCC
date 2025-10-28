@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ArenaVirtualAPI.Models;
 using ArenaVirtualAPI.DTOs;
 using ArenaVirtualAPI.Data;
 using System.Linq;
+using ArenaVirtualAPI.Models;
 
 namespace ArenaVirtualAPI.Controllers {
     [ApiController]

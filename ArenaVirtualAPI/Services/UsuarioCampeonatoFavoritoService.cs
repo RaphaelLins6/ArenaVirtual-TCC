@@ -1,5 +1,4 @@
 ﻿using ArenaVirtualAPI.Data;
-using ArenaVirtualAPI.Models;
 using ArenaVirtualAPI.DTOs;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -7,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using Microsoft.Extensions.Logging;
+using ArenaVirtualAPI.Models;
 
 namespace ArenaVirtualAPI.Services {
     public class UsuarioCampeonatoFavoritoService : IBackendService<UsuarioCampeonatoFavorito, UsuarioCampeonatoFavoritoSyncDto> {

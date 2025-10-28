@@ -1,12 +1,12 @@
 ﻿using ArenaVirtualAPI.Data;
 using ArenaVirtualAPI.Services;
 using Microsoft.EntityFrameworkCore;
-using ArenaVirtualAPI.Models;
 using ArenaVirtualAPI.DTOs;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using ArenaVirtualAPI.Models;
 
 public class CampeonatoService : IBackendService<Campeonato, CampeonatoSyncDto> {
     private readonly ApiDbContext _context;

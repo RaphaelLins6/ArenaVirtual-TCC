@@ -1,8 +1,8 @@
 ﻿using ArenaVirtualAPI.Data;
-using ArenaVirtualAPI.Models;
 using ArenaVirtualAPI.DTOs;
 using Microsoft.EntityFrameworkCore;
 using ArenaVirtualAPI.Services;
+using ArenaVirtualAPI.Models;
 
 
 public class TimeService : IBackendService<Time, TimeSyncDto> {

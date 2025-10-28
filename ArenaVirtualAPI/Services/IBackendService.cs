@@ -1,8 +1,8 @@
-﻿using ArenaVirtualAPI.Models;
-using ArenaVirtualAPI.DTOs;
+﻿using ArenaVirtualAPI.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
+using ArenaVirtualAPI.Models;
 
 namespace ArenaVirtualAPI.Services {
     public interface IBackendService<TModel, TDto>

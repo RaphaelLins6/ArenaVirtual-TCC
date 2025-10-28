@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ArenaVirtualAPI.Models;
 using ArenaVirtualAPI.Data;
+using ArenaVirtualAPI.Models;
 
 namespace ArenaVirtualAPI.Controllers;
 
