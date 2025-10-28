@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 namespace ArenaVirtualAPI.Models;
 
 public class Usuario : ISyncable {
+
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
@@ -42,9 +43,9 @@ public class Usuario : ISyncable {
     // Chave estrangeira e propriedade de navegação para a entidade Time
     public int? TimeId { get; set; }
     [ForeignKey("TimeId")]
-    public virtual Time? Time { get; set; }
+    public virtual Time Time { get; set; }
     [InverseProperty("Capitao")]
-    public virtual Time? TimeCapitao { get; set; }
+    public virtual Time TimeCapitao { get; set; }
 
     // Propriedades de sincronização
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

@@ -36,7 +36,7 @@ namespace ArenaVirtualAPI.Controllers {
                 DataNascimento = user.DataNascimento,
 
                 // CORREÇÃO: Converte o GeneroEnum para string
-                Genero = user.Genero?.ToString(),
+                Genero = user.Genero,
 
                 NomeEmpresa = user.NomeEmpresa,
                 CNPJ = user.CNPJ,
@@ -45,7 +45,7 @@ namespace ArenaVirtualAPI.Controllers {
                 FaixaOrcamentoPatrocinio = user.FaixaOrcamentoPatrocinio,
 
                 // CORREÇÃO: Usa a propriedade TimeClientAppId
-                TimeClientAppId = user.TimeClientAppId
+                TimeClientAppId = (Guid)user.TimeClientAppId
             });
         }
     }

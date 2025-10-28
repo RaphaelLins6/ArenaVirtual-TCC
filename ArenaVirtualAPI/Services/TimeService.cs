@@ -47,7 +47,6 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
                     Descricao = dto.Descricao,
                     DataCriacao = dto.DataCriacao,
                     Regiao = dto.Regiao,
-                    PontuacaoTotal = dto.PontuacaoTotal,
                     Vitorias = dto.Vitorias,
                     Derrotas = dto.Derrotas,
                     Empates = dto.Empates,
@@ -63,7 +62,6 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
                     existingItem.Descricao = dto.Descricao;
                     existingItem.DataCriacao = dto.DataCriacao;
                     existingItem.Regiao = dto.Regiao;
-                    existingItem.PontuacaoTotal = dto.PontuacaoTotal;
                     existingItem.Vitorias = dto.Vitorias;
                     existingItem.Derrotas = dto.Derrotas;
                     existingItem.Empates = dto.Empates;
@@ -80,6 +78,7 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
 
     // Segunda fase: atualização de chaves estrangeiras
     public async Task UpdateForeignKeysAsync(IEnumerable<TimeSyncDto> dtos, Dictionary<string, Dictionary<Guid, int>> idMappings) {
+
         if (!idMappings.TryGetValue("Usuario", out var userMappings)) {
             return;
         }
@@ -89,21 +88,34 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
 
         foreach (var dto in dtos) {
             var existingItem = await _context.Time.FirstOrDefaultAsync(t => t.ClientAppId == dto.ClientAppId);
+
             if (existingItem != null) {
-                if (dto.CapitaoClientAppId.HasValue && userMappings.TryGetValue(dto.CapitaoClientAppId.Value, out int newCapitaoId)) {
+
+                // CORREÇÃO: Inicialize as variáveis locais
+                int newCapitaoId = 0;   // Inicialize com 0 (ou outro valor padrão)
+                int newCampeonatoId = 0; // Inicialize com 0
+
+                // --- 1. Mapeamento de CapitaoId (Obrigatório) ---
+                bool capitaoFound = dto.CapitaoClientAppId.HasValue &&
+                                    userMappings.TryGetValue(dto.CapitaoClientAppId.Value, out newCapitaoId);
+
+                // --- 2. Mapeamento de CampeonatoId (Obrigatório) ---
+                bool campeonatoFound = dto.CampeonatoClientAppId.HasValue &&
+                                       campeonatoMappings.TryGetValue(dto.CampeonatoClientAppId.Value, out newCampeonatoId);
+
+
+                // 3. Verifica a Regra de Negócio: APENAS ATUALIZA SE AMBOS OS IDs FOREM ENCONTRADOS.
+                if (capitaoFound && campeonatoFound) {
+
+                    // Atribuição de valores (o newCapitaoId só é usado se tiver sido atribuído pelo TryGetValue)
                     existingItem.CapitaoId = newCapitaoId;
-                } else {
-                    existingItem.CapitaoId = null;
-                }
-                if (dto.CampeonatoClientAppId.HasValue && campeonatoMappings.TryGetValue(dto.CampeonatoClientAppId.Value, out int newCampeonatoId)) {
                     existingItem.CampeonatoId = newCampeonatoId;
-                } else {
-                    existingItem.CampeonatoId = null;
+
+                    _context.Entry(existingItem).State = EntityState.Modified;
+
                 }
-                _context.Entry(existingItem).State = EntityState.Modified;
             }
         }
-        // CORREÇÃO: Remova o _context.SaveChangesAsync() daqui.
     }
 
     // GetUpdatedSinceAsync está correto e não precisa de alterações.
@@ -120,7 +132,6 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
                 Descricao = t.Descricao,
                 DataCriacao = t.DataCriacao,
                 Regiao = t.Regiao,
-                PontuacaoTotal = t.PontuacaoTotal,
                 Vitorias = t.Vitorias,
                 Derrotas = t.Derrotas,
                 Empates = t.Empates,

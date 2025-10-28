@@ -35,18 +35,18 @@ namespace ArenaVirtual.ViewModels {
 
         [RelayCommand]
         private async Task Login() {
-            //Debug.WriteLine($"[LoginViewModel] Login iniciado. Email: {Email}, Senha preenchida: {!string.IsNullOrEmpty(Senha)}");
-
-            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Senha)) {
-                await alertService.DisplayAlert("Erro", "Preencha o e-mail e a senha.", "OK");
-                //Debug.WriteLine("[LoginViewModel] Falha: email ou senha em branco.");
-                return;
-            }
+            // ... (Inicialização e validação) ...
 
             IsBusy = true;
 
             try {
-                if (IsOffline) {
+                // 🚨 NOVO BLOCO PARA FORÇAR TESTE OFFLINE
+                // ------------------------------------------------------------------
+                bool forcarModoOfflineParaTeste = true; // <-- Defina como TRUE para o teste
+
+                if (IsOffline || forcarModoOfflineParaTeste) {
+                    // ------------------------------------------------------------------
+
                     //Debug.WriteLine("[LoginViewModel] Modo offline detectado. Tentando autenticação local...");
                     var usuarioOffline = await usuarioService.AutenticarOffline(Email, Senha);
                     if (usuarioOffline != null) {
@@ -62,33 +62,38 @@ namespace ArenaVirtual.ViewModels {
                     }
                 }
 
+                // Se forcarModoOfflineParaTeste é TRUE, o código abaixo nunca será executado
+
                 //Debug.WriteLine("[LoginViewModel] Tentando autenticação online...");
-                var usuario = await usuarioService.Autenticar(Email, Senha);
+                //var usuario = await usuarioService.Autenticar(Email, Senha); // <-- Este método será ignorado ou comentado
 
-                if (usuario == null) {
-                    //Debug.WriteLine("[LoginViewModel] Autenticação falhou. Usuário nulo.");
-                    await alertService.DisplayAlert("Erro", "E-mail ou senha inválidos.", "OK");
-                    return;
-                }
+                // ... (Restante da lógica de autenticação online e sincronização) ...
 
-                SessaoService.Instancia.Login(usuario);
-                //Debug.WriteLine($"[LoginViewModel] Login inicial OK. Sessão criada para {usuario.Email} (ID {usuario.ClientAppId})");
+                //if (usuario == null) {
+                //    //Debug.WriteLine("[LoginViewModel] Autenticação falhou. Usuário nulo.");
+                //    await alertService.DisplayAlert("Erro", "E-mail ou senha inválidos.", "OK");
+                //    return;
+                //}
+
+                //SessaoService.Instancia.Login(usuario);
+
+                // 🚨 NOTA: Se você comentar o método Autenticar, lembre-se de que a sincronização não
+                // poderá ser feita aqui, pois 'usuario' será nulo ou o token estará faltando.
+                // O login offline puro deve levar à AppShell imediatamente.
 
                 await syncService.SyncAsync(null);
                 //Debug.WriteLine("[LoginViewModel] Sincronização concluída.");
 
                 App.CurrentUser = await usuarioService.GetUsuarioByEmailAsync(Email);
-                //Debug.WriteLine($"[LoginViewModel] Usuario retornado após sync: {(App.CurrentUser == null ? "NULL" : App.CurrentUser.Email)}");
 
                 if (App.CurrentUser == null || App.CurrentUser.Id == 0) {
                     throw new Exception("Falha na sincronização do usuário.");
                 }
 
                 SessaoService.Instancia.Login(App.CurrentUser);
-                //Debug.WriteLine($"[LoginViewModel] Sessão atualizada com usuário {App.CurrentUser.Email} (ID {App.CurrentUser.ClientAppId}).");
 
                 Application.Current.MainPage = new AppShell(App.CurrentUser, serviceProvider);
-                //Debug.WriteLine("[LoginViewModel] Navegação para AppShell concluída.");
+
             } catch (Exception ex) {
                 //Debug.WriteLine($"[LoginViewModel] Erro no processo de login/sincronização: {ex}");
                 await alertService.DisplayAlert("Erro", "Ocorreu um erro. Tente novamente ou verifique sua conexão.", "OK");

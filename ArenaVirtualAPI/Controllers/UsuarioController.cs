@@ -106,19 +106,19 @@ namespace ArenaVirtualAPI.Controllers {
             Id = u.Id,
             Nome = u.Nome,
             Email = u.Email,
-            Perfil = u.Perfil.ToString(), // Converte Perfil para string
+            Perfil = u.Perfil.ToString(), 
             ImagemPath = u.ImagemPath,
             Localizacao = u.Localizacao,
             Telefone = u.Telefone,
             LinkRedeSocial = u.LinkRedeSocial,
             DataNascimento = u.DataNascimento,
-            Genero = u.Genero?.ToString(), // Converte Genero para string (com verificação de nulo)
+            Genero = u.Genero, 
             NomeEmpresa = u.NomeEmpresa,
             CNPJ = u.CNPJ,
             Peso = u.Peso,
             Altura = u.Altura,
             FaixaOrcamentoPatrocinio = u.FaixaOrcamentoPatrocinio,
-            TimeClientAppId = u.TimeClientAppId, // Corrigido para usar TimeClientAppId
+            TimeClientAppId = u.TimeClientAppId, 
             ClientAppId = u.ClientAppId
         };
     }

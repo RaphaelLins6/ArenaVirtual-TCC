@@ -52,9 +52,6 @@ public class CampeonatoService : IBackendService<Campeonato, CampeonatoSyncDto> 
                     FormatoCampeonato = dto.FormatoCampeonato,
                     LocaisDosJogos = dto.LocaisDosJogos,
                     HaveraPremiacao = dto.HaveraPremiacao,
-                    Descricao = dto.Descricao,
-                    Modalidade = dto.Modalidade,
-                    Regras = dto.Regras,
                     DataTermino = dto.DataTermino,
                     NumeroEquipes = dto.NumeroEquipes,
                     IsSynced = true,
@@ -80,9 +77,6 @@ public class CampeonatoService : IBackendService<Campeonato, CampeonatoSyncDto> 
                 existingItem.FormatoCampeonato = dto.FormatoCampeonato;
                 existingItem.LocaisDosJogos = dto.LocaisDosJogos;
                 existingItem.HaveraPremiacao = dto.HaveraPremiacao;
-                existingItem.Descricao = dto.Descricao;
-                existingItem.Modalidade = dto.Modalidade;
-                existingItem.Regras = dto.Regras;
                 existingItem.DataTermino = dto.DataTermino;
                 existingItem.NumeroEquipes = dto.NumeroEquipes;
                 existingItem.UpdatedAt = DateTime.UtcNow;
@@ -148,10 +142,8 @@ public class CampeonatoService : IBackendService<Campeonato, CampeonatoSyncDto> 
         var existingCampeonato = await _context.Campeonatos.FindAsync(campeonato.Id);
         if (existingCampeonato != null) {
             existingCampeonato.Nome = campeonato.Nome;
-            existingCampeonato.Descricao = campeonato.Descricao;
             existingCampeonato.DataInicio = campeonato.DataInicio;
             existingCampeonato.DataFim = campeonato.DataFim;
-            existingCampeonato.Regras = campeonato.Regras;
             existingCampeonato.IsSynced = true;
             existingCampeonato.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
@@ -177,9 +169,6 @@ public class CampeonatoService : IBackendService<Campeonato, CampeonatoSyncDto> 
                 FormatoCampeonato = c.FormatoCampeonato,
                 LocaisDosJogos = c.LocaisDosJogos,
                 HaveraPremiacao = c.HaveraPremiacao,
-                Descricao = c.Descricao,
-                Modalidade = c.Modalidade,
-                Regras = c.Regras,
                 DataTermino = c.DataTermino,
                 NumeroEquipes = c.NumeroEquipes
             })

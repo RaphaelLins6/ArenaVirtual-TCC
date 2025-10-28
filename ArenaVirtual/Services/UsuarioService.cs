@@ -17,53 +17,53 @@ namespace ArenaVirtual.Services {
         private readonly SyncService _syncService = syncService;
         private readonly ApiService _apiService = apiService;
 
-        public async Task<Usuario?> Autenticar(string email, string senha) {
-            Debug.WriteLine($"[UsuarioService] Tentando autenticação ONLINE para: {email}");
+        //public async Task<Usuario?> Autenticar(string email, string senha) {
+        //    Debug.WriteLine($"[UsuarioService] Tentando autenticação ONLINE para: {email}");
 
-            try {
-                var loginDto = new { Email = email, Senha = senha };
-                var response = await _apiService.PostAsync<LoginResponseDto>("api/auth/login", loginDto);
+        //    try {
+        //        var loginDto = new { Email = email, Senha = senha };
+        //        var response = await _apiService.PostAsync<LoginResponseDto>("api/auth/login", loginDto);
 
-                if (response == null) {
-                    Debug.WriteLine("[UsuarioService] Falha na autenticação online: Resposta da API é NULL.");
-                    return null;
-                }
+        //        if (response == null) {
+        //            Debug.WriteLine("[UsuarioService] Falha na autenticação online: Resposta da API é NULL.");
+        //            return null;
+        //        }
 
-                if (string.IsNullOrEmpty(response.Token)) {
-                    Debug.WriteLine("[UsuarioService] Falha na autenticação online: Token vazio (Credenciais inválidas ou erro de DTO).");
-                    return null;
-                }
+        //        if (string.IsNullOrEmpty(response.Token)) {
+        //            Debug.WriteLine("[UsuarioService] Falha na autenticação online: Token vazio (Credenciais inválidas ou erro de DTO).");
+        //            return null;
+        //        }
 
-                Debug.WriteLine($"[UsuarioService] Autenticação online OK. Token recebido: {response.Token.Substring(0, 10)}...");
+        //        Debug.WriteLine($"[UsuarioService] Autenticação online OK. Token recebido: {response.Token.Substring(0, 10)}...");
 
-                SessaoService.Instancia.Token = response.Token;
+        //        SessaoService.Instancia.Token = response.Token;
 
-                var usuarioLogado = MapearParaUsuario(response);
+        //        var usuarioLogado = MapearParaUsuario(response);
 
-                if (usuarioLogado == null) {
-                    Debug.WriteLine("[UsuarioService] Erro: Mapeamento do usuário retornado pela API falhou.");
-                    return null;
-                }
+        //        if (usuarioLogado == null) {
+        //            Debug.WriteLine("[UsuarioService] Erro: Mapeamento do usuário retornado pela API falhou.");
+        //            return null;
+        //        }
 
-                await _databaseService.UpsertUsuarioAsync(usuarioLogado);
-                return usuarioLogado;
-            } catch (Exception ex) {
-                Debug.WriteLine($"[UsuarioService] Erro catastrófico na autenticação online (Exception): {ex.Message}");
-                return null;
-            }
-        }
+        //        await _databaseService.UpsertUsuarioAsync(usuarioLogado);
+        //        return usuarioLogado;
+        //    } catch (Exception ex) {
+        //        Debug.WriteLine($"[UsuarioService] Erro catastrófico na autenticação online (Exception): {ex.Message}");
+        //        return null;
+        //    }
+        //}
 
-        private Usuario MapearParaUsuario(LoginResponseDto dto) {
-            return new Usuario {
-                Id = dto.Id, 
-                ClientAppId = dto.ClientAppId,
-                Email = dto.Email,
-                Nome = dto.Nome,
-                SenhaHash = dto.SenhaHash, 
-                IsSynced = true,
-                UpdatedAt = DateTime.UtcNow 
-            };
-        }
+        //private Usuario MapearParaUsuario(LoginResponseDto dto) {
+        //    return new Usuario {
+        //        Id = dto.Id, 
+        //        ClientAppId = dto.ClientAppId,
+        //        Email = dto.Email,
+        //        Nome = dto.Nome,
+        //        SenhaHash = dto.SenhaHash, 
+        //        IsSynced = true,
+        //        UpdatedAt = DateTime.UtcNow 
+        //    };
+        //}
 
         public async Task<Usuario?> AutenticarOffline(string email, string senha) {
             try {

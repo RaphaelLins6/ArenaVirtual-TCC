@@ -51,12 +51,12 @@ public class UsuarioService : IBackendService<Usuario, UsuarioSyncDto> {
                 existingItem.Localizacao = dto.Localizacao ?? existingItem.Localizacao;
                 existingItem.Telefone = dto.Telefone ?? existingItem.Telefone;
                 existingItem.LinkRedeSocial = dto.LinkRedeSocial ?? existingItem.LinkRedeSocial;
-                existingItem.DataNascimento = dto.DataNascimento ?? existingItem.DataNascimento;
-                existingItem.Genero = dto.Genero ?? existingItem.Genero;
+                existingItem.DataNascimento = dto.DataNascimento;
+                existingItem.Genero = dto.Genero;
                 existingItem.NomeEmpresa = dto.NomeEmpresa ?? existingItem.NomeEmpresa;
                 existingItem.CNPJ = dto.CNPJ ?? existingItem.CNPJ;
-                existingItem.Peso = dto.Peso ?? existingItem.Peso;
-                existingItem.Altura = dto.Altura ?? existingItem.Altura;
+                existingItem.Peso = dto.Peso;
+                existingItem.Altura = dto.Altura;
                 existingItem.FaixaOrcamentoPatrocinio = dto.FaixaOrcamentoPatrocinio ?? existingItem.FaixaOrcamentoPatrocinio;
                 existingItem.UpdatedAt = DateTime.UtcNow;
                 existingItem.IsSynced = true;
@@ -73,7 +73,6 @@ public class UsuarioService : IBackendService<Usuario, UsuarioSyncDto> {
             return;
         }
 
-        // Pré-carregar os Usuários para evitar múltiplas consultas
         var clientAppIds = dtos.Select(d => d.ClientAppId).ToHashSet();
         var existingItems = await _context.Usuarios
             .Where(u => clientAppIds.Contains(u.ClientAppId))
@@ -81,19 +80,16 @@ public class UsuarioService : IBackendService<Usuario, UsuarioSyncDto> {
 
         foreach (var dto in dtos) {
             if (existingItems.TryGetValue(dto.ClientAppId, out var existingItem)) {
-                if (dto.TimeClientAppId.HasValue && dto.TimeClientAppId.Value != Guid.Empty) {
-                    // Tenta resolver o ClientAppId para o ID inteiro
-                    if (timeMappings.TryGetValue(dto.TimeClientAppId.Value, out int newTimeId)) {
+
+                if (dto.TimeClientAppId != Guid.Empty) {
+
+                    if (timeMappings.TryGetValue((Guid)dto.TimeClientAppId, out int newTimeId)) {
+
                         existingItem.TimeId = newTimeId;
+
                     } else {
-                        // Se o time for novo e não tiver sido mapeado nesta fase, preserva o TimeId
-                        // ou, se a regra for que o FK deve ser resolvido, define como null/0.
-                        // Para evitar erro de FK, vamos definir explicitamente como null se não for mapeado
-                        existingItem.TimeId = null;
                     }
                 } else {
-                    // Se o DTO enviar TimeClientAppId nulo ou Guid.Empty, remove a ligação
-                    existingItem.TimeId = null;
                 }
                 _context.Entry(existingItem).State = EntityState.Modified;
             }
@@ -103,9 +99,6 @@ public class UsuarioService : IBackendService<Usuario, UsuarioSyncDto> {
     // Terceira fase: GetUpdates (correção aqui)
     public async Task<IEnumerable<UsuarioSyncDto>> GetUpdatedSinceAsync(DateTime lastSyncTime) {
         return await _context.Usuarios
-            // Incluindo a propriedade de navegação Time para garantir que a FK Guid seja populada corretamente
-            // NOTE: Isso pode ser removido se 'u.TimeClientAppId' já for uma coluna no DB e for Guid?
-            // Se 'u.TimeClientAppId' for uma coluna no DB:
             .Where(u => u.UpdatedAt > lastSyncTime)
             .Select(u => new UsuarioSyncDto {
                 ClientAppId = u.ClientAppId,
@@ -124,8 +117,8 @@ public class UsuarioService : IBackendService<Usuario, UsuarioSyncDto> {
                 Peso = u.Peso,
                 Altura = u.Altura,
                 FaixaOrcamentoPatrocinio = u.FaixaOrcamentoPatrocinio,
-                // CORREÇÃO: Força o tratamento do GUID nulo para evitar erros de serialização JSON
-                TimeClientAppId = u.TimeClientAppId.HasValue && u.TimeClientAppId.Value != Guid.Empty ? u.TimeClientAppId.Value : (Guid?)null
+
+                TimeClientAppId = u.TimeClientAppId != Guid.Empty ? u.TimeClientAppId : Guid.Empty
             })
             .ToListAsync();
     }

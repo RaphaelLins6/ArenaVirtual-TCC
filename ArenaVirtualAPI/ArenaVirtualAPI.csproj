@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
     <DockerfileContext>..\ArenaVirtual</DockerfileContext>
+    <UserSecretsId>b770b993-5a11-49cb-8ce1-36b426be7ff7</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

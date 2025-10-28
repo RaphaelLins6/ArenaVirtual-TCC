@@ -14,7 +14,7 @@ public class Time : ISyncable {
     [Required]
     public Guid ClientAppId { get; set; }
 
-    public int? CampeonatoId { get; set; }
+    public int CampeonatoId { get; set; }
 
     [Required, MaxLength(100)]
     public string Nome { get; set; } = string.Empty;
@@ -23,25 +23,21 @@ public class Time : ISyncable {
     public string? LogoUrl { get; set; }
 
     [MaxLength(500)]
-    public string? Descricao { get; set; }
+    public string Descricao { get; set; }
 
     public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
 
     [MaxLength(50)]
-    public string? Regiao { get; set; }
+    public string Regiao { get; set; }
 
-    public int PontuacaoTotal { get; set; } = 0;
     public int Vitorias { get; set; } = 0;
     public int Derrotas { get; set; } = 0;
     public int Empates { get; set; } = 0;
 
-    // Chave estrangeira para o ID do capitão no servidor (int)
-    public int? CapitaoId { get; set; }
+    public int CapitaoId { get; set; }
 
-    // **Chave universal do capitão (Guid) para sincronização**
-    public Guid? CapitaoClientAppId { get; set; }
+    public Guid CapitaoClientAppId { get; set; }
 
-    // Propriedades de navegação
     [ForeignKey("CapitaoId")]
     public Usuario? Capitao { get; set; }
 
@@ -49,7 +45,7 @@ public class Time : ISyncable {
     public Campeonato? Campeonato { get; set; }
 
     [JsonIgnore]
-    public ICollection<Usuario>? Membros { get; set; }
+    public ICollection<Usuario> Membros { get; set; }
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public bool IsSynced { get; set; } = false;
