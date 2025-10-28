@@ -118,6 +118,9 @@ namespace ArenaVirtual.Services {
         }
         public Task<Usuario?> ObterUsuarioPorIdAsync(int id) =>
             _database.Table<Usuario>().Where(u => u.Id == id).FirstOrDefaultAsync();
+        public Task<int> UpsertUsuarioAsync(Usuario usuario) {
+            return _database.InsertOrReplaceAsync(usuario);
+        }
 
         // --- MÉTODOS DE JOGADOR ---
         public async Task<List<Usuario>> ObterJogadoresPorCampeonatoAsync(Guid campeonatoClientAppId) {
@@ -618,9 +621,9 @@ namespace ArenaVirtual.Services {
         public async Task SaveDownloadedCampeonatosAsync(IEnumerable<CampeonatoDownloadDto> dtos) {
             foreach (var dto in dtos) {
 
-                if (dto.ClientAppId == Guid.Empty || string.IsNullOrWhiteSpace(dto.Nome)) {
-                    System.Diagnostics.Debug.WriteLine($"[Sync Download Campeonato] Ignorando DTO inválido: ClientAppId: {dto.ClientAppId}, Nome: {dto.Nome}");
-                    continue; 
+                if (dto.ClientAppId == Guid.Empty) {
+                    System.Diagnostics.Debug.WriteLine($"[Sync Download Campeonato] Ignorando DTO inválido: ClientAppId é Guid.Empty.");
+                    continue;
                 }
 
                 var existing = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.ClientAppId == dto.ClientAppId);

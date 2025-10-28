@@ -1,10 +1,13 @@
 ﻿using ArenaVirtual.Models;
 using System.Diagnostics;
+using System.Threading.Tasks; 
 
 namespace ArenaVirtual.Services {
     public class SessaoService {
-        private static SessaoService? _instancia;
+        private static readonly SessaoService _instancia = new SessaoService();
         private Usuario? _usuarioAtual;
+
+        public string Token { get; set; } = string.Empty; 
 
         private SessaoService() {
             //Debug.WriteLine("[SessaoService] Construtor privado chamado.");
@@ -12,10 +15,6 @@ namespace ArenaVirtual.Services {
 
         public static SessaoService Instancia {
             get {
-                if (_instancia == null) {
-                    _instancia = new SessaoService();
-                    //Debug.WriteLine("[SessaoService] Nova instância criada.");
-                }
                 return _instancia;
             }
         }
@@ -33,6 +32,7 @@ namespace ArenaVirtual.Services {
         public void Logout() {
             //Debug.WriteLine($"[SessaoService] Logout chamado. Usuário anterior: {(_usuarioAtual == null ? "NULL" : _usuarioAtual.Email)}");
             _usuarioAtual = null;
+            this.Token = string.Empty; 
         }
 
         public bool EstaLogado {
