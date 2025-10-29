@@ -1,4 +1,5 @@
-﻿using ArenaVirtual.Models;
+﻿using ArenaVirtual.DTOs;
+using ArenaVirtual.Models;
 using System;
 using System.Collections;
 using System.Diagnostics;
@@ -101,6 +102,18 @@ namespace ArenaVirtual.Services {
     }
 
     public class UpdateResponse {
-        public Dictionary<string, JsonElement> UpdatedItems { get; set; } = new();
+        public Dictionary<string, JsonElement> UpdatedItems { get; set; } = new Dictionary<string, JsonElement>();
+        public List<UsuarioSyncDto>? Usuarios { get; set; }
+        public List<CampeonatoSyncDto>? Campeonatos { get; set; }
+        public List<TimeSyncDto>? Times { get; set; }
+        public List<ConviteSyncDto>? Convites { get; set; }
+        public List<JogoSyncDto>? Jogos { get; set; }
+        public List<UsuarioCampeonatoFavoritoSyncDto>? UsuarioCampeonatoFavoritos { get; set; }
+        public List<RodadaDeJogosSyncDto>? RodadasDeJogos { get; set; }
+        public List<InscricaoSyncDto>? Inscricoes { get; set; }
+        public List<EstatisticaPartidaSyncDto>? EstatisticasPartidas { get; set; }
+        public List<AvaliacaoArbitroSyncDto>? AvaliacoesArbitros { get; set; }
+        public List<CampanhaPatrocinioSyncDto>? CampanhasPatrocinios { get; set; }
+        public List<PropostaPatrocinioSyncDto>? PropostasPatrocinios { get; set; }
     }
 }

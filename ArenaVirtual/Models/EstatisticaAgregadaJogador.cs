@@ -1,5 +1,5 @@
 ﻿namespace ArenaVirtual.Models {
-    public class EstatisticaAgregadaJogador {
+    public class EstatisticaAgregadaJogador : ISyncable {
         public int UsuarioId { get; set; }
         public string NomeJogador { get; set; }
         public string ImagemPath { get; set; }
@@ -21,5 +21,10 @@
         public int Arremessos3PontosTentados { get; set; }
         public int LancesLivresConvertidos { get; set; }
         public int LancesLivresTentados { get; set; }
+
+        public int Id { get; set; }
+        public Guid ClientAppId { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public bool IsSynced { get; set; }
     }
 }

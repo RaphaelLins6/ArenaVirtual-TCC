@@ -564,11 +564,9 @@ namespace ArenaVirtual.Services {
         #region Métodos de Sincronização de Download
 
         public async Task SaveDownloadedUsuariosAsync(IEnumerable<UsuarioDownloadDto> dtos) {
-            // Definindo valores padrão seguros
             TipoPerfil perfilPadrao = TipoPerfil.Atleta;
             GeneroEnum generoPadrao = GeneroEnum.Outro;
 
-            // Usando 0.0m para garantir double correto, embora 0.0 também funcione
             double pesoPadrao = 0.0;
             double alturaPadrao = 0.0;
 
@@ -576,33 +574,28 @@ namespace ArenaVirtual.Services {
                 var existing = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.ClientAppId == dto.ClientAppId);
                 bool isNew = existing == null;
                 if (isNew) {
-                    // Garante que ClientAppId é sempre um GUID
-                    existing = new Usuario { ClientAppId = dto.ClientAppId ?? Guid.Empty };
+                    existing = new Usuario { ClientAppId = dto.ClientAppId };
                 }
 
-                existing.IdServidor = dto.Id ?? 0; // Garantindo que IdServidor é 0 se null
+                existing.IdServidor = dto.Id; 
 
-                // Se Nome, Email, ImagemPath, etc. não são anuláveis no modelo Usuario,
-                // use o operador de coalescência nula (??) aqui também:
                 existing.Nome = dto.Nome ?? string.Empty;
                 existing.Email = dto.Email ?? string.Empty;
 
-                // O restante das propriedades de valor já estão corretas:
-                existing.Perfil = dto.Perfil ?? perfilPadrao;
+                existing.Perfil = dto.Perfil ?? perfilPadrao; 
                 existing.ImagemPath = dto.ImagemPath ?? string.Empty;
                 existing.Localizacao = dto.Localizacao ?? string.Empty;
                 existing.Telefone = dto.Telefone ?? string.Empty;
                 existing.LinkRedeSocial = dto.LinkRedeSocial ?? string.Empty;
-                existing.DataNascimento = dto.DataNascimento; // DateTime?
-                existing.Genero = dto.Genero ?? generoPadrao;
+                existing.DataNascimento = dto.DataNascimento; 
+                existing.Genero = dto.Genero; 
                 existing.NomeEmpresa = dto.NomeEmpresa ?? string.Empty;
                 existing.CNPJ = dto.CNPJ ?? string.Empty;
 
-                existing.Peso = dto.Peso ?? pesoPadrao; // double? para double?
-                existing.Altura = dto.Altura ?? alturaPadrao; // double? para double?
+                existing.Peso = dto.Peso ?? pesoPadrao; 
+                existing.Altura = dto.Altura ?? alturaPadrao; 
                 existing.FaixaOrcamentoPatrocinio = dto.FaixaOrcamentoPatrocinio ?? string.Empty;
 
-                // Lógica de FK (TimeId)
                 if (dto.TimeId.HasValue && dto.TimeId > 0) {
                     var time = await _database.Table<Time>().FirstOrDefaultAsync(t => t.IdServidor == dto.TimeId.Value);
                     if (time != null) existing.TimeClientAppId = time.ClientAppId;
@@ -611,7 +604,7 @@ namespace ArenaVirtual.Services {
                 }
 
                 existing.IsSynced = true;
-                existing.UpdatedAt = dto.UpdatedAt ?? DateTime.UtcNow;
+                existing.UpdatedAt = dto.UpdatedAt;
 
                 if (isNew) await _database.InsertAsync(existing);
                 else await _database.UpdateAsync(existing);
@@ -632,7 +625,6 @@ namespace ArenaVirtual.Services {
                     existing = new Campeonato { ClientAppId = dto.ClientAppId };
                 }
 
-                // Mapeamento dos campos
                 existing.IdServidor = dto.Id;
                 existing.Nome = dto.Nome ?? string.Empty;
                 existing.Local = dto.Local;
@@ -653,15 +645,12 @@ namespace ArenaVirtual.Services {
                 existing.DataTermino = dto.DataTermino;
                 existing.NumeroEquipes = dto.NumeroEquipes ?? 0;
 
-                // Associa o Organizador
                 var organizador = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.IdServidor == dto.OrganizadorId);
                 if (organizador != null) existing.OrganizadorClientAppId = organizador.ClientAppId;
 
-                // Campos de controle de sincronização
                 existing.IsSynced = true;
                 existing.UpdatedAt = dto.UpdatedAt;
 
-                // Salva no banco de dados local
                 if (isNew) await _database.InsertAsync(existing);
                 else await _database.UpdateAsync(existing);
             }
@@ -672,7 +661,7 @@ namespace ArenaVirtual.Services {
 
                 if (dto.ClientAppId == Guid.Empty || string.IsNullOrWhiteSpace(dto.Nome)) {
                     System.Diagnostics.Debug.WriteLine($"[Sync Download Time] Ignorando DTO inválido: ClientAppId: {dto.ClientAppId}, Nome: {dto.Nome}");
-                    continue; 
+                    continue;
                 }
 
                 var existing = await _database.Table<Time>().FirstOrDefaultAsync(t => t.ClientAppId == dto.ClientAppId);
@@ -681,7 +670,6 @@ namespace ArenaVirtual.Services {
                     existing = new Time { ClientAppId = dto.ClientAppId };
                 }
 
-                // Mapeamento dos dados do DTO para o objeto local existente ou novo
                 existing.IdServidor = dto.Id;
                 existing.Nome = dto.Nome ?? string.Empty;
                 existing.LogoUrl = dto.LogoUrl;
@@ -693,20 +681,18 @@ namespace ArenaVirtual.Services {
                 existing.Derrotas = dto.Derrotas;
                 existing.Empates = dto.Empates;
 
-                // Lógica de FK para Campeonato
                 if (dto.CampeonatoId.HasValue && dto.CampeonatoId > 0) {
                     var camp = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.IdServidor == dto.CampeonatoId.Value);
                     if (camp != null) existing.CampeonatoClientAppId = camp.ClientAppId;
-                    else existing.CampeonatoClientAppId = Guid.Empty; 
+                    else existing.CampeonatoClientAppId = Guid.Empty;
                 } else {
                     existing.CampeonatoClientAppId = Guid.Empty;
                 }
 
-                // Lógica de FK para Capitão
                 if (dto.CapitaoId.HasValue && dto.CapitaoId > 0) {
                     var capitao = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.IdServidor == dto.CapitaoId.Value);
                     if (capitao != null) existing.CapitaoClientAppId = capitao.ClientAppId;
-                    else existing.CapitaoClientAppId = null; // Caso o Capitão não tenha sido baixado ainda
+                    else existing.CapitaoClientAppId = null; 
                 } else {
                     existing.CapitaoClientAppId = null;
                 }
@@ -799,7 +785,6 @@ namespace ArenaVirtual.Services {
                 var camp = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.IdServidor == dto.CampeonatoId);
                 if (camp != null) {
                     existing.CampeonatoClientAppId = camp.ClientAppId;
-                    existing.CampeonatoId = camp.Id; // ID local (int)
                 } else {
                     existing.CampeonatoClientAppId = Guid.Empty;
                 }
@@ -812,13 +797,194 @@ namespace ArenaVirtual.Services {
                 }
 
                 var timeA = await _database.Table<Time>().FirstOrDefaultAsync(t => t.IdServidor == dto.TimeAId);
-                existing.TimeAId = timeA?.Id ?? 0;
+                existing.TimeAId = timeA.Id;
 
                 var timeB = await _database.Table<Time>().FirstOrDefaultAsync(t => t.IdServidor == dto.TimeBId);
-                existing.TimeBId = timeB?.Id ?? 0;
+                existing.TimeBId = timeB.Id;
 
                 existing.IsSynced = true;
                 existing.UpdatedAt = dto.UpdatedAt;
+
+                if (isNew) await _database.InsertAsync(existing);
+                else await _database.UpdateAsync(existing);
+            }
+        }
+
+        public async Task SaveDownloadedRodadaDeJogosAsync(IEnumerable<RodadaDeJogosDownloadDto> dtos) {
+            foreach (var dto in dtos) {
+                var existing = await _database.Table<RodadaDeJogos>().FirstOrDefaultAsync(r => r.ClientAppId == dto.ClientAppId);
+                bool isNew = existing == null;
+                if (isNew) {
+                    existing = new RodadaDeJogos { ClientAppId = dto.ClientAppId };
+                }
+
+                existing.NomeRodada = dto.NomeRodada;
+                existing.UpdatedAt = dto.UpdatedAt;
+
+                // Lógica de FK para Campeonato
+                var camp = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.IdServidor == dto.Id);
+                existing.ClientAppId = camp?.ClientAppId ?? Guid.Empty;
+
+                existing.IsSynced = true;
+
+                if (isNew) await _database.InsertAsync(existing);
+                else await _database.UpdateAsync(existing);
+            }
+        }
+
+        public async Task SaveDownloadedInscricaosAsync(IEnumerable<InscricaoDownloadDto> dtos) {
+            foreach (var dto in dtos) {
+                var existing = await _database.Table<Inscricao>().FirstOrDefaultAsync(i => i.ClientAppId == dto.ClientAppId);
+                bool isNew = existing == null;
+                if (isNew) {
+                    existing = new Inscricao { ClientAppId = dto.ClientAppId };
+                }
+
+                existing.Status = dto.Status;
+                existing.UpdatedAt = dto.UpdatedAt;
+
+                // Lógica de FK para Time
+                var time = await _database.Table<Time>().FirstOrDefaultAsync(t => t.IdServidor == dto.TimeId);
+                existing.TimeClientAppId = time?.ClientAppId ?? Guid.Empty;
+
+                // Lógica de FK para Campeonato
+                var camp = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.IdServidor == dto.CampeonatoId);
+                existing.CampeonatoClientAppId = camp?.ClientAppId ?? Guid.Empty;
+
+                existing.IsSynced = true;
+
+                if (isNew) await _database.InsertAsync(existing);
+                else await _database.UpdateAsync(existing);
+            }
+        }
+
+        public async Task SaveDownloadedEstatisticaPartidasAsync(IEnumerable<EstatisticaPartidaDownloadDto> dtos) {
+            foreach (var dto in dtos) {
+                var existing = await _database.Table<EstatisticaPartida>().FirstOrDefaultAsync(e => e.ClientAppId == dto.ClientAppId);
+                bool isNew = existing == null;
+                if (isNew) {
+                    existing = new EstatisticaPartida { ClientAppId = dto.ClientAppId };
+                }
+
+                existing.Pontos = dto.Pontos;
+                existing.Rebotes = dto.Rebotes;
+                existing.Assistencias = dto.Assistencias;
+                existing.Roubos = dto.Roubos;
+                existing.Bloqueios = dto.Bloqueios;
+                existing.Faltas = dto.Faltas;
+                existing.Turnovers = dto.Turnovers;
+                existing.Arremessos2PontosConvertidos = dto.Arremessos2PontosConvertidos;
+                existing.Arremessos2PontosTentados = dto.Arremessos2PontosTentados;
+                existing.Arremessos3PontosConvertidos = dto.Arremessos3PontosConvertidos;
+                existing.Arremessos3PontosTentados = dto.Arremessos3PontosTentados;
+                existing.LancesLivresConvertidos = dto.LancesLivresConvertidos;
+                existing.LancesLivresTentados = dto.LancesLivresTentados;
+                existing.UpdatedAt = dto.UpdatedAt;
+
+                // Lógica de FK para Usuário
+                var user = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.IdServidor == dto.UsuarioId);
+                existing.ClientAppId = user?.ClientAppId ?? Guid.Empty;
+
+                // Lógica de FK para Jogo
+                var jogo = await _database.Table<Jogo>().FirstOrDefaultAsync(j => j.IdServidor == dto.JogoId);
+                existing.ClientAppId = jogo?.ClientAppId ?? Guid.Empty;
+
+                // Lógica de FK para Time
+                var time = await _database.Table<Time>().FirstOrDefaultAsync(t => t.IdServidor == dto.TimeId);
+                existing.ClientAppId = time?.ClientAppId ?? Guid.Empty;
+
+                existing.IsSynced = true;
+
+                if (isNew) await _database.InsertAsync(existing);
+                else await _database.UpdateAsync(existing);
+            }
+        }
+
+        public async Task SaveDownloadedAvaliacaoArbitrosAsync(IEnumerable<AvaliacaoArbitroDownloadDto> dtos) {
+            foreach (var dto in dtos) {
+                var existing = await _database.Table<AvaliacaoArbitro>().FirstOrDefaultAsync(a => a.ClientAppId == dto.ClientAppId);
+                bool isNew = existing == null;
+                if (isNew) {
+                    existing = new AvaliacaoArbitro { ClientAppId = dto.ClientAppId };
+                }
+
+                existing.Comentarios = dto.Comentarios;
+                existing.Nota = dto.Nota;
+                existing.UpdatedAt = dto.UpdatedAt;
+
+                // Lógica de FK para Arbitro (Usuário)
+                var arbitro = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.IdServidor == dto.ArbitroId);
+                existing.ClientAppId = arbitro?.ClientAppId ?? Guid.Empty;
+
+                // Lógica de FK para Jogo
+                var jogo = await _database.Table<Jogo>().FirstOrDefaultAsync(j => j.IdServidor == dto.JogoId);
+                existing.ClientAppId = jogo?.ClientAppId ?? Guid.Empty;
+
+                existing.IsSynced = true;
+
+                if (isNew) await _database.InsertAsync(existing);
+                else await _database.UpdateAsync(existing);
+            }
+        }
+
+        public async Task SaveDownloadedCampanhaPatrociniosAsync(IEnumerable<CampanhaPatrocinioDownloadDto> dtos) {
+            foreach (var dto in dtos) {
+                var existing = await _database.Table<CampanhaPatrocinio>().FirstOrDefaultAsync(c => c.ClientAppId == dto.ClientAppId);
+                bool isNew = existing == null;
+                if (isNew) {
+                    existing = new CampanhaPatrocinio { ClientAppId = dto.ClientAppId };
+                }
+
+                existing.ImagemPatrocinador = dto.ImagemPatrocinador;
+                existing.Nome = dto.Nome;
+                existing.ValorProposta = dto.ValorProposta;
+                existing.Inicio = dto.Inicio;
+                existing.Fim = dto.Fim;
+                existing.Descricao = dto.Descricao;
+                existing.UpdatedAt = dto.UpdatedAt;
+
+                // Lógica de FK para Patrocinador (Usuário)
+                var patrocinador = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.IdServidor == dto.PatrocinadorId);
+                existing.ClientAppId = patrocinador?.ClientAppId ?? Guid.Empty;
+
+                // Lógica de FK para Campeonato
+                var camp = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.IdServidor == dto.CampeonatoId);
+                existing.ClientAppId = camp?.ClientAppId ?? Guid.Empty;
+
+                existing.IsSynced = true;
+
+                if (isNew) await _database.InsertAsync(existing);
+                else await _database.UpdateAsync(existing);
+            }
+        }
+
+        public async Task SaveDownloadedPropostaPatrociniosAsync(IEnumerable<PropostaPatrocinioDownloadDto> dtos) {
+            foreach (var dto in dtos) {
+                var existing = await _database.Table<PropostaPatrocinio>().FirstOrDefaultAsync(p => p.ClientAppId == dto.ClientAppId);
+                bool isNew = existing == null;
+                if (isNew) {
+                    existing = new PropostaPatrocinio { ClientAppId = dto.ClientAppId };
+                }
+
+                existing.NomePatrocinador = dto.NomePatrocinador;
+                existing.ImagemPatrocinador = dto.ImagemPatrocinador;
+                existing.LinkPatrocinador = dto.LinkPatrocinador;
+                existing.ValorMonetario = dto.ValorMonetario;
+                existing.DataInicio = dto.DataInicio;
+                existing.DataFim = dto.DataFim;
+                existing.Mensagem = dto.Mensagem;
+                existing.Aprovada = dto.Aprovada;
+                existing.UpdatedAt = dto.UpdatedAt;
+
+                // Lógica de FK para Patrocinador (Usuário)
+                var patrocinador = await _database.Table<Usuario>().FirstOrDefaultAsync(u => u.IdServidor == dto.PatrocinadorId);
+                existing.ClientAppId = patrocinador?.ClientAppId ?? Guid.Empty;
+
+                // Lógica de FK para Campeonato
+                var camp = await _database.Table<Campeonato>().FirstOrDefaultAsync(c => c.IdServidor == dto.CampeonatoId);
+                existing.ClientAppId = camp?.ClientAppId ?? Guid.Empty;
+
+                existing.IsSynced = true;
 
                 if (isNew) await _database.InsertAsync(existing);
                 else await _database.UpdateAsync(existing);

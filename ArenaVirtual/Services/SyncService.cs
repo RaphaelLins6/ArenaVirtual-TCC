@@ -17,8 +17,14 @@ public class SyncService {
     typeof(Campeonato),
     typeof(Jogo),
     typeof(Convite),
-    typeof(UsuarioCampeonatoFavorito)
-};
+    typeof(UsuarioCampeonatoFavorito),
+    typeof(RodadaDeJogos),
+    typeof(Inscricao),
+    typeof(PropostaPatrocinio),
+    typeof(CampanhaPatrocinio),
+    typeof(EstatisticaPartida),
+    typeof(AvaliacaoArbitro)
+    };
 
     private readonly Dictionary<string, Type> _downloadDtoMap = new Dictionary<string, Type>
     {
@@ -27,7 +33,13 @@ public class SyncService {
         { "Time", typeof(TimeDownloadDto) },
         { "Convite", typeof(ConviteDownloadDto) },
         { "UsuarioCampeonatoFavorito", typeof(UsuarioCampeonatoFavoritoDownloadDto) },
-        { "Jogo", typeof(JogoDownloadDto) }
+        { "Jogo", typeof(JogoDownloadDto) },
+        { "RodadaDeJogos", typeof(RodadaDeJogosDownloadDto) },
+        { "Inscricao", typeof(InscricaoDownloadDto) },
+        { "EstatisticaPartida", typeof(EstatisticaPartidaDownloadDto) },
+        { "AvaliacaoArbitro", typeof(AvaliacaoArbitroDownloadDto) },
+        { "CampanhaPatrocinio", typeof(CampanhaPatrocinioDownloadDto) },
+        { "PropostaPatrocinio", typeof(PropostaPatrocinioDownloadDto) }
     };
 
     public SyncService(DatabaseService databaseService, ApiService apiService) {
