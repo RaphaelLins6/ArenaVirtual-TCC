@@ -13,8 +13,6 @@
     <ContentPage.Resources>
         <converters:IntToPhaseNameConverter x:Key="PhaseNameConverter" />
         <converters:IntToBracketMarginConverter x:Key="BracketMarginConverter" />
-        <converters:SelectedStatConverter x:Key="SelectedStatConverter" />
-        <converters:SelectedStatTextConverter x:Key="SelectedStatTextConverter" />
         <converters:SequenciaToColorConverter x:Key="SequenciaToColorConverter" />
     </ContentPage.Resources>
 
@@ -863,34 +861,7 @@
                                         CornerRadius="15"
                                         FontSize="14"
                                         Style="{StaticResource BotaoPrincipal}"
-                                        Text="{Binding .}">
-                                        <VisualStateManager.VisualStateGroups>
-                                            <VisualStateGroup x:Name="CommonStates">
-
-                                                <VisualState x:Name="Normal">
-                                                    <VisualState.Setters>
-                                                        <Setter Property="BackgroundColor" Value="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=EstatisticaSelecionada, Converter={StaticResource SelectedStatConverter}, ConverterParameter={Binding .}}" />
-                                                        <Setter Property="TextColor" Value="{Binding Source={RelativeSource AncestorType={x:Type vm:CampeonatoDetailViewModel}}, Path=EstatisticaSelecionada, Converter={StaticResource SelectedStatTextConverter}, ConverterParameter={Binding .}}" />
-                                                    </VisualState.Setters>
-                                                </VisualState>
-
-                                                <VisualState x:Name="PointerOver">
-                                                    <VisualState.Setters>
-                                                        <Setter Property="BackgroundColor" Value="#FFA500" />
-                                                        <Setter Property="TextColor" Value="Black" />
-                                                    </VisualState.Setters>
-                                                </VisualState>
-
-                                                <VisualState x:Name="Pressed">
-                                                    <VisualState.Setters>
-                                                        <Setter Property="BackgroundColor" Value="#FF6600" />
-                                                        <Setter Property="TextColor" Value="White" />
-                                                    </VisualState.Setters>
-                                                </VisualState>
-
-                                            </VisualStateGroup>
-                                        </VisualStateManager.VisualStateGroups>
-                                    </Button>
+                                        Text="{Binding .}" />
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </FlexLayout>
