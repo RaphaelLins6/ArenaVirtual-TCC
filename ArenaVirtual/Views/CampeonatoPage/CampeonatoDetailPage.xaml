@@ -121,7 +121,7 @@
                     <Label
                         Margin="15,0,15,5"
                         FontAttributes="Bold"
-                        FontSize="Subtitle"
+                        FontSize="20"
                         HorizontalOptions="Center"
                         Text="Patrocínio Principal"
                         TextColor="White" />
@@ -669,166 +669,171 @@
                         Text="Estatísticas do Campeonato (Médias por Jogo)"
                         TextColor="White" />
 
-                    <CollectionView ItemsSource="{Binding EstatisticasTimes}">
-                        <CollectionView.Header>
-                            <Grid Padding="5" ColumnDefinitions="50,*,60,60,60,60,60,60,60,60,60,60">
-                                <Label
-                                    Grid.Column="1"
-                                    FontAttributes="Bold"
-                                    Text="Time"
-                                    TextColor="Orange" />
-                                <Label
-                                    Grid.Column="2"
-                                    FontAttributes="Bold"
-                                    HorizontalOptions="Center"
-                                    Text="P/J"
-                                    TextColor="Orange" />
-                                <Label
-                                    Grid.Column="3"
-                                    FontAttributes="Bold"
-                                    HorizontalOptions="Center"
-                                    Text="RBT/J"
-                                    TextColor="Orange" />
-                                <Label
-                                    Grid.Column="4"
-                                    FontAttributes="Bold"
-                                    HorizontalOptions="Center"
-                                    Text="AST/J"
-                                    TextColor="Orange" />
-                                <Label
-                                    Grid.Column="5"
-                                    FontAttributes="Bold"
-                                    HorizontalOptions="Center"
-                                    Text="ROU/J"
-                                    TextColor="Orange" />
-                                <Label
-                                    Grid.Column="6"
-                                    FontAttributes="Bold"
-                                    HorizontalOptions="Center"
-                                    Text="BLO/J"
-                                    TextColor="Orange" />
-                                <Label
-                                    Grid.Column="7"
-                                    FontAttributes="Bold"
-                                    HorizontalOptions="Center"
-                                    Text="T/J"
-                                    TextColor="Orange" />
-                                <Label
-                                    Grid.Column="8"
-                                    FontAttributes="Bold"
-                                    HorizontalOptions="Center"
-                                    Text="F/J"
-                                    TextColor="Orange" />
+                    <ScrollView Orientation="Horizontal">
+                        <CollectionView ItemsSource="{Binding EstatisticasTimes}">
 
-                                <Label
-                                    Grid.Column="9"
-                                    FontAttributes="Bold"
-                                    HorizontalOptions="Center"
-                                    Text="2P%"
-                                    TextColor="Orange" />
-                                <Label
-                                    Grid.Column="10"
-                                    FontAttributes="Bold"
-                                    HorizontalOptions="Center"
-                                    Text="3P%"
-                                    TextColor="Orange" />
-                                <Label
-                                    Grid.Column="11"
-                                    FontAttributes="Bold"
-                                    HorizontalOptions="Center"
-                                    Text="LL%"
-                                    TextColor="Orange" />
-                            </Grid>
-                        </CollectionView.Header>
-
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="{x:Type vm:TimeEstatisticaViewModel}">
+                            <CollectionView.Header>
                                 <Grid
                                     Padding="5"
-                                    BackgroundColor="#282828"
-                                    ColumnDefinitions="50,*,60,60,60,60,60,60,60,60,60,60">
-
-                                    <Image
-                                        Grid.Column="0"
-                                        HeightRequest="40"
-                                        Source="{Binding logoUrl}"
-                                        WidthRequest="40" />
+                                    ColumnDefinitions="40,100,46,46,46,46,46,46,46,46,46,46"
+                                    WidthRequest="600">
                                     <Label
                                         Grid.Column="1"
-                                        Text="{Binding NomeTime}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
+                                        FontAttributes="Bold"
+                                        Text="Time"
+                                        TextColor="Orange" />
 
                                     <Label
                                         Grid.Column="2"
+                                        FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="{Binding MediaPontos, StringFormat='{0:F1}'}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
+                                        Text="P/J"
+                                        TextColor="Orange" />
                                     <Label
                                         Grid.Column="3"
+                                        FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="{Binding MediaRebotes, StringFormat='{0:F1}'}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
+                                        Text="RBT/J"
+                                        TextColor="Orange" />
                                     <Label
                                         Grid.Column="4"
+                                        FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="{Binding MediaAssistencias, StringFormat='{0:F1}'}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
+                                        Text="AST/J"
+                                        TextColor="Orange" />
                                     <Label
                                         Grid.Column="5"
+                                        FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="{Binding MediaRoubos, StringFormat='{0:F1}'}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
+                                        Text="ROU/J"
+                                        TextColor="Orange" />
                                     <Label
                                         Grid.Column="6"
+                                        FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="{Binding MediaBloqueios, StringFormat='{0:F1}'}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
+                                        Text="BLO/J"
+                                        TextColor="Orange" />
                                     <Label
                                         Grid.Column="7"
+                                        FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="{Binding MediaTurnovers, StringFormat='{0:F1}'}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
+                                        Text="T/J"
+                                        TextColor="Orange" />
                                     <Label
                                         Grid.Column="8"
+                                        FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="{Binding MediaFaltas, StringFormat='{0:F1}'}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
-
+                                        Text="F/J"
+                                        TextColor="Orange" />
                                     <Label
                                         Grid.Column="9"
+                                        FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="{Binding Percentual2P, StringFormat='{0:F1}'}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
+                                        Text="2P%"
+                                        TextColor="Orange" />
                                     <Label
                                         Grid.Column="10"
+                                        FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="{Binding Percentual3P, StringFormat='{0:F1}'}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
+                                        Text="3P%"
+                                        TextColor="Orange" />
                                     <Label
                                         Grid.Column="11"
+                                        FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="{Binding PercentualLancesLivres, StringFormat='{0:F1}'}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
+                                        Text="LL%"
+                                        TextColor="Orange" />
                                 </Grid>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+                            </CollectionView.Header>
+
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="{x:Type vm:TimeEstatisticaViewModel}">
+                                    <Grid
+                                        Padding="0,5"
+                                        BackgroundColor="#282828"
+                                        ColumnDefinitions="40,100,46,46,46,46,46,46,46,46,46,46"
+                                        WidthRequest="600">
+                                        <Image
+                                            Grid.Column="0"
+                                            HeightRequest="40"
+                                            Source="{Binding logoUrl}"
+                                            WidthRequest="30" />
+                                        <Label
+                                            Grid.Column="1"
+                                            Text="{Binding NomeTime}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+
+                                        <Label
+                                            Grid.Column="2"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding MediaPontos, StringFormat='{0:F1}'}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            Grid.Column="3"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding MediaRebotes, StringFormat='{0:F1}'}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            Grid.Column="4"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding MediaAssistencias, StringFormat='{0:F1}'}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            Grid.Column="5"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding MediaRoubos, StringFormat='{0:F1}'}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            Grid.Column="6"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding MediaBloqueios, StringFormat='{0:F1}'}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            Grid.Column="7"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding MediaTurnovers, StringFormat='{0:F1}'}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            Grid.Column="8"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding MediaFaltas, StringFormat='{0:F1}'}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            Grid.Column="9"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding Percentual2P, StringFormat='{0:F1}'}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            Grid.Column="10"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding Percentual3P, StringFormat='{0:F1}'}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            Grid.Column="11"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding PercentualLancesLivres, StringFormat='{0:F1}'}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
+
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </ScrollView>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Padding="0" Spacing="0">
 
-                    <!--  Título  -->
                     <Label
                         Margin="15,10,15,5"
                         FontAttributes="Bold"

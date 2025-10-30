@@ -18,6 +18,7 @@
             <converters:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmptyConverter" />
             <converters:InverterBooleanConverter x:Key="InverterBooleanConverter" />
             <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
+            <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
 
             <x:Array x:Key="PerfilTipos" Type="{x:Type x:String}">
                 <x:String>Atleta</x:String>

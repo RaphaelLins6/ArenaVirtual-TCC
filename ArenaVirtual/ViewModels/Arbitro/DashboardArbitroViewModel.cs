@@ -1,6 +1,7 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Models.ViewModels.Shared;
 using ArenaVirtual.Services;
+using ArenaVirtual.Views.Arbitro;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -155,11 +156,21 @@ namespace ArenaVirtual.ViewModels.Arbitro {
             //Debug.WriteLine($"[COMMAND LOG] Tentando navegar para Jogo ID: {partidaDetalhe.Jogo.Id} usando Dictionary.");
 
             try {
-                await Shell.Current.GoToAsync("LancamentoEstatisticaPage", navigationParameters);
-                //Debug.WriteLine("[COMMAND LOG] Navegação solicitada com sucesso (via Dictionary).");
+                await Shell.Current.GoToAsync(nameof(LancamentoEstatisticaPage), navigationParameters);
             } catch (Exception ex) {
-               //Debug.WriteLine($"[COMMAND LOG ERROR] FALHA NA NAVEGAÇÃO: {ex.Message}");
-                await Shell.Current.DisplayAlert("Erro de Navegação", "Não foi possível abrir a tela de estatísticas. Verifique a rota no AppShell.", "OK");
+                // 1. Loga a mensagem REAL da exceção no console de debug (visual studio)
+                //System.Diagnostics.Debug.WriteLine($"[SHELL NAVIGATION ERROR] Rota: {nameof(LancamentoEstatisticaPage)}. Mensagem: {ex.Message}");
+
+                // 2. Exibe a mensagem REAL da exceção para o usuário
+                string mensagemErro = $"Mensagem de Erro: {ex.Message}\nVerifique o AppShell.";
+
+                // 3. Opcional: Se houver exceções internas, exiba-as também.
+                if (ex.InnerException != null) {
+                    mensagemErro += $"\nInner Exception: {ex.InnerException.Message}";
+                    //System.Diagnostics.Debug.WriteLine($"[SHELL NAVIGATION ERROR] Inner Exception: {ex.InnerException.Message}");
+                }
+
+                await Shell.Current.DisplayAlert("ERRO DE NAVEGAÇÃO FATAL", mensagemErro, "OK");
             }
         }
     }

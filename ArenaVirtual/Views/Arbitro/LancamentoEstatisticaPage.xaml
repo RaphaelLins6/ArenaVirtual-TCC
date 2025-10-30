@@ -3,6 +3,7 @@
     x:Class="ArenaVirtual.Views.Arbitro.LancamentoEstatisticaPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:ArenaVirtual.Converters"
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.Arbitro"
     Title="Lançar Estatísticas"
     x:DataType="vm:LancamentoEstatisticaViewModel"
@@ -94,270 +95,273 @@
                     Text="{Binding Jogo.TimeA.Nome, StringFormat='Estatísticas Individuais - {0}'}"
                     TextColor="#FF4500" />
 
-                <CollectionView ItemsSource="{Binding EstatisticasTimeA}">
-                    <CollectionView.Header>
-                        <Grid
-                            Padding="10,0"
-                            BackgroundColor="#1E1E1E"
-                            ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70">
-                            <Label
-                                Grid.Column="1"
-                                FontAttributes="Bold"
-                                Text="Atleta"
-                                TextColor="White"
-                                VerticalOptions="Center" />
-                            <Label
-                                Grid.Column="2"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="PTS"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="3"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="REB"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="4"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="AST"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="5"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="ROU"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="6"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="BLO"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="7"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="TOV"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="8"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="Faltas"
-                                TextColor="#FFA500" />
+                <ScrollView Orientation="Horizontal">
+                    <CollectionView ItemsSource="{Binding EstatisticasTimeA}">
+                        <CollectionView.Header>
+                            <Grid
+                                Padding="10,0"
+                                BackgroundColor="#1E1E1E"
+                                ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70"
+                                WidthRequest="1040">
+                                <Label
+                                    Grid.Column="1"
+                                    FontAttributes="Bold"
+                                    Text="Atleta"
+                                    TextColor="White"
+                                    VerticalOptions="Center" />
+                                <Label
+                                    Grid.Column="2"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="PTS"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="3"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="REB"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="4"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="AST"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="5"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="ROU"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="6"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="BLO"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="7"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="TOV"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="8"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="Faltas"
+                                    TextColor="#FFA500" />
 
-                            <Label
-                                Grid.Column="9"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="2C"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="10"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="2T"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="11"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="3C"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="12"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="3T"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="13"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="LLC"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="14"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="LLT"
-                                TextColor="#FFA500" />
-                        </Grid>
-                    </CollectionView.Header>
+                                <Label
+                                    Grid.Column="9"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="2C"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="10"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="2T"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="11"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="3C"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="12"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="3T"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="13"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="LLC"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="14"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="LLT"
+                                    TextColor="#FFA500" />
+                            </Grid>
+                        </CollectionView.Header>
 
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:AtletaEstatisticaItem">
-                            <Frame
-                                Margin="0,2"
-                                Padding="5"
-                                BackgroundColor="#282828"
-                                CornerRadius="5">
-                                <Grid ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:AtletaEstatisticaItem">
+                                <Frame
+                                    Margin="0,2"
+                                    Padding="5"
+                                    BackgroundColor="#282828"
+                                    CornerRadius="5">
+                                    <Grid ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70">
 
-                                    <Image
-                                        Grid.Column="0"
-                                        Margin="0,0,5,0"
-                                        HeightRequest="30"
-                                        HorizontalOptions="Center"
-                                        Source="{Binding FotoAtletaUrl}"
-                                        VerticalOptions="Center"
-                                        WidthRequest="30">
-                                        <Image.Clip>
-                                            <EllipseGeometry
-                                                Center="15, 15"
-                                                RadiusX="15"
-                                                RadiusY="15" />
-                                        </Image.Clip>
-                                    </Image>
+                                        <Image
+                                            Grid.Column="0"
+                                            Margin="0,0,5,0"
+                                            HeightRequest="30"
+                                            HorizontalOptions="Center"
+                                            Source="{Binding FotoAtletaUrl}"
+                                            VerticalOptions="Center"
+                                            WidthRequest="30">
+                                            <Image.Clip>
+                                                <EllipseGeometry
+                                                    Center="15, 15"
+                                                    RadiusX="15"
+                                                    RadiusY="15" />
+                                            </Image.Clip>
+                                        </Image>
 
-                                    <Label
-                                        Grid.Column="1"
-                                        Margin="5,0"
-                                        FontSize="14"
-                                        Text="{Binding NomeAtleta}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
+                                        <Label
+                                            Grid.Column="1"
+                                            Margin="5,0"
+                                            FontSize="14"
+                                            Text="{Binding NomeAtleta}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
 
-                                    <Entry
-                                        Grid.Column="2"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Pontos}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="3"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Rebotes}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="4"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Assistencias}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="5"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Roubos}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="6"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Bloqueios}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="7"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Turnovers}"
-                                        TextColor="White" />
+                                        <Entry
+                                            Grid.Column="2"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Pontos}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="3"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Rebotes}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="4"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Assistencias}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="5"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Roubos}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="6"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Bloqueios}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="7"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Turnovers}"
+                                            TextColor="White" />
 
-                                    <Entry
-                                        Grid.Column="8"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Faltas}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="9"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Arremessos2PontosConvertidos}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="10"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Arremessos2PontosTentados}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="11"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Arremessos3PontosConvertidos}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="12"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Arremessos3PontosTentados}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="13"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding LancesLivresConvertidos}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="14"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding LancesLivresTentados}"
-                                        TextColor="White" />
+                                        <Entry
+                                            Grid.Column="8"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Faltas}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="9"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Arremessos2PontosConvertidos}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="10"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Arremessos2PontosTentados}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="11"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Arremessos3PontosConvertidos}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="12"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Arremessos3PontosTentados}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="13"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding LancesLivresConvertidos}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="14"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding LancesLivresTentados}"
+                                            TextColor="White" />
 
-                                </Grid>
-                            </Frame>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </ScrollView>
 
                 <Label
                     Margin="0,30,0,0"
@@ -366,270 +370,272 @@
                     Text="{Binding Jogo.TimeB.Nome, StringFormat='Estatísticas Individuais - {0}'}"
                     TextColor="#FF4500" />
 
-                <CollectionView ItemsSource="{Binding EstatisticasTimeB}">
-                    <CollectionView.Header>
-                        <Grid
-                            Padding="10,0"
-                            BackgroundColor="#1E1E1E"
-                            ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70">
-                            <Label
-                                Grid.Column="1"
-                                FontAttributes="Bold"
-                                Text="Atleta"
-                                TextColor="White"
-                                VerticalOptions="Center" />
-                            <Label
-                                Grid.Column="2"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="PTS"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="3"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="REB"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="4"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="AST"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="5"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="ROU"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="6"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="BLO"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="7"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="TOV"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="8"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="Faltas"
-                                TextColor="#FFA500" />
+                <ScrollView Orientation="Horizontal">
+                    <CollectionView ItemsSource="{Binding EstatisticasTimeB}">
+                        <CollectionView.Header>
+                            <Grid
+                                Padding="10,0"
+                                BackgroundColor="#1E1E1E"
+                                ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70"
+                                WidthRequest="1040">
+                                <Label
+                                    Grid.Column="1"
+                                    FontAttributes="Bold"
+                                    Text="Atleta"
+                                    TextColor="White"
+                                    VerticalOptions="Center" />
+                                <Label
+                                    Grid.Column="2"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="PTS"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="3"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="REB"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="4"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="AST"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="5"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="ROU"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="6"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="BLO"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="7"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="TOV"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="8"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="Faltas"
+                                    TextColor="#FFA500" />
 
-                            <Label
-                                Grid.Column="9"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="2C"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="10"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="2T"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="11"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="3C"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="12"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="3T"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="13"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="LLC"
-                                TextColor="#FFA500" />
-                            <Label
-                                Grid.Column="14"
-                                FontAttributes="Bold"
-                                HorizontalTextAlignment="Center"
-                                Text="LLT"
-                                TextColor="#FFA500" />
-                        </Grid>
-                    </CollectionView.Header>
+                                <Label
+                                    Grid.Column="9"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="2C"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="10"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="2T"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="11"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="3C"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="12"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="3T"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="13"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="LLC"
+                                    TextColor="#FFA500" />
+                                <Label
+                                    Grid.Column="14"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="Center"
+                                    Text="LLT"
+                                    TextColor="#FFA500" />
+                            </Grid>
+                        </CollectionView.Header>
 
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:AtletaEstatisticaItem">
-                            <Frame
-                                Margin="0,2"
-                                Padding="5"
-                                BackgroundColor="#282828"
-                                CornerRadius="5">
-                                <Grid ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:AtletaEstatisticaItem">
+                                <Frame
+                                    Margin="0,2"
+                                    Padding="5"
+                                    BackgroundColor="#282828"
+                                    CornerRadius="5">
+                                    <Grid ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70">
 
-                                    <Image
-                                        Grid.Column="0"
-                                        Margin="0,0,5,0"
-                                        HeightRequest="30"
-                                        HorizontalOptions="Center"
-                                        Source="{Binding FotoAtletaUrl}"
-                                        VerticalOptions="Center"
-                                        WidthRequest="30">
-                                        <Image.Clip>
-                                            <EllipseGeometry
-                                                Center="15, 15"
-                                                RadiusX="15"
-                                                RadiusY="15" />
-                                        </Image.Clip>
-                                    </Image>
+                                        <Image
+                                            Grid.Column="0"
+                                            Margin="0,0,5,0"
+                                            HeightRequest="30"
+                                            HorizontalOptions="Center"
+                                            Source="{Binding FotoAtletaUrl}"
+                                            VerticalOptions="Center"
+                                            WidthRequest="30">
+                                            <Image.Clip>
+                                                <EllipseGeometry
+                                                    Center="15, 15"
+                                                    RadiusX="15"
+                                                    RadiusY="15" />
+                                            </Image.Clip>
+                                        </Image>
 
-                                    <Label
-                                        Grid.Column="1"
-                                        Margin="5,0"
-                                        FontSize="14"
-                                        Text="{Binding NomeAtleta}"
-                                        TextColor="White"
-                                        VerticalOptions="Center" />
+                                        <Label
+                                            Grid.Column="1"
+                                            Margin="5,0"
+                                            FontSize="14"
+                                            Text="{Binding NomeAtleta}"
+                                            TextColor="White"
+                                            VerticalOptions="Center" />
 
-                                    <Entry
-                                        Grid.Column="2"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Pontos}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="3"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Rebotes}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="4"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Assistencias}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="5"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Roubos}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="6"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Bloqueios}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="7"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Turnovers}"
-                                        TextColor="White" />
+                                        <Entry
+                                            Grid.Column="2"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Pontos}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="3"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Rebotes}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="4"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Assistencias}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="5"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Roubos}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="6"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Bloqueios}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="7"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Turnovers}"
+                                            TextColor="White" />
 
-                                    <Entry
-                                        Grid.Column="8"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Faltas}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="9"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Arremessos2PontosConvertidos}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="10"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Arremessos2PontosTentados}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="11"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Arremessos3PontosConvertidos}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="12"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding Arremessos3PontosTentados}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="13"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding LancesLivresConvertidos}"
-                                        TextColor="White" />
-                                    <Entry
-                                        Grid.Column="14"
-                                        BackgroundColor="#303030"
-                                        FontSize="14"
-                                        HorizontalOptions="FillAndExpand"
-                                        HorizontalTextAlignment="Center"
-                                        Keyboard="Numeric"
-                                        Placeholder="0"
-                                        Text="{Binding LancesLivresTentados}"
-                                        TextColor="White" />
-
-                                </Grid>
-                            </Frame>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                                        <Entry
+                                            Grid.Column="8"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Faltas}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="9"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Arremessos2PontosConvertidos}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="10"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Arremessos2PontosTentados}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="11"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Arremessos3PontosConvertidos}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="12"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding Arremessos3PontosTentados}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="13"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding LancesLivresConvertidos}"
+                                            TextColor="White" />
+                                        <Entry
+                                            Grid.Column="14"
+                                            BackgroundColor="#303030"
+                                            FontSize="14"
+                                            HorizontalOptions="FillAndExpand"
+                                            HorizontalTextAlignment="Center"
+                                            Keyboard="Numeric"
+                                            Placeholder="0"
+                                            Text="{Binding LancesLivresTentados}"
+                                            TextColor="White" />
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </ScrollView>
 
                 <Button
                     Margin="0,30,0,0"
