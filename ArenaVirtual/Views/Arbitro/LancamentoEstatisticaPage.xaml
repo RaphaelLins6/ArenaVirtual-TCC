@@ -31,7 +31,7 @@
 
                     <Grid ColumnDefinitions="*, Auto, *" ColumnSpacing="10">
 
-                        <StackLayout Grid.Column="0" HorizontalOptions="Center">
+                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center">
                             <Image
                                 HeightRequest="60"
                                 Source="{Binding Jogo.TimeA.LogoUrl}"
@@ -52,7 +52,7 @@
                                 Text="{Binding PlacarTimeA, Mode=TwoWay}"
                                 TextColor="#FFA500"
                                 WidthRequest="100" />
-                        </StackLayout>
+                        </VerticalStackLayout>
 
                         <Label
                             Grid.Column="1"

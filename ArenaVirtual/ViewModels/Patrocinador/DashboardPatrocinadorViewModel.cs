@@ -92,7 +92,7 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
 
                         NomeCampanha = (status == "Dado Antigo/Bug") ? "Patrocínio - Erro de Mapeamento" : $"Patrocínio - {campeonato?.Nome ?? "Campeonato Desconhecido"}",
                         NomeCampeonato = campeonato?.Nome ?? "Campeonato Não Encontrado",
-                        LogotipoCampeonatoUrl = campeonato?.LogoUrl ?? "logo_default.png",
+                        LogotipoCampeonatoUrl = campeonato?.LogoUrl ?? "placeholder.png",
                         DataFim = c.Fim.ToString("dd/MM/yyyy"),
                         Status = status
                     };
@@ -105,7 +105,7 @@ namespace ArenaVirtual.ViewModels.Patrocinador {
                 }
 
                 ListaVazia = !CampanhasAtivas.Any();
-                ListaInativaVazia = !CampanhasInativas.Any(); // ⭐️ Nova flag ⭐️
+                ListaInativaVazia = !CampanhasInativas.Any(); 
 
             } catch (Exception ex) {
                 //System.Diagnostics.Debug.WriteLine($"[PATROCINADOR] Erro ao carregar campanhas: {ex.Message}");
