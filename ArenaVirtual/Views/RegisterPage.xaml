@@ -38,7 +38,10 @@
                     Placeholder="Telefone/WhatsApp"
                     Text="{Binding Telefone}">
                     <Entry.Behaviors>
-                        <behaviors:MaskBehavior Mask="PHONE" />
+                        <OnPlatform x:TypeArguments="behaviors:MaskBehavior">
+                            <On Platform="Windows" Value="{x:Static behaviors:MaskBehavior.MaskProperty}" />
+                            <On Platform="MacCatalyst" Value="{x:Static behaviors:MaskBehavior.MaskProperty}" />
+                        </OnPlatform>
                     </Entry.Behaviors>
                 </Entry>
 
@@ -66,7 +69,14 @@
                         Placeholder="CNPJ/CPF"
                         Text="{Binding Cnpj}">
                         <Entry.Behaviors>
-                            <behaviors:MaskBehavior Mask="CNPJ" />
+                            <OnPlatform x:TypeArguments="Behavior">
+                                <On Platform="Windows">
+                                    <behaviors:MaskBehavior Mask="CNPJ" />
+                                </On>
+                                <On Platform="MacCatalyst">
+                                    <behaviors:MaskBehavior Mask="CNPJ" />
+                                </On>
+                            </OnPlatform>
                         </Entry.Behaviors>
                     </Entry>
 
@@ -85,7 +95,14 @@
                         Placeholder="CNPJ/CPF"
                         Text="{Binding Cnpj}">
                         <Entry.Behaviors>
-                            <behaviors:MaskBehavior Mask="CNPJ" />
+                            <OnPlatform x:TypeArguments="Behavior">
+                                <On Platform="Windows">
+                                    <behaviors:MaskBehavior Mask="CNPJ" />
+                                </On>
+                                <On Platform="MacCatalyst">
+                                    <behaviors:MaskBehavior Mask="CNPJ" />
+                                </On>
+                            </OnPlatform>
                         </Entry.Behaviors>
                     </Entry>
                 </VerticalStackLayout>
