@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Maui.Controls;
 
 namespace ArenaVirtual.ViewModels.Atleta {
     public partial class EstatisticasPessoaisViewModel : ObservableObject {
@@ -13,8 +14,10 @@ namespace ArenaVirtual.ViewModels.Atleta {
 
         [ObservableProperty]
         private AtletaEstatisticaViewModel estatisticasAtleta = new();
+
         [ObservableProperty]
-        private string fotoAtletaSource; 
+        private ImageSource fotoAtletaSource;
+
         [ObservableProperty]
         private bool estaCarregando = true;
 
@@ -38,7 +41,11 @@ namespace ArenaVirtual.ViewModels.Atleta {
                 return;
             }
 
-            FotoAtletaSource = usuarioAtual.ImagemPath;
+            if (!string.IsNullOrEmpty(usuarioAtual.ImagemPath)) {
+                FotoAtletaSource = ImageSource.FromFile(usuarioAtual.ImagemPath);
+            } else {
+                FotoAtletaSource = ImageSource.FromFile("placeholder.png");
+            }
 
             List<EstatisticaPartida> todasEstatisticas = await _databaseService.ObterEstatisticasPorAtletaAsync(usuarioAtual.Id);
 

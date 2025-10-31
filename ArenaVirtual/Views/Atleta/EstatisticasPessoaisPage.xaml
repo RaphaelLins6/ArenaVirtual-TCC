@@ -7,10 +7,6 @@
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.Atleta"
     Title="Estatísticas Pessoais">
 
-    <ContentPage.Resources>
-        <converters:InverterBooleanConverter x:Key="InverterBooleanConverter" />
-    </ContentPage.Resources>
-
     <VerticalStackLayout
         Padding="15,20"
         BackgroundColor="#1E1E1E"
@@ -24,22 +20,21 @@
             Text="Minhas Estatísticas (Médias por Jogo)"
             TextColor="Orange" />
 
-        <Frame
+        <Border
             Margin="0,10,0,20"
             Padding="0"
-            BorderColor="Orange"
-            CornerRadius="60"
-            HasShadow="False"
             HeightRequest="120"
             HorizontalOptions="Center"
-            IsClippedToBounds="True"
+            Stroke="Orange"
+            StrokeShape="RoundRectangle 60"
+            StrokeThickness="2"
             WidthRequest="120">
             <Image
                 Aspect="AspectFill"
                 HorizontalOptions="CenterAndExpand"
                 Source="{Binding FotoAtletaSource}"
                 VerticalOptions="CenterAndExpand" />
-        </Frame>
+        </Border>
 
         <Grid RowDefinitions="*">
 
@@ -53,7 +48,7 @@
                 WidthRequest="50"
                 Color="Orange" />
 
-            <ScrollView Grid.Row="0" IsVisible="{Binding EstaCarregando, Converter={StaticResource InverterBooleanConverter}}">
+            <ScrollView HorizontalScrollBarVisibility="Never" Orientation="Horizontal">
                 <Grid
                     Padding="0,5"
                     BindingContext="{Binding EstatisticasAtleta}"
