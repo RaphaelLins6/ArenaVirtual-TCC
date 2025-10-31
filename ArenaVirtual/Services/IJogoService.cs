@@ -10,5 +10,6 @@ namespace ArenaVirtual.Services {
         List<Jogo> FiltrarPartidasDoTime(Dictionary<int, ObservableCollection<Jogo>> todosOsJogosPorRodada, int timeId);
         Task<List<Jogo>> ObterJogosMataMataPorCampeonatoAsync(Guid campeonatoClientAppId);
         Task DeletarJogosDoCampeonatoAsync(Guid campeonatoClientAppId);
+        Task<int> SalvarJogoAsync(Jogo jogo);
     }
 }

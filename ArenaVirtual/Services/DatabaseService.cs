@@ -497,18 +497,30 @@ namespace ArenaVirtual.Services {
             return jogosUnicos;
         }
         public async Task<int> SalvarJogoAsync(Jogo item) {
-            //System.Diagnostics.Debug.WriteLine($"[E] DB SERVICE (Salvar Jogo): Jogo.Id: {item.Id} | ClientAppId: {item.ClientAppId} | CampeonatoId ANTES: {item.CampeonatoId}");
+            // 1. Lógica de correção do CampeonatoId (MANTIDA)
             if (item.CampeonatoId == 0 && item.CampeonatoClientAppId != Guid.Empty) {
                 var campeonato = await _database.Table<Campeonato>()
                                                 .Where(c => c.ClientAppId == item.CampeonatoClientAppId)
                                                 .FirstOrDefaultAsync();
                 if (campeonato != null) {
                     item.CampeonatoId = campeonato.Id;
-                    //System.Diagnostics.Debug.WriteLine($"[DB SERVICE - Jogo] CampeonatoId CORRIGIDO para: {item.CampeonatoId}");
                 }
             }
-            int resultado = await _database.InsertOrReplaceAsync(item);
-            //System.Diagnostics.Debug.WriteLine($"[F] DB SERVICE (Fim Salvar): InsertOrReplaceAsync retornou: {resultado}");
+
+            int resultado = 0;
+
+            // 2. Verifica se é uma INSERÇÃO (ID 0 ou negativo) ou ATUALIZAÇÃO (ID positivo)
+            if (item.Id > 0) {
+                // É ATUALIZAÇÃO: Usa Update
+                //Debug.WriteLine($"[DB SERVICE] Jogo ID: {item.Id}. Chamando UpdateAsync.");
+                resultado = await _database.UpdateAsync(item);
+            } else {
+                // É INSERÇÃO: Usa InsertAsync, que ATUALIZA o item.Id com o novo ID gerado
+                //Debug.WriteLine($"[DB SERVICE] Jogo ID: {item.Id} (Novo). Chamando InsertAsync.");
+                resultado = await _database.InsertAsync(item); // O objeto 'item' agora tem o novo ID real
+            }
+
+            //Debug.WriteLine($"[DB SERVICE] Fim Salvar. Jogo ID ATUALIZADO: {item.Id}. Resultado: {resultado}");
             return resultado;
         }
         public Task<int> InsertAllAsync<T>(IEnumerable<T> items) {

@@ -209,5 +209,10 @@ namespace ArenaVirtual.Services {
 
             return jogosSalvos;
         }
+
+        public Task<int> SalvarJogoAsync(Jogo jogo) {
+            // Delega a chamada para o método corrigido no DatabaseService
+            return _databaseService.SalvarJogoAsync(jogo);
+        }
     }
 }
