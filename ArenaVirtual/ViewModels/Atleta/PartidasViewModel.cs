@@ -21,6 +21,15 @@ namespace ArenaVirtual.ViewModels.Atleta {
         [ObservableProperty]
         private string _nomeTime = string.Empty;
 
+        [ObservableProperty]
+        private ObservableCollection<Jogo> proximasPartidas = new();
+
+        [ObservableProperty]
+        private ObservableCollection<Jogo> partidasAnteriores = new();
+
+        [ObservableProperty]
+        private bool isPartidasAnterioresExpanded = false;
+
         private readonly DatabaseService _databaseService;
         private readonly IJogoService _jogoService;
 
@@ -62,64 +71,89 @@ namespace ArenaVirtual.ViewModels.Atleta {
             }
         }
 
-        public async Task LoadTodasPartidasDoTimeAsync(Time timeDoAtleta) {
+        [CommunityToolkit.Mvvm.Input.RelayCommand]
+        private void TogglePartidasAnteriores() {
+            IsPartidasAnterioresExpanded = !IsPartidasAnterioresExpanded;
+        }
+
+        public async Task LoadTodasPartidasDoTimeAsync(Time timeDoAtleta) {
             if (timeDoAtleta == null) return;
 
-            PartidasDoTime.Clear();
+            // Limpeza das coleções de exibição (IMPORTANTE)
+            PartidasDoTime.Clear(); // Mantendo se ainda for usada na View, mas é recomendado usar as novas.
+            ProximasPartidas.Clear(); // <--- NOVO
+            PartidasAnteriores.Clear(); // <--- NOVO
+
             var todasPartidas = new List<Jogo>();
 
-            var campeonatosIds = await _databaseService.ObterIdsCampeonatosDoTimeAceitoAsync(timeDoAtleta.ClientAppId);
-
-            //Debug.WriteLine($"[PartidasViewModel] Passo 1: Encontrados {campeonatosIds.Count} IDs de campeonatos aceitos para o Time.");
+            var campeonatosIds = await _databaseService.ObterIdsCampeonatosDoTimeAceitoAsync(timeDoAtleta.ClientAppId);
 
             if (!campeonatosIds.Any()) {
-                //Debug.WriteLine($"[PartidasViewModel] ALERTA: O time {timeDoAtleta.Nome} não tem convites ACEITOS na tabela Convite. Finalizando busca de jogos.");
                 return;
             }
 
-            foreach (var campId in campeonatosIds) {
-                //Debug.WriteLine($"[PartidasViewModel] -- Iniciando busca para o Campeonato ID interno: {campId}");
-
+            foreach (var campId in campeonatosIds) {
+                // ... (Lógica de carregamento de campeonato e timesInscritos - MANTIDA)
                 var campeonato = await _databaseService.GetTable<Campeonato>()
-                  .Where(c => c.Id == campId).FirstOrDefaultAsync();
+                    .Where(c => c.Id == campId).FirstOrDefaultAsync();
 
-                if (campeonato == null) {
-                    //Debug.WriteLine($"[PartidasViewModel] ERRO: Campeonato com ID {campId} não encontrado. Pulando.");
-                    continue;
-                }
+                if (campeonato == null) continue;
 
-                //Debug.WriteLine($"[PartidasViewModel] Carregando dados para o Campeonato: {campeonato.Nome}");
+                var timesInscritos = await _databaseService.ObterTimesAceitosAsync(campeonato.Id);
 
-                var timesInscritos = await _databaseService.ObterTimesAceitosAsync(campeonato.Id);
+                if (timesInscritos.Count < 2) continue;
 
-                //Debug.WriteLine($"[PartidasViewModel] {timesInscritos.Count} times encontrados no campeonato {campeonato.Nome}.");
+                var todosOsJogosPorRodada = await _jogoService.GerarTabelaJogosAsync(campeonato, timesInscritos.ToList());
 
-                if (timesInscritos.Count < 2) {
-                    //Debug.WriteLine($"[PartidasViewModel] ALERTA: Poucos times ({timesInscritos.Count}) para gerar jogos no {campeonato.Nome}. Pulando.");
-                    continue;
-                }
+                var jogosDoTimeNesteCamp = _jogoService.FiltrarPartidasDoTime(todosOsJogosPorRodada, timeDoAtleta.Id);
 
-                var todosOsJogosPorRodada = await _jogoService.GerarTabelaJogosAsync(campeonato, timesInscritos.ToList());
-
-                var jogosDoTimeNesteCamp = _jogoService.FiltrarPartidasDoTime(todosOsJogosPorRodada, timeDoAtleta.Id);
-
-                //Debug.WriteLine($"[PartidasViewModel] Encontrados {jogosDoTimeNesteCamp.Count} jogos específicos do time no campeonato {campeonato.Nome}.");
-
-                foreach (var jogo in jogosDoTimeNesteCamp) {
+                foreach (var jogo in jogosDoTimeNesteCamp) {
                     jogo.NomeCampeonato = campeonato.Nome;
                 }
 
                 todasPartidas.AddRange(jogosDoTimeNesteCamp);
             }
 
-            var partidasOrdenadas = todasPartidas.OrderBy(j => j.DataHora).ToList();
+            // ----------------------------------------------------------------------------------
+            // NOVO BLOCO DE FILTRAGEM E SEPARAÇÃO
+            // ----------------------------------------------------------------------------------
+            var horaAtual = DateTime.Now;
 
-            PartidasDoTime.Clear();
-            foreach (var jogo in partidasOrdenadas) {
-                PartidasDoTime.Add(jogo);
+            var proximas = new List<Jogo>();
+            var anteriores = new List<Jogo>();
+
+            // 1. Itera sobre todas as partidas para separar
+            foreach (var jogo in todasPartidas) {
+                // Usa DataHora para determinar se já passou
+                if (jogo.DataHora > horaAtual) {
+                    proximas.Add(jogo);
+                } else {
+                    anteriores.Add(jogo);
+                }
             }
 
-            //Debug.WriteLine($"[PartidasViewModel] ** FIM ** Total de {PartidasDoTime.Count} partidas consolidadas adicionadas à lista PartidasDoTime.");
+            // 2. Ordena as listas:
+            // Próximas: Da mais recente para a mais distante.
+            // Anteriores: Da mais recente para a mais antiga (para mostrar o histórico recente).
+            var proximasOrdenadas = proximas.OrderBy(j => j.DataHora).ToList();
+            var anterioresOrdenadas = anteriores.OrderByDescending(j => j.DataHora).ToList();
+
+            // 3. Atualiza as propriedades observáveis na Main Thread
+            MainThread.BeginInvokeOnMainThread(() => {
+                // Limpeza (já feita no início, mas garantindo)
+                ProximasPartidas.Clear();
+                PartidasAnteriores.Clear();
+
+                foreach (var jogo in proximasOrdenadas) {
+                    ProximasPartidas.Add(jogo);
+                }
+
+                foreach (var jogo in anterioresOrdenadas) {
+                    PartidasAnteriores.Add(jogo);
+                }
+            });
+
+            // Debug.WriteLine($"[PartidasViewModel] ** FIM ** Total de jogos: {todasPartidas.Count}. Próximos: {ProximasPartidas.Count}. Anteriores: {PartidasAnteriores.Count}");
         }
     }
 }
