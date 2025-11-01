@@ -53,7 +53,10 @@
                 </Entry.Behaviors>
             </Entry>
 
-            <Label Style="{StaticResource LabelHeaderStyle}" Text="Formato do Campeonato" />
+            <Label
+                FontSize="14"
+                Text="Formato do Campeonato"
+                TextColor="White" />
             <Picker
                 Title="Selecione o Formato"
                 SelectedItem="{Binding Campeonato.FormatoCampeonato}"
