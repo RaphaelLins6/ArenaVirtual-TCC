@@ -46,10 +46,6 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
                     LogoUrl = dto.LogoUrl,
                     Descricao = dto.Descricao,
                     DataCriacao = dto.DataCriacao,
-                    Regiao = dto.Regiao,
-                    Vitorias = dto.Vitorias,
-                    Derrotas = dto.Derrotas,
-                    Empates = dto.Empates,
                     UpdatedAt = DateTime.UtcNow,
                     IsSynced = true
                 };
@@ -61,10 +57,6 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
                     existingItem.LogoUrl = dto.LogoUrl;
                     existingItem.Descricao = dto.Descricao;
                     existingItem.DataCriacao = dto.DataCriacao;
-                    existingItem.Regiao = dto.Regiao;
-                    existingItem.Vitorias = dto.Vitorias;
-                    existingItem.Derrotas = dto.Derrotas;
-                    existingItem.Empates = dto.Empates;
                     existingItem.UpdatedAt = DateTime.UtcNow;
                     existingItem.IsSynced = true;
                     _context.Entry(existingItem).State = EntityState.Modified;
@@ -98,22 +90,6 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
                 // --- 1. Mapeamento de CapitaoId (Obrigatório) ---
                 bool capitaoFound = dto.CapitaoClientAppId.HasValue &&
                                     userMappings.TryGetValue(dto.CapitaoClientAppId.Value, out newCapitaoId);
-
-                // --- 2. Mapeamento de CampeonatoId (Obrigatório) ---
-                bool campeonatoFound = dto.CampeonatoClientAppId.HasValue &&
-                                       campeonatoMappings.TryGetValue(dto.CampeonatoClientAppId.Value, out newCampeonatoId);
-
-
-                // 3. Verifica a Regra de Negócio: APENAS ATUALIZA SE AMBOS OS IDs FOREM ENCONTRADOS.
-                if (capitaoFound && campeonatoFound) {
-
-                    // Atribuição de valores (o newCapitaoId só é usado se tiver sido atribuído pelo TryGetValue)
-                    existingItem.CapitaoId = newCapitaoId;
-                    existingItem.CampeonatoId = newCampeonatoId;
-
-                    _context.Entry(existingItem).State = EntityState.Modified;
-
-                }
             }
         }
     }
@@ -131,12 +107,7 @@ public class TimeService : IBackendService<Time, TimeSyncDto> {
                 LogoUrl = t.LogoUrl,
                 Descricao = t.Descricao,
                 DataCriacao = t.DataCriacao,
-                Regiao = t.Regiao,
-                Vitorias = t.Vitorias,
-                Derrotas = t.Derrotas,
-                Empates = t.Empates,
                 CapitaoClientAppId = t.Capitao != null ? t.Capitao.ClientAppId : (Guid?)null,
-                CampeonatoClientAppId = t.Campeonato != null ? t.Campeonato.ClientAppId : (Guid?)null
             })
             .ToListAsync();
     }

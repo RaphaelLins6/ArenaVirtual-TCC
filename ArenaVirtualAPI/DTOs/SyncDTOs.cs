@@ -47,14 +47,8 @@ namespace ArenaVirtualAPI.DTOs {
         public int Id { get; set; }
         public string? Nome { get; set; }
         public string? LogoUrl { get; set; }
-        public Guid? CampeonatoClientAppId { get; set; }
         public string? Descricao { get; set; }
         public DateTime DataCriacao { get; set; }
-        public string? Regiao { get; set; }
-        public int PontuacaoTotal { get; set; }
-        public int Vitorias { get; set; }
-        public int Derrotas { get; set; }
-        public int Empates { get; set; }
         public Guid? CapitaoClientAppId { get; set; }
         public DateTime UpdatedAt { get; set; }
         public bool IsSynced { get; set; }
