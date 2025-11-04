@@ -51,6 +51,7 @@ builder.Services.AddScoped<IInscricaoService, InscricaoService>();
 builder.Services.AddScoped<IAvaliacaoArbitroService, AvaliacaoArbitroService>();
 builder.Services.AddScoped<IEstatisticaPartidaService, EstatisticaPartidaService>();
 builder.Services.AddScoped<ICampanhaPatrocinioService, CampanhaPatrocinioService>();
+builder.Services.AddScoped<IRodadaDeJogosService, RodadaDeJogosService>();
 
 // Registro corrigido para UsuarioCampeonatoFavoritoService
 builder.Services.AddScoped<UsuarioCampeonatoFavoritoService>();

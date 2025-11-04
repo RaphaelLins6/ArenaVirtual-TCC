@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace ArenaVirtualAPI.DTOs {
-    // DTO para retornar dados
     public class RodadaDeJogosReadDto {
         public int Id { get; set; }
         public Guid ClientAppId { get; set; }
@@ -10,7 +9,6 @@ namespace ArenaVirtualAPI.DTOs {
         public DateTime UpdatedAt { get; set; }
     }
 
-    // DTO para criar/atualizar dados via API (sem IDs de sincronização)
     public class RodadaDeJogosCreateUpdateDto {
         [Required]
         [StringLength(100)]

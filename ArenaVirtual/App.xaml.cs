@@ -1,6 +1,7 @@
 ﻿using ArenaVirtual.Models;
 using ArenaVirtual.Services;
 using ArenaVirtual.Views;
+using System.Diagnostics;
 
 namespace ArenaVirtual;
 
@@ -12,7 +13,7 @@ public partial class App : Application {
     public App() {
         InitializeComponent();
         DatabasePath = Path.Combine(FileSystem.AppDataDirectory, "arenavirtual.db3");
-
+        Debug.WriteLine($"[DB PATH] Banco de dados inicializado no caminho: {DatabasePath}");
     }
 
     protected override Window CreateWindow(IActivationState? activationState) {

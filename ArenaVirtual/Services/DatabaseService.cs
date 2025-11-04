@@ -30,6 +30,11 @@ namespace ArenaVirtual.Services {
             await _database.CreateTableAsync<UsuarioCampeonatoFavorito>();
             await _database.CreateTableAsync<Convite>();
             await _database.CreateTableAsync<Inscricao>();
+            await _database.CreateTableAsync<RodadaDeJogos>();
+            await _database.CreateTableAsync<PatrocinioDetalhe>();
+            await _database.CreateTableAsync<EstatisticaAgregadaJogador>();
+
+            await PerformMigrationsAsync();
 
             int deletadosTimes = await _database.ExecuteAsync("DELETE FROM Time WHERE Nome IS NULL OR Nome = '' OR ClientAppId = ?", Guid.Empty);
             //System.Diagnostics.Debug.WriteLine($"[DB CLEANUP] {deletadosTimes} times fantasmas deletados.");
@@ -571,6 +576,28 @@ namespace ArenaVirtual.Services {
                 existingItem.IsSynced = true;
                 await _database.UpdateAsync(existingItem);
             }
+        }
+
+        // --- MÉTODOS DE MIGRAÇÃO DE DADOS ---
+        private async Task TryAddColumnAsync(string tableName, string columnName, string columnType) {
+            try {
+                string query = $"ALTER TABLE {tableName} ADD COLUMN {columnName} {columnType}";
+                 System.Diagnostics.Debug.WriteLine($"[DB MIGRATION] Executando: {query}");
+                await _database.ExecuteAsync(query);
+            } catch (SQLiteException ex) {
+                if (ex.Message.Contains("duplicate column name")) {
+                     System.Diagnostics.Debug.WriteLine($"[DB MIGRATION] Coluna {columnName} já existe em {tableName}. OK.");
+                } else {
+                    throw;
+                }
+            } catch (Exception) {
+                throw;
+            }
+        }
+        private async Task PerformMigrationsAsync() {
+            await TryAddColumnAsync("Campeonato", "DataTermino", "TEXT");
+            await TryAddColumnAsync("Convite", "TimeClientAppId", "TEXT");
+            await TryAddColumnAsync("Time", "NovaColunaInteger", "INTEGER");
         }
 
         #region Métodos de Sincronização de Download
