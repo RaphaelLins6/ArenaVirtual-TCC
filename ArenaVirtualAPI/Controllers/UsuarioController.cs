@@ -14,14 +14,20 @@ namespace ArenaVirtualAPI.Controllers {
         // GET: api/usuarios
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UsuarioReadDto>>> GetUsuarios() {
-            var usuarios = await _context.Usuarios.AsNoTracking().ToListAsync();
+            var usuarios = await _context.Usuarios
+                .Include(u => u.Time) // <-- CORREÇÃO: Adicionando o carregamento do relacionamento
+                .AsNoTracking()
+                .ToListAsync();
             return Ok(usuarios.Select(MapToReadDto));
         }
 
         // GET: api/usuarios/5
         [HttpGet("{id:int}")]
         public async Task<ActionResult<UsuarioReadDto>> GetUsuario(int id) {
-            var u = await _context.Usuarios.FindAsync(id);
+            var u = await _context.Usuarios
+                .Include(u => u.Time) // <-- CORREÇÃO AQUI TAMBÉM
+                .FirstOrDefaultAsync(u => u.Id == id);
+
             if (u == null) return NotFound();
             return Ok(MapToReadDto(u));
         }
@@ -106,19 +112,20 @@ namespace ArenaVirtualAPI.Controllers {
             Id = u.Id,
             Nome = u.Nome,
             Email = u.Email,
-            Perfil = u.Perfil.ToString(), 
+            Perfil = u.Perfil.ToString(),
             ImagemPath = u.ImagemPath,
             Localizacao = u.Localizacao,
             Telefone = u.Telefone,
             LinkRedeSocial = u.LinkRedeSocial,
             DataNascimento = u.DataNascimento,
-            Genero = u.Genero, 
+            Genero = u.Genero,
             NomeEmpresa = u.NomeEmpresa,
             CNPJ = u.CNPJ,
             Peso = u.Peso,
             Altura = u.Altura,
             FaixaOrcamentoPatrocinio = u.FaixaOrcamentoPatrocinio,
-            TimeClientAppId = u.TimeClientAppId, 
+            TimeId = u.TimeId ?? 0, // Puxa o ID do campo FK (Chave Estrangeira)
+            TimeClientAppId = u.Time != null ? u.Time.ClientAppId : null, // Puxa o ClientAppId do objeto Time (navegação)
             ClientAppId = u.ClientAppId
         };
     }

@@ -99,6 +99,8 @@ public class UsuarioService : IBackendService<Usuario, UsuarioSyncDto> {
     // Terceira fase: GetUpdates (correção aqui)
     public async Task<IEnumerable<UsuarioSyncDto>> GetUpdatedSinceAsync(DateTime lastSyncTime) {
         return await _context.Usuarios
+            // 1. O INCLUDE é CRUCIAL: Garante que o objeto Time seja carregado.
+            .Include(u => u.Time)
             .Where(u => u.UpdatedAt > lastSyncTime)
             .Select(u => new UsuarioSyncDto {
                 ClientAppId = u.ClientAppId,
@@ -118,7 +120,15 @@ public class UsuarioService : IBackendService<Usuario, UsuarioSyncDto> {
                 Altura = u.Altura,
                 FaixaOrcamentoPatrocinio = u.FaixaOrcamentoPatrocinio,
 
-                TimeClientAppId = u.TimeClientAppId != Guid.Empty ? u.TimeClientAppId : Guid.Empty
+                // 2. Mapeamento Correto do ClientAppId do Time
+                // Se o Time não for nulo, pega o ClientAppId dele.
+                TimeClientAppId = u.Time != null ? (Guid?)u.Time.ClientAppId : null,
+
+                // 3. Inclui os campos de controle de sincronização
+                IsSynced = u.IsSynced
+
+                // O campo 'Id' interno do servidor NÃO DEVE ser incluído no DTO de Sync.
+                // A sincronização deve usar o ClientAppId como chave primária.
             })
             .ToListAsync();
     }
