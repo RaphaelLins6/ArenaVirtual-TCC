@@ -80,14 +80,47 @@
                                     BackgroundColor="{AppThemeBinding Light=White,
                                                                       Dark=#1E1E1E}"
                                     CornerRadius="12">
-                                    <HorizontalStackLayout Spacing="10">
+                                    <Grid ColumnDefinitions="40,*,Auto">
                                         <Image
+                                            Grid.Column="0"
                                             Aspect="AspectFill"
                                             HeightRequest="40"
                                             Source="{Binding Foto}"
                                             WidthRequest="40" />
-                                        <Label Text="{Binding Nome}" VerticalOptions="Center" />
-                                    </HorizontalStackLayout>
+                                        <Label
+                                            Grid.Column="1"
+                                            Margin="10,0,0,0"
+                                            Text="{Binding Nome}"
+                                            VerticalOptions="Center" />
+
+                                        <Button
+                                            Grid.Column="2"
+                                            Padding="10,0"
+                                            BackgroundColor="Red"
+                                            Command="{Binding RemoverMembroCommand, Source={RelativeSource AncestorType={x:Type vm:MeuTimePageViewModel}}}"
+                                            CommandParameter="{Binding .}"
+                                            CornerRadius="15"
+                                            FontSize="12"
+                                            HeightRequest="30"
+                                            Style="{StaticResource BotaoPrincipal}"
+                                            Text="Remover"
+                                            TextColor="White"
+                                            VerticalOptions="Center">
+
+                                            <Button.Triggers>
+                                                <DataTrigger
+                                                    Binding="{Binding EhCapitaoLogado}"
+                                                    TargetType="Button"
+                                                    Value="True">
+                                                    <Setter Property="IsVisible" Value="False" />
+                                                </DataTrigger>
+                                            </Button.Triggers>
+
+                                            <Button.IsVisible>
+                                                <Binding Path="UsuarioEhCapitao" Source="{RelativeSource AncestorType={x:Type vm:MeuTimePageViewModel}}" />
+                                            </Button.IsVisible>
+                                        </Button>
+                                    </Grid>
                                 </Frame>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>

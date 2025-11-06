@@ -17,6 +17,8 @@ namespace ArenaVirtual.ViewModels.Atleta {
         public partial class MembroModel : ObservableObject {
             public string Nome { get; set; }
             public ImageSource Foto { get; set; }
+            public Guid ClientAppId { get; set; }
+            public bool EhCapitaoLogado { get; set; }
         }
 
         [ObservableProperty]
@@ -95,17 +97,24 @@ namespace ArenaVirtual.ViewModels.Atleta {
 
                 var usuariosDoTime = await _databaseService.GetMembrosByTimeClientAppIdAsync(Time.ClientAppId);
 
+                // Obtém o ClientAppId do usuário logado (Capitão ou Membro)
+                var capitãoId = usuarioAtual.ClientAppId;
+
                 var membrosCarregados = new ObservableCollection<MembroModel>();
                 if (usuariosDoTime != null) {
                     foreach (var usuario in usuariosDoTime) {
                         membrosCarregados.Add(new MembroModel {
                             Nome = usuario.Nome,
-                            Foto = GetImageSourceFromFile(usuario.ImagemPath)
+                            Foto = GetImageSourceFromFile(usuario.ImagemPath),
+                            ClientAppId = usuario.ClientAppId, // Preenche o ID para remoção segura
+                                                               // Define se este card é do usuário logado (para uso no XAML se necessário)
+                            EhCapitaoLogado = usuario.ClientAppId == capitãoId
                         });
                     }
                 }
                 MembrosDoTime = membrosCarregados;
 
+                // Propriedade principal para comandos e botões na página
                 UsuarioEhCapitao = usuarioAtual.ClientAppId == Time.CapitaoClientAppId;
 
                 MostraBotaoVerSolicitacoes = UsuarioEhCapitao;
@@ -209,6 +218,41 @@ namespace ArenaVirtual.ViewModels.Atleta {
         [RelayCommand]
         private async Task ProcurarCampeonatos() {
             await Shell.Current.GoToAsync(nameof(ProcurarCampeonatosPage));
+        }
+
+        [RelayCommand]
+        private async Task RemoverMembro(MembroModel membro) {
+            if (Time == null || !UsuarioEhCapitao) {
+                return;
+            }
+
+            var usuarioAtual = SessaoService.Instancia.GetUsuarioAtual();
+            if (usuarioAtual?.ClientAppId == membro.ClientAppId) {
+                await Application.Current.MainPage.DisplayAlert("Atenção", "Você não pode se remover do time nesta tela, pois você é o Capitão. Para sair, você deve primeiro transferir a capitania ou excluir o time.", "OK");
+                return;
+            }
+
+            bool confirmacao = await Application.Current.MainPage.DisplayAlert(
+                "Remover Membro",
+                $"Tem certeza de que deseja remover o membro {membro.Nome} do time?",
+                "Sim",
+                "Não");
+
+            if (!confirmacao) {
+                return;
+            }
+
+            try {
+
+                await _usuarioService.RemoverUsuarioDoTimeAsync(membro.ClientAppId);
+
+                MembrosDoTime.Remove(membro);
+                await Application.Current.MainPage.DisplayAlert("Sucesso", $"{membro.Nome} foi removido do time.", "OK");
+
+            } catch (Exception ex) {
+                //Debug.WriteLine($"[ERRO DE REMOÇÃO] Falha ao remover membro: {ex.Message}");
+                await Application.Current.MainPage.DisplayAlert("Erro", "Não foi possível remover o membro. Tente novamente mais tarde.", "OK");
+            }
         }
     }
 }

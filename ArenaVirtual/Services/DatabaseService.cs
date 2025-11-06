@@ -126,6 +126,9 @@ namespace ArenaVirtual.Services {
         public Task<int> UpsertUsuarioAsync(Usuario usuario) {
             return _database.InsertOrReplaceAsync(usuario);
         }
+        public Task<int> SalvarUsuarioAsync(Usuario usuario) {
+            return _database.InsertOrReplaceAsync(usuario);
+        }
 
         // --- MÉTODOS DE JOGADOR ---
         public async Task<List<Usuario>> ObterJogadoresPorCampeonatoAsync(Guid campeonatoClientAppId) {

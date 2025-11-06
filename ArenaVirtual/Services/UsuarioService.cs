@@ -149,5 +149,16 @@ namespace ArenaVirtual.Services {
 
             return arbitrosMap;
         }
+
+        public async Task RemoverUsuarioDoTimeAsync(Guid usuarioClientAppId) {
+
+            var usuario = await _databaseService.ObterUsuarioPorClientAppIdAsync(usuarioClientAppId);
+
+            if (usuario != null) {
+                usuario.TimeClientAppId = null;
+
+                await _databaseService.SalvarUsuarioAsync(usuario);
+            }
+        }
     }
 }
