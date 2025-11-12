@@ -550,15 +550,15 @@
                                                             <Label
                                                                 FontAttributes="Bold"
                                                                 FontSize="12"
-                                                                Text="{Binding DataHora, StringFormat='{0:ddd, dd/MM - HH:mm}'}"
-                                                                TextColor="Gray" />
+                                                                Style="{StaticResource ContentTextStyle}"
+                                                                Text="{Binding DataHora, StringFormat='{0:ddd, dd/MM - HH:mm}'}" />
                                                         </HorizontalStackLayout>
 
                                                         <Label
                                                             FontSize="12"
                                                             HorizontalOptions="Center"
+                                                            Style="{StaticResource ContentTextStyle}"
                                                             Text="{Binding Local}"
-                                                            TextColor="OrangeRed"
                                                             VerticalOptions="Center" />
 
 
@@ -609,16 +609,16 @@
                                                                 FontAttributes="Bold"
                                                                 FontSize="16"
                                                                 HorizontalOptions="End"
-                                                                Text="{Binding TimeA.Nome}"
-                                                                TextColor="White" />
+                                                                Style="{StaticResource ContentTextStyle}"
+                                                                Text="{Binding TimeA.Nome}" />
 
                                                             <Label
                                                                 Grid.Column="2"
                                                                 FontAttributes="Bold"
                                                                 FontSize="16"
                                                                 HorizontalOptions="Start"
-                                                                Text="{Binding TimeB.Nome}"
-                                                                TextColor="White" />
+                                                                Style="{StaticResource ContentTextStyle}"
+                                                                Text="{Binding TimeB.Nome}" />
 
 
                                                         </Grid>

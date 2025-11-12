@@ -464,7 +464,9 @@
     <Style x:Key="GameCardStyle" TargetType="Frame">
         <Setter Property="Margin" Value="0,5" />
         <Setter Property="Padding" Value="15" />
-        <Setter Property="BackgroundColor" Value="#282828" />
+
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray300}, Dark=#282828}" />
+
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="HasShadow" Value="True" />
         <Setter Property="BorderColor" Value="OrangeRed" />
