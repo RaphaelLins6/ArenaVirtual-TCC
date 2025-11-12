@@ -32,8 +32,10 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="model:Jogo">
                         <Frame
-                            Margin="0,5"
+                            Margin="2"
                             Padding="10"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray200},
+                                                              Dark=#282828}"
                             CornerRadius="8"
                             HasShadow="True">
                             <StackLayout>
@@ -43,7 +45,7 @@
                                     FontSize="Small"
                                     HorizontalOptions="Center"
                                     Text="{Binding NomeCampeonato}"
-                                    TextColor="#FF9800" />
+                                    TextColor="OrangeRed" />
 
                                 <Grid Padding="5" ColumnDefinitions="*,Auto,*">
 
@@ -109,7 +111,8 @@
             <Frame
                 Margin="0,25,0,5"
                 Padding="10"
-                BackgroundColor="#444444"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Gray200},
+                                                  Dark=#282828}"
                 CornerRadius="8">
                 <Frame.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding TogglePartidasAnterioresCommand}" />
@@ -120,13 +123,13 @@
                         FontAttributes="Bold"
                         FontSize="Medium"
                         HorizontalOptions="StartAndExpand"
-                        Text="Partidas Anteriores"
-                        TextColor="White" />
+                        Style="{StaticResource ContentTextStyle}"
+                        Text="Partidas Anteriores" />
 
                     <Label
                         FontAttributes="Bold"
-                        Text="{Binding IsPartidasAnterioresExpanded, Converter={StaticResource BoolToChevronConverter}}"
-                        TextColor="White" />
+                        Style="{StaticResource ContentTextStyle}"
+                        Text="{Binding IsPartidasAnterioresExpanded, Converter={StaticResource BoolToChevronConverter}}" />
                 </StackLayout>
             </Frame>
 
@@ -138,15 +141,16 @@
                     <Label
                         Padding="10"
                         HorizontalTextAlignment="Center"
-                        Text="Nenhuma partida anterior no histórico."
-                        TextColor="Gray" />
+                        Style="{StaticResource ContentTextStyle}"
+                        Text="Nenhuma partida anterior no histórico." />
                 </CollectionView.EmptyView>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="model:Jogo">
                         <Frame
                             Margin="0,5"
                             Padding="10"
-                            BackgroundColor="#2A2A2A"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray200},
+                                                              Dark=#282828}"
                             CornerRadius="8"
                             HasShadow="True">
                             <StackLayout>
@@ -155,8 +159,8 @@
                                     FontAttributes="Italic"
                                     FontSize="Small"
                                     HorizontalOptions="Center"
-                                    Text="{Binding NomeCampeonato}"
-                                    TextColor="#FFB347" />
+                                    Style="{StaticResource ContentTextStyle}"
+                                    Text="{Binding NomeCampeonato}" />
 
                                 <Grid Padding="5" ColumnDefinitions="*,Auto,*">
                                     <StackLayout Grid.Column="0" HorizontalOptions="Start">
@@ -168,7 +172,8 @@
                                         <Label
                                             FontAttributes="Bold"
                                             HorizontalOptions="Center"
-                                            Text="{Binding TimeA.Nome}" />
+                                            Text="{Binding TimeA.Nome}"
+                                            TextColor="OrangeRed" />
                                     </StackLayout>
 
                                     <StackLayout
@@ -183,6 +188,7 @@
                                         <Label
                                             FontSize="12"
                                             HorizontalTextAlignment="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding DataHora, StringFormat='{0:dd/MM/yyyy}'}" />
                                     </StackLayout>
 
@@ -195,7 +201,8 @@
                                         <Label
                                             FontAttributes="Bold"
                                             HorizontalOptions="Center"
-                                            Text="{Binding TimeB.Nome}" />
+                                            Text="{Binding TimeB.Nome}"
+                                            TextColor="OrangeRed" />
                                     </StackLayout>
                                 </Grid>
                             </StackLayout>

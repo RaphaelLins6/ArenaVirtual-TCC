@@ -52,6 +52,7 @@
 
                     <Label
                         FontSize="16"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="Status:"
                         VerticalOptions="Center" />
 

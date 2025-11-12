@@ -39,8 +39,8 @@
                 Margin="0,0,0,15"
                 FontAttributes="Bold"
                 FontSize="24"
-                Text="Minhas Campanhas Ativas"
-                TextColor="#FFA500" />
+                Style="{StaticResource ContentTextStyle}"
+                Text="Minhas Campanhas Ativas" />
 
             <RefreshView Command="{Binding LoadCampanhasCommand}" IsRefreshing="{Binding EstaOcupado}">
 
@@ -53,8 +53,8 @@
                         <StackLayout Padding="20">
                             <Label
                                 HorizontalOptions="Center"
+                                Style="{StaticResource ContentTextStyle}"
                                 Text="Você não tem campanhas de patrocínio ativas."
-                                TextColor="Orange"
                                 VerticalOptions="Center" />
                         </StackLayout>
                     </CollectionView.EmptyView>
@@ -64,7 +64,8 @@
                             <Frame
                                 Margin="0,5"
                                 Padding="10"
-                                BackgroundColor="#1E1E1E"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray400},
+                                                                  Dark=#282828}"
                                 CornerRadius="8"
                                 HasShadow="True">
                                 <StackLayout>
@@ -74,8 +75,8 @@
                                         FontAttributes="Bold"
                                         FontSize="Medium"
                                         HorizontalOptions="Center"
-                                        Text="{Binding NomeCampanha}"
-                                        TextColor="White" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="{Binding NomeCampanha}" />
 
                                     <Grid Padding="5" ColumnDefinitions="Auto,*,Auto">
 
@@ -95,19 +96,19 @@
                                                 FontAttributes="Italic"
                                                 FontSize="Small"
                                                 Text="{Binding NomeCampeonato}"
-                                                TextColor="#FF9800" />
+                                                TextColor="OrangeRed" />
                                             <Label
                                                 FontSize="Small"
-                                                Text="{Binding Status, StringFormat='Status: {0}'}"
-                                                TextColor="White" />
+                                                Style="{StaticResource ContentTextStyle}"
+                                                Text="{Binding Status, StringFormat='Status: {0}'}" />
                                         </StackLayout>
 
                                         <StackLayout Grid.Column="2" HorizontalOptions="End">
                                             <Label
                                                 FontAttributes="Bold"
                                                 HorizontalTextAlignment="End"
-                                                Text="{Binding DataFim, StringFormat='Término: {0}'}"
-                                                TextColor="LightGray" />
+                                                Style="{StaticResource ContentTextStyle}"
+                                                Text="{Binding DataFim, StringFormat='Término: {0}'}" />
                                             <Button
                                                 x:Name="BotaoVerDetalhes"
                                                 BackgroundColor="#2ECC71"
@@ -131,8 +132,8 @@
                 Margin="0,30,0,15"
                 FontAttributes="Bold"
                 FontSize="24"
-                Text="Campanhas Finalizadas/Inativas"
-                TextColor="Gray" />
+                Style="{StaticResource ContentTextStyle}"
+                Text="Campanhas Finalizadas/Inativas" />
 
             <RefreshView IsEnabled="False" IsVisible="{Binding EstaOcupado, Converter={StaticResource InvertBoolean}}">
                 <CollectionView
@@ -144,8 +145,8 @@
                         <StackLayout Padding="20" IsVisible="{Binding ListaInativaVazia}">
                             <Label
                                 HorizontalOptions="Center"
+                                Style="{StaticResource ContentTextStyle}"
                                 Text="Nenhuma campanha finalizada para exibir."
-                                TextColor="Gray"
                                 VerticalOptions="Center" />
                         </StackLayout>
                     </CollectionView.EmptyView>
@@ -155,7 +156,8 @@
                             <Frame
                                 Margin="0,5"
                                 Padding="10"
-                                BackgroundColor="#1E1E1E"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray400},
+                                                                  Dark=#282828}"
                                 CornerRadius="8"
                                 HasShadow="True">
                                 <StackLayout>
@@ -165,8 +167,8 @@
                                         FontAttributes="Bold"
                                         FontSize="Medium"
                                         HorizontalOptions="Center"
-                                        Text="{Binding NomeCampanha}"
-                                        TextColor="LightGray" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="{Binding NomeCampanha}" />
                                     <Grid Padding="5" ColumnDefinitions="Auto,*,Auto">
 
                                         <Image
@@ -185,19 +187,19 @@
                                                 FontAttributes="Italic"
                                                 FontSize="Small"
                                                 Text="{Binding NomeCampeonato}"
-                                                TextColor="Gray" />
+                                                TextColor="OrangeRed" />
                                             <Label
                                                 FontSize="Small"
-                                                Text="{Binding Status, StringFormat='Status: {0}'}"
-                                                TextColor="LightGray" />
+                                                Style="{StaticResource ContentTextStyle}"
+                                                Text="{Binding Status, StringFormat='Status: {0}'}" />
                                         </StackLayout>
 
                                         <StackLayout Grid.Column="2" HorizontalOptions="End">
                                             <Label
                                                 FontAttributes="Bold"
                                                 HorizontalTextAlignment="End"
-                                                Text="{Binding DataFim, StringFormat='Fim: {0}'}"
-                                                TextColor="DarkGray" />
+                                                Style="{StaticResource ContentTextStyle}"
+                                                Text="{Binding DataFim, StringFormat='Fim: {0}'}" />
                                         </StackLayout>
 
                                     </Grid>

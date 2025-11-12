@@ -231,14 +231,15 @@
                             <DataTemplate x:DataType="models:Time">
                                 <Grid
                                     Padding="0,5"
-                                    BackgroundColor="#282828"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100},
+                                                                      Dark=#282828}"
                                     ColumnDefinitions="40, 40, *, 40, 40, 60, 60">
 
                                     <Label
                                         Grid.Column="0"
                                         HorizontalOptions="Center"
-                                        Text="{Binding Posicao}"
-                                        TextColor="White" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="{Binding Posicao}" />
 
                                     <Image
                                         Grid.Column="1"
@@ -249,29 +250,29 @@
 
                                     <Label
                                         Grid.Column="2"
+                                        Style="{StaticResource ContentTextStyle}"
                                         Text="{Binding Nome}"
-                                        TextColor="White"
                                         VerticalOptions="Center" />
 
                                     <Label
                                         Grid.Column="3"
                                         HorizontalOptions="Center"
+                                        Style="{StaticResource ContentTextStyle}"
                                         Text="{Binding Vitorias}"
-                                        TextColor="White"
                                         VerticalOptions="Center" />
 
                                     <Label
                                         Grid.Column="4"
                                         HorizontalOptions="Center"
+                                        Style="{StaticResource ContentTextStyle}"
                                         Text="{Binding Derrotas}"
-                                        TextColor="White"
                                         VerticalOptions="Center" />
 
                                     <Label
                                         Grid.Column="5"
                                         HorizontalOptions="Center"
+                                        Style="{StaticResource ContentTextStyle}"
                                         Text="{Binding PorcentagemVitoria, StringFormat='{0:P0}'}"
-                                        TextColor="White"
                                         VerticalOptions="Center" />
 
 
@@ -323,7 +324,8 @@
                     HeightRequest="1"
                     HorizontalOptions="FillAndExpand"
                     IsVisible="{Binding IsFaseTabelaEJogos}"
-                    Color="Gray" />
+                    Color="{AppThemeBinding Light={StaticResource Gray500},
+                                            Dark={StaticResource Gray500}}" />
 
                 <VerticalStackLayout
                     Padding="15,0"
@@ -379,7 +381,8 @@
                                 <Frame
                                     Margin="0,5"
                                     Padding="15"
-                                    BackgroundColor="#282828"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100},
+                                                                      Dark=#282828}"
                                     CornerRadius="5">
 
 
@@ -388,15 +391,15 @@
                                             <Label
                                                 FontAttributes="Bold"
                                                 FontSize="12"
-                                                Text="{Binding DataHora, StringFormat='{0:ddd, dd/MM - HH:mm}'}"
-                                                TextColor="Gray" />
+                                                Style="{StaticResource ContentTextStyle}"
+                                                Text="{Binding DataHora, StringFormat='{0:ddd, dd/MM - HH:mm}'}" />
 
                                         </HorizontalStackLayout>
                                         <Label
                                             FontSize="12"
                                             HorizontalOptions="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding Local}"
-                                            TextColor="OrangeRed"
                                             VerticalOptions="Center" />
 
 
@@ -446,15 +449,15 @@
                                                 FontAttributes="Bold"
                                                 FontSize="16"
                                                 HorizontalOptions="End"
-                                                Text="{Binding TimeA.Nome}"
-                                                TextColor="White" />
+                                                Style="{StaticResource ContentTextStyle}"
+                                                Text="{Binding TimeA.Nome}" />
                                             <Label
                                                 Grid.Column="2"
                                                 FontAttributes="Bold"
                                                 FontSize="16"
                                                 HorizontalOptions="Start"
-                                                Text="{Binding TimeB.Nome}"
-                                                TextColor="White" />
+                                                Style="{StaticResource ContentTextStyle}"
+                                                Text="{Binding TimeB.Nome}" />
 
 
                                         </Grid>
@@ -750,7 +753,8 @@
                                 <DataTemplate x:DataType="{x:Type vm:TimeEstatisticaViewModel}">
                                     <Grid
                                         Padding="0,5"
-                                        BackgroundColor="#282828"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100},
+                                                                          Dark=#282828}"
                                         ColumnDefinitions="40,100,46,46,46,46,46,46,46,46,46,46"
                                         WidthRequest="600">
                                         <Image
@@ -760,69 +764,69 @@
                                             WidthRequest="30" />
                                         <Label
                                             Grid.Column="1"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding NomeTime}"
-                                            TextColor="White"
                                             VerticalOptions="Center" />
 
                                         <Label
                                             Grid.Column="2"
                                             HorizontalOptions="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding MediaPontos, StringFormat='{0:F1}'}"
-                                            TextColor="White"
                                             VerticalOptions="Center" />
                                         <Label
                                             Grid.Column="3"
                                             HorizontalOptions="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding MediaRebotes, StringFormat='{0:F1}'}"
-                                            TextColor="White"
                                             VerticalOptions="Center" />
                                         <Label
                                             Grid.Column="4"
                                             HorizontalOptions="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding MediaAssistencias, StringFormat='{0:F1}'}"
-                                            TextColor="White"
                                             VerticalOptions="Center" />
                                         <Label
                                             Grid.Column="5"
                                             HorizontalOptions="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding MediaRoubos, StringFormat='{0:F1}'}"
-                                            TextColor="White"
                                             VerticalOptions="Center" />
                                         <Label
                                             Grid.Column="6"
                                             HorizontalOptions="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding MediaBloqueios, StringFormat='{0:F1}'}"
-                                            TextColor="White"
                                             VerticalOptions="Center" />
                                         <Label
                                             Grid.Column="7"
                                             HorizontalOptions="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding MediaTurnovers, StringFormat='{0:F1}'}"
-                                            TextColor="White"
                                             VerticalOptions="Center" />
                                         <Label
                                             Grid.Column="8"
                                             HorizontalOptions="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding MediaFaltas, StringFormat='{0:F1}'}"
-                                            TextColor="White"
                                             VerticalOptions="Center" />
                                         <Label
                                             Grid.Column="9"
                                             HorizontalOptions="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding Percentual2P, StringFormat='{0:F1}'}"
-                                            TextColor="White"
                                             VerticalOptions="Center" />
                                         <Label
                                             Grid.Column="10"
                                             HorizontalOptions="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding Percentual3P, StringFormat='{0:F1}'}"
-                                            TextColor="White"
                                             VerticalOptions="Center" />
                                         <Label
                                             Grid.Column="11"
                                             HorizontalOptions="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding PercentualLancesLivres, StringFormat='{0:F1}'}"
-                                            TextColor="White"
                                             VerticalOptions="Center" />
 
                                     </Grid>

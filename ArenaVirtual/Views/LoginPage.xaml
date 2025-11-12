@@ -114,6 +114,7 @@
                 <Entry
                     Keyboard="Email"
                     Placeholder="E-mail"
+                    Style="{StaticResource EntryStyle}"
                     Text="{Binding Email}" />
 
                 <Entry
@@ -122,6 +123,7 @@
                     Keyboard="Default"
                     Placeholder="Senha"
                     ReturnType="Go"
+                    Style="{StaticResource EntryStyle}"
                     Text="{Binding Senha}" />
 
                 <Button

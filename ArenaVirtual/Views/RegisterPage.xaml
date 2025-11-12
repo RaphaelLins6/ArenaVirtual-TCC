@@ -21,21 +21,40 @@
     <Grid>
         <ScrollView>
             <VerticalStackLayout Padding="30" Spacing="15">
-                <Entry Placeholder="Nome" Text="{Binding Nome}" />
+
+                <Label
+                    Margin="0,0,0,10"
+                    FontAttributes="Bold"
+                    FontSize="22"
+                    HorizontalOptions="Center"
+                    HorizontalTextAlignment="Center"
+                    Text="Registre-se aqui!"
+                    TextColor="{StaticResource CorTextoPrincipal}" />
+
+                <Label Style="{StaticResource ContentTextStyle}" Text="Digite seu nome:" />
+                <Entry
+                    Placeholder="Nome"
+                    Style="{StaticResource EntryStyle}"
+                    Text="{Binding Nome}" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Digite seu email:" />
                 <Entry
                     Keyboard="Email"
                     Placeholder="Email"
+                    Style="{StaticResource EntryStyle}"
                     Text="{Binding Email}" />
 
                 <Picker
                     Title="Selecione o perfil"
                     ItemsSource="{Binding PerfisDisponiveis}"
-                    SelectedItem="{Binding PerfilSelecionado}" />
+                    SelectedItem="{Binding PerfilSelecionado}"
+                    Style="{StaticResource PickerStyle}" />
 
+                <Label Style="{StaticResource ContentTextStyle}" Text="Digite seu Telefone/WhatsApp:" />
                 <Entry
                     Keyboard="Numeric"
                     MaxLength="16"
                     Placeholder="Telefone/WhatsApp"
+                    Style="{StaticResource EntryStyle}"
                     Text="{Binding Telefone}">
                     <Entry.Behaviors>
                         <OnPlatform x:TypeArguments="behaviors:MaskBehavior">
@@ -45,28 +64,47 @@
                     </Entry.Behaviors>
                 </Entry>
 
-                <Entry Placeholder="Cidade" Text="{Binding Localizacao}" />
-                <Entry Placeholder="Link Rede Social" Text="{Binding LinkRedeSocial}" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Digite sua cidade:" />
+                <Entry
+                    Placeholder="Cidade"
+                    Style="{StaticResource EntryStyle}"
+                    Text="{Binding Localizacao}" />
+
+                <Label Style="{StaticResource ContentTextStyle}" Text="Digite sua rede social:" />
+                <Entry
+                    Placeholder="Link Rede Social"
+                    Style="{StaticResource EntryStyle}"
+                    Text="{Binding LinkRedeSocial}" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Digite sua senha:" />
                 <Entry
                     Completed="OnRegisterEnterPressed"
                     IsPassword="True"
                     Placeholder="Senha"
+                    Style="{StaticResource EntryStyle}"
                     Text="{Binding Senha}" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Confirme sua senha:" />
                 <Entry
                     IsPassword="True"
                     Placeholder="Confirmar Senha"
+                    Style="{StaticResource EntryStyle}"
                     Text="{Binding ConfirmarSenha}" />
 
                 <VerticalStackLayout
                     x:Name="PatrocinadorFields"
                     IsVisible="{Binding PerfilSelecionado, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:TipoPerfil.Patrocinador}}"
                     Spacing="10">
-                    <Entry Placeholder="Nome da Empresa" Text="{Binding NomeEmpresa}" />
+                    <Label Style="{StaticResource ContentTextStyle}" Text="Digite o nome da sua empresa:" />
+                    <Entry
+                        Placeholder="Nome da Empresa"
+                        Style="{StaticResource EntryStyle}"
+                        Text="{Binding NomeEmpresa}" />
 
+                    <Label Style="{StaticResource ContentTextStyle}" Text="Digite seu CNPJ:" />
                     <Entry
                         Keyboard="Numeric"
                         MaxLength="18"
-                        Placeholder="CNPJ/CPF"
+                        Placeholder="CNPJ"
+                        Style="{StaticResource EntryStyle}"
                         Text="{Binding Cnpj}">
                         <Entry.Behaviors>
                             <OnPlatform x:TypeArguments="Behavior">
@@ -80,19 +118,28 @@
                         </Entry.Behaviors>
                     </Entry>
 
-                    <Entry Placeholder="Faixa de Orçamento para Patrocínio" Text="{Binding FaixaOrcamentoPatrocinio}" />
+                    <Label Style="{StaticResource ContentTextStyle}" Text="Digite seu orçamento:" />
+                    <Entry
+                        Placeholder="Faixa de Orçamento para Patrocínio"
+                        Style="{StaticResource EntryStyle}"
+                        Text="{Binding FaixaOrcamentoPatrocinio}" />
                 </VerticalStackLayout>
 
                 <VerticalStackLayout
                     x:Name="OrganizadorFields"
                     IsVisible="{Binding PerfilSelecionado, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:TipoPerfil.Organizador}}"
                     Spacing="10">
-                    <Entry Placeholder="Nome da Empresa" Text="{Binding NomeEmpresa}" />
-
+                    <Label Style="{StaticResource ContentTextStyle}" Text="Digite o nome da sua empresa:" />
+                    <Entry
+                        Placeholder="Nome da Empresa"
+                        Style="{StaticResource EntryStyle}"
+                        Text="{Binding NomeEmpresa}" />
+                    <Label Style="{StaticResource ContentTextStyle}" Text="Digite seu CNPJ:" />
                     <Entry
                         Keyboard="Numeric"
                         MaxLength="18"
-                        Placeholder="CNPJ/CPF"
+                        Placeholder="CNPJ"
+                        Style="{StaticResource EntryStyle}"
                         Text="{Binding Cnpj}">
                         <Entry.Behaviors>
                             <OnPlatform x:TypeArguments="Behavior">
@@ -111,13 +158,17 @@
                     x:Name="AtletaFields"
                     IsVisible="{Binding PerfilSelecionado, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static models:TipoPerfil.Atleta}}"
                     Spacing="10">
+                    <Label Style="{StaticResource ContentTextStyle}" Text="Digite sua altura:" />
                     <Entry
                         Keyboard="Numeric"
                         Placeholder="Altura (cm)"
+                        Style="{StaticResource EntryStyle}"
                         Text="{Binding Altura}" />
+                    <Label Style="{StaticResource ContentTextStyle}" Text="Digite seu peso:" />
                     <Entry
                         Keyboard="Numeric"
                         Placeholder="Peso (kg)"
+                        Style="{StaticResource EntryStyle}"
                         Text="{Binding Peso}" />
                 </VerticalStackLayout>
 
@@ -128,9 +179,13 @@
                     <Picker
                         Title="Gênero"
                         ItemsSource="{Binding GenerosDisponiveis}"
-                        SelectedItem="{Binding GeneroSelecionado}" />
-                    <Label Text="Data de Nascimento:" TextColor="White" />
-                    <DatePicker Date="{Binding DataNascimento, Mode=TwoWay}" Format="dd/MM/yyyy" />
+                        SelectedItem="{Binding GeneroSelecionado}"
+                        Style="{StaticResource PickerStyle}" />
+                    <Label Style="{StaticResource ContentTextStyle}" Text="Data de Nascimento:" />
+                    <DatePicker
+                        Date="{Binding DataNascimento, Mode=TwoWay}"
+                        Format="dd/MM/yyyy"
+                        Style="{StaticResource DatePickerStyle}" />
                 </VerticalStackLayout>
 
 

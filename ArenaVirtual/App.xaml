@@ -12,7 +12,6 @@
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <!--  Conversores e outros recursos definidos após os dicionários mesclados  -->
             <converters:FavoritoIconConverter x:Key="FavoritoIconConverter" />
             <converters:ZeroToTrueConverter x:Key="ZeroToTrueConverter" />
             <converters:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmptyConverter" />

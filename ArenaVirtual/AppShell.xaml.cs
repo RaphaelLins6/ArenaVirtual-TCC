@@ -62,6 +62,7 @@ namespace ArenaVirtual {
             this.Items.Add(new FlyoutItem {
                 Title = "Meu Perfil",
                 Route = "PerfilPage",
+                Icon = "perfil_icon.png",
                 Items = {
                     new ShellContent {
                         ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<PerfilPage>())
@@ -72,6 +73,7 @@ namespace ArenaVirtual {
             if (usuario.Perfil == TipoPerfil.Atleta) {
                 this.Items.Add(new FlyoutItem {
                     Title = "Meu Time",
+                    Icon = "time_icon.png",
                     Items = {
                         new ShellContent { Title = "Informações do Time", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<MeusTimesPage>()) },
                         new ShellContent { Title = "Jogos", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<Views.Atleta.PartidasPage>()) },
@@ -81,6 +83,7 @@ namespace ArenaVirtual {
             } else if (usuario.Perfil == TipoPerfil.Organizador) {
                 this.Items.Add(new FlyoutItem {
                     Title = "Gerenciar Campeonatos",
+                    Icon = "gereciarcampeonato_icon.png",
                     Items = {
                         new ShellContent { Title = "Criar Campeonato", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<CriarCampeonatoPage>()) },
                         new ShellContent { Title = "Meus Campeonatos", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<DashboardOrganizadorPage>()) }
@@ -89,6 +92,7 @@ namespace ArenaVirtual {
             } else if (usuario.Perfil == TipoPerfil.Arbitro) {
                 this.Items.Add(new FlyoutItem {
                     Title = "Dashboard",
+                    Icon = "arbitro_icon.png",
                     Items = {
                         new ShellContent { Title = "Ver Jogos Atribuidos", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<DashboardArbitroPage>()) }
                     }
@@ -96,6 +100,7 @@ namespace ArenaVirtual {
             } else if (usuario.Perfil == TipoPerfil.Patrocinador) {
                 this.Items.Add(new FlyoutItem {
                     Title = "Minhas Campanhas",
+                    Icon = "patrocinador_icon.png",
                     Items = {
                         new ShellContent { Title = "Dashboard", ContentTemplate = new DataTemplate(() => _serviceProvider.GetService<DashboardPatrocinadorPage>()) }
                     }
@@ -103,6 +108,7 @@ namespace ArenaVirtual {
             }
 
             this.Items.Add(new MenuItem {
+                IconImageSource = "sair_icon.png",
                 Text = "Sair",
                 Command = new Command(() => {
                     MainThread.BeginInvokeOnMainThread(() => {

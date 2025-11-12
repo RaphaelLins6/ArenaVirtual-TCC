@@ -25,7 +25,8 @@
                 <Frame
                     Margin="0,10"
                     Padding="15"
-                    BackgroundColor="#1E1E1E"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray200},
+                                                      Dark=#282828}"
                     CornerRadius="10"
                     HasShadow="True">
 
@@ -40,17 +41,18 @@
                                 FontAttributes="Bold"
                                 FontSize="18"
                                 HorizontalOptions="Center"
-                                Text="{Binding Jogo.TimeA.Nome}"
-                                TextColor="White" />
+                                Style="{StaticResource ContentTextStyle}"
+                                Text="{Binding Jogo.TimeA.Nome}" />
                             <Entry
                                 Margin="0,10,0,0"
-                                BackgroundColor="#303030"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray400},
+                                                                  Dark=#282828}"
                                 FontSize="24"
                                 HorizontalTextAlignment="Center"
                                 Keyboard="Numeric"
                                 Placeholder="Placar"
                                 Text="{Binding PlacarTimeA, Mode=TwoWay}"
-                                TextColor="#FFA500"
+                                TextColor="OrangeRed"
                                 WidthRequest="100" />
                         </VerticalStackLayout>
 
@@ -71,17 +73,18 @@
                                 FontAttributes="Bold"
                                 FontSize="18"
                                 HorizontalOptions="Center"
-                                Text="{Binding Jogo.TimeB.Nome}"
-                                TextColor="White" />
+                                Style="{StaticResource ContentTextStyle}"
+                                Text="{Binding Jogo.TimeB.Nome}" />
                             <Entry
                                 Margin="0,10,0,0"
-                                BackgroundColor="#303030"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray400},
+                                                                  Dark=#282828}"
                                 FontSize="24"
                                 HorizontalTextAlignment="Center"
                                 Keyboard="Numeric"
                                 Placeholder="Placar"
                                 Text="{Binding PlacarTimeB, Mode=TwoWay}"
-                                TextColor="#FFA500"
+                                TextColor="OrangeRed"
                                 WidthRequest="100" />
                         </StackLayout>
 
@@ -100,94 +103,95 @@
                         <CollectionView.Header>
                             <Grid
                                 Padding="10,0"
-                                BackgroundColor="#1E1E1E"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray400},
+                                                                  Dark=#282828}"
                                 ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70"
                                 WidthRequest="1040">
                                 <Label
                                     Grid.Column="1"
                                     FontAttributes="Bold"
                                     Text="Atleta"
-                                    TextColor="White"
+                                    TextColor="#FF4500"
                                     VerticalOptions="Center" />
                                 <Label
                                     Grid.Column="2"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="PTS"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="3"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="REB"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="4"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="AST"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="5"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="ROU"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="6"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="BLO"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="7"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="TOV"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="8"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="Faltas"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
 
                                 <Label
                                     Grid.Column="9"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="2C"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="10"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="2T"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="11"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="3C"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="12"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="3T"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="13"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="LLC"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="14"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="LLT"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                             </Grid>
                         </CollectionView.Header>
 
@@ -196,7 +200,8 @@
                                 <Frame
                                     Margin="0,2"
                                     Padding="5"
-                                    BackgroundColor="#282828"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray400},
+                                                                      Dark=#282828}"
                                     CornerRadius="5">
                                     <Grid ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70">
 
@@ -220,141 +225,154 @@
                                             Grid.Column="1"
                                             Margin="5,0"
                                             FontSize="14"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding NomeAtleta}"
-                                            TextColor="White"
                                             VerticalOptions="Center" />
 
                                         <Entry
                                             Grid.Column="2"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Pontos}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Pontos}" />
                                         <Entry
                                             Grid.Column="3"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Rebotes}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Rebotes}" />
                                         <Entry
                                             Grid.Column="4"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Assistencias}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Assistencias}" />
                                         <Entry
                                             Grid.Column="5"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Roubos}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Roubos}" />
                                         <Entry
                                             Grid.Column="6"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Bloqueios}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Bloqueios}" />
                                         <Entry
                                             Grid.Column="7"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Turnovers}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Turnovers}" />
 
                                         <Entry
                                             Grid.Column="8"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Faltas}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Faltas}" />
                                         <Entry
                                             Grid.Column="9"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Arremessos2PontosConvertidos}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Arremessos2PontosConvertidos}" />
                                         <Entry
                                             Grid.Column="10"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Arremessos2PontosTentados}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Arremessos2PontosTentados}" />
                                         <Entry
                                             Grid.Column="11"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Arremessos3PontosConvertidos}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Arremessos3PontosConvertidos}" />
                                         <Entry
                                             Grid.Column="12"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Arremessos3PontosTentados}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Arremessos3PontosTentados}" />
                                         <Entry
                                             Grid.Column="13"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding LancesLivresConvertidos}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding LancesLivresConvertidos}" />
                                         <Entry
                                             Grid.Column="14"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding LancesLivresTentados}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding LancesLivresTentados}" />
 
                                     </Grid>
                                 </Frame>
@@ -375,94 +393,95 @@
                         <CollectionView.Header>
                             <Grid
                                 Padding="10,0"
-                                BackgroundColor="#1E1E1E"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray400},
+                                                                  Dark=#282828}"
                                 ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70"
                                 WidthRequest="1040">
                                 <Label
                                     Grid.Column="1"
                                     FontAttributes="Bold"
                                     Text="Atleta"
-                                    TextColor="White"
+                                    TextColor="#FF4500"
                                     VerticalOptions="Center" />
                                 <Label
                                     Grid.Column="2"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="PTS"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="3"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="REB"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="4"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="AST"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="5"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="ROU"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="6"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="BLO"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="7"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="TOV"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="8"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="Faltas"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
 
                                 <Label
                                     Grid.Column="9"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="2C"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="10"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="2T"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="11"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="3C"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="12"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="3T"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="13"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="LLC"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                                 <Label
                                     Grid.Column="14"
                                     FontAttributes="Bold"
                                     HorizontalTextAlignment="Center"
                                     Text="LLT"
-                                    TextColor="#FFA500" />
+                                    TextColor="#FF4500" />
                             </Grid>
                         </CollectionView.Header>
 
@@ -471,7 +490,8 @@
                                 <Frame
                                     Margin="0,2"
                                     Padding="5"
-                                    BackgroundColor="#282828"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray400},
+                                                                      Dark=#282828}"
                                     CornerRadius="5">
                                     <Grid ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70">
 
@@ -495,141 +515,154 @@
                                             Grid.Column="1"
                                             Margin="5,0"
                                             FontSize="14"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding NomeAtleta}"
-                                            TextColor="White"
                                             VerticalOptions="Center" />
 
                                         <Entry
                                             Grid.Column="2"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Pontos}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Pontos}" />
                                         <Entry
                                             Grid.Column="3"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Rebotes}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Rebotes}" />
                                         <Entry
                                             Grid.Column="4"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Assistencias}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Assistencias}" />
                                         <Entry
                                             Grid.Column="5"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Roubos}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Roubos}" />
                                         <Entry
                                             Grid.Column="6"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Bloqueios}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Bloqueios}" />
                                         <Entry
                                             Grid.Column="7"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Turnovers}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Turnovers}" />
 
                                         <Entry
                                             Grid.Column="8"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Faltas}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Faltas}" />
                                         <Entry
                                             Grid.Column="9"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Arremessos2PontosConvertidos}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Arremessos2PontosConvertidos}" />
                                         <Entry
                                             Grid.Column="10"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Arremessos2PontosTentados}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Arremessos2PontosTentados}" />
                                         <Entry
                                             Grid.Column="11"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Arremessos3PontosConvertidos}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Arremessos3PontosConvertidos}" />
                                         <Entry
                                             Grid.Column="12"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding Arremessos3PontosTentados}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding Arremessos3PontosTentados}" />
                                         <Entry
                                             Grid.Column="13"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding LancesLivresConvertidos}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding LancesLivresConvertidos}" />
                                         <Entry
                                             Grid.Column="14"
-                                            BackgroundColor="#303030"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                                              Dark=#282828}"
                                             FontSize="14"
                                             HorizontalOptions="FillAndExpand"
                                             HorizontalTextAlignment="Center"
                                             Keyboard="Numeric"
                                             Placeholder="0"
-                                            Text="{Binding LancesLivresTentados}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding LancesLivresTentados}" />
                                     </Grid>
                                 </Frame>
                             </DataTemplate>

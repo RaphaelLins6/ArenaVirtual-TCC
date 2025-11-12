@@ -9,7 +9,8 @@
 
     <VerticalStackLayout
         Padding="15,20"
-        BackgroundColor="#1E1E1E"
+        BackgroundColor="{AppThemeBinding Light={StaticResource White},
+                                          Dark=#1E1E1E}"
         Spacing="10">
 
         <Label
@@ -18,14 +19,14 @@
             FontSize="24"
             HorizontalOptions="Center"
             Text="Minhas Estatísticas (Médias por Jogo)"
-            TextColor="Orange" />
+            TextColor="OrangeRed" />
 
         <Border
             Margin="0,10,0,20"
             Padding="0"
             HeightRequest="120"
             HorizontalOptions="Center"
-            Stroke="Orange"
+            Stroke="OrangeRed"
             StrokeShape="RoundRectangle 60"
             StrokeThickness="2"
             WidthRequest="120">
@@ -46,7 +47,7 @@
                 IsVisible="{Binding EstaCarregando}"
                 VerticalOptions="Center"
                 WidthRequest="50"
-                Color="Orange" />
+                Color="OrangeRed" />
 
             <ScrollView HorizontalScrollBarVisibility="Never" Orientation="Horizontal">
                 <Grid
@@ -61,147 +62,148 @@
                         Padding="0,5"
                         FontAttributes="Bold"
                         Text="Atleta"
-                        TextColor="Orange" />
+                        TextColor="OrangeRed" />
                     <Label
                         Grid.Row="0"
                         Grid.Column="1"
                         FontAttributes="Bold"
                         HorizontalOptions="Center"
                         Text="P/J"
-                        TextColor="Orange" />
+                        TextColor="OrangeRed" />
                     <Label
                         Grid.Row="0"
                         Grid.Column="2"
                         FontAttributes="Bold"
                         HorizontalOptions="Center"
                         Text="RBT/J"
-                        TextColor="Orange" />
+                        TextColor="OrangeRed" />
                     <Label
                         Grid.Row="0"
                         Grid.Column="3"
                         FontAttributes="Bold"
                         HorizontalOptions="Center"
                         Text="AST/J"
-                        TextColor="Orange" />
+                        TextColor="OrangeRed" />
                     <Label
                         Grid.Row="0"
                         Grid.Column="4"
                         FontAttributes="Bold"
                         HorizontalOptions="Center"
                         Text="ROU/J"
-                        TextColor="Orange" />
+                        TextColor="OrangeRed" />
                     <Label
                         Grid.Row="0"
                         Grid.Column="5"
                         FontAttributes="Bold"
                         HorizontalOptions="Center"
                         Text="BLO/J"
-                        TextColor="Orange" />
+                        TextColor="OrangeRed" />
                     <Label
                         Grid.Row="0"
                         Grid.Column="6"
                         FontAttributes="Bold"
                         HorizontalOptions="Center"
                         Text="T/J"
-                        TextColor="Orange" />
+                        TextColor="OrangeRed" />
                     <Label
                         Grid.Row="0"
                         Grid.Column="7"
                         FontAttributes="Bold"
                         HorizontalOptions="Center"
                         Text="F/J"
-                        TextColor="Orange" />
+                        TextColor="OrangeRed" />
                     <Label
                         Grid.Row="0"
                         Grid.Column="8"
                         FontAttributes="Bold"
                         HorizontalOptions="Center"
                         Text="2P%"
-                        TextColor="Orange" />
+                        TextColor="OrangeRed" />
                     <Label
                         Grid.Row="0"
                         Grid.Column="9"
                         FontAttributes="Bold"
                         HorizontalOptions="Center"
                         Text="3P%"
-                        TextColor="Orange" />
+                        TextColor="OrangeRed" />
                     <Label
                         Grid.Row="0"
                         Grid.Column="10"
                         FontAttributes="Bold"
                         HorizontalOptions="Center"
                         Text="LL%"
-                        TextColor="Orange" />
+                        TextColor="OrangeRed" />
 
                     <BoxView
                         Grid.Row="1"
                         Grid.ColumnSpan="11"
                         Margin="0,-5,0,-5"
-                        BackgroundColor="#282828"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray200},
+                                                          Dark=#282828}"
                         VerticalOptions="FillAndExpand" />
 
                     <Label
                         Grid.Row="1"
                         Grid.Column="0"
                         Padding="5,0"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="{Binding NomeAtleta}"
-                        TextColor="White"
                         VerticalOptions="Center"
                         ZIndex="1" />
                     <Label
                         Grid.Row="1"
                         Grid.Column="1"
                         HorizontalOptions="Center"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="{Binding MediaPontos, StringFormat='{0:F1}'}"
-                        TextColor="White"
                         VerticalOptions="Center"
                         ZIndex="1" />
                     <Label
                         Grid.Row="1"
                         Grid.Column="2"
                         HorizontalOptions="Center"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="{Binding MediaRebotes, StringFormat='{0:F1}'}"
-                        TextColor="White"
                         VerticalOptions="Center"
                         ZIndex="1" />
                     <Label
                         Grid.Row="1"
                         Grid.Column="3"
                         HorizontalOptions="Center"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="{Binding MediaAssistencias, StringFormat='{0:F1}'}"
-                        TextColor="White"
                         VerticalOptions="Center"
                         ZIndex="1" />
                     <Label
                         Grid.Row="1"
                         Grid.Column="4"
                         HorizontalOptions="Center"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="{Binding MediaRoubos, StringFormat='{0:F1}'}"
-                        TextColor="White"
                         VerticalOptions="Center"
                         ZIndex="1" />
                     <Label
                         Grid.Row="1"
                         Grid.Column="5"
                         HorizontalOptions="Center"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="{Binding MediaBloqueios, StringFormat='{0:F1}'}"
-                        TextColor="White"
                         VerticalOptions="Center"
                         ZIndex="1" />
                     <Label
                         Grid.Row="1"
                         Grid.Column="6"
                         HorizontalOptions="Center"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="{Binding MediaTurnovers, StringFormat='{0:F1}'}"
-                        TextColor="White"
                         VerticalOptions="Center"
                         ZIndex="1" />
                     <Label
                         Grid.Row="1"
                         Grid.Column="7"
                         HorizontalOptions="Center"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="{Binding MediaFaltas, StringFormat='{0:F1}'}"
-                        TextColor="White"
                         VerticalOptions="Center"
                         ZIndex="1" />
 
@@ -209,24 +211,24 @@
                         Grid.Row="1"
                         Grid.Column="8"
                         HorizontalOptions="Center"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="{Binding Percentual2P, StringFormat='{0:F1}%'}"
-                        TextColor="White"
                         VerticalOptions="Center"
                         ZIndex="1" />
                     <Label
                         Grid.Row="1"
                         Grid.Column="9"
                         HorizontalOptions="Center"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="{Binding Percentual3P, StringFormat='{0:F1}%'}"
-                        TextColor="White"
                         VerticalOptions="Center"
                         ZIndex="1" />
                     <Label
                         Grid.Row="1"
                         Grid.Column="10"
                         HorizontalOptions="Center"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="{Binding PercentualLancesLivres, StringFormat='{0:F1}%'}"
-                        TextColor="White"
                         VerticalOptions="Center"
                         ZIndex="1" />
                 </Grid>
