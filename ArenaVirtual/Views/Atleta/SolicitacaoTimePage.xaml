@@ -15,14 +15,14 @@
                 Margin="0,20,0,0"
                 FontAttributes="Bold"
                 FontSize="20"
-                Text="Convites Pendentes"
-                TextColor="{AppThemeBinding Light=#333333,
-                                            Dark=White}" />
+                Style="{StaticResource ContentTextStyle}"
+                Text="Convites Pendentes" />
 
             <CollectionView ItemsSource="{Binding ConvitesPendentes}">
                 <CollectionView.EmptyView>
                     <Label
                         HorizontalOptions="Center"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="Nenhum convite pendente."
                         VerticalOptions="CenterAndExpand" />
                 </CollectionView.EmptyView>

@@ -40,14 +40,22 @@
             <Label
                 FontAttributes="Bold"
                 FontSize="18"
-                Text="Nome do Time" />
-            <Entry Placeholder="Insira o nome do time" Text="{Binding NomeTime}" />
+                Text="Nome do Time"
+                TextColor="OrangeRed" />
+            <Entry
+                Placeholder="Insira o nome do time"
+                Style="{StaticResource ContentTextStyle}"
+                Text="{Binding NomeTime}" />
 
             <Label
                 FontAttributes="Bold"
                 FontSize="18"
-                Text="Descrição" />
-            <Entry Placeholder="Insira uma breve descrição" Text="{Binding DescricaoTime}" />
+                Text="Descrição"
+                TextColor="OrangeRed" />
+            <Entry
+                Placeholder="Insira uma breve descrição"
+                Style="{StaticResource ContentTextStyle}"
+                Text="{Binding DescricaoTime}" />
 
             <Button
                 BackgroundColor="#4CAF50"

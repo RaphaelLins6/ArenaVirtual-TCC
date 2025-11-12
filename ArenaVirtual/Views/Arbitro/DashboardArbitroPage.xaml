@@ -27,7 +27,7 @@
                 FontAttributes="Bold"
                 FontSize="24"
                 Text="Partidas para Lançamento"
-                TextColor="#FFA500" />
+                TextColor="OrangeRed" />
 
             <RefreshView
                 Grid.Row="2"
@@ -77,7 +77,8 @@
                                             <Label
                                                 FontAttributes="Bold"
                                                 HorizontalOptions="Center"
-                                                Text="{Binding NomeTimeA}" />
+                                                Text="{Binding NomeTimeA}"
+                                                TextColor="OrangeRed" />
                                         </StackLayout>
                                         <StackLayout
                                             Grid.Column="1"
@@ -86,19 +87,23 @@
                                             <Label
                                                 FontSize="12"
                                                 HorizontalTextAlignment="Center"
-                                                Text="{Binding DataHora, StringFormat='{0:dd/MM - HH:mm}'}" />
+                                                Text="{Binding DataHora, StringFormat='{0:dd/MM - HH:mm}'}"
+                                                TextColor="OrangeRed" />
                                             <Label
                                                 FontSize="12"
                                                 HorizontalTextAlignment="Center"
-                                                Text="{Binding Jogo.Local}" />
+                                                Text="{Binding Jogo.Local}"
+                                                TextColor="OrangeRed" />
                                             <Label
                                                 FontAttributes="Bold"
                                                 HorizontalTextAlignment="Center"
-                                                Text="VS" />
+                                                Text="VS"
+                                                TextColor="OrangeRed" />
                                             <Label
                                                 FontSize="12"
                                                 HorizontalTextAlignment="Center"
-                                                Text="{Binding Jogo.Rodada, StringFormat='Rodada {0}'}" />
+                                                Text="{Binding Jogo.Rodada, StringFormat='Rodada {0}'}"
+                                                TextColor="OrangeRed" />
                                         </StackLayout>
                                         <StackLayout Grid.Column="2" HorizontalOptions="End">
                                             <Image
@@ -109,7 +114,8 @@
                                             <Label
                                                 FontAttributes="Bold"
                                                 HorizontalOptions="Center"
-                                                Text="{Binding NomeTimeB}" />
+                                                Text="{Binding NomeTimeB}"
+                                                TextColor="OrangeRed" />
                                         </StackLayout>
                                     </Grid>
 
@@ -173,7 +179,8 @@
                                         <Label
                                             FontAttributes="Bold"
                                             HorizontalOptions="Center"
-                                            Text="{Binding NomeTimeA}" />
+                                            Text="{Binding NomeTimeA}"
+                                            TextColor="OrangeRed" />
                                     </StackLayout>
                                     <StackLayout
                                         Grid.Column="1"
@@ -193,7 +200,8 @@
                                         <Label
                                             FontSize="12"
                                             HorizontalTextAlignment="Center"
-                                            Text="{Binding DataHora, StringFormat='{0:dd/MM - HH:mm}'}" />
+                                            Text="{Binding DataHora, StringFormat='{0:dd/MM - HH:mm}'}"
+                                            TextColor="OrangeRed" />
                                     </StackLayout>
                                     <StackLayout Grid.Column="2" HorizontalOptions="End">
                                         <Image
@@ -204,7 +212,8 @@
                                         <Label
                                             FontAttributes="Bold"
                                             HorizontalOptions="Center"
-                                            Text="{Binding NomeTimeB}" />
+                                            Text="{Binding NomeTimeB}"
+                                            TextColor="OrangeRed" />
                                     </StackLayout>
                                 </Grid>
                             </StackLayout>

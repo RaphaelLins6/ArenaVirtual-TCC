@@ -30,7 +30,8 @@
                                     <Label
                                         FontAttributes="Bold"
                                         FontSize="20"
-                                        Text="{Binding Time.Nome}" />
+                                        Text="{Binding Time.Nome}"
+                                        TextColor="OrangeRed" />
                                     <Label
                                         FontSize="14"
                                         Text="{Binding Time.Descricao}"
@@ -70,7 +71,8 @@
                     <Label
                         FontAttributes="Bold"
                         FontSize="18"
-                        Text="Membros" />
+                        Text="Membros"
+                        TextColor="OrangeRed" />
                     <CollectionView ItemsSource="{Binding MembrosDoTime}">
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
@@ -90,6 +92,7 @@
                                         <Label
                                             Grid.Column="1"
                                             Margin="10,0,0,0"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding Nome}"
                                             VerticalOptions="Center" />
 
@@ -138,12 +141,14 @@
                     FontAttributes="Bold"
                     FontSize="20"
                     HorizontalOptions="Center"
+                    Style="{StaticResource ContentTextStyle}"
                     Text="{Binding StatusMessageTitle}" />
 
                 <Label
                     FontSize="16"
                     HorizontalOptions="Center"
                     HorizontalTextAlignment="Center"
+                    Style="{StaticResource ContentTextStyle}"
                     Text="{Binding StatusMessageDescription}" />
 
                 <Button

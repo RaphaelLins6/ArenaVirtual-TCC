@@ -21,6 +21,7 @@
                     <Label
                         FontSize="16"
                         HorizontalOptions="Center"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="Nenhum campeonato encontrado."
                         VerticalOptions="CenterAndExpand" />
                 </CollectionView.EmptyView>
@@ -52,7 +53,8 @@
                                         FontAttributes="Bold"
                                         FontSize="16"
                                         LineBreakMode="WordWrap"
-                                        Text="{Binding Nome}" />
+                                        Text="{Binding Nome}"
+                                        TextColor="OrangeRed" />
                                     <Label
                                         FontSize="12"
                                         Text="{Binding Descricao}"

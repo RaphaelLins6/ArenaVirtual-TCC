@@ -11,56 +11,97 @@
     x:DataType="vm:HomeViewModel">
 
     <Grid RowDefinitions="Auto, *">
-        <HorizontalStackLayout
-            Grid.Row="0"
-            Padding="20"
-            HorizontalOptions="End"
-            Spacing="10">
-            <Label
-                FontSize="16"
-                Text="Status:"
-                VerticalOptions="Center" />
-            <Ellipse
-                HeightRequest="15"
-                StrokeThickness="1"
-                VerticalOptions="Center"
-                WidthRequest="15">
-                <Ellipse.Fill>
-                    <SolidColorBrush>
-                        <SolidColorBrush.Color>
-                            <OnPlatform x:TypeArguments="Color">
-                                <On Platform="iOS, Android" Value="Gray" />
-                                <On Platform="WinUI" Value="Black" />
-                            </OnPlatform>
-                        </SolidColorBrush.Color>
-                    </SolidColorBrush>
-                </Ellipse.Fill>
-                <Ellipse.Triggers>
-                    <DataTrigger
-                        Binding="{Binding IsOnline}"
-                        TargetType="Ellipse"
-                        Value="True">
-                        <Setter Property="Fill" Value="Green" />
-                    </DataTrigger>
-                    <DataTrigger
-                        Binding="{Binding IsOnline}"
-                        TargetType="Ellipse"
-                        Value="False">
-                        <Setter Property="Fill" Value="Red" />
-                    </DataTrigger>
-                </Ellipse.Triggers>
-            </Ellipse>
-            <ImageButton
-                Margin="10,0,0,0"
-                Aspect="AspectFit"
-                BackgroundColor="Transparent"
-                Command="{Binding SincronizarCommand}"
-                HeightRequest="40"
-                HorizontalOptions="End"
-                IsVisible="{Binding IsOnline}"
-                Source="sync_icon.png"
-                WidthRequest="40" />
-        </HorizontalStackLayout>
+        <Grid RowDefinitions="Auto, *">
+
+            <Grid
+                Grid.Row="0"
+                Padding="20"
+                ColumnDefinitions="Auto, *">
+
+                <ImageButton
+                    Grid.Column="0"
+                    Margin="0,0,0,0"
+                    Aspect="AspectFit"
+                    BackgroundColor="Transparent"
+                    Command="{Binding ToggleThemeCommand}"
+                    HeightRequest="40"
+                    HorizontalOptions="Start"
+                    WidthRequest="40">
+
+                    <ImageButton.Triggers>
+                        <DataTrigger
+                            Binding="{Binding IsDarkMode}"
+                            TargetType="ImageButton"
+                            Value="True">
+                            <Setter Property="Source" Value="sun_icon.png" />
+                        </DataTrigger>
+
+                        <DataTrigger
+                            Binding="{Binding IsDarkMode}"
+                            TargetType="ImageButton"
+                            Value="False">
+                            <Setter Property="Source" Value="moon_icon.png" />
+                        </DataTrigger>
+                    </ImageButton.Triggers>
+                </ImageButton>
+
+                <HorizontalStackLayout
+                    Grid.Column="1"
+                    HorizontalOptions="End"
+                    Spacing="10">
+
+                    <Label
+                        FontSize="16"
+                        Text="Status:"
+                        VerticalOptions="Center" />
+
+                    <Ellipse
+                        HeightRequest="15"
+                        StrokeThickness="1"
+                        VerticalOptions="Center"
+                        WidthRequest="15">
+                        <Ellipse.Fill>
+                            <SolidColorBrush>
+                                <SolidColorBrush.Color>
+                                    <OnPlatform x:TypeArguments="Color">
+                                        <On Platform="iOS, Android" Value="Gray" />
+                                        <On Platform="WinUI" Value="Black" />
+                                    </OnPlatform>
+                                </SolidColorBrush.Color>
+                            </SolidColorBrush>
+                        </Ellipse.Fill>
+                        <Ellipse.Triggers>
+                            <DataTrigger
+                                Binding="{Binding IsOnline}"
+                                TargetType="Ellipse"
+                                Value="True">
+                                <Setter Property="Fill" Value="Green" />
+                            </DataTrigger>
+                            <DataTrigger
+                                Binding="{Binding IsOnline}"
+                                TargetType="Ellipse"
+                                Value="False">
+                                <Setter Property="Fill" Value="Red" />
+                            </DataTrigger>
+                        </Ellipse.Triggers>
+                    </Ellipse>
+
+                    <ImageButton
+                        Margin="10,0,0,0"
+                        Aspect="AspectFit"
+                        BackgroundColor="Transparent"
+                        Command="{Binding SincronizarCommand}"
+                        HeightRequest="40"
+                        HorizontalOptions="End"
+                        IsVisible="{Binding IsOnline}"
+                        Source="sync_icon.png"
+                        WidthRequest="40" />
+
+                </HorizontalStackLayout>
+
+            </Grid>
+
+        </Grid>
 
         <ScrollView Grid.Row="1">
             <StackLayout Padding="20" Spacing="24">
@@ -82,8 +123,8 @@
                         <CollectionView.EmptyView>
                             <Label
                                 HorizontalOptions="Center"
+                                Style="{StaticResource ContentTextStyle}"
                                 Text="Nenhum campeonato favoritado."
-                                TextColor="White"
                                 VerticalOptions="Center" />
                         </CollectionView.EmptyView>
                         <CollectionView.ItemTemplate>
@@ -107,8 +148,8 @@
                         <CollectionView.EmptyView>
                             <Label
                                 HorizontalOptions="Center"
+                                Style="{StaticResource ContentTextStyle}"
                                 Text="Nenhum campeonato encontrado."
-                                TextColor="White"
                                 VerticalOptions="Center" />
                         </CollectionView.EmptyView>
                         <CollectionView.ItemTemplate>

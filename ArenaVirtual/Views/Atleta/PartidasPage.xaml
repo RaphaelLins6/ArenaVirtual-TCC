@@ -21,6 +21,7 @@
                 Margin="0,0,0,15"
                 FontAttributes="Bold"
                 FontSize="24"
+                Style="{StaticResource ContentTextStyle}"
                 Text="{Binding NomeTime, StringFormat='Próximas Partidas de {0}'}" />
 
             <CollectionView
@@ -55,7 +56,8 @@
                                         <Label
                                             FontAttributes="Bold"
                                             HorizontalOptions="Center"
-                                            Text="{Binding TimeA.Nome}" />
+                                            Text="{Binding TimeA.Nome}"
+                                            TextColor="OrangeRed" />
                                     </StackLayout>
 
                                     <StackLayout
@@ -65,18 +67,22 @@
                                         <Label
                                             FontSize="12"
                                             HorizontalTextAlignment="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding DataHora, StringFormat='{0:dd/MM - HH:mm}'}" />
                                         <Label
                                             FontSize="12"
                                             HorizontalTextAlignment="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding Local}" />
                                         <Label
                                             FontAttributes="Bold"
                                             HorizontalTextAlignment="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="VS" />
                                         <Label
                                             FontSize="12"
                                             HorizontalTextAlignment="Center"
+                                            Style="{StaticResource ContentTextStyle}"
                                             Text="{Binding Rodada, StringFormat='Rodada {0}'}" />
                                     </StackLayout>
 
@@ -89,7 +95,8 @@
                                         <Label
                                             FontAttributes="Bold"
                                             HorizontalOptions="Center"
-                                            Text="{Binding TimeB.Nome}" />
+                                            Text="{Binding TimeB.Nome}"
+                                            TextColor="OrangeRed" />
                                     </StackLayout>
 
                                 </Grid>

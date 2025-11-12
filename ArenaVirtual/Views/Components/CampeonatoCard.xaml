@@ -57,23 +57,23 @@
                     FontAttributes="Bold"
                     FontSize="18"
                     HorizontalTextAlignment="Start"
-                    Text="{Binding Nome}"
-                    TextColor="White" />
+                    Style="{StaticResource ContentTextStyle}"
+                    Text="{Binding Nome}" />
                 <Label
                     FontSize="14"
                     HorizontalTextAlignment="Start"
-                    Text="{Binding Local}"
-                    TextColor="White" />
+                    Style="{StaticResource ContentTextStyle}"
+                    Text="{Binding Local}" />
                 <Label
                     FontSize="12"
                     HorizontalTextAlignment="Start"
-                    Text="{Binding DataInicio, StringFormat='Início: {0:dd/MM/yyyy}'}"
-                    TextColor="White" />
+                    Style="{StaticResource ContentTextStyle}"
+                    Text="{Binding DataInicio, StringFormat='Início: {0:dd/MM/yyyy}'}" />
                 <Label
                     FontSize="12"
                     HorizontalTextAlignment="Start"
-                    Text="{Binding DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}"
-                    TextColor="White" />
+                    Style="{StaticResource ContentTextStyle}"
+                    Text="{Binding DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}" />
 
                 <HorizontalStackLayout
                     Margin="0,8,0,0"

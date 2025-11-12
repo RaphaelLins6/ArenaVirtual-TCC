@@ -28,6 +28,9 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty]
         private bool isOffline = false;
 
+        [ObservableProperty]
+        private bool isDarkMode = true;
+
         public void UpdateConnectivityStatus() {
             IsOffline = !connectivityService.IsConnected;
             //Debug.WriteLine($"[LoginViewModel] Status de conectividade atualizado. Está offline: {IsOffline}");
@@ -35,18 +38,13 @@ namespace ArenaVirtual.ViewModels {
 
         [RelayCommand]
         private async Task Login() {
-            // ... (Inicialização e validação) ...
 
             IsBusy = true;
 
             try {
-                // 🚨 NOVO BLOCO PARA FORÇAR TESTE OFFLINE
-                // ------------------------------------------------------------------
-                bool forcarModoOfflineParaTeste = true; // <-- Defina como TRUE para o teste
+                bool forcarModoOfflineParaTeste = true; 
 
                 if (IsOffline || forcarModoOfflineParaTeste) {
-                    // ------------------------------------------------------------------
-
                     //Debug.WriteLine("[LoginViewModel] Modo offline detectado. Tentando autenticação local...");
                     var usuarioOffline = await usuarioService.AutenticarOffline(Email, Senha);
                     if (usuarioOffline != null) {
@@ -119,6 +117,19 @@ namespace ArenaVirtual.ViewModels {
             } else {
                 //Debug.WriteLine("[LoginViewModel] ERRO: Services do app não disponíveis.");
                 await alertService.DisplayAlert("Erro", "Serviços do aplicativo não disponíveis. Contate o suporte.", "OK");
+            }
+        }
+
+        [RelayCommand]
+        private void ToggleTheme() {
+            if (Application.Current != null) {
+                //Debug.WriteLine($"[THEME DEBUG] 1. IsDarkMode ANTES do clique: {IsDarkMode}");
+                IsDarkMode = !IsDarkMode;
+                //Debug.WriteLine($"[THEME DEBUG] 2. IsDarkMode DEPOIS de inverter: {IsDarkMode}");
+                Application.Current.UserAppTheme = IsDarkMode ? AppTheme.Dark : AppTheme.Light;
+                //Debug.WriteLine($"[THEME DEBUG] 3. Tema aplicado: {Application.Current.UserAppTheme}");
+            } else {
+                //Debug.WriteLine("[THEME DEBUG] ERRO: Application.Current é nulo.");
             }
         }
     }

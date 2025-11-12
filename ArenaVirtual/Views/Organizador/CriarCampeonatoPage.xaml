@@ -23,13 +23,13 @@
         <ScrollView>
             <VerticalStackLayout Padding="20" Spacing="15">
 
-                <Label Style="{StaticResource LabelHeaderStyle}" Text="Nome do Campeonato" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Nome do Campeonato" />
                 <Entry
                     Placeholder="Nome do Campeonato"
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding Nome}" />
 
-                <Label Style="{StaticResource LabelHeaderStyle}" Text="Logo do Campeonato" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Logo do Campeonato" />
                 <Button
                     Command="{Binding SelecionarLogoCommand}"
                     Style="{StaticResource BotaoPrincipal}"
@@ -41,20 +41,20 @@
                     Source="{Binding LogoImageSource}"
                     WidthRequest="100" />
 
-                <Label Style="{StaticResource LabelHeaderStyle}" Text="Nome do Organizador/Organização" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Nome do Organizador/Organização" />
                 <Entry
                     Placeholder="Ex: Sua Empresa S.A. ou Seu Nome"
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding NomeOrganizador}" />
 
-                <Label Style="{StaticResource LabelHeaderStyle}" Text="Email do Organizador/Organização" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Email do Organizador/Organização" />
                 <Entry
                     Keyboard="Email"
                     Placeholder="email@exemplo.com"
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding EmailOrganizador}" />
 
-                <Label Style="{StaticResource LabelHeaderStyle}" Text="Telefone do Organizador" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Telefone do Organizador" />
                 <Entry
                     Keyboard="Telephone"
                     Placeholder="(XX) XXXXX-XXXX"
@@ -65,35 +65,35 @@
                     </Entry.Behaviors>
                 </Entry>
 
-                <Label Style="{StaticResource LabelHeaderStyle}" Text="Local do Campeonato" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Local do Campeonato" />
                 <Entry
                     Placeholder="Endereço completo ou nome do local"
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding Local}" />
 
-                <Label Style="{StaticResource LabelHeaderStyle}" Text="Data de Início" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Data de Início" />
                 <DatePicker Date="{Binding DataInicio}" Format="dd/MM/yy" />
-                <Label Style="{StaticResource LabelHeaderStyle}" Text="Data de Término" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Data de Término" />
                 <DatePicker
                     Date="{Binding DataFim}"
                     Format="dd/MM/yy"
                     MinimumDate="{Binding DataInicio}" />
 
-                <Label Style="{StaticResource LabelHeaderStyle}" Text="Número Máximo de Equipes" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Número Máximo de Equipes" />
                 <Entry
                     Keyboard="Numeric"
                     Placeholder="Ex: 16"
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding NumeroMaximoEquipesTexto}" />
 
-                <Label Style="{StaticResource LabelHeaderStyle}" Text="Valor da Taxa de Inscrição por Equipe (R$)" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Valor da Taxa de Inscrição por Equipe (R$)" />
                 <Entry
                     Keyboard="Numeric"
                     Placeholder="Ex: 50.00"
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding ValorTaxaInscricaoTexto}" />
 
-                <Label Style="{StaticResource LabelHeaderStyle}" Text="Formato do Campeonato" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Formato do Campeonato" />
                 <Picker
                     Title="Selecione o Formato"
                     SelectedItem="{Binding FormatoCampeonato}"
@@ -108,7 +108,7 @@
                     </Picker.ItemsSource>
                 </Picker>
 
-                <Label Style="{StaticResource LabelHeaderStyle}" Text="Local(is) dos Jogos" />
+                <Label Style="{StaticResource ContentTextStyle}" Text="Local(is) dos Jogos" />
                 <Editor
                     AutoSize="TextChanges"
                     HeightRequest="80"
@@ -123,8 +123,8 @@
                     <Label
                         FontAttributes="Bold"
                         FontSize="Medium"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="Haverá Premiação?"
-                        TextColor="White"
                         VerticalOptions="Center" />
                     <Switch IsToggled="{Binding HaveraPremiacao}" VerticalOptions="Center" />
                 </StackLayout>

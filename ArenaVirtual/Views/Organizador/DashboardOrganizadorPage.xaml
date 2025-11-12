@@ -9,15 +9,15 @@
             <Label
                 FontSize="20"
                 HorizontalOptions="Center"
-                Text="Campeonatos"
-                TextColor="White" />
+                Style="{StaticResource ContentTextStyle}"
+                Text="Campeonatos" />
 
             <CollectionView ItemsSource="{Binding Campeonatos}">
                 <CollectionView.EmptyView>
                     <Label
                         HorizontalOptions="Center"
+                        Style="{StaticResource ContentTextStyle}"
                         Text="Nenhum campeonato cadastrado."
-                        TextColor="White"
                         VerticalOptions="Center" />
                 </CollectionView.EmptyView>
                 <CollectionView.ItemTemplate>
@@ -48,23 +48,23 @@
                                         FontAttributes="Bold"
                                         FontSize="18"
                                         HorizontalTextAlignment="Center"
-                                        Text="{Binding Nome}"
-                                        TextColor="White" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="{Binding Nome}" />
                                     <Label
                                         FontSize="14"
                                         HorizontalTextAlignment="Center"
-                                        Text="{Binding Local}"
-                                        TextColor="White" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="{Binding Local}" />
                                     <Label
                                         FontSize="12"
                                         HorizontalTextAlignment="Center"
-                                        Text="{Binding DataInicio, StringFormat='Início: {0:dd/MM/yyyy}'}"
-                                        TextColor="White" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="{Binding DataInicio, StringFormat='Início: {0:dd/MM/yyyy}'}" />
                                     <Label
                                         FontSize="12"
                                         HorizontalTextAlignment="Center"
-                                        Text="{Binding DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}"
-                                        TextColor="White" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="{Binding DataFim, StringFormat='Fim: {0:dd/MM/yyyy}'}" />
                                     <HorizontalStackLayout
                                         Margin="0,10,0,0"
                                         HorizontalOptions="Center"

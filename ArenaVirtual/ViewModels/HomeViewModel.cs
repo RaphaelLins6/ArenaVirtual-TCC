@@ -22,6 +22,9 @@ namespace ArenaVirtual.ViewModels {
         [ObservableProperty]
         private bool isOnline;
 
+        [ObservableProperty]
+        private bool isDarkMode = true;
+
         private readonly ObservableCollection<Campeonato> _campeonatos = new();
         public ObservableCollection<Campeonato> Campeonatos => _campeonatos;
 
@@ -36,6 +39,11 @@ namespace ArenaVirtual.ViewModels {
         public HomeViewModel() : this(null!, null!, null!) {
             _connectivityService.ConnectivityChanged += OnConnectivityChanged;
             UpdateConnectivityStatus();
+            //Debug.WriteLine($"[THEME] Inicializando IsDarkMode antes: {IsDarkMode}");
+            //Debug.WriteLine($"[THEME] IsDarkMode definido para: {IsDarkMode}");
+            if (Application.Current != null) {
+                Application.Current.UserAppTheme = AppTheme.Dark;
+            }
         }
 
         private void OnConnectivityChanged(object sender, ConnectivityChangedEventArgs e) {
@@ -196,6 +204,16 @@ namespace ArenaVirtual.ViewModels {
             };
 
             await Shell.Current.GoToAsync(nameof(CampeonatoDetailPage), navigationParameter);
+        }
+
+        [RelayCommand]
+        private void ToggleTheme() {
+            if (Application.Current != null) {
+                //Debug.WriteLine($"[THEME] IsDarkMode antes da inversão: {IsDarkMode}");
+                IsDarkMode = !IsDarkMode;
+                //Debug.WriteLine($"[THEME] Tema alternado. Novo IsDarkMode: {IsDarkMode}");
+                Application.Current.UserAppTheme = IsDarkMode ? AppTheme.Dark : AppTheme.Light;
+            }
         }
     }
 }

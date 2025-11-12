@@ -73,7 +73,8 @@
                                         FontAttributes="Bold"
                                         FontSize="16"
                                         LineBreakMode="WordWrap"
-                                        Text="{Binding Nome}" />
+                                        Text="{Binding Nome}"
+                                        TextColor="OrangeRed" />
                                     <Label
                                         FontSize="12"
                                         Text="{Binding Descricao}"

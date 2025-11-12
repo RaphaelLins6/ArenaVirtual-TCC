@@ -123,8 +123,8 @@
                         FontAttributes="Bold"
                         FontSize="20"
                         HorizontalOptions="Center"
-                        Text="Patrocínio Principal"
-                        TextColor="White" />
+                        Style="{StaticResource ContentTextStyle}"
+                        Text="Patrocínio Principal" />
 
                     <Grid Margin="0" HeightRequest="300">
                         <Image Aspect="AspectFill" Source="{Binding BannerDivulgacaoSource}" />
@@ -151,8 +151,8 @@
                         FontAttributes="Bold"
                         FontSize="20"
                         HorizontalOptions="Center"
-                        Text="Fase do Campeonato:"
-                        TextColor="White" />
+                        Style="{StaticResource ContentTextStyle}"
+                        Text="Fase do Campeonato:" />
 
                     <Picker
                         Title="Selecione a Fase"
@@ -170,8 +170,8 @@
                         FontAttributes="Bold"
                         FontSize="20"
                         HorizontalOptions="Center"
-                        Text="Tabela de Classificação"
-                        TextColor="White" />
+                        Style="{StaticResource ContentTextStyle}"
+                        Text="Tabela de Classificação" />
 
                     <Picker
                         Title="Selecione o Grupo"
@@ -185,42 +185,42 @@
                             Grid.Column="0"
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
-                            Text="#"
-                            TextColor="Orange" />
+                            Style="{StaticResource ContentTextStyle}"
+                            Text="#" />
 
                         <Label
                             Grid.Column="2"
                             FontAttributes="Bold"
-                            Text="Time"
-                            TextColor="Orange" />
+                            Style="{StaticResource ContentTextStyle}"
+                            Text="Time" />
 
                         <Label
                             Grid.Column="3"
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
-                            Text="V"
-                            TextColor="Orange" />
+                            Style="{StaticResource ContentTextStyle}"
+                            Text="V" />
 
                         <Label
                             Grid.Column="4"
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
-                            Text="D"
-                            TextColor="Orange" />
+                            Style="{StaticResource ContentTextStyle}"
+                            Text="D" />
 
                         <Label
                             Grid.Column="5"
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
-                            Text="Vit%"
-                            TextColor="Orange" />
+                            Style="{StaticResource ContentTextStyle}"
+                            Text="Vit%" />
 
                         <Label
                             Grid.Column="6"
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
-                            Text="Seq."
-                            TextColor="Orange" />
+                            Style="{StaticResource ContentTextStyle}"
+                            Text="Seq." />
                     </Grid>
 
                     <CollectionView
@@ -351,8 +351,8 @@
                             FontAttributes="Bold"
                             FontSize="20"
                             HorizontalOptions="Center"
+                            Style="{StaticResource ContentTextStyle}"
                             Text="{Binding RodadaAtual, StringFormat='RODADA {0}'}"
-                            TextColor="White"
                             VerticalOptions="Center" />
                         <Button
                             Grid.Column="2"
@@ -666,8 +666,8 @@
                         FontAttributes="Bold"
                         FontSize="20"
                         HorizontalOptions="Center"
-                        Text="Estatísticas do Campeonato (Médias por Jogo)"
-                        TextColor="White" />
+                        Style="{StaticResource ContentTextStyle}"
+                        Text="Estatísticas do Campeonato (Médias por Jogo)" />
 
                     <ScrollView Orientation="Horizontal">
                         <CollectionView ItemsSource="{Binding EstatisticasTimes}">
@@ -680,69 +680,69 @@
                                     <Label
                                         Grid.Column="1"
                                         FontAttributes="Bold"
-                                        Text="Time"
-                                        TextColor="Orange" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="Time" />
 
                                     <Label
                                         Grid.Column="2"
                                         FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="P/J"
-                                        TextColor="Orange" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="P/J" />
                                     <Label
                                         Grid.Column="3"
                                         FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="RBT/J"
-                                        TextColor="Orange" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="RBT/J" />
                                     <Label
                                         Grid.Column="4"
                                         FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="AST/J"
-                                        TextColor="Orange" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="AST/J" />
                                     <Label
                                         Grid.Column="5"
                                         FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="ROU/J"
-                                        TextColor="Orange" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="ROU/J" />
                                     <Label
                                         Grid.Column="6"
                                         FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="BLO/J"
-                                        TextColor="Orange" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="BLO/J" />
                                     <Label
                                         Grid.Column="7"
                                         FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="T/J"
-                                        TextColor="Orange" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="T/J" />
                                     <Label
                                         Grid.Column="8"
                                         FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="F/J"
-                                        TextColor="Orange" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="F/J" />
                                     <Label
                                         Grid.Column="9"
                                         FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="2P%"
-                                        TextColor="Orange" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="2P%" />
                                     <Label
                                         Grid.Column="10"
                                         FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="3P%"
-                                        TextColor="Orange" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="3P%" />
                                     <Label
                                         Grid.Column="11"
                                         FontAttributes="Bold"
                                         HorizontalOptions="Center"
-                                        Text="LL%"
-                                        TextColor="Orange" />
+                                        Style="{StaticResource ContentTextStyle}"
+                                        Text="LL%" />
                                 </Grid>
                             </CollectionView.Header>
 
@@ -839,8 +839,8 @@
                         FontAttributes="Bold"
                         FontSize="20"
                         HorizontalOptions="Center"
-                        Text="Estatísticas dos Jogadores"
-                        TextColor="White" />
+                        Style="{StaticResource ContentTextStyle}"
+                        Text="Estatísticas dos Jogadores" />
 
                     <ScrollView HorizontalScrollBarVisibility="Never" Orientation="Horizontal">
                         <FlexLayout
@@ -884,8 +884,8 @@
                                         Grid.Column="0"
                                         FontAttributes="Bold"
                                         HorizontalOptions="Center"
+                                        Style="{StaticResource ContentTextStyle}"
                                         Text="{Binding Posicao}"
-                                        TextColor="White"
                                         VerticalOptions="Center" />
 
                                     <!--  Foto do jogador  -->
@@ -914,8 +914,8 @@
                                         <Label
                                             FontAttributes="Bold"
                                             FontSize="16"
-                                            Text="{Binding NomeJogador}"
-                                            TextColor="White" />
+                                            Style="{StaticResource ContentTextStyle}"
+                                            Text="{Binding NomeJogador}" />
                                         <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                                             <Image
                                                 HeightRequest="15"
@@ -934,8 +934,8 @@
                                         FontAttributes="Bold"
                                         FontSize="16"
                                         HorizontalOptions="End"
+                                        Style="{StaticResource ContentTextStyle}"
                                         Text="{Binding ValorEstatisticaPrincipal}"
-                                        TextColor="White"
                                         VerticalOptions="Center" />
 
                                 </Grid>

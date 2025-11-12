@@ -7,52 +7,74 @@
     xmlns:viewmodels="clr-namespace:ArenaVirtual.ViewModels"
     Title="Login"
     x:DataType="viewmodels:LoginViewModel"
-    BackgroundColor="{StaticResource CorFundoPrincipal}"
+    BackgroundColor="{AppThemeBinding Light={StaticResource White},
+                                      Dark={StaticResource CorFundoPrincipal}}"
     Shell.NavBarIsVisible="False">
 
     <Grid RowDefinitions="Auto, *">
-        <HorizontalStackLayout
+        <Grid
             Grid.Row="0"
             Padding="20"
-            HorizontalOptions="End"
-            Spacing="10"
-            VerticalOptions="Start">
-            <Label
-                FontSize="16"
-                Text="Status:"
-                TextColor="White"
-                VerticalOptions="Center" />
-            <Ellipse
-                HeightRequest="15"
-                Stroke="White"
-                StrokeThickness="1"
-                VerticalOptions="Center"
-                WidthRequest="15">
-                <Ellipse.Fill>
-                    <SolidColorBrush>
-                        <SolidColorBrush.Color>
-                            <OnPlatform x:TypeArguments="Color">
-                                <On Platform="iOS, Android, WinUI" Value="Red" />
-                            </OnPlatform>
-                        </SolidColorBrush.Color>
-                    </SolidColorBrush>
-                </Ellipse.Fill>
-                <Ellipse.Triggers>
+            ColumnDefinitions="Auto, *">
+
+            <ImageButton
+                Grid.Column="0"
+                Margin="0,0,0,0"
+                Aspect="AspectFit"
+                BackgroundColor="Transparent"
+                Command="{Binding ToggleThemeCommand}"
+                HeightRequest="40"
+                HorizontalOptions="Start"
+                WidthRequest="40">
+                <ImageButton.Triggers>
                     <DataTrigger
-                        Binding="{Binding IsOffline}"
-                        TargetType="Ellipse"
-                        Value="False">
-                        <Setter Property="Fill" Value="Green" />
-                    </DataTrigger>
-                    <DataTrigger
-                        Binding="{Binding IsOffline}"
-                        TargetType="Ellipse"
+                        Binding="{Binding IsDarkMode}"
+                        TargetType="ImageButton"
                         Value="True">
-                        <Setter Property="Fill" Value="Red" />
+                        <Setter Property="Source" Value="sun_icon.png" />
                     </DataTrigger>
-                </Ellipse.Triggers>
-            </Ellipse>
-        </HorizontalStackLayout>
+
+                    <DataTrigger
+                        Binding="{Binding IsDarkMode}"
+                        TargetType="ImageButton"
+                        Value="False">
+                        <Setter Property="Source" Value="moon_icon.png" />
+                    </DataTrigger>
+                </ImageButton.Triggers>
+            </ImageButton>
+
+            <HorizontalStackLayout
+                Grid.Column="1"
+                HorizontalOptions="End"
+                Spacing="10">
+
+                <Label
+                    FontSize="16"
+                    Style="{StaticResource ContentTextStyle}"
+                    Text="Status:"
+                    VerticalOptions="Center" />
+
+                <Ellipse
+                    HeightRequest="15"
+                    Stroke="White"
+                    StrokeThickness="1"
+                    VerticalOptions="Center"
+                    WidthRequest="15">
+                    <Ellipse.Fill>
+                        <SolidColorBrush>
+                            <SolidColorBrush.Color>
+                                <OnPlatform x:TypeArguments="Color">
+                                    <On Platform="iOS, Android, WinUI" Value="Red" />
+                                </OnPlatform>
+                            </SolidColorBrush.Color>
+                        </SolidColorBrush>
+                    </Ellipse.Fill>
+                    <Ellipse.Triggers />
+                </Ellipse>
+
+            </HorizontalStackLayout>
+
+        </Grid>
 
         <Label
             Grid.Row="0"
@@ -71,6 +93,14 @@
                 HorizontalOptions="Center"
                 Spacing="20"
                 VerticalOptions="CenterAndExpand">
+
+                <Image
+                    Margin="0,0,0,20"
+                    Aspect="AspectFit"
+                    HeightRequest="100"
+                    HorizontalOptions="Center"
+                    Source="logo.png"
+                    WidthRequest="350" />
 
                 <Label
                     Margin="0,0,0,10"
@@ -102,8 +132,8 @@
                 <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
                     <Label Text="Não tem uma conta?" TextColor="{StaticResource CorTextoPrincipal}" />
                     <Label
+                        Style="{StaticResource ContentTextStyle}"
                         Text="Registre-se"
-                        TextColor="{StaticResource CorLink}"
                         TextDecorations="Underline">
                         <Label.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding IrParaRegistroCommand}" />

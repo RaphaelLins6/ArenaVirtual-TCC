@@ -11,17 +11,19 @@
             <Label
                 FontSize="24"
                 HorizontalOptions="Center"
-                Text="Criar Novo Time" />
+                Text="Criar Novo Time"
+                TextColor="OrangeRed" />
 
+            <Label Style="{StaticResource ContentTextStyle}" Text="Nome do Time:" />
             <Entry Placeholder="Nome do time" Text="{Binding Nome}" />
 
+            <Label Style="{StaticResource ContentTextStyle}" Text="Descrição do Time:" />
             <Editor
                 AutoSize="TextChanges"
                 HeightRequest="100"
                 Placeholder="Descrição do time"
                 Text="{Binding Descricao, Mode=TwoWay}" />
 
-            <!--  Upload da logo (imagem)  -->
             <Button
                 Command="{Binding SelecionarLogoCommand}"
                 Style="{StaticResource BotaoPrincipal}"
@@ -33,23 +35,22 @@
                 Source="{Binding LogoImagem}"
                 WidthRequest="100" />
 
-            <!--  Escolha da cor do uniforme  -->
-            <Label Text="Cor do uniforme:" />
+            <Label Style="{StaticResource ContentTextStyle}" Text="Cor do uniforme:" />
             <Picker
                 Title="Escolha uma cor"
                 ItemsSource="{Binding CoresDisponiveis}"
                 SelectedItem="{Binding CorUniforme}" />
 
-            <Label Text="Cor secundária do uniforme:" />
+            <Label Style="{StaticResource ContentTextStyle}" Text="Cor secundária do uniforme:" />
             <Picker
                 Title="Escolha uma cor secundária"
                 ItemsSource="{Binding CoresDisponiveis}"
                 SelectedItem="{Binding CorSecundaria}" />
 
-            <Label Text="Responsável:" />
+            <Label Style="{StaticResource ContentTextStyle}" Text="Responsável:" />
             <Entry IsReadOnly="True" Text="{Binding NomeResponsavel}" />
 
-            <Label Text="Telefone do Responsável:" />
+            <Label Style="{StaticResource ContentTextStyle}" Text="Telefone do Responsável:" />
             <Entry
                 IsReadOnly="True"
                 Keyboard="Telephone"
