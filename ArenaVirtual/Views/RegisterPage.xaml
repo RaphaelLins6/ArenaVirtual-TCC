@@ -43,8 +43,8 @@
                     Style="{StaticResource EntryStyle}"
                     Text="{Binding Email}" />
 
+                <Label Style="{StaticResource ContentTextStyle}" Text="Escolha seu perfil:" />
                 <Picker
-                    Title="Selecione o perfil"
                     ItemsSource="{Binding PerfisDisponiveis}"
                     SelectedItem="{Binding PerfilSelecionado}"
                     Style="{StaticResource PickerStyle}" />
@@ -176,6 +176,7 @@
                     x:Name="DataNascimentoGeneroFields"
                     IsVisible="{Binding PerfilSelecionado, Converter={StaticResource MultiPerfilToBoolConverter}, ConverterParameter='Atleta,Arbitro'}"
                     Spacing="10">
+                    <Label Style="{StaticResource ContentTextStyle}" Text="Selecione seu gênero:" />
                     <Picker
                         Title="Gênero"
                         ItemsSource="{Binding GenerosDisponiveis}"
