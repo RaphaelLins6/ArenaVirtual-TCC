@@ -33,6 +33,14 @@ Para demonstrar a experiência do usuário e as funcionalidades do Arena Virtual
 </div>
     > **Destaque:** Demonstra a identidade visual durante o carregamento (Assumindo que esta imagem existe, embora não tenha sido enviada).
 
+* **Tela de Login:**
+<div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
+    <img src="imagens/1-TelaDeLogin.png" alt="Tela de Login (Tema Escuro)" width="40%" />
+    
+    <img src="imagens/1.1-TelaDeLogin.png" alt="Tela de Login (Tema Claro)" width="40%" />
+</div>
+> **Destaque:** Demonstração da interface de login em temas **Escuro** e **Claro**, evidenciando a adaptabilidade visual do .NET MAUI.
+
 * **Tela de Registro de Usuário (Cadastro):**
 <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
     <img src="imagens/2-TelaDeRegistro.png" alt="Tela de Registro, primeira parte" width="40%" />
@@ -40,7 +48,7 @@ Para demonstrar a experiência do usuário e as funcionalidades do Arena Virtual
 </div>
 > **Destaque:** Duas partes do formulário de registro, mostrando a coleta de dados básicos (nome, email) e dados específicos do atleta (altura, peso).
 
-* **Tela Inicial (Dashboard):**
+* **Tela Inicial:**
 <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
     <img src="imagens/3-HomePage.png" alt="Home Page com menu e campeonatos" width="40%" />
     <img src="imagens/3.1-HomePage.png" alt="Home Page listando todos os campeonatos" width="40%" />
