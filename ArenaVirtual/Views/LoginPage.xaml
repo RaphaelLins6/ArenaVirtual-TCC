@@ -99,7 +99,8 @@
                     Aspect="AspectFit"
                     HeightRequest="100"
                     HorizontalOptions="Center"
-                    Source="logo.png"
+                    Source="{AppThemeBinding Light=logo.png,
+                                             Dark=logo2.png}"
                     WidthRequest="350" />
 
                 <Label
