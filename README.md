@@ -36,7 +36,6 @@ Para demonstrar a experiência do usuário e as funcionalidades do Arena Virtual
 * **Tela de Login:**
 <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
     <img src="imagens/1-TelaDeLogin.png" alt="Tela de Login (Tema Escuro)" width="40%" />
-    
     <img src="imagens/1.1-TelaDeLogin.png" alt="Tela de Login (Tema Claro)" width="40%" />
 </div>
 > **Destaque:** Demonstração da interface de login em temas **Escuro** e **Claro**, evidenciando a adaptabilidade visual do .NET MAUI.
