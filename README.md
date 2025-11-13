@@ -23,6 +23,48 @@ A aplicação foi projetada para funcionar em **Android**, **iOS**, **Windows** 
 - 🌐 **API REST:** ASP.NET Core Web API (para integração e sincronização de dados)
 - 🛠️ **Ferramentas:** Visual Studio 2022, .NET 8 SDK, Postman (para testes de API), swagger (para documentação de API)
 
+## 📱 Screenshots (Telas do Aplicativo)
+
+Para demonstrar a experiência do usuário e as funcionalidades do Arena Virtual, apresentamos algumas telas-chave da aplicação.
+
+* **Tela de Abertura (Splash Screen):** ![Tela inicial do carregamento do aplicativo Arena Virtual](imagens/0-SplashScreen.png)
+    > **Destaque:** Demonstra a identidade visual durante o carregamento (Assumindo que esta imagem existe, embora não tenha sido enviada).
+
+* **Tela de Registro de Usuário (Cadastro):**
+<div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
+    <img src="imagens/2-TelaDeRegistro.png" alt="Tela de Registro, primeira parte" width="40%" />
+    
+    <img src="imagens/2.1-TelaDeRegistro.png" alt="Tela de Registro, segunda parte" width="40%" />
+</div>
+> **Destaque:** Duas partes do formulário de registro, mostrando a coleta de dados básicos (nome, email) e dados específicos do atleta (altura, peso).
+
+* **Tela Inicial (Dashboard):**
+<div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
+    <img src="imagens/3-HomePage.png" alt="Home Page com menu e campeonatos" width="40%" />
+    
+    <img src="imagens/3.1-HomePage.png" alt="Home Page listando todos os campeonatos" width="40%" />
+</div>
+> **Destaque:** Visão geral rápida dos campeonatos ativos (Favoritos e Todos), facilitando a navegação e o acompanhamento dos torneios.
+
+* **Classificação e Jogos do Campeonato:**
+<div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
+    <img src="imagens/12.1-TelaDoCampeonato.png" alt="Tabela de Classificação" width="40%" />
+    
+    <img src="imagens/12.2-TelaDoCampeonato.png" alt="Jogos da Rodada" width="40%" />
+</div>
+> **Destaque:** Apresentação dinâmica do ranking (Tabela de Classificação) e a listagem dos jogos da rodada, as funcionalidades centrais do gerenciador.
+
+* **Estatísticas do Campeonato e dos Jogadores:**
+<div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
+    <img src="imagens/12.3-TelaDoCampeonato.png" alt="Estatísticas gerais do Campeonato" width="40%" />
+    
+    <img src="imagens/12.4-TelaDoCampeonato.png" alt="Ranking de Estatísticas dos Jogadores" width="40%" />
+</div>
+> **Destaque:** Detalhes estatísticos cruciais (médias por jogo) e o ranking individual de jogadores por categoria (Ponto, Assistência, Rebote, Roubo), evidenciando a capacidade de acompanhamento.
+
+* **Gestão de Fases (Opcional, para demonstrar o controle do Admin):** ![Seleção de Fase do Campeonato](imagens/12.6-TelaDoCampeonato.png)
+    > **Destaque:** Demonstração da flexibilidade do sistema em lidar com diferentes fases do campeonato (Tabela & Jogos, Mata-Mata).
+
 ---
 
 ## Como Iniciar o Projeto
