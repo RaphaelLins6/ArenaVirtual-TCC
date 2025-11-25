@@ -55,6 +55,7 @@ Para demonstrar a experiência do usuário e as funcionalidades do Arena Virtual
     <img src="imagens/3-HomePage.png" alt="Home Page com menu e campeonatos" width="40%" />
     <img src="imagens/3.1-HomePage.png" alt="Home Page listando todos os campeonatos" width="40%" />
 </div>
+
 > **Destaque:** Visão geral rápida dos campeonatos ativos (Favoritos e Todos), facilitando a navegação e o acompanhamento dos torneios.
 
 * **Classificação e Jogos do Campeonato:**
