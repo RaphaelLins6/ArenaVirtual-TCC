@@ -32,7 +32,7 @@ Para demonstrar a experiência do usuário e as funcionalidades do Arena Virtual
     <img src="imagens/0-SplashScreen.png" alt="Estatísticas gerais do Campeonato" width="40%" />
 </div>
     
-    > **Destaque:** Demonstra a identidade visual durante o carregamento (Assumindo que esta imagem existe, embora não tenha sido enviada).
+> **Destaque:** Demonstra a identidade visual durante o carregamento (Assumindo que esta imagem existe, embora não tenha sido enviada).
 
 * **Tela de Login:**
 <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
