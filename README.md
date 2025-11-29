@@ -124,6 +124,6 @@ Este projeto está licenciado sob a licença MIT. Veja o arquivo [LICENSE](LICEN
 
 ## 🙏 Agradecimentos
 
-Agradecimentos especiais aos professores orientadores, colegas de curso e à comunidade .NET MAUI pelo suporte e recursos disponibilizados.
+Agradecimentos especiais ao meu orientador, colegas de curso e à comunidade .NET MAUI pelo suporte e recursos disponibilizados.
 
 ---
