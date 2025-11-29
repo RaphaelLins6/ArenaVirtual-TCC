@@ -72,12 +72,16 @@
                     Text="{Binding Local}" />
 
                 <Label Style="{StaticResource ContentTextStyle}" Text="Data de Início" />
-                <DatePicker Date="{Binding DataInicio}" Format="dd/MM/yy" />
+                <DatePicker
+                    Date="{Binding DataInicio}"
+                    Format="dd/MM/yy"
+                    Style="{StaticResource PickerStyle}" />
                 <Label Style="{StaticResource ContentTextStyle}" Text="Data de Término" />
                 <DatePicker
                     Date="{Binding DataFim}"
                     Format="dd/MM/yy"
-                    MinimumDate="{Binding DataInicio}" />
+                    MinimumDate="{Binding DataInicio}"
+                    Style="{StaticResource PickerStyle}" />
 
                 <Label Style="{StaticResource ContentTextStyle}" Text="Número Máximo de Equipes" />
                 <Entry
