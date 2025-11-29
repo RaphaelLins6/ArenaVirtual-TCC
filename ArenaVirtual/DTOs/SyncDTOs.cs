@@ -14,11 +14,10 @@ namespace ArenaVirtual.DTOs {
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }
 
-        // As FKs devem ser Guid ClientAppIds
         public Guid TimeAClientAppId { get; set; }
         public Guid TimeBClientAppId { get; set; }
         public Guid CampeonatoClientAppId { get; set; }
-        public Guid? ArbitroClientAppId { get; set; } // O foco da correção
+        public Guid? ArbitroClientAppId { get; set; } 
 
         public string? Local { get; set; }
         public DateTime DataHora { get; set; }
@@ -125,7 +124,6 @@ namespace ArenaVirtual.DTOs {
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }
 
-        // Chaves estrangeiras usando Guid ClientAppIds
         public Guid TimeClientAppId { get; set; }
         public Guid CampeonatoClientAppId { get; set; }
 
@@ -138,7 +136,6 @@ namespace ArenaVirtual.DTOs {
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }
 
-        // Chaves estrangeiras usando ClientAppId do Usuário, Jogo e Time
         public Guid UsuarioClientAppId { get; set; }
         public Guid JogoClientAppId { get; set; }
         public Guid TimeClientAppId { get; set; }
@@ -165,7 +162,6 @@ namespace ArenaVirtual.DTOs {
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }
 
-        // Chaves estrangeiras usando ClientAppId do Arbitro (Usuário) e Jogo
         public Guid ArbitroClientAppId { get; set; }
         public Guid JogoClientAppId { get; set; }
 
@@ -183,7 +179,6 @@ namespace ArenaVirtual.DTOs {
         public string? ImagemPatrocinador { get; set; }
         public string Nome { get; set; } = string.Empty;
 
-        // Chaves estrangeiras usando ClientAppId do Patrocinador (Usuário) e Campeonato
         public Guid PatrocinadorClientAppId { get; set; }
         public Guid CampeonatoClientAppId { get; set; }
 
@@ -200,7 +195,6 @@ namespace ArenaVirtual.DTOs {
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }
 
-        // Chaves estrangeiras usando ClientAppId do Patrocinador (Usuário) e Campeonato
         public Guid PatrocinadorClientAppId { get; set; }
         public Guid CampeonatoClientAppId { get; set; }
 

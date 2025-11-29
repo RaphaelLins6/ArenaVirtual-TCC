@@ -83,7 +83,6 @@ namespace ArenaVirtual.Models {
         public bool IsSynced { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-        // --- Construtor ---
         public Jogo() {
             ClientAppId = Guid.NewGuid();
             IsSynced = false;

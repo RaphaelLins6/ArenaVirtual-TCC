@@ -1,6 +1,6 @@
 ﻿using ArenaVirtual.Models;
 using System.ComponentModel.DataAnnotations;
-using System; // Adicionado para garantir o Guid e DateTime
+using System; 
 
 namespace ArenaVirtual.DTOs {
 
@@ -8,21 +8,18 @@ namespace ArenaVirtual.DTOs {
         public int Id { get; set; }
         public Guid ClientAppId { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public bool IsSynced { get; set; } // Adicionada conforme ISyncableDto e o contexto do primeiro código
+        public bool IsSynced { get; set; } 
 
-        // Propriedades do DTO original (com tipagem do segundo código)
         public DateTime DataHora { get; set; }
-        public string? Local { get; set; } // Ajustado para string? para consistência
+        public string? Local { get; set; } 
         public int PlacarA { get; set; }
         public int PlacarB { get; set; }
 
-        // Chaves estrangeiras (IDs)
         public int? TimeAId { get; set; }
         public int? TimeBId { get; set; }
         public int? CampeonatoId { get; set; }
         public int? ArbitroId { get; set; }
 
-        // Propriedades do DTO original
         public int Rodada { get; set; }
         public JogoStatus Status { get; set; }
     }
@@ -33,7 +30,6 @@ namespace ArenaVirtual.DTOs {
         public DateTime UpdatedAt { get; set; }
         public bool IsSynced { get; set; }
 
-        // Propriedades do DTO original
         public string? Nome { get; set; }
         public string? Local { get; set; }
         public DateTime DataInicio { get; set; }
@@ -56,12 +52,11 @@ namespace ArenaVirtual.DTOs {
     }
 
     public class UsuarioDownloadDto : ISyncableDto {
-        public int Id { get; set; } // De int? para int, mas usando a tipagem original para FK, garantindo o requisito da interface.
-        public Guid ClientAppId { get; set; } // De Guid? para Guid, garantindo o requisito da interface.
-        public DateTime UpdatedAt { get; set; } // De DateTime? para DateTime, garantindo o requisito da interface.
+        public int Id { get; set; } 
+        public Guid ClientAppId { get; set; } 
+        public DateTime UpdatedAt { get; set; } 
         public bool IsSynced { get; set; }
 
-        // Propriedades do DTO original
         public string? Nome { get; set; }
         public string? Email { get; set; }
         public TipoPerfil? Perfil { get; set; }
@@ -85,7 +80,6 @@ namespace ArenaVirtual.DTOs {
         public DateTime UpdatedAt { get; set; }
         public bool IsSynced { get; set; }
 
-        // Propriedades do DTO original
         public string? Nome { get; set; }
         public string? LogoUrl { get; set; }
         public int? CampeonatoId { get; set; }
@@ -105,7 +99,6 @@ namespace ArenaVirtual.DTOs {
         public DateTime UpdatedAt { get; set; }
         public bool IsSynced { get; set; }
 
-        // Propriedades do DTO original
         public string? ConvidadoEmail { get; set; }
         public DateTime DataEnvio { get; set; }
         public int IdSolicitanteId { get; set; }
@@ -119,12 +112,11 @@ namespace ArenaVirtual.DTOs {
         public DateTime UpdatedAt { get; set; }
         public bool IsSynced { get; set; }
 
-        // Propriedades do DTO original
         public int UsuarioId { get; set; }
         public int CampeonatoId { get; set; }
     }
 
-    public class RodadaDeJogosDownloadDto : ISyncableDto { // Adicionada do primeiro código
+    public class RodadaDeJogosDownloadDto : ISyncableDto { 
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }
         public string NomeRodada { get; set; } = string.Empty;
@@ -132,16 +124,12 @@ namespace ArenaVirtual.DTOs {
         public bool IsSynced { get; set; }
     }
 
-    public class InscricaoDownloadDto : ISyncableDto { // Adicionada do primeiro código
+    public class InscricaoDownloadDto : ISyncableDto { 
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }
 
-        // Chaves estrangeiras usando Guid ClientAppIds no primeiro código,
-        // mas aqui vamos manter a lógica de usar IDs do tipo int/int? se fosse o caso de usar o segundo código.
-        // Como o segundo código não tinha este DTO, mantemos os tipos Guid ClientAppId (FKs) e adicionamos os IDs int? se necessário
-        public int TimeId { get; set; } // Se a referência for um ID local
-        public int CampeonatoId { get; set; } // Se a referência for um ID local
-        // As Guid ClientAppIds (do primeiro código)
+        public int TimeId { get; set; } 
+        public int CampeonatoId { get; set; } 
         public Guid TimeClientAppId { get; set; }
         public Guid CampeonatoClientAppId { get; set; }
 
@@ -150,15 +138,13 @@ namespace ArenaVirtual.DTOs {
         public bool IsSynced { get; set; }
     }
 
-    public class EstatisticaPartidaDownloadDto : ISyncableDto { // Adicionada do primeiro código
+    public class EstatisticaPartidaDownloadDto : ISyncableDto { 
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }
 
-        // Chaves estrangeiras usando IDs (mantendo o padrão do segundo código)
         public int UsuarioId { get; set; }
         public int JogoId { get; set; }
         public int TimeId { get; set; }
-        // As Guid ClientAppIds (do primeiro código)
         public Guid UsuarioClientAppId { get; set; }
         public Guid JogoClientAppId { get; set; }
         public Guid TimeClientAppId { get; set; }
@@ -181,14 +167,12 @@ namespace ArenaVirtual.DTOs {
         public bool IsSynced { get; set; }
     }
 
-    public class AvaliacaoArbitroDownloadDto : ISyncableDto { // Adicionada do primeiro código
+    public class AvaliacaoArbitroDownloadDto : ISyncableDto { 
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }
 
-        // Chaves estrangeiras usando IDs (mantendo o padrão do segundo código)
         public int ArbitroId { get; set; }
         public int JogoId { get; set; }
-        // As Guid ClientAppIds (do primeiro código)
         public Guid ArbitroClientAppId { get; set; }
         public Guid JogoClientAppId { get; set; }
 
@@ -199,17 +183,15 @@ namespace ArenaVirtual.DTOs {
         public bool IsSynced { get; set; }
     }
 
-    public class CampanhaPatrocinioDownloadDto : ISyncableDto { // Adicionada do primeiro código
+    public class CampanhaPatrocinioDownloadDto : ISyncableDto { 
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }
 
         public string? ImagemPatrocinador { get; set; }
         public string Nome { get; set; } = string.Empty;
 
-        // Chaves estrangeiras usando IDs (mantendo o padrão do segundo código)
         public int PatrocinadorId { get; set; }
         public int CampeonatoId { get; set; }
-        // As Guid ClientAppIds (do primeiro código)
         public Guid PatrocinadorClientAppId { get; set; }
         public Guid CampeonatoClientAppId { get; set; }
 
@@ -222,14 +204,12 @@ namespace ArenaVirtual.DTOs {
         public bool IsSynced { get; set; }
     }
 
-    public class PropostaPatrocinioDownloadDto : ISyncableDto { // Adicionada do primeiro código
+    public class PropostaPatrocinioDownloadDto : ISyncableDto { 
         public Guid ClientAppId { get; set; }
         public int Id { get; set; }
 
-        // Chaves estrangeiras usando IDs (mantendo o padrão do segundo código)
         public int PatrocinadorId { get; set; }
         public int CampeonatoId { get; set; }
-        // As Guid ClientAppIds (do primeiro código)
         public Guid PatrocinadorClientAppId { get; set; }
         public Guid CampeonatoClientAppId { get; set; }
 
@@ -246,7 +226,7 @@ namespace ArenaVirtual.DTOs {
         public bool IsSynced { get; set; }
     }
 
-    public class PatrocinioDetalheDownloadDto : ISyncableDto { // Adicionada do primeiro código
+    public class PatrocinioDetalheDownloadDto : ISyncableDto { 
         public int Id { get; set; }
         public Guid ClientAppId { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -258,7 +238,6 @@ namespace ArenaVirtual.DTOs {
         public string Mensagem { get; set; } = string.Empty;
         public bool Aprovada { get; set; }
 
-        // As Guid ClientAppIds (do primeiro código)
         public Guid PatrocinadorClientAppId { get; set; }
         public Guid CampeonatoClientAppId { get; set; }
 

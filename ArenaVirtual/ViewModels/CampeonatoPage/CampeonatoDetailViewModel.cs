@@ -322,12 +322,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
             //Debug.WriteLine($"[DEBUG-FORMATO] IsFormatoHibrido set to: {IsFormatoHibrido}. IsFiltroFaseVisivel: {IsFiltroFaseVisivel}");
 
-            FasesDisponiveis.Clear(); // Limpar a lista para reconstruir
+            FasesDisponiveis.Clear(); 
 
             if (IsFormatoHibrido) {
                 FasesDisponiveis.Add("Tabela & Jogos");
                 FasesDisponiveis.Add("Mata-Mata");
-                FaseAtual = "Tabela & Jogos"; // Padrão
+                FaseAtual = "Tabela & Jogos"; 
             } else {
                 if (IsMataMataFormat)
                     FaseAtual = "Mata-Mata";
@@ -376,17 +376,12 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             var jogosMataMataSalvos = await _jogoService.ObterJogosMataMataPorCampeonatoAsync(Campeonato.ClientAppId);
             if (jogosMataMataSalvos == null) jogosMataMataSalvos = new List<Jogo>();
 
-            // --------------------------------------------------------------------------
-            // LOG 1: Verificar os jogos que vieram do banco (Persistência)
-            // --------------------------------------------------------------------------
-            Debug.WriteLine("[DEBUG-MATA-MATA] Iniciando GerarJogosMataMata. Jogos salvos carregados:");
+            //Debug.WriteLine("[DEBUG-MATA-MATA] Iniciando GerarJogosMataMata. Jogos salvos carregados:");
+
             foreach (var j in jogosMataMataSalvos) {
-                // Agora, todos os jogos com Id positivo DEVEM ter o ArbitroId persistido se o árbitro foi anexado.
                 Debug.WriteLine($"[DEBUG-MATA-MATA - SALVO] Jogo ID: {j.Id}. Rodada: {j.Rodada}. ArbitroId: {j.ArbitroId}.");
             }
-            // --------------------------------------------------------------------------
 
-            // Carrega TODOS os IDs de árbitros de TODOS os jogos SALVOS
             var todosOsArbitrosIds = jogosMataMataSalvos
                 .Select(j => j.ArbitroId)
                 .Where(id => id.HasValue && id.Value != Guid.Empty)
@@ -397,8 +392,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             var arbitrosMap = await _usuarioService.ObterNomesUsuariosPorIdsAsync(todosOsArbitrosIds);
             if (arbitrosMap == null) arbitrosMap = new Dictionary<Guid, string>();
 
-            // LOG 2: Verificar o mapa de nomes carregados
-            Debug.WriteLine($"[DEBUG-MATA-MATA - MAP] Total de árbitros mapeados: {arbitrosMap.Count}");
+            //Debug.WriteLine($"[DEBUG-MATA-MATA - MAP] Total de árbitros mapeados: {arbitrosMap.Count}");
 
 
             bool isOrganizador = this.IsOrganizador;
@@ -413,30 +407,24 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 return;
             }
 
-            int mockIdCounter = -1; // Mantido apenas para IDs de Vencedores/Bye (placeholders)
+            int mockIdCounter = -1; 
             var mockJogosFlat = new List<Jogo>();
             int totalRodadas = 0;
 
-            // *************************************************************
-            // FUNÇÃO REFATORADA: Encontra ou Cria e PERSISTE o jogo no banco
-            // *************************************************************
             async Task<Jogo> EncontrarOuCriarEPersistirJogo(Time tA, Time tB, int rodada) {
 
-                // 1. Tenta encontrar um jogo existente no banco de dados
                 var jogoExistente = jogosMataMataSalvos
                     .FirstOrDefault(j => j.Rodada == rodada &&
                                          ((j.TimeAId == tA.Id && j.TimeBId == tB.Id) ||
                                           (j.TimeAId == tB.Id && j.TimeBId == tA.Id)));
 
                 if (jogoExistente != null) {
-                    // LOG 3: Jogo real encontrado
-                    Debug.WriteLine($"[DEBUG-MATA-MATA - MATCH] Jogo Real Encontrado. Rodada {rodada}. ID: {jogoExistente.Id}. ArbitroId: {jogoExistente.ArbitroId}.");
+                    //Debug.WriteLine($"[DEBUG-MATA-MATA - MATCH] Jogo Real Encontrado. Rodada {rodada}. ID: {jogoExistente.Id}. ArbitroId: {jogoExistente.ArbitroId}.");
                     return jogoExistente;
                 }
 
-                // 2. Se não encontrou, é um novo jogo da primeira rodada. Cria o objeto para PERSISTÊNCIA.
                 var novoJogo = new Jogo {
-                    Id = 0, // Id = 0 indica um novo registro para o banco de dados auto-incrementar
+                    Id = 0, 
                     TimeA = tA,
                     TimeAId = tA.Id,
                     TimeB = tB,
@@ -448,20 +436,16 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     CampeonatoClientAppId = Campeonato.ClientAppId
                 };
 
-                // 3. Persiste o jogo Imediatamente! O objeto novoJogo DEVE ser atualizado com o ID real.
-                await _jogoService.SalvarJogoAsync(novoJogo); // Assumimos que SalvarJogoAsync insere e atualiza o novoJogo.Id
+                await _jogoService.SalvarJogoAsync(novoJogo); 
 
-                Debug.WriteLine($"[DEBUG-MATA-MATA - PERSIST] Jogo Novo Criado e Salvo. Novo ID Real: {novoJogo.Id}.");
+                //Debug.WriteLine($"[DEBUG-MATA-MATA - PERSIST] Jogo Novo Criado e Salvo. Novo ID Real: {novoJogo.Id}.");
 
-                // 4. Adiciona o novo jogo à lista de jogos salvos para que seja encontrado em buscas futuras (nesta sessão)
                 jogosMataMataSalvos.Add(novoJogo);
 
                 return novoJogo;
             }
-            // *************************************************************
 
 
-            // --- LÓGICA DE GERAÇÃO DO BRACKET (AJUSTADA PARA USAR ASYNC) ---
             if (timesAceitos.Count == 2) {
                 totalRodadas = 1;
                 var jogoFinal = await EncontrarOuCriarEPersistirJogo(timesAceitos[0], timesAceitos[1], 1);
@@ -472,7 +456,6 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 mockJogosFlat.Add(jogoSemi1);
 
                 var vencedorPlaceholder = new Time { Nome = $"Vencedor Jogo {jogoSemi1.Id}", LogoUrl = "default_logo.png", Id = jogoSemi1.Id };
-                // O Jogo Final ainda precisa ser um Mock, pois o Time B é um placeholder
                 var jogoFinal = new Jogo {
                     Id = mockIdCounter--,
                     TimeA = timesAceitos[0],
@@ -508,14 +491,11 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
 
                         Jogo jogoParaAdicionar;
 
-                        // Só persistimos se for a primeira rodada E os dois times forem reais (IDs > 0)
                         if (rodadaAtual == 1 && timeA.Id > 0 && timeB.Id > 0) {
-                            // Chamada ASYNC
                             jogoParaAdicionar = await EncontrarOuCriarEPersistirJogo(timeA, timeB, rodadaAtual);
                         } else {
-                            // Se for rodada futura ou envolver BYE/VencedorPlaceholder, cria mock
                             jogoParaAdicionar = new Jogo {
-                                Id = mockIdCounter--, // ID de mock APENAS para jogos futuros
+                                Id = mockIdCounter--, 
                                 TimeA = timeA,
                                 TimeAId = timeA.Id,
                                 TimeB = timeB,
@@ -536,7 +516,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                             var vencedorPlaceholder = new Time {
                                 Nome = $"Vencedor Jogo {idPlaceholder}",
                                 LogoUrl = "default_logo.png",
-                                Id = jogoParaAdicionar.Id // Usa o ID do jogo como ID do Placeholder
+                                Id = jogoParaAdicionar.Id 
                             };
                             participantesProximaRodada.Add(vencedorPlaceholder);
                         }
@@ -546,12 +526,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                 }
                 totalRodadas = rodadaAtual - 1;
             }
-            // --- FIM DA LÓGICA DE GERAÇÃO DO BRACKET ---
 
-
-            // *************************************************************
-            // LOG 4: Aplicar NomeArbitro a TODOS os jogos na lista final (Funciona 100% agora)
-            // *************************************************************
             foreach (var jogo in mockJogosFlat) {
                 string nomeSetado = string.Empty;
 
@@ -563,12 +538,10 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
                     nomeSetado = jogo.ArbitroId.HasValue ? "ERRO: ID VÁLIDO, NOME NÃO MAPEADO" : "ID VAZIO";
                 }
 
-                // LOG 4: Atribuição final de nome
-                Debug.WriteLine($"[DEBUG-MATA-MATA - FINAL] Jogo ID: {jogo.Id}. Rodada: {jogo.Rodada}. ArbitroId: {jogo.ArbitroId}. NomeAtribuído: {nomeSetado}.");
+                //Debug.WriteLine($"[DEBUG-MATA-MATA - FINAL] Jogo ID: {jogo.Id}. Rodada: {jogo.Rodada}. ArbitroId: {jogo.ArbitroId}. NomeAtribuído: {nomeSetado}.");
 
                 jogo.NotifyArbitroStatusChanged();
             }
-            // *************************************************************
 
             var groupedJogos = mockJogosFlat
                 .OrderBy(j => j.Rodada)
@@ -626,7 +599,7 @@ namespace ArenaVirtual.ViewModels.CampeonatoPage {
             if (!todosOsTimes.Any()) {
                 MainThread.BeginInvokeOnMainThread(() => {
                     TabelaClassificacao.Clear();
-                    EstatisticasTimes.Clear(); // Limpa a nova lista também
+                    EstatisticasTimes.Clear(); 
                     IsFiltroGrupoVisivel = false;
                 });
                 return;
