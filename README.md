@@ -16,12 +16,13 @@ A aplicação foi projetada para funcionar em **Android**, **iOS**, **Windows** 
 
 ## 🚀 Tecnologias Utilizadas
 
-- 👨‍💻 **C# .NET MAUI**: Framework para desenvolvimento multiplataforma.
+- 👨‍💻 **C#**: Linguagem de programção
+- ⚙️ **.NET MAUI**: Framework para desenvolvimento multiplataforma.
 - 🗄️ **SQLite**: Banco de dados local para armazenamento de informações.
 - 🏗️ **MVVM**: Arquitetura para separação de responsabilidades.
 - 🎨 **XAML**: Para criação de interfaces gráficas.
 - 🌐 **API REST:** ASP.NET Core Web API (para integração e sincronização de dados)
-- 🛠️ **Ferramentas:** Visual Studio 2022, .NET 8 SDK, Postman (para testes de API), swagger (para documentação de API)
+- 🛠️ **Ferramentas:** Visual Studio 2022, .NET 8 SDK, swagger (para documentação e testes de API)
 
 ## 📱 Screenshots (Telas do Aplicativo)
 
