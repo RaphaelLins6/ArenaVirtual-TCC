@@ -105,7 +105,7 @@
                                 Padding="10,0"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource Gray400},
                                                                   Dark=#282828}"
-                                ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70"
+                                ColumnDefinitions="40, 100, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70"
                                 WidthRequest="1040">
                                 <Label
                                     Grid.Column="1"
@@ -203,7 +203,7 @@
                                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray400},
                                                                       Dark=#282828}"
                                     CornerRadius="5">
-                                    <Grid ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70">
+                                    <Grid ColumnDefinitions="40, 100, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70">
 
                                         <Image
                                             Grid.Column="0"
@@ -395,7 +395,7 @@
                                 Padding="10,0"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource Gray400},
                                                                   Dark=#282828}"
-                                ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70"
+                                ColumnDefinitions="40, 100, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70"
                                 WidthRequest="1040">
                                 <Label
                                     Grid.Column="1"
@@ -493,7 +493,7 @@
                                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray400},
                                                                       Dark=#282828}"
                                     CornerRadius="5">
-                                    <Grid ColumnDefinitions="40, *, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70">
+                                    <Grid ColumnDefinitions="40, 100, 60, 60, 60, 60, 60, 60, 70, 70, 70, 70, 70, 70, 70">
 
                                         <Image
                                             Grid.Column="0"

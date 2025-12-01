@@ -8,7 +8,6 @@
     xmlns:vm="clr-namespace:ArenaVirtual.ViewModels.CampeonatoPage"
     Title="Times Cadastrados"
     x:DataType="vm:TimesCadastradosViewModel"
-    BackgroundColor="#1E1E1E"
     Shell.NavBarIsVisible="True">
 
     <ContentPage.Content>
@@ -37,7 +36,8 @@
                         <Frame
                             Margin="0,5"
                             Padding="10"
-                            BackgroundColor="#282828"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray400},
+                                  Dark=#282828}"
                             CornerRadius="5"
                             HasShadow="False">
                             <Grid ColumnDefinitions="50, *, Auto" ColumnSpacing="15">
