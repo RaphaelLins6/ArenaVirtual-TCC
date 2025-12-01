@@ -15,14 +15,13 @@ O **Arena Virtual** é uma aplicação multiplataforma que permite:
 A aplicação foi projetada para funcionar em **Android**, **iOS**, **Windows** e **MacCatalyst**, aproveitando o poder do .NET MAUI para criar uma experiência unificada.
 
 ## 🚀 Tecnologias Utilizadas
-
-- 👨‍💻 **C#**: Linguagem de programção
-- ⚙️ **.NET MAUI**: Framework para desenvolvimento multiplataforma.
-- 🗄️ **SQLite**: Banco de dados local para armazenamento de informações.
-- 🏗️ **MVVM**: Arquitetura para separação de responsabilidades.
-- 🎨 **XAML**: Para criação de interfaces gráficas.
-- 🌐 **API REST:** ASP.NET Core Web API (para integração e sincronização de dados)
-- 🛠️ **Ferramentas:** Visual Studio 2022, .NET 8 SDK, swagger (para documentação e testes de API)
+- ![Static Badge](https://img.shields.io/badge/C%23-green?style=flat) : Linguagem de programção
+- ![Static Badge](https://img.shields.io/badge/.NET%20MAUI-purple?style=flat) : Framework para desenvolvimento multiplataforma.
+- ![Static Badge](https://img.shields.io/badge/SQLite-blue?style=flat) : Banco de dados local para armazenamento de informações.
+- ![Static Badge](https://img.shields.io/badge/MVVM-orangered?style=flat) : Arquitetura para separação de responsabilidades.
+- ![Static Badge](https://img.shields.io/badge/XAML-lightblue?style=flat) : Para criação de interfaces gráficas.
+- ![Static Badge](https://img.shields.io/badge/Swagger%20-%20green?style=flat) : Para documentação e testes de API
+- ![Static Badge](https://img.shields.io/badge/Visual%20Studio%202022%20-%20purple?style=flat) : IDE de desenvolvimento.
 
 ## 📱 Screenshots (Telas do Aplicativo)
 
