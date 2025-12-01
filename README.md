@@ -15,14 +15,13 @@ O **Arena Virtual** é uma aplicação multiplataforma que permite:
 A aplicação foi projetada para funcionar em **Android**, **iOS**, **Windows** e **MacCatalyst**, aproveitando o poder do .NET MAUI para criar uma experiência unificada.
 
 ## 🚀 Tecnologias Utilizadas
-
-- 👨‍💻 **C#**: Linguagem de programção
-- ⚙️ **.NET MAUI**: Framework para desenvolvimento multiplataforma.
-- 🗄️ **SQLite**: Banco de dados local para armazenamento de informações.
-- 🏗️ **MVVM**: Arquitetura para separação de responsabilidades.
-- 🎨 **XAML**: Para criação de interfaces gráficas.
-- 🌐 **API REST:** ASP.NET Core Web API (para integração e sincronização de dados)
-- 🛠️ **Ferramentas:** Visual Studio 2022, .NET 8 SDK, swagger (para documentação e testes de API)
+- ![Static Badge](https://img.shields.io/badge/C%23-green?style=flat) : Linguagem de programção
+- ![Static Badge](https://img.shields.io/badge/.NET%20MAUI-purple?style=flat) : Framework para desenvolvimento multiplataforma.
+- ![Static Badge](https://img.shields.io/badge/SQLite-blue?style=flat) : Banco de dados local para armazenamento de informações.
+- ![Static Badge](https://img.shields.io/badge/MVVM-orangered?style=flat) : Arquitetura para separação de responsabilidades.
+- ![Static Badge](https://img.shields.io/badge/XAML-lightblue?style=flat) : Para criação de interfaces gráficas.
+- ![Static Badge](https://img.shields.io/badge/Swagger%20-%20green?style=flat) : Para documentação e testes de API
+- ![Static Badge](https://img.shields.io/badge/Visual%20Studio%202022%20-%20purple?style=flat) : IDE de desenvolvimento.
 
 ## 📱 Screenshots (Telas do Aplicativo)
 
@@ -30,54 +29,54 @@ Para demonstrar a experiência do usuário e as funcionalidades do Arena Virtual
 
 * **Tela de Abertura (Splash Screen):** 
 <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
-    <img src="imagens/0-SplashScreen.png" alt="Estatísticas gerais do Campeonato" width="40%" />
+    <img src="imagens/0-SplashScreen.png" alt="Estatísticas gerais do Campeonato" width="20%" />
 </div>
     
 > **Destaque:** Demonstra a identidade visual durante o carregamento (Assumindo que esta imagem existe, embora não tenha sido enviada).
 
 * **Tela de Login:**
 <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
-    <img src="imagens/1-TelaDeLogin.png" alt="Tela de Login (Tema Escuro)" width="40%" />
-    <img src="imagens/1.1-TelaDeLogin.png" alt="Tela de Login (Tema Claro)" width="40%" />
+    <img src="imagens/1-TelaDeLogin.png" alt="Tela de Login (Tema Escuro)" width="20%" />
+    <img src="imagens/1.1-TelaDeLogin.png" alt="Tela de Login (Tema Claro)" width="20%" />
 </div>
 
 > **Destaque:** Demonstração da interface de login em temas **Escuro** e **Claro**, evidenciando a adaptabilidade visual do .NET MAUI.
 
 * **Tela de Registro de Usuário (Cadastro):**
 <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
-    <img src="imagens/2-TelaDeRegistro.png" alt="Tela de Registro, primeira parte" width="40%" />
-    <img src="imagens/2.1-TelaDeRegistro.png" alt="Tela de Registro, segunda parte" width="40%" />
+    <img src="imagens/2-TelaDeRegistro.png" alt="Tela de Registro, primeira parte" width="20%" />
+    <img src="imagens/2.1-TelaDeRegistro.png" alt="Tela de Registro, segunda parte" width="20%" />
 </div>
     
 > **Destaque:** Duas partes do formulário de registro, mostrando a coleta de dados básicos (nome, email) e dados específicos do atleta (altura, peso).
 
 * **Tela Inicial:**
 <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
-    <img src="imagens/3-HomePage.png" alt="Home Page com menu e campeonatos" width="40%" />
-    <img src="imagens/3.1-HomePage.png" alt="Home Page listando todos os campeonatos" width="40%" />
+    <img src="imagens/3-HomePage.png" alt="Home Page com menu e campeonatos" width="20%" />
+    <img src="imagens/3.1-HomePage.png" alt="Home Page listando todos os campeonatos" width="20%" />
 </div>
 
 > **Destaque:** Visão geral rápida dos campeonatos ativos (Favoritos e Todos), facilitando a navegação e o acompanhamento dos torneios.
 
 * **Classificação e Jogos do Campeonato:**
 <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
-    <img src="imagens/12.1-TelaDoCampeonato.png" alt="Tabela de Classificação" width="40%" />
-    <img src="imagens/12.2-TelaDoCampeonato.png" alt="Jogos da Rodada" width="40%" />
+    <img src="imagens/12.1-TelaDoCampeonato.png" alt="Tabela de Classificação" width="20%" />
+    <img src="imagens/12.2-TelaDoCampeonato.png" alt="Jogos da Rodada" width="20%" />
 </div>
     
 > **Destaque:** Apresentação dinâmica do ranking (Tabela de Classificação) e a listagem dos jogos da rodada, as funcionalidades centrais do gerenciador.
 
 * **Estatísticas do Campeonato e dos Jogadores:**
 <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
-    <img src="imagens/12.3-TelaDoCampeonato.png" alt="Estatísticas gerais do Campeonato" width="40%" />
-    <img src="imagens/12.4-TelaDoCampeonato.png" alt="Ranking de Estatísticas dos Jogadores" width="40%" />
+    <img src="imagens/12.3-TelaDoCampeonato.png" alt="Estatísticas gerais do Campeonato" width="20%" />
+    <img src="imagens/12.4-TelaDoCampeonato.png" alt="Ranking de Estatísticas dos Jogadores" width="20%" />
 </div>
     
 > **Destaque:** Detalhes estatísticos cruciais (médias por jogo) e o ranking individual de jogadores por categoria (Ponto, Assistência, Rebote, Roubo), evidenciando a capacidade de acompanhamento.
 
 * **Gestão de Fases (Opcional, para demonstrar o controle do Admin):** 
 <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start;">
-    <img src="imagens/12.6-TelaDoCampeonato.png" alt="Estatísticas gerais do Campeonato" width="40%" />
+    <img src="imagens/12.6-TelaDoCampeonato.png" alt="Estatísticas gerais do Campeonato" width="20%" />
 </div>
         
 > **Destaque:** Demonstração da flexibilidade do sistema em lidar com diferentes fases do campeonato (Tabela & Jogos, Mata-Mata).
